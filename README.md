@@ -1,1 +1,1 @@
-# Curious-Ape-API
+# Curious-Ape
