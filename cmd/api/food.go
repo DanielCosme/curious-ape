@@ -32,7 +32,7 @@ func (a *application) showFoodHabitHandler(rw http.ResponseWriter, r *http.Reque
 		Tags:  []string{"lion", "16/8"},
 	}
 
-	err = a.writeJson(rw, http.StatusOK, habit, nil)
+	err = a.writeJson(rw, http.StatusOK, envelope{"foodHabit": habit}, nil)
 	if err != nil {
 		a.logger.Println(err)
 		http.Error(rw, "Internal Error", http.StatusInternalServerError)
