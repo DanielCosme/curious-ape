@@ -16,5 +16,8 @@ func (a *application) routes() http.Handler {
 		r.Post("/food/habits", a.createFoodHabitHandler)
 	})
 
+	mux.NotFound(a.notFoundResponse)
+	mux.MethodNotAllowed(a.methodNotAllowedResponse)
+
 	return mux
 }
