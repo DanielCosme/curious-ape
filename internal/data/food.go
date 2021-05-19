@@ -2,6 +2,7 @@ package data
 
 import (
 	"database/sql"
+	"errors"
 
 	"github.com/danielcosme/curious-ape/internal/validator"
 	"github.com/lib/pq"
@@ -20,19 +21,51 @@ type FoodHabitModel struct {
 
 func (fh *FoodHabitModel) Insert(habit *FoodHabit) error {
 	query := `
-		Insert into food_habits (state, "date", tags)
-		values ($1, $2, $3)
-		Returning id `
+		INSERT INTO food_habits (state, "date", tags)
+		VALUES ($1, $2, $3)
+		RETURNING id `
 	args := []interface{}{habit.State, habit.Date, pq.Array(habit.Tags)}
 	return fh.DB.QueryRow(query, args...).Scan(&habit.ID)
 }
 
-func (fh *FoodHabitModel) Get(id int) (*FoodHabit, error) {
-	return nil, nil
+func (fh *FoodHabitModel) Get(date string) (*FoodHabit, error) {
+	query := `
+		SELECT id, state, date, tags FROM food_habits 
+		WHERE "date" = $1`
+	var habit FoodHabit
+	err := fh.DB.QueryRow(query, date).Scan(
+		&habit.ID,
+		&habit.State,
+		&habit.Date,
+		pq.Array(&habit.Tags),
+	)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &habit, nil
 }
 
 func (fh *FoodHabitModel) Update(habit *FoodHabit) error {
-	return nil
+	stm := `
+		UPDATE food_habits
+		SET state = $1, "date" = $2, tags = $3
+		WHERE "date" = $2
+		RETURNING state, "date", tags`
+
+	args := []interface{}{
+		habit.State,
+		habit.Date,
+		pq.Array(habit.Tags),
+	}
+
+	return fh.DB.QueryRow(stm, args...).Scan(&habit.State, &habit.Date, pq.Array(&habit.Tags))
 }
 
 func (fh *FoodHabitModel) Delete(id int) error {

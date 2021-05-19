@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -51,14 +52,62 @@ func (a *application) createFoodHabitHandler(rw http.ResponseWriter, r *http.Req
 
 func (a *application) showFoodHabitHandler(rw http.ResponseWriter, r *http.Request) {
 	date := chi.URLParam(r, "date")
-	habit := data.FoodHabit{
-		ID:    1,
-		State: true,
-		Date:  date,
-		Tags:  []string{"lion", "16/8"},
+	habit, err := a.models.FoodHabits.Get(date)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			a.notFoundResponse(rw, r)
+		default:
+			a.serverErrorResponse(rw, r, err)
+		}
+		return
 	}
 
-	err := a.writeJSON(rw, http.StatusOK, envelope{"foodHabit": habit}, nil)
+	err = a.writeJSON(rw, http.StatusOK, envelope{"foodHabit": habit}, nil)
+	if err != nil {
+		a.serverErrorResponse(rw, r, err)
+	}
+}
+
+func (a *application) updateFoodHabitHandler(rw http.ResponseWriter, r *http.Request) {
+	date := chi.URLParam(r, "date")
+	habit, err := a.models.FoodHabits.Get(date)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			a.notFoundResponse(rw, r)
+		default:
+			a.serverErrorResponse(rw, r, err)
+		}
+		return
+	}
+
+	var input struct {
+		State bool     `json:"state"`
+		Date  string   `json:"date"`
+		Tags  []string `json:"tags"`
+	}
+	err = a.readJSON(rw, r, &input)
+	if err != nil {
+		a.serverErrorResponse(rw, r, err)
+		return
+	}
+
+	habit.State = input.State
+	habit.Date = input.Date
+	habit.Tags = input.Tags
+	v := validator.New()
+	if data.ValidateFoodHabit(v, habit); !v.Valid() {
+		a.failedValidationResponse(rw, r, v.Errors)
+		return
+	}
+
+	err = a.models.FoodHabits.Update(habit)
+	if err != nil {
+		a.serverErrorResponse(rw, r, err)
+	}
+
+	err = a.writeJSON(rw, http.StatusOK, envelope{"foodHabit": habit}, nil)
 	if err != nil {
 		a.serverErrorResponse(rw, r, err)
 	}

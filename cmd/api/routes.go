@@ -13,6 +13,7 @@ func (a *application) routes() http.Handler {
 		r.Get("/healthcheck", a.healthcheckerHandler)
 
 		r.Get("/food/habit/{date}", a.showFoodHabitHandler)
+		r.Put("/food/habit/{date}", a.updateFoodHabitHandler)
 		r.Post("/food/habits", a.createFoodHabitHandler)
 	})
 
