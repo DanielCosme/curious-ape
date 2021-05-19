@@ -20,7 +20,10 @@ type config struct {
 	port int
 	env  string
 	db   struct {
-		dsn string // data source name
+		dsn          string // data source name
+		maxOpenConns int
+		maxIdleConns int
+		maxIdleTime  string
 	}
 }
 
@@ -28,6 +31,7 @@ type config struct {
 type application struct {
 	config config
 	logger *log.Logger
+	debug  *log.Logger
 }
 
 func main() {
@@ -35,14 +39,18 @@ func main() {
 
 	flag.IntVar(&cfg.port, "port", 3000, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Running environment")
-
-	//?sslmode=verify-full
-	flag.StringVar(&cfg.db.dsn, "db-dsn",
-		os.Getenv("APE_PG_DB_DSN"), "PostgreSQL DSN")
+	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("APE_PG_DB_DSN"),
+		"PostgreSQL DSN")
+	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25,
+		"PostgreSQL max open connections")
+	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25,
+		"PostgreSQL max idle connections")
+	flag.StringVar(&cfg.db.maxIdleTime, "db-max-idle-time", "15m",
+		"PostgreSQL max connection idle time")
 	flag.Parse()
 
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
-	logger.Println(cfg.db.dsn)
+	debug := log.New(os.Stdout, "DEBUG =>", log.Ldate|log.Ltime)
 
 	// initialize db connection pool
 	db, err := openDB(cfg)
@@ -55,6 +63,7 @@ func main() {
 	app := &application{
 		config: cfg,
 		logger: logger,
+		debug:  debug,
 	}
 
 	srv := &http.Server{
@@ -75,6 +84,14 @@ func openDB(cfg config) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	db.SetMaxOpenConns(cfg.db.maxOpenConns)
+	db.SetMaxIdleConns(cfg.db.maxIdleConns)
+	duration, err := time.ParseDuration(cfg.db.maxIdleTime)
+	if err != nil {
+		return nil, err
+	}
+	db.SetConnMaxIdleTime(duration)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
