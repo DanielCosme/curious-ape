@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/danielcosme/curious-ape/internal/data"
 	_ "github.com/lib/pq"
 )
 
@@ -29,9 +30,10 @@ type config struct {
 
 // http handler dependencies.
 type application struct {
-	config config
 	logger *log.Logger
 	debug  *log.Logger
+	config config
+	models data.Models
 }
 
 func main() {
@@ -50,7 +52,7 @@ func main() {
 	flag.Parse()
 
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
-	debug := log.New(os.Stdout, "DEBUG =>", log.Ldate|log.Ltime)
+	debug := log.New(os.Stdout, "DEBUG\t", log.Ldate|log.Ltime|log.Llongfile)
 
 	// initialize db connection pool
 	db, err := openDB(cfg)
@@ -58,12 +60,13 @@ func main() {
 		logger.Fatal(err)
 	}
 	defer db.Close()
-	logger.Printf("database connection pool established")
+	logger.Printf("Database connection pool established")
 
 	app := &application{
 		config: cfg,
 		logger: logger,
 		debug:  debug,
+		models: data.NewModels(db),
 	}
 
 	srv := &http.Server{

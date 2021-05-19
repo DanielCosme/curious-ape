@@ -6,6 +6,7 @@ import (
 
 	"github.com/danielcosme/curious-ape/internal/data"
 	"github.com/danielcosme/curious-ape/internal/validator"
+	"github.com/go-chi/chi/v5"
 )
 
 func (a *application) createFoodHabitHandler(rw http.ResponseWriter, r *http.Request) {
@@ -21,28 +22,35 @@ func (a *application) createFoodHabitHandler(rw http.ResponseWriter, r *http.Req
 		return
 	}
 
+	habit := &data.FoodHabit{
+		State: input.State,
+		Date:  input.Date,
+		Tags:  input.Tags,
+	}
+
 	v := validator.New()
-	v.Check(input.Date != "", "date", "must be provided")
-	v.Check(len([]rune(input.Date)) == 10, "date", "must be exactly 10 characters long")
-
-	v.Check(len(input.Tags) < 5, "tags", "must not have more than 5 tags")
-	v.Check(validator.Unique(input.Tags), "tags", "must not have duplicate values")
-
-	if !v.Valid() {
+	if data.ValidateFoodHabit(v, habit); !v.Valid() {
 		a.failedValidationResponse(rw, r, v.Errors)
 		return
 	}
 
-	fmt.Fprintf(rw, "%+v\n", input)
-}
-
-func (a *application) showFoodHabitHandler(rw http.ResponseWriter, r *http.Request) {
-	date, err := a.validateDateParam(r)
+	err = a.models.FoodHabits.Insert(habit)
 	if err != nil {
-		a.errorResponse(rw, r, http.StatusBadRequest, "invalid date string")
+		a.serverErrorResponse(rw, r, err)
 		return
 	}
 
+	headers := make(http.Header)
+	headers.Set("Location", fmt.Sprintf("/v1/movies/%d", habit.ID))
+
+	err = a.writeJSON(rw, http.StatusCreated, envelope{"foodHabit": habit}, headers)
+	if err != nil {
+		a.serverErrorResponse(rw, r, err)
+	}
+}
+
+func (a *application) showFoodHabitHandler(rw http.ResponseWriter, r *http.Request) {
+	date := chi.URLParam(r, "date")
 	habit := data.FoodHabit{
 		ID:    1,
 		State: true,
@@ -50,7 +58,7 @@ func (a *application) showFoodHabitHandler(rw http.ResponseWriter, r *http.Reque
 		Tags:  []string{"lion", "16/8"},
 	}
 
-	err = a.writeJSON(rw, http.StatusOK, envelope{"foodHabit": habit}, nil)
+	err := a.writeJSON(rw, http.StatusOK, envelope{"foodHabit": habit}, nil)
 	if err != nil {
 		a.serverErrorResponse(rw, r, err)
 	}
