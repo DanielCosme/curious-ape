@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/danielcosme/curious-ape/internal/data"
+	"github.com/danielcosme/curious-ape/internal/validator"
 )
 
 func (a *application) createFoodHabitHandler(rw http.ResponseWriter, r *http.Request) {
@@ -17,6 +18,18 @@ func (a *application) createFoodHabitHandler(rw http.ResponseWriter, r *http.Req
 	err := a.readJSON(rw, r, &input)
 	if err != nil {
 		a.badRequestResponse(rw, r, err)
+		return
+	}
+
+	v := validator.New()
+	v.Check(input.Date != "", "date", "must be provided")
+	v.Check(len([]rune(input.Date)) == 10, "date", "must be exactly 10 characters long")
+
+	v.Check(len(input.Tags) < 5, "tags", "must not have more than 5 tags")
+	v.Check(validator.Unique(input.Tags), "tags", "must not have duplicate values")
+
+	if !v.Valid() {
+		a.failedValidationResponse(rw, r, v.Errors)
 		return
 	}
 
