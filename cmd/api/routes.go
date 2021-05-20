@@ -12,6 +12,7 @@ func (a *application) routes() http.Handler {
 	mux.MethodNotAllowed(a.methodNotAllowedResponse)
 
 	mux.Use(a.recoverPanic)
+	mux.Use(a.rateLimit)
 
 	mux.Route("/v1", func(r chi.Router) {
 		r.Get("/healthcheck", a.healthcheckerHandler)
