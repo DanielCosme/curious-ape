@@ -14,6 +14,7 @@ func (a *application) routes() http.Handler {
 
 		r.Get("/food/habit/{date}", a.showFoodHabitHandler)
 		r.Put("/food/habit/{date}", a.updateFoodHabitHandler)
+		r.Delete("/food/habit/{id}", a.deleteFoodHabitHandler)
 		r.Post("/food/habits", a.createFoodHabitHandler)
 	})
 

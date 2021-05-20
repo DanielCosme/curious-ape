@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/danielcosme/curious-ape/internal/data"
 	"github.com/danielcosme/curious-ape/internal/validator"
@@ -108,6 +109,30 @@ func (a *application) updateFoodHabitHandler(rw http.ResponseWriter, r *http.Req
 	}
 
 	err = a.writeJSON(rw, http.StatusOK, envelope{"foodHabit": habit}, nil)
+	if err != nil {
+		a.serverErrorResponse(rw, r, err)
+	}
+}
+
+func (a *application) deleteFoodHabitHandler(rw http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		a.badRequestResponse(rw, r, err)
+		return
+	}
+
+	err = a.models.FoodHabits.Delete(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			a.notFoundResponse(rw, r)
+		default:
+			a.serverErrorResponse(rw, r, err)
+		}
+		return
+	}
+
+	err = a.writeJSON(rw, http.StatusOK, envelope{"message": "food habit log succesfully deleted"}, nil)
 	if err != nil {
 		a.serverErrorResponse(rw, r, err)
 	}
