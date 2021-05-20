@@ -8,6 +8,10 @@ import (
 
 func (a *application) routes() http.Handler {
 	mux := chi.NewRouter()
+	mux.NotFound(a.notFoundResponse)
+	mux.MethodNotAllowed(a.methodNotAllowedResponse)
+
+	mux.Use(a.recoverPanic)
 
 	mux.Route("/v1", func(r chi.Router) {
 		r.Get("/healthcheck", a.healthcheckerHandler)
@@ -18,9 +22,6 @@ func (a *application) routes() http.Handler {
 		r.Post("/food/habits", a.createFoodHabitHandler)
 		r.Get("/food/habits", a.listFoodHabitsHandler)
 	})
-
-	mux.NotFound(a.notFoundResponse)
-	mux.MethodNotAllowed(a.methodNotAllowedResponse)
 
 	return mux
 }
