@@ -90,7 +90,6 @@ func (fh *FoodHabitModel) Delete(id int) error {
 }
 
 func ValidateFoodHabit(v *validator.Validator, habit *FoodHabit) {
-	v = validator.New()
 	v.Check(habit.Date != "", "date", "must be provided")
 	v.Check(len([]rune(habit.Date)) == 10, "date", "must be exactly 10 characters long")
 
