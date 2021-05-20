@@ -23,12 +23,14 @@ func (a *application) recoverPanic(next http.Handler) http.Handler {
 }
 
 func (a *application) rateLimit(next http.Handler) http.Handler {
-	limiter := rate.NewLimiter(2, 4)
+	limiter := rate.NewLimiter(rate.Limit(a.config.limiter.rps), a.config.limiter.burst)
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !limiter.Allow() {
-			a.rateLimitExceededResponse(w, r)
-			return
+		if a.config.limiter.enabled {
+			if !limiter.Allow() {
+				a.rateLimitExceededResponse(w, r)
+				return
+			}
 		}
 
 		next.ServeHTTP(w, r)
