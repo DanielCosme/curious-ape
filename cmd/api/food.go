@@ -51,6 +51,19 @@ func (a *application) createFoodHabitHandler(rw http.ResponseWriter, r *http.Req
 	}
 }
 
+func (a *application) listFoodHabitsHandler(rw http.ResponseWriter, r *http.Request) {
+	habits, err := a.models.FoodHabits.GetAll()
+	if err != nil {
+		a.serverErrorResponse(rw, r, err)
+		return
+	}
+
+	err = a.writeJSON(rw, http.StatusOK, envelope{"habits": habits}, nil)
+	if err != nil {
+		a.serverErrorResponse(rw, r, err)
+	}
+}
+
 func (a *application) showFoodHabitHandler(rw http.ResponseWriter, r *http.Request) {
 	date := chi.URLParam(r, "date")
 	habit, err := a.models.FoodHabits.Get(date)

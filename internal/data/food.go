@@ -19,6 +19,34 @@ type FoodHabitModel struct {
 	DB *sql.DB
 }
 
+func (fh *FoodHabitModel) GetAll() ([]*FoodHabit, error) {
+	query := `
+		SELECT state, date, tags FROM food_habits`
+	rows, err := fh.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	habits := []*FoodHabit{}
+	for rows.Next() {
+		var habit FoodHabit
+
+		err := rows.Scan(
+			&habit.State,
+			&habit.Date,
+			pq.Array(&habit.Tags),
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		habits = append(habits, &habit)
+	}
+
+	return habits, nil
+}
+
 func (fh *FoodHabitModel) Insert(habit *FoodHabit) error {
 	query := `
 		INSERT INTO food_habits (state, "date", tags)
@@ -30,7 +58,7 @@ func (fh *FoodHabitModel) Insert(habit *FoodHabit) error {
 
 func (fh *FoodHabitModel) Get(date string) (*FoodHabit, error) {
 	query := `
-		SELECT id, state, date, tags FROM food_habits 
+		SELECT id, state, date, tags FROM food_habits
 		WHERE "date" = $1`
 	var habit FoodHabit
 	err := fh.DB.QueryRow(query, date).Scan(

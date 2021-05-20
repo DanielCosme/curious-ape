@@ -16,6 +16,7 @@ func (a *application) routes() http.Handler {
 		r.Put("/food/habit/{date}", a.updateFoodHabitHandler)
 		r.Delete("/food/habit/{id}", a.deleteFoodHabitHandler)
 		r.Post("/food/habits", a.createFoodHabitHandler)
+		r.Get("/food/habits", a.listFoodHabitsHandler)
 	})
 
 	mux.NotFound(a.notFoundResponse)
