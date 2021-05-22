@@ -22,6 +22,8 @@ func (a *application) routes() http.Handler {
 		r.Delete("/food/habit/{id}", a.deleteFoodHabitHandler)
 		r.Post("/food/habits", a.createFoodHabitHandler)
 		r.Get("/food/habits", a.listFoodHabitsHandler)
+
+		r.Post("/users", a.registerUserHandler)
 	})
 
 	return mux
