@@ -7,9 +7,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"time"
-
-	"github.com/go-chi/chi/v5"
 )
 
 type envelope map[string]interface{}
@@ -95,28 +92,19 @@ func (a *application) writeJSON(rw http.ResponseWriter, status int, data envelop
 	return nil
 }
 
-func (a *application) validateDateParam(r *http.Request) (time.Time, error) {
-	date := chi.URLParam(r, "date")
-	dateTime, err := time.Parse("2006-01-02", date)
-	if err != nil {
-		return dateTime, err
-	}
-	return dateTime, nil
-}
-
 // The background() helper accepts an arbitrary function as a parameter.
-func (a *application) background(fn func()) {
-	// Launch a background goroutine.
-	go func() {
-		// Recover any panic.
-		defer func() {
-			if err := recover(); err != nil {
-				//a.logger.PrintError(fmt.Errorf("%s", err), nil)
-				a.logger.Println(err)
-			}
-		}()
-
-		// Execute the arbitrary function that we passed as the parameter.
-		fn()
-	}()
-}
+// func (a *application) background(fn func()) {
+// 	// Launch a background goroutine.
+// 	go func() {
+// 		// Recover any panic.
+// 		defer func() {
+// 			if err := recover(); err != nil {
+// 				//a.logger.PrintError(fmt.Errorf("%s", err), nil)
+// 				a.logger.Println(err)
+// 			}
+// 		}()
+//
+// 		// Execute the arbitrary function that we passed as the parameter.
+// 		fn()
+// 	}()
+// }

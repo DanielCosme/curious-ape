@@ -1,6 +1,7 @@
 package main
 
 import (
+	"expvar"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -11,6 +12,7 @@ func (a *application) routes() http.Handler {
 	mux.NotFound(a.notFoundResponse)
 	mux.MethodNotAllowed(a.methodNotAllowedResponse)
 
+	mux.Use(a.metrics)
 	mux.Use(a.recoverPanic)
 	mux.Use(a.rateLimit)
 
@@ -25,6 +27,8 @@ func (a *application) routes() http.Handler {
 
 		r.Post("/users", a.registerUserHandler)
 	})
+
+	mux.Handle("/debug/vars", expvar.Handler())
 
 	return mux
 }

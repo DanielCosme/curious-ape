@@ -21,3 +21,4 @@ tmp/
 # Environment
 *.env
 *.db
+.envrc

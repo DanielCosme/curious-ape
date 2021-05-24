@@ -3,19 +3,23 @@ package main
 import (
 	"context"
 	"database/sql"
+	"expvar"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/danielcosme/curious-ape/internal/data"
 	_ "github.com/lib/pq"
 )
 
-// It will later be created automatically during the build process
-const version = "1.0.0"
+var (
+	version   string
+	buildTime string
+)
 
 type config struct {
 	port int
@@ -57,8 +61,15 @@ func main() {
 	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
+	displayVersion := flag.Bool("version", false, "Display version and exit")
 
 	flag.Parse()
+
+	if *displayVersion {
+		fmt.Printf("Version:\t%s\n", version)
+		fmt.Printf("Build time:\t%s\n", buildTime)
+		os.Exit(0)
+	}
 
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 	debug := log.New(os.Stdout, "DEBUG\t", log.Ldate|log.Ltime|log.Llongfile)
@@ -70,6 +81,23 @@ func main() {
 	}
 	defer db.Close()
 	logger.Printf("Database connection pool established")
+
+	expvar.NewString("version").Set(version)
+
+	// Publish the number of active goroutines.
+	expvar.Publish("goroutines", expvar.Func(func() interface{} {
+		return runtime.NumGoroutine()
+	}))
+
+	// Publish the database connection pool statistics.
+	expvar.Publish("database", expvar.Func(func() interface{} {
+		return db.Stats()
+	}))
+
+	// Publish the current Unix timestamp.
+	expvar.Publish("timestamp", expvar.Func(func() interface{} {
+		return time.Now().Unix()
+	}))
 
 	app := &application{
 		config: cfg,
