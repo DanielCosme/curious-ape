@@ -47,14 +47,14 @@ db/migrations/new:
 
 current_time = $(shell date --iso-8601=seconds)
 git_description = $(shell git describe --always --dirty --tags --long)
-linker_flags = '-s -X main.buildTime=${current_time} -X main.version=${git_description}'
+linker_flags = '-s -X main.buildTime=${current_time} -X main.version=${git_description} -extldflags "-static"'
 
 ## build/api: build the cmd/api application
 .PHONY: build/api
 build/api:
 	@echo 'Building cmd/api...'
 	@echo $current_time
-	go build -ldflags=${linker_flags} -o=./bin/ape ./cmd/api
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/ape ./cmd/api
 
 # ==================================================================================== #
 # QUALITY CONTROL
@@ -80,3 +80,21 @@ vendor:
 	go mod verify
 	@echo 'Vendoring dependencies...'
 	go mod vendor
+
+
+# ==================================================================================== #
+# PRODUCTION
+# ==================================================================================== #
+
+production_host_ip = "104.248.10.77"
+
+## production/connect: connect to the production server
+.PHONY: production/connect
+production/connect:
+	ssh daniel@${production_host_ip}
+
+## production/deploy/api: deploy the api to production
+.PHONY: production/deploy/api
+production/deploy/api:
+	rsync -rP --delete ./bin/ape ./migrations daniel@${production_host_ip}:~
+	ssh -t daniel@${production_host_ip} 'migrate -path ~/migrations -database $$APE_DB_DSN up'
