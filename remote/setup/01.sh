@@ -5,7 +5,7 @@ set -eu
 # VARIABLES
 # ==================================================================================== #
 
-# Set the timezone for the server. A full list of available timezones can be found by 
+# Set the timezone for the server. A full list of available timezones can be found by
 # running timedatectl list-timezones.
 TIMEZONE=America/Toronto
 
@@ -16,10 +16,10 @@ USERNAME=daniel
 # a password in this script).
 read -p "Enter password for curious ape DB user: " DB_PASSWORD
 
-# Force all output to be presented in en_US for the duration of this script. This avoids  
-# any "setting locale failed" errors while this script is running, before we have 
+# Force all output to be presented in en_US for the duration of this script. This avoids
+# any "setting locale failed" errors while this script is running, before we have
 # installed support for all locales. Do not change this setting!
-export LC_ALL=en_US.UTF-8 
+export LC_ALL=en_US.UTF-8
 
 # ==================================================================================== #
 # SCRIPT LOGIC
@@ -28,7 +28,7 @@ export LC_ALL=en_US.UTF-8
 # Enable the "universe" repository.
 add-apt-repository --yes universe
 
-# Update all software packages. Using the --force-confnew flag means that configuration 
+# Update all software packages. Using the --force-confnew flag means that configuration
 # files will be replaced if newer ones are available.
 apt update
 apt --yes -o Dpkg::Options::="--force-confnew" upgrade
@@ -69,7 +69,7 @@ sudo -i -u postgres psql -c "CREATE DATABASE ape"
 sudo -i -u postgres psql -d ape -c "CREATE EXTENSION IF NOT EXISTS citext"
 sudo -i -u postgres psql -d ape -c "CREATE ROLE daniel WITH LOGIN PASSWORD '${DB_PASSWORD}'"
 
-# Add a DSN for connecting to the greenlight database to the system-wide environment 
+# Add a DSN for connecting to the greenlight database to the system-wide environment
 # variables in the /etc/environment file.
 echo "APE_DB_DSN='postgres://daniel:${DB_PASSWORD}@localhost/ape'" >> /etc/environment
 

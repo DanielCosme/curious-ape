@@ -98,3 +98,22 @@ production/connect:
 production/deploy/api:
 	rsync -rP --delete ./bin/ape ./migrations daniel@${production_host_ip}:~
 	ssh -t daniel@${production_host_ip} 'migrate -path ~/migrations -database $$APE_DB_DSN up'
+
+## production/configure/ape.service: configure the production systemd ape.service file
+.PHONY: production/configure/api.service
+production/configure/ape.service:
+	rsync -P ./remote/production/ape.service daniel@${production_host_ip}:~
+	ssh -t daniel@${production_host_ip} '\
+		sudo mv ~/ape.service /etc/systemd/system/ \
+		&& sudo systemctl enable ape \
+		&& sudo systemctl restart ape \
+	'
+
+## production/configure/caddyfile: configure the production Caddyfile
+.PHONY: production/configure/caddyfile
+production/configure/caddyfile:
+	rsync -P ./remote/production/Caddyfile daniel@${production_host_ip}:~
+	ssh -t daniel@${production_host_ip} '\
+		sudo mv ~/Caddyfile /etc/caddy/ \
+		&& sudo systemctl reload caddy \
+	'
