@@ -15,9 +15,9 @@ func (a *application) routes() http.Handler {
 	mux.Use(a.metrics)
 	mux.Use(a.recoverPanic)
 	mux.Use(a.rateLimit)
+	mux.Use(a.authenticate)
 
 	mux.Route("/v1", func(r chi.Router) {
-		r.Get("/healthcheck", a.healthcheckerHandler)
 
 		r.Get("/food/habit/{date}", a.showFoodHabitHandler)
 		r.Put("/food/habit/{date}", a.updateFoodHabitHandler)
@@ -28,6 +28,7 @@ func (a *application) routes() http.Handler {
 		r.Post("/users", a.registerUserHandler)
 	})
 
+	mux.Get("/healthcheck", a.healthcheckerHandler)
 	mux.Handle("/debug/vars", expvar.Handler())
 
 	return mux

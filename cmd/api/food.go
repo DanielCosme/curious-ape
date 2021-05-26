@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/danielcosme/curious-ape/internal/data"
 	"github.com/danielcosme/curious-ape/internal/validator"
@@ -103,6 +104,10 @@ func (a *application) updateFoodHabitHandler(rw http.ResponseWriter, r *http.Req
 	}
 	err = a.readJSON(rw, r, &input)
 	if err != nil {
+		if strings.Contains(err.Error(), "body must not be empty") {
+			a.errorResponse(rw, r, http.StatusBadRequest, err.Error())
+			return
+		}
 		a.serverErrorResponse(rw, r, err)
 		return
 	}

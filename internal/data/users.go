@@ -63,10 +63,7 @@ func (m UserModel) GetByEmail(email string) (*User, error) {
 
 	var user User
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	err := m.DB.QueryRowContext(ctx, query, email).Scan(
+	err := m.DB.QueryRow(query, email).Scan(
 		&user.ID,
 		&user.CreatedAt,
 		&user.Name,

@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS food_habits (
     id serial PRIMARY KEY,
     created_at timestamp(0) with time zone NOT NULL DEFAULT NOW(),
     state boolean NOT NULL,
-    "date" date NOT NULL DEFAULT current_date,
+    "date" date UNIQUE NOT NULL DEFAULT current_date,
     tags text[] NOT NULL
 );
 

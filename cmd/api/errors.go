@@ -48,7 +48,17 @@ func (a *application) failedValidationResponse(rw http.ResponseWriter, r *http.R
 	a.errorResponse(rw, r, http.StatusUnprocessableEntity, errors)
 }
 
-func (a *application) rateLimitExceededResponse(w http.ResponseWriter, r *http.Request) {
+func (a *application) rateLimitExceededResponse(rw http.ResponseWriter, r *http.Request) {
 	message := "rate limit exceeded"
-	a.errorResponse(w, r, http.StatusTooManyRequests, message)
+	a.errorResponse(rw, r, http.StatusTooManyRequests, message)
+}
+
+func (a *application) unauthorizedResponse(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Add("WWW-Authenticate", "basic")
+	a.errorResponse(rw, r, http.StatusUnauthorized, "unauthorized")
+}
+
+func (a *application) invalidCredentialsResponse(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Add("WWW-Authenticate", "basic")
+	a.errorResponse(rw, r, http.StatusUnauthorized, "invalid credentials")
 }

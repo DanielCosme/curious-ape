@@ -1,26 +1,78 @@
 package main
 
 import (
+	"encoding/base64"
+	"errors"
 	"expvar"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"golang.org/x/time/rate"
 )
 
+func (a *application) authenticate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		header := r.Header.Get("Authorization")
+		if header == "" {
+			a.unauthorizedResponse(rw, r)
+			return
+		}
+
+		auth := strings.Split(header, " ")[1:]
+		if len(auth) != 1 {
+			a.badRequestResponse(rw, r, errors.New("client needs to provide credentials"))
+			return
+		}
+
+		decoded, err := base64.StdEncoding.DecodeString(auth[0])
+		if err != nil {
+			a.serverErrorResponse(rw, r, err)
+			return
+		}
+
+		auth = strings.Split(string(decoded), ":")
+		if len(auth) != 2 {
+			a.badRequestResponse(rw, r, errors.New("credentials need to be in username=password format"))
+			return
+		}
+		usr := auth[0]
+		pass := auth[1]
+
+		user, err := a.models.Users.GetByEmail(usr)
+		if err != nil {
+			a.invalidCredentialsResponse(rw, r)
+			return
+		}
+
+		isMatch, err := user.Password.IsMatch(pass)
+		if err != nil {
+			a.serverErrorResponse(rw, r, err)
+			return
+		}
+
+		if !isMatch {
+			a.invalidCredentialsResponse(rw, r)
+			return
+		}
+
+		next.ServeHTTP(rw, r)
+	})
+}
+
 func (a *application) recoverPanic(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		// Create a deferred function (which will always be run in the event of a panic
 		// as Go unwinds the stack).
 		defer func() {
 			if err := recover(); err != nil {
-				w.Header().Set("Connection", "close")
-				a.serverErrorResponse(w, r, fmt.Errorf("%s", err))
+				rw.Header().Set("Connection", "close")
+				a.serverErrorResponse(rw, r, fmt.Errorf("%s", err))
 			}
 		}()
 
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(rw, r)
 	})
 }
 
