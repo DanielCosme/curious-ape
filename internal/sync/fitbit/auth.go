@@ -14,4 +14,5 @@ func init() {
 	fitbitAuth.ClientSecret = os.Getenv("FITBIT_SECRET")
 	fitbitAuth.ClientID = os.Getenv("FITBIT_ID")
 	fitbitAuth.RedirectURL = os.Getenv("FITBIT_REDIRECT_URI")
+	fitbitAuth.Provider = "fitbit"
 }

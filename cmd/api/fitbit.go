@@ -23,11 +23,10 @@ func (a *application) successFitbitHandler(rw http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	payload.Service = "fitbit"
 	err = a.models.Tokens.Update(payload)
 	if err != nil {
 		a.serverErrorResponse(rw, r, err)
 	}
 
-	a.writeJSON(rw, 200, envelope{"message": "success"}, nil)
+	a.writeJSON(rw, 200, envelope{"message": payload}, nil)
 }

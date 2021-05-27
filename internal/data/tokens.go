@@ -15,7 +15,10 @@ func (a *AuthTokenModel) Update(t auth.Token) error {
 			WHERE service = $3`
 	args := []interface{}{t.AccessToken, t.RefreshToken, t.Service}
 	_, err := a.DB.Exec(stm, args...)
-	return err
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *AuthTokenModel) Get(srv string) (*auth.Token, error) {

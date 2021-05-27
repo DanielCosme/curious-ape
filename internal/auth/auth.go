@@ -13,6 +13,7 @@ type AuthConfig struct {
 	RedirectURL      string
 	ClientID         string
 	ClientSecret     string
+	Provider         string
 }
 
 type Token struct {
@@ -29,6 +30,7 @@ func (auth *AuthConfig) ExchangeCodeForToken(code string) (Token, error) {
 	}
 
 	err = json.Unmarshal(jsonPayload, &payload)
+	payload.Service = auth.Provider
 	return payload, nil
 }
 
