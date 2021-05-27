@@ -1,4 +1,4 @@
-create TABLE sleep_record (
+create TABLE sleep_records (
     id SERIAL PRIMARY KEY,
     "date" DATE UNIQUE NOT NULL,
     duration INT NOT NULL,
