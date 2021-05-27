@@ -12,6 +12,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/danielcosme/curious-ape/internal/collectors/fitbit"
 	"github.com/danielcosme/curious-ape/internal/data"
 	_ "github.com/lib/pq"
 )
@@ -98,6 +99,9 @@ func main() {
 	expvar.Publish("timestamp", expvar.Func(func() interface{} {
 		return time.Now().Unix()
 	}))
+
+	fit := fitbit.Fitbit
+	logger.Println(fit.Name == "a")
 
 	app := &application{
 		config: cfg,
