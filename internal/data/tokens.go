@@ -2,6 +2,7 @@ package data
 
 import (
 	"database/sql"
+	"log"
 
 	"github.com/danielcosme/curious-ape/internal/auth"
 )
@@ -18,12 +19,14 @@ func (a *AuthTokenModel) Update(t auth.Token) error {
 	if err != nil {
 		return err
 	}
+
+	log.Println("Token Update successful")
 	return nil
 }
 
 func (a *AuthTokenModel) Get(srv string) (*auth.Token, error) {
 	t := &auth.Token{}
-	stm := `SELECT access_token, refresh_token FROM tokens
+	stm := `SELECT access_token, refresh_token FROM auth_tokens
 			WHERE service = $1`
 
 	row := a.DB.QueryRow(stm, srv)
@@ -32,6 +35,7 @@ func (a *AuthTokenModel) Get(srv string) (*auth.Token, error) {
 		return nil, err
 	}
 
+	t.Service = srv
 	return t, nil
 }
 

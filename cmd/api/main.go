@@ -43,7 +43,7 @@ type application struct {
 	logger     *log.Logger
 	debug      *log.Logger
 	config     config
-	models     data.Models
+	models     *data.Models
 	collectors *sync.Collectors
 }
 
@@ -101,13 +101,15 @@ func main() {
 		return time.Now().Unix()
 	}))
 
-	collector := sync.NewCollectors()
+	models := data.NewModels(db)
+	collector := sync.NewCollectors(models)
+	go collector.GetDay("2020-05-07")
 
 	app := &application{
 		config:     cfg,
 		logger:     logger,
 		debug:      debug,
-		models:     data.NewModels(db),
+		models:     models,
 		collectors: collector,
 	}
 

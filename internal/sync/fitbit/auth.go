@@ -6,13 +6,13 @@ import (
 	"github.com/danielcosme/curious-ape/internal/auth"
 )
 
-var fitbitAuth = &auth.AuthConfig{}
+var FitbitAuth = &auth.AuthConfig{}
 
 func init() {
-	fitbitAuth.AuthorizationURL = "https://www.fitbit.com/oauth2/authorize"
-	fitbitAuth.TokenRequestURL = "https://api.fitbit.com/oauth2/token"
-	fitbitAuth.ClientSecret = os.Getenv("FITBIT_SECRET")
-	fitbitAuth.ClientID = os.Getenv("FITBIT_ID")
-	fitbitAuth.RedirectURL = os.Getenv("FITBIT_REDIRECT_URI")
-	fitbitAuth.Provider = "fitbit"
+	FitbitAuth.AuthorizationURL = "https://www.fitbit.com/oauth2/authorize"
+	FitbitAuth.TokenRequestURL = "https://api.fitbit.com/oauth2/token"
+	FitbitAuth.ClientSecret = os.Getenv("FITBIT_SECRET")
+	FitbitAuth.ClientID = os.Getenv("FITBIT_ID")
+	FitbitAuth.RedirectURL = os.Getenv("FITBIT_REDIRECT_URI")
+	FitbitAuth.Provider = "fitbit"
 }

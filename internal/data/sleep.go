@@ -3,6 +3,7 @@ package data
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 )
 
 type SleepRecord struct {
@@ -15,7 +16,7 @@ type SleepRecord struct {
 	MinutesAwake  int    `json:"minutesAwake"`
 	MinutesInBed  int    `json:"timeInBed"`
 	Provider      string `json:"-"`
-	rawJson       []byte `json:"-"`
+	RawJson       []byte `json:"-"`
 }
 
 type SleepRecordModel struct {
@@ -24,7 +25,7 @@ type SleepRecordModel struct {
 
 func (sr *SleepRecordModel) Get(date string) (*SleepRecord, error) {
 	r := &SleepRecord{}
-	stm := `SELECT * FROM sleep WHERE "date" = ?`
+	stm := `SELECT * FROM sleep_records WHERE "date" = ?`
 	row := sr.DB.QueryRow(stm, date)
 	err := row.Scan(
 		&r.ID,
@@ -51,7 +52,7 @@ func (sr *SleepRecordModel) Get(date string) (*SleepRecord, error) {
 
 func (sr *SleepRecordModel) GetAll() ([]*SleepRecord, error) {
 	records := []*SleepRecord{}
-	stm := `SELECT id, date, duration, start_time, end_time, minutes_asleep, minutes_awake, minutes_in_bed, provider FROM sleep_record`
+	stm := `SELECT id, date, duration, start_time, end_time, minutes_asleep, minutes_awake, minutes_in_bed, provider FROM sleep_records`
 	rows, err := sr.DB.Query(stm)
 	if err != nil {
 		return records, err
@@ -83,19 +84,20 @@ func (sr *SleepRecordModel) GetAll() ([]*SleepRecord, error) {
 }
 
 func (sr *SleepRecordModel) Insert(data SleepRecord) error {
-	stm := `INSERT INTO sleep_record (date, duration, start_time, end_time, minutes_asleep,
+	stm := `INSERT INTO sleep_records (date, duration, start_time, end_time, minutes_asleep,
 									minutes_awake, minutes_in_bed, provider, raw_json)
-			VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9 ,$10)`
+			VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)`
+	fmt.Println(data.Date)
 	args := []interface{}{
-		data.ID,
 		data.Date,
+		data.Duration,
 		data.StartTime,
 		data.EndTime,
 		data.MinutesAsleep,
 		data.MinutesAwake,
 		data.MinutesInBed,
 		data.Provider,
-		data.rawJson,
+		data.RawJson,
 	}
 	_, err := sr.DB.Exec(stm, args...)
 	if err != nil {

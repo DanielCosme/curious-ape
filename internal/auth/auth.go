@@ -22,19 +22,18 @@ type Token struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
-func (auth *AuthConfig) ExchangeCodeForToken(code string) (Token, error) {
-	var payload Token
-	jsonPayload, err := auth.tokens(code, "authorization")
-	if err != nil {
-		return payload, err
-	}
-
-	err = json.Unmarshal(jsonPayload, &payload)
-	payload.Service = auth.Provider
-	return payload, nil
+func (auth *AuthConfig) ExchangeCodeForToken(code string) (payload Token, err error) {
+	payload, err = auth.tokens(code, "authorization")
+	return payload, err
 }
 
-func (auth *AuthConfig) tokens(codeOrToken, grant string) ([]byte, error) {
+func (auth *AuthConfig) RefreshToken(refreshToken string) (payload Token, err error) {
+	payload, err = auth.tokens(refreshToken, "refresh")
+	return payload, err
+}
+
+func (auth *AuthConfig) tokens(codeOrToken, grant string) (Token, error) {
+	var token Token
 	var params map[string]string
 	if grant == "authorization" {
 		params = map[string]string{
@@ -49,25 +48,31 @@ func (auth *AuthConfig) tokens(codeOrToken, grant string) ([]byte, error) {
 			"refresh_token": codeOrToken,
 		}
 	} else {
-		return nil, fmt.Errorf("Invalid grant.")
+		return token, fmt.Errorf("Invalid grant.")
 	}
 
 	body := UrlEncode(params)
 	req, err := tokensRequest(body, auth)
 	if err != nil {
-		return nil, err
+		return token, err
 	}
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, err
+		return token, err
 	}
 	defer res.Body.Close()
 
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, err
+		return token, err
 	}
 
-	return resBody, nil
+	err = json.Unmarshal(resBody, &token)
+	if err != nil {
+		return token, err
+	}
+	token.Service = auth.Provider
+
+	return token, nil
 }

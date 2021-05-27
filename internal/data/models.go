@@ -17,8 +17,8 @@ type Models struct {
 	Tokens       AuthTokenModel
 }
 
-func NewModels(db *sql.DB) Models {
-	return Models{
+func NewModels(db *sql.DB) *Models {
+	return &Models{
 		FoodHabits:   FoodHabitModel{DB: db},
 		Users:        UserModel{DB: db},
 		SleepRecords: SleepRecordModel{DB: db},
