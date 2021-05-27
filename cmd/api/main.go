@@ -12,8 +12,8 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/danielcosme/curious-ape/internal/collectors/fitbit"
 	"github.com/danielcosme/curious-ape/internal/data"
+	"github.com/danielcosme/curious-ape/internal/sync"
 	_ "github.com/lib/pq"
 )
 
@@ -40,10 +40,11 @@ type config struct {
 
 // http handler dependencies.
 type application struct {
-	logger *log.Logger
-	debug  *log.Logger
-	config config
-	models data.Models
+	logger     *log.Logger
+	debug      *log.Logger
+	config     config
+	models     data.Models
+	collectors *sync.Collectors
 }
 
 func main() {
@@ -100,14 +101,14 @@ func main() {
 		return time.Now().Unix()
 	}))
 
-	fit := fitbit.Fitbit
-	logger.Println(fit.Name == "a")
+	collector := sync.NewCollectors()
 
 	app := &application{
-		config: cfg,
-		logger: logger,
-		debug:  debug,
-		models: data.NewModels(db),
+		config:     cfg,
+		logger:     logger,
+		debug:      debug,
+		models:     data.NewModels(db),
+		collectors: collector,
 	}
 
 	srv := &http.Server{

@@ -1,6 +1,11 @@
 package auth
 
-import "net/url"
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+)
 
 type AuthConfig struct {
 	AuthorizationURL string
@@ -10,10 +15,57 @@ type AuthConfig struct {
 	ClientSecret     string
 }
 
-func UrlEncode(values map[string]string) string {
-	p := url.Values{}
-	for key, value := range values {
-		p.Add(key, value)
+type Token struct {
+	Service      string `json:"-"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
+func (auth *AuthConfig) ExchangeCodeForToken(code string) (Token, error) {
+	var payload Token
+	jsonPayload, err := auth.tokens(code, "authorization")
+	if err != nil {
+		return payload, err
 	}
-	return p.Encode()
+
+	err = json.Unmarshal(jsonPayload, &payload)
+	return payload, nil
+}
+
+func (auth *AuthConfig) tokens(codeOrToken, grant string) ([]byte, error) {
+	var params map[string]string
+	if grant == "authorization" {
+		params = map[string]string{
+			"client_id":    auth.ClientID,
+			"grant_type":   "authorization_code",
+			"code":         codeOrToken,
+			"redirect_uri": auth.RedirectURL,
+		}
+	} else if grant == "refresh" {
+		params = map[string]string{
+			"grant_type":    "refresh_token",
+			"refresh_token": codeOrToken,
+		}
+	} else {
+		return nil, fmt.Errorf("Invalid grant.")
+	}
+
+	body := UrlEncode(params)
+	req, err := tokensRequest(body, auth)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	resBody, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return resBody, nil
 }

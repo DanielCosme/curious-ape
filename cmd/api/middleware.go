@@ -14,6 +14,11 @@ import (
 
 func (a *application) authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		if a.config.env == "development" {
+			next.ServeHTTP(rw, r)
+			return
+		}
+
 		header := r.Header.Get("Authorization")
 		if header == "" {
 			a.unauthorizedResponse(rw, r)
