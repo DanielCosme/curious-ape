@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
@@ -129,6 +130,30 @@ func (co *Collectors) saveLog(date string, jsonResponse []byte) error {
 	err = co.Models.SleepRecords.Insert(sleepRecord)
 	if err != nil {
 		log.Println("ERR", err.Error())
+		return err
+	}
+
+	// TODO refactor
+	var habit *data.Habit = &data.Habit{
+		Date:   sleepRecord.Date,
+		Origin: sleepRecord.Provider,
+		Type:   "sleep",
+		State:  "yes",
+	}
+
+	d := strings.Split(sleepRecord.EndTime, "T")
+	hour := d[1][:2]
+	hourInt, err := strconv.Atoi(hour)
+	if err != nil {
+		return err
+	}
+
+	if hourInt > 6 {
+		habit.State = "no"
+	}
+
+	err = co.Models.Habits.Insert(habit)
+	if err != nil {
 		return err
 	}
 

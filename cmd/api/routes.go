@@ -24,11 +24,11 @@ func (a *application) routes() http.Handler {
 		r.Get("/sleep/logs", a.listSleepRecordsHandler)
 		r.Get("/sleep/log/{date}", a.showSleepRecordHandler)
 
-		r.Get("/food/habit/{date}", a.showFoodHabitHandler)
-		r.Put("/food/habit/{date}", a.updateFoodHabitHandler)
-		r.Delete("/food/habit/{id}", a.deleteFoodHabitHandler)
-		r.Post("/food/habits", a.createFoodHabitHandler)
-		r.Get("/food/habits", a.listFoodHabitsHandler)
+		r.Get("/habit/{id}", a.showHabitHandler)
+		r.Put("/habit/{id}", a.updateHabitHandler)
+		r.Delete("/habit/{id}", a.deleteHabitHandler)
+		r.Post("/habits", a.createHabitHandler)
+		r.Get("/habits", a.listHabitsHandler)
 
 		r.Post("/users", a.registerUserHandler)
 	})

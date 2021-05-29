@@ -22,40 +22,6 @@ type SleepCollector struct {
 	Scope string
 }
 
-func (sc *SleepCollector) GetRange(start, end string) (map[string][]byte, error) {
-	url := fmt.Sprintf("%s%s/date/%s/%s.json", BaseUrl, sc.Scope, start, end)
-	log.Println(url)
-	return nil, nil
-	// url := baseUrl + ".json"
-	// result, err := makeRequest(url)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// var jsonResponse map[string][]interface{}
-	// response := map[string][]byte{}
-
-	// err = json.Unmarshal(result, &jsonResponse)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// for _, v := range jsonResponse["sleep"] {
-	// 	blob, ok := v.(map[string]interface{})
-	// 	if !ok {
-	// 		return nil, fmt.Errorf("Error procesing the logs range result")
-	// 	}
-	// 	key := blob["dateOfSleep"].(string)
-	// 	jsonBlob, err := json.Marshal(blob)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-
-	// 	response[key] = jsonBlob
-	// }
-
-	// return response, nil
-}
-
 func (sc *SleepCollector) LogsRange(start, end string) (map[string][]byte, error) {
 	url := fmt.Sprintf("%s%s/date/%s/%s.json", BaseUrl, sc.Scope, start, end)
 	result, err := sc.makeRequest(url)

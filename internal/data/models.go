@@ -11,7 +11,7 @@ var (
 )
 
 type Models struct {
-	FoodHabits   FoodHabitModel
+	Habits       HabitModel
 	Users        UserModel
 	SleepRecords SleepRecordModel
 	Tokens       AuthTokenModel
@@ -19,7 +19,7 @@ type Models struct {
 
 func NewModels(db *sql.DB) *Models {
 	return &Models{
-		FoodHabits:   FoodHabitModel{DB: db},
+		Habits:       HabitModel{DB: db},
 		Users:        UserModel{DB: db},
 		SleepRecords: SleepRecordModel{DB: db},
 		Tokens:       AuthTokenModel{DB: db},

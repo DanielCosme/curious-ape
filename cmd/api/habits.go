@@ -12,11 +12,12 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func (a *application) createFoodHabitHandler(rw http.ResponseWriter, r *http.Request) {
+func (a *application) createHabitHandler(rw http.ResponseWriter, r *http.Request) {
 	var input struct {
-		State bool     `json:"state"`
-		Date  string   `json:"date"`
-		Tags  []string `json:"tags"`
+		State  string `json:"state"`
+		Date   string `json:"date"`
+		Origin string `json:"origin"`
+		Type   string `json:"type"`
 	}
 
 	err := a.readJSON(rw, r, &input)
@@ -25,35 +26,35 @@ func (a *application) createFoodHabitHandler(rw http.ResponseWriter, r *http.Req
 		return
 	}
 
-	habit := &data.FoodHabit{
-		State: input.State,
-		Date:  input.Date,
-		Tags:  input.Tags,
-	}
+	var habit *data.Habit = &data.Habit{}
+	habit.Date = input.Date
+	habit.State = input.State
+	habit.Origin = input.Origin
+	habit.Type = input.Type
 
 	v := validator.New()
-	if data.ValidateFoodHabit(v, habit); !v.Valid() {
+	if data.ValidateHabit(v, habit); !v.Valid() {
 		a.failedValidationResponse(rw, r, v.Errors)
 		return
 	}
 
-	err = a.models.FoodHabits.Insert(habit)
+	err = a.models.Habits.Insert(habit)
 	if err != nil {
 		a.serverErrorResponse(rw, r, err)
 		return
 	}
 
 	headers := make(http.Header)
-	headers.Set("Location", fmt.Sprintf("/v1/movies/%d", habit.ID))
+	headers.Set("Location", fmt.Sprintf("/v1/habits/%d", habit.ID))
 
-	err = a.writeJSON(rw, http.StatusCreated, envelope{"foodHabit": habit}, headers)
+	err = a.writeJSON(rw, http.StatusCreated, envelope{"Habit": habit}, headers)
 	if err != nil {
 		a.serverErrorResponse(rw, r, err)
 	}
 }
 
-func (a *application) listFoodHabitsHandler(rw http.ResponseWriter, r *http.Request) {
-	habits, err := a.models.FoodHabits.GetAll()
+func (a *application) listHabitsHandler(rw http.ResponseWriter, r *http.Request) {
+	habits, err := a.models.Habits.GetAll()
 	if err != nil {
 		a.serverErrorResponse(rw, r, err)
 		return
@@ -65,9 +66,15 @@ func (a *application) listFoodHabitsHandler(rw http.ResponseWriter, r *http.Requ
 	}
 }
 
-func (a *application) showFoodHabitHandler(rw http.ResponseWriter, r *http.Request) {
-	date := chi.URLParam(r, "date")
-	habit, err := a.models.FoodHabits.Get(date)
+func (a *application) showHabitHandler(rw http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		a.badRequestResponse(rw, r, err)
+		return
+	}
+
+	habit, err := a.models.Habits.Get(idInt)
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrRecordNotFound):
@@ -78,15 +85,21 @@ func (a *application) showFoodHabitHandler(rw http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	err = a.writeJSON(rw, http.StatusOK, envelope{"foodHabit": habit}, nil)
+	err = a.writeJSON(rw, http.StatusOK, envelope{"Habit": habit}, nil)
 	if err != nil {
 		a.serverErrorResponse(rw, r, err)
 	}
 }
 
-func (a *application) updateFoodHabitHandler(rw http.ResponseWriter, r *http.Request) {
-	date := chi.URLParam(r, "date")
-	habit, err := a.models.FoodHabits.Get(date)
+func (a *application) updateHabitHandler(rw http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		a.badRequestResponse(rw, r, err)
+		return
+	}
+
+	habit, err := a.models.Habits.Get(idInt)
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrRecordNotFound):
@@ -98,9 +111,10 @@ func (a *application) updateFoodHabitHandler(rw http.ResponseWriter, r *http.Req
 	}
 
 	var input struct {
-		State bool     `json:"state"`
-		Date  string   `json:"date"`
-		Tags  []string `json:"tags"`
+		State  string `json:"state"`
+		Date   string `json:"date"`
+		Origin string `json:"origin"`
+		Type   string `json:"type"`
 	}
 	err = a.readJSON(rw, r, &input)
 	if err != nil {
@@ -114,32 +128,33 @@ func (a *application) updateFoodHabitHandler(rw http.ResponseWriter, r *http.Req
 
 	habit.State = input.State
 	habit.Date = input.Date
-	habit.Tags = input.Tags
+	habit.Type = input.Type
+	habit.Origin = input.Origin
 	v := validator.New()
-	if data.ValidateFoodHabit(v, habit); !v.Valid() {
+	if data.ValidateHabit(v, habit); !v.Valid() {
 		a.failedValidationResponse(rw, r, v.Errors)
 		return
 	}
 
-	err = a.models.FoodHabits.Update(habit)
+	err = a.models.Habits.Update(habit)
 	if err != nil {
 		a.serverErrorResponse(rw, r, err)
 	}
 
-	err = a.writeJSON(rw, http.StatusOK, envelope{"foodHabit": habit}, nil)
+	err = a.writeJSON(rw, http.StatusOK, envelope{"Habit": habit}, nil)
 	if err != nil {
 		a.serverErrorResponse(rw, r, err)
 	}
 }
 
-func (a *application) deleteFoodHabitHandler(rw http.ResponseWriter, r *http.Request) {
+func (a *application) deleteHabitHandler(rw http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		a.badRequestResponse(rw, r, err)
 		return
 	}
 
-	err = a.models.FoodHabits.Delete(id)
+	err = a.models.Habits.Delete(id)
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrRecordNotFound):
