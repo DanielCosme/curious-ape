@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"net/http"
 )
 
@@ -16,6 +17,10 @@ func (a *application) successFitbitHandler(rw http.ResponseWriter, r *http.Reque
 		return
 	}
 	code := r.Form.Get("code") // Valid only for 10 minutes.
+	if code == "" {
+		a.badRequestResponse(rw, r, errors.New("no authorization code provided"))
+		return
+	}
 
 	payload, err := a.collectors.Sleep.Auth.ExchangeCodeForToken(code)
 	if err != nil {
