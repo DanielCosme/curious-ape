@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -29,9 +30,13 @@ func (auth *AuthConfig) ExchangeCodeForToken(code string) (payload Token, err er
 
 func (auth *AuthConfig) RefreshToken(refreshToken string) (payload Token, err error) {
 	payload, err = auth.tokens(refreshToken, "refresh")
-	return payload, err
+	if err != nil {
+		return payload, err
+	}
+	return payload, nil
 }
 
+// TODO read body for error
 func (auth *AuthConfig) tokens(codeOrToken, grant string) (Token, error) {
 	var token Token
 	var params map[string]string
@@ -73,6 +78,10 @@ func (auth *AuthConfig) tokens(codeOrToken, grant string) (Token, error) {
 		return token, err
 	}
 	token.Service = auth.Provider
+
+	if res.StatusCode == http.StatusBadRequest {
+		return token, errors.New("Failed to fetch or refresh tokens")
+	}
 
 	return token, nil
 }

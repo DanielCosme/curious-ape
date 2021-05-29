@@ -22,6 +22,72 @@ type SleepCollector struct {
 	Scope string
 }
 
+func (sc *SleepCollector) GetRange(start, end string) (map[string][]byte, error) {
+	url := fmt.Sprintf("%s%s/date/%s/%s.json", BaseUrl, sc.Scope, start, end)
+	log.Println(url)
+	return nil, nil
+	// url := baseUrl + ".json"
+	// result, err := makeRequest(url)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// var jsonResponse map[string][]interface{}
+	// response := map[string][]byte{}
+
+	// err = json.Unmarshal(result, &jsonResponse)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// for _, v := range jsonResponse["sleep"] {
+	// 	blob, ok := v.(map[string]interface{})
+	// 	if !ok {
+	// 		return nil, fmt.Errorf("Error procesing the logs range result")
+	// 	}
+	// 	key := blob["dateOfSleep"].(string)
+	// 	jsonBlob, err := json.Marshal(blob)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+
+	// 	response[key] = jsonBlob
+	// }
+
+	// return response, nil
+}
+
+func (sc *SleepCollector) LogsRange(start, end string) (map[string][]byte, error) {
+	url := fmt.Sprintf("%s%s/date/%s/%s.json", BaseUrl, sc.Scope, start, end)
+	result, err := sc.makeRequest(url)
+	if err != nil {
+		return nil, err
+	}
+	var jsonResponse map[string][]interface{}
+	response := map[string][]byte{}
+
+	err = json.Unmarshal(result, &jsonResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range jsonResponse["sleep"] {
+		blob, ok := v.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("Error procesing the logs range result")
+		}
+
+		key := blob["dateOfSleep"].(string)
+		jsonBlob, err := json.Marshal(blob)
+		if err != nil {
+			return nil, err
+		}
+
+		response[key] = jsonBlob
+	}
+
+	return response, nil
+}
+
 func (sc *SleepCollector) DayLog(date string) ([]byte, error) {
 	url := fmt.Sprintf("%s%s/date/%s.json", BaseUrl, sc.Scope, date)
 
@@ -69,9 +135,10 @@ func (sc *SleepCollector) makeRequest(url string) (body []byte, err error) {
 		if res.StatusCode == http.StatusUnauthorized {
 			log.Println("Status code", res.StatusCode, "\nERR", string(body))
 			times++
-			err = sc.refreshToken()
+			err := sc.refreshToken()
 			if err != nil {
-				return body, nil
+				// TODO keep track of the days that have no logs.
+				return body, err
 			}
 		} else if res.StatusCode == http.StatusOK {
 			log.Println("Request Successfully received")
@@ -92,8 +159,12 @@ func (sc *SleepCollector) refreshToken() (err error) {
 	}
 
 	newT, err := sc.Auth.RefreshToken(t.RefreshToken)
+	if err != nil {
+		return err
+	}
+
 	err = sc.Token.Update(newT)
-	return err
+	return nil
 }
 
 func (col *SleepCollector) AuthorizationURI() string {

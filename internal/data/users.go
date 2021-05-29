@@ -32,7 +32,7 @@ type UserModel struct {
 	DB *sql.DB
 }
 
-func (m UserModel) Insert(user *User) error {
+func (m *UserModel) Insert(user *User) error {
 	query := `
         INSERT INTO users (name, email, password_hash, activated) 
         VALUES ($1, $2, $3, $4)
@@ -55,7 +55,36 @@ func (m UserModel) Insert(user *User) error {
 	return nil
 }
 
-func (m UserModel) GetByEmail(email string) (*User, error) {
+func (m *UserModel) GetByID(id int) (*User, error) {
+	query := `
+        SELECT id, created_at, name, email, password_hash, activated
+        FROM users
+        WHERE id = $1`
+
+	var user User
+
+	err := m.DB.QueryRow(query, id).Scan(
+		&user.ID,
+		&user.CreatedAt,
+		&user.Name,
+		&user.Email,
+		&user.Password.hash,
+		&user.Activated,
+	)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &user, nil
+}
+
+func (m *UserModel) GetByEmail(email string) (*User, error) {
 	query := `
         SELECT id, created_at, name, email, password_hash, activated
         FROM users
@@ -84,7 +113,7 @@ func (m UserModel) GetByEmail(email string) (*User, error) {
 	return &user, nil
 }
 
-func (m UserModel) Update(user *User) error {
+func (m *UserModel) Update(user *User) error {
 	query := `
         UPDATE users 
         SET name = $1, email = $2, password_hash = $3, activated = $4

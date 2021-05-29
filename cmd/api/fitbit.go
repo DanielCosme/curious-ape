@@ -28,5 +28,5 @@ func (a *application) successFitbitHandler(rw http.ResponseWriter, r *http.Reque
 		a.serverErrorResponse(rw, r, err)
 	}
 
-	a.writeJSON(rw, 200, envelope{"message": payload}, nil)
+	a.writeJSON(rw, 200, envelope{"message": "authorization successful"}, nil)
 }

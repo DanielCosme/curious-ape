@@ -21,6 +21,9 @@ func (a *application) routes() http.Handler {
 		r.Get("/fitbit/success", a.successFitbitHandler)
 		r.Get("/fitbit/authorize", a.authorizeFitbitHandler)
 
+		r.Get("/sleep/logs", a.listSleepRecordsHandler)
+		r.Get("/sleep/log/{date}", a.showSleepRecordHandler)
+
 		r.Get("/food/habit/{date}", a.showFoodHabitHandler)
 		r.Put("/food/habit/{date}", a.updateFoodHabitHandler)
 		r.Delete("/food/habit/{id}", a.deleteFoodHabitHandler)
