@@ -105,15 +105,13 @@ func main() {
 	models := data.NewModels(db)
 	collector := sync.NewCollectors(models)
 
-	t := time.Now().Location()
-	s := gocron.NewScheduler(t)
+	s := gocron.NewScheduler(time.Now().Location())
 	_, err = s.Every(1).Day().Tag("sleep").At("18:00").Do(collector.GetTodayLog)
 	if err != nil {
 		logger.Println(err)
 	}
 
 	s.StartAsync()
-	logger.Println(t, time.Now())
 
 	app := &application{
 		config:     cfg,
