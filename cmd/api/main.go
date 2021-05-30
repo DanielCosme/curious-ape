@@ -112,7 +112,7 @@ func main() {
 	}
 
 	s.StartAsync()
-	collector.FromDayZero(time.Now())
+	// collector.FromDayZero(time.Now())
 	//go collector.GetLog("2021-05-25")
 
 	app := &application{
