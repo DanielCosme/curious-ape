@@ -16,6 +16,12 @@ func (a *application) seedDataHandler(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	a.collectors.BuildHabitsFromSleepRecords()
+	if err != nil {
+		a.errorResponse(rw, r, http.StatusNotFound, err)
+		return
+	}
+
 	e := envelope{
 		"message": fmt.Sprintf("Sleep records and habits build until %v", ts),
 		"success": true,
