@@ -33,6 +33,7 @@ func (a *application) routes() http.Handler {
 		r.Post("/users", a.registerUserHandler)
 
 		r.Post("/debug/seed", a.seedDataHandler)
+		r.Post("/debug/misc", a.miscHandler)
 	})
 
 	mux.Get("/healthcheck", a.healthcheckerHandler)

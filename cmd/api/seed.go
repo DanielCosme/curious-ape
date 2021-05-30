@@ -21,3 +21,12 @@ func (a *application) seedDataHandler(rw http.ResponseWriter, r *http.Request) {
 	}
 	a.writeJSON(rw, http.StatusOK, e, nil)
 }
+
+func (a *application) miscHandler(rw http.ResponseWriter, r *http.Request) {
+	msg := "yes"
+	e := envelope{
+		"message": msg,
+		"success": true,
+	}
+	a.writeJSON(rw, http.StatusOK, e, nil)
+}
