@@ -31,6 +31,8 @@ func (a *application) routes() http.Handler {
 		r.Get("/habits", a.listHabitsHandler)
 
 		r.Post("/users", a.registerUserHandler)
+
+		r.Post("/debug/seed", a.seedDataHandler)
 	})
 
 	mux.Get("/healthcheck", a.healthcheckerHandler)

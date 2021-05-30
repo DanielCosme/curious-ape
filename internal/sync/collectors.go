@@ -56,14 +56,14 @@ func (co *Collectors) GetLog(date string) {
 
 func (co *Collectors) FromDayZero(limit time.Time) error {
 	zero, _ := time.Parse("2006-01-02", fitbit.ZeroDay) // From here
-	err := co.RangeLogs(zero, limit)
+	err := co.AllRangeLogs(zero, limit)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (co *Collectors) RangeLogs(zero, limit time.Time) error {
+func (co *Collectors) AllRangeLogs(zero, limit time.Time) error {
 	maxYear, maxMonth, _ := limit.Date()
 
 	first := zero
@@ -73,7 +73,7 @@ func (co *Collectors) RangeLogs(zero, limit time.Time) error {
 		lastStr := last.Format("2006-01-02")
 
 		// Get logs for current month
-		if err := co.rangeLog(firstStr, lastStr); err != nil {
+		if err := co.monthRangeLog(firstStr, lastStr); err != nil {
 			log.Println("ERR", err.Error())
 			return err
 		}
@@ -91,7 +91,7 @@ func (co *Collectors) RangeLogs(zero, limit time.Time) error {
 
 // Request the record for the given months range and save them in the database on day at
 // a time.
-func (co *Collectors) rangeLog(first, last string) error {
+func (co *Collectors) monthRangeLog(first, last string) error {
 	logs, err := co.Sleep.LogsRange(first, last)
 	if err != nil {
 		return err
@@ -133,7 +133,17 @@ func (co *Collectors) saveLog(date string, jsonResponse []byte) error {
 		return err
 	}
 
-	// TODO refactor
+	err = co.SaveSleepHabit(&sleepRecord)
+	if err != nil {
+		log.Println("ERR", err.Error())
+		return err
+	}
+
+	log.Println("All Good")
+	return nil
+}
+
+func (co *Collectors) SaveSleepHabit(sleepRecord *data.SleepRecord) error {
 	var habit *data.Habit = &data.Habit{
 		Date:   sleepRecord.Date,
 		Origin: sleepRecord.Provider,
@@ -157,6 +167,5 @@ func (co *Collectors) saveLog(date string, jsonResponse []byte) error {
 		return err
 	}
 
-	log.Println("All Good")
 	return nil
 }

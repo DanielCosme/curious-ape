@@ -26,12 +26,12 @@ func (a *application) createHabitHandler(rw http.ResponseWriter, r *http.Request
 		return
 	}
 
-	var habit *data.Habit = &data.Habit{}
-	habit.Date = input.Date
-	habit.State = input.State
-	habit.Origin = input.Origin
-	habit.Type = input.Type
-
+	habit := &data.Habit{
+		Date:   input.Date,
+		State:  input.State,
+		Origin: input.Origin,
+		Type:   input.Type,
+	}
 	v := validator.New()
 	if data.ValidateHabit(v, habit); !v.Valid() {
 		a.failedValidationResponse(rw, r, v.Errors)
