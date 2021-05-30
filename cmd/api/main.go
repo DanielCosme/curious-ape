@@ -46,6 +46,7 @@ type application struct {
 	config     config
 	models     *data.Models
 	collectors *sync.Collectors
+	user       *data.User
 }
 
 func main() {
@@ -119,7 +120,9 @@ func main() {
 		debug:      debug,
 		models:     models,
 		collectors: collector,
+		user:       &data.User{},
 	}
+	app.loadUser()
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.port),
@@ -157,4 +160,12 @@ func openDB(cfg config) (*sql.DB, error) {
 	}
 
 	return db, nil
+}
+
+func (a *application) loadUser() {
+	user, err := a.models.Users.GetByID(1)
+	if err != nil {
+		panic("unable to load admin info")
+	}
+	a.user = user
 }

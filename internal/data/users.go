@@ -34,7 +34,7 @@ type UserModel struct {
 
 func (m *UserModel) Insert(user *User) error {
 	query := `
-        INSERT INTO users (name, email, password_hash, activated) 
+        INSERT INTO users (name, email, password_hash, activated)
         VALUES ($1, $2, $3, $4)
         RETURNING id, created_at`
 	args := []interface{}{user.Name, user.Email, user.Password.hash, user.Activated}
@@ -115,9 +115,9 @@ func (m *UserModel) GetByEmail(email string) (*User, error) {
 
 func (m *UserModel) Update(user *User) error {
 	query := `
-        UPDATE users 
+        UPDATE users
         SET name = $1, email = $2, password_hash = $3, activated = $4
-        WHERE id = $5 
+        WHERE id = $5
         RETURNING id`
 
 	args := []interface{}{
