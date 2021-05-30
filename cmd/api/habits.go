@@ -126,6 +126,11 @@ func (a *application) updateHabitHandler(rw http.ResponseWriter, r *http.Request
 		return
 	}
 
+	if habit.Type != input.Type {
+		a.badRequestResponse(rw, r, fmt.Errorf("habits must be the same type"))
+		return
+	}
+
 	habit.State = input.State
 	habit.Date = input.Date
 	habit.Type = input.Type
@@ -139,11 +144,13 @@ func (a *application) updateHabitHandler(rw http.ResponseWriter, r *http.Request
 	err = a.models.Habits.Update(habit)
 	if err != nil {
 		a.serverErrorResponse(rw, r, err)
+		return
 	}
 
 	err = a.writeJSON(rw, http.StatusOK, envelope{"Habit": habit}, nil)
 	if err != nil {
 		a.serverErrorResponse(rw, r, err)
+		return
 	}
 }
 

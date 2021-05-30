@@ -170,9 +170,56 @@ func (co *Collectors) SaveSleepHabit(sleepRecord *data.SleepRecord) error {
 		habit.State = "no"
 	}
 
-	err = co.Models.Habits.UpdateByDate(habit)
+	err = co.Models.Habits.UpdateOrCreate(habit)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (co *Collectors) InitializeDayHabits() (err error) {
+	types := []string{"sleep", "food", "fitness", "work"}
+	h := data.Habit{
+		State:  "no_info",
+		Date:   time.Now().Format("2006-01-02"),
+		Origin: "automated",
+	}
+
+	c := 0
+	for _, v := range types {
+		h.Type = v
+		err = co.Models.Habits.Insert(&h)
+		if err == nil {
+			c++
+		}
+	}
+
+	if err != nil {
+		log.Println(c, "Habits Added,", err.Error())
+		return err
+	}
+
+	log.Println(c, "CRON habits for today added successfully")
+	return nil
+}
+
+func (co *Collectors) BuildHabitsFromSleepRecords() (err error) {
+	all, err := co.Models.SleepRecords.GetAll()
+	if err != nil {
+		return err
+	}
+
+	l := len(all)
+	for i, v := range all {
+		err := co.SaveSleepHabit(v)
+		if err != nil {
+			return err
+		}
+
+		if i+1 == l {
+			log.Println("succesfully added", l, "habits")
+		}
 	}
 
 	return nil

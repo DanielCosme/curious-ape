@@ -12,9 +12,9 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/danielcosme/curious-ape/internal/cron"
 	"github.com/danielcosme/curious-ape/internal/data"
 	"github.com/danielcosme/curious-ape/internal/sync"
-	"github.com/go-co-op/gocron"
 	_ "github.com/lib/pq"
 )
 
@@ -105,14 +105,8 @@ func main() {
 
 	models := data.NewModels(db)
 	collector := sync.NewCollectors(models)
-
-	s := gocron.NewScheduler(time.Now().Location())
-	_, err = s.Every(1).Day().Tag("sleep").At("18:00").Do(collector.GetTodayLog)
-	if err != nil {
-		logger.Println(err)
-	}
-
-	s.StartAsync()
+	scheduler := &cron.Cron{Collector: collector}
+	go scheduler.Start()
 
 	app := &application{
 		config:     cfg,

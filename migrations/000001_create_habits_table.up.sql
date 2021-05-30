@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS habits (
     state habit_state NOT NULL DEFAULT 'no_info',
     "date" DATE NOT NULL,
     "type" habit_type NOT NULL,
-    origin TEXT NOT NULL DEFAULT 'unknown'
+    origin TEXT NOT NULL DEFAULT 'unknown',
+    UNIQUE("date", "type")
 );
 

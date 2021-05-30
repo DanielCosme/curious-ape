@@ -83,6 +83,27 @@ func (fh *HabitModel) Get(id int) (*Habit, error) {
 	return &habit, nil
 }
 
+func (fh *HabitModel) UpdateOrCreate(habit *Habit) error {
+	stm := `SELECT id FROM habits WHERE "date" = $1 and "type" = $2`
+	q, _ := fh.DB.Query(stm, habit.Date, habit.Type)
+	if !q.Next() {
+		if q.Err() == nil {
+			return fh.Insert(habit)
+		}
+		return q.Err()
+	}
+
+	if err := q.Scan(&habit.ID); err != nil {
+		return err
+	}
+
+	if err := fh.Update(habit); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (fh *HabitModel) Update(habit *Habit) error {
 	stm := `
 		UPDATE habits
@@ -96,6 +117,23 @@ func (fh *HabitModel) Update(habit *Habit) error {
 		habit.Type,
 		habit.Origin,
 		habit.ID,
+	}
+
+	return fh.DB.QueryRow(stm, args...).Scan(&habit.State, &habit.Date, &habit.Type)
+}
+
+func (fh *HabitModel) UpdateByDate(habit *Habit) error {
+	stm := `
+		UPDATE habits
+		SET state = $1, origin = $2
+		WHERE "date" = $3 AND "type" = $4
+		RETURNING state, "date", "type"`
+
+	args := []interface{}{
+		habit.State,
+		habit.Origin,
+		habit.Date,
+		habit.Type,
 	}
 
 	return fh.DB.QueryRow(stm, args...).Scan(&habit.State, &habit.Date, &habit.Type)

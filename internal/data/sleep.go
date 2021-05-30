@@ -57,7 +57,7 @@ func (sr *SleepRecordModel) Get(date string) (*SleepRecord, error) {
 
 func (sr *SleepRecordModel) GetAll() ([]*SleepRecord, error) {
 	records := []*SleepRecord{}
-	stm := `SELECT id, date, duration, start_time, end_time, minutes_asleep, minutes_awake, minutes_in_bed FROM sleep_records`
+	stm := `SELECT id, date, duration, start_time, end_time, minutes_asleep, minutes_awake, minutes_in_bed, provider FROM sleep_records`
 	rows, err := sr.DB.Query(stm)
 	if err != nil {
 		return records, err
@@ -75,6 +75,7 @@ func (sr *SleepRecordModel) GetAll() ([]*SleepRecord, error) {
 			&r.MinutesAsleep,
 			&r.MinutesAwake,
 			&r.MinutesInBed,
+			&r.Provider,
 		)
 
 		if err != nil {
