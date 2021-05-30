@@ -35,23 +35,31 @@ func NewCollectors(models *data.Models) *Collectors {
 	}
 }
 
-func (co *Collectors) GetTodayLog() {
+func (co *Collectors) GetTodayLog() error {
 	today := time.Now()
 	strTime := today.Format("2006-01-02")
-	co.GetLog(strTime)
+	err := co.GetLog(strTime)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (co *Collectors) GetLog(date string) {
+func (co *Collectors) GetLog(date string) error {
 	log.Println("Getting Record")
 	jsonRecord, err := co.Sleep.DayLog(date)
 	if err != nil {
 		log.Println("ERR on GetLog", err.Error())
+		return err
 	}
 
 	err = co.saveLog(date, jsonRecord)
 	if err != nil {
 		log.Println("ERR on GetLog", err.Error())
+		return err
 	}
+
+	return nil
 }
 
 func (co *Collectors) FromDayZero(limit time.Time) error {
@@ -162,7 +170,7 @@ func (co *Collectors) SaveSleepHabit(sleepRecord *data.SleepRecord) error {
 		habit.State = "no"
 	}
 
-	err = co.Models.Habits.Insert(habit)
+	err = co.Models.Habits.UpdateByDate(habit)
 	if err != nil {
 		return err
 	}

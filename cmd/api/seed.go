@@ -12,7 +12,7 @@ func (a *application) seedDataHandler(rw http.ResponseWriter, r *http.Request) {
 	err := a.collectors.FromDayZero(t)
 	ts := t.Format("2006-01-02")
 	if err != nil {
-		a.serverErrorResponse(rw, r, err)
+		a.errorResponse(rw, r, http.StatusNotFound, err)
 	}
 
 	e := envelope{
@@ -23,6 +23,12 @@ func (a *application) seedDataHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (a *application) miscHandler(rw http.ResponseWriter, r *http.Request) {
+	err := a.collectors.GetLog("2021-05-26")
+	if err != nil {
+		a.errorResponse(rw, r, http.StatusNotFound, err.Error())
+		return
+	}
+
 	msg := "yes"
 	e := envelope{
 		"message": msg,

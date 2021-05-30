@@ -16,6 +16,8 @@ const (
 	BaseUrl = "https://api.fitbit.com/1.2/user/-/"
 )
 
+var ErrNoRecord = fmt.Errorf("Error procesing the logs range result")
+
 type SleepCollector struct {
 	Auth  *auth.AuthConfig
 	Token *data.AuthTokenModel
@@ -39,7 +41,7 @@ func (sc *SleepCollector) LogsRange(start, end string) (map[string][]byte, error
 	for _, v := range jsonResponse["sleep"] {
 		blob, ok := v.(map[string]interface{})
 		if !ok {
-			return nil, fmt.Errorf("Error procesing the logs range result")
+			return nil, ErrNoRecord
 		}
 
 		key := blob["dateOfSleep"].(string)
@@ -57,7 +59,6 @@ func (sc *SleepCollector) LogsRange(start, end string) (map[string][]byte, error
 func (sc *SleepCollector) DayLog(date string) ([]byte, error) {
 	url := fmt.Sprintf("%s%s/date/%s.json", BaseUrl, sc.Scope, date)
 
-	log.Println("Getting daily Log")
 	result, err := sc.makeRequest(url)
 	if err != nil {
 		return nil, err
@@ -70,6 +71,11 @@ func (sc *SleepCollector) DayLog(date string) ([]byte, error) {
 	}
 
 	arr := jsonResponse["sleep"].([]interface{})
+
+	if len(arr) == 0 {
+		return nil, fmt.Errorf("no %s log found for %s", sc.Scope, date)
+	}
+
 	response, err := json.Marshal(arr[0])
 	if err != nil {
 		return nil, err

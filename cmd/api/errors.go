@@ -12,7 +12,10 @@ func (a *application) logError(r *http.Request, err error) {
 // json formated error messages.
 func (a *application) errorResponse(rw http.ResponseWriter, r *http.Request, status int,
 	message interface{}) {
-	e := envelope{"error": message}
+	e := envelope{
+		"error":   message,
+		"success": false,
+	}
 
 	err := a.writeJSON(rw, status, e, nil)
 	if err != nil {
