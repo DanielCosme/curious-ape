@@ -45,7 +45,7 @@ type application struct {
 	debug      *log.Logger
 	config     config
 	models     *data.Models
-	collectors *sync.Collectors
+	collectors *sync.Collector
 	user       *data.User
 }
 

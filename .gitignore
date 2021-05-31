@@ -19,6 +19,5 @@ bin/
 tmp/
 
 # Environment
-*.env
+*.env*
 *.db
-.envrc

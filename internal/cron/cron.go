@@ -9,7 +9,7 @@ import (
 )
 
 type Cron struct {
-	Collector *sync.Collectors
+	Collector *sync.Collector
 }
 
 func (cron *Cron) Start() {

@@ -10,6 +10,7 @@ import (
 
 	"github.com/danielcosme/curious-ape/internal/data"
 	"github.com/danielcosme/curious-ape/internal/sync/fitbit"
+	"github.com/danielcosme/curious-ape/internal/sync/toggl"
 )
 
 var (
@@ -17,25 +18,37 @@ var (
 	ErrUnauthorized = errors.New("server needs to authorize again")
 )
 
-type Collectors struct {
+// type Collectors interface {
+// 	LogsRange()
+// 	DayLog()
+// }
+
+type Collector struct {
 	Models *data.Models
 	Sleep  *fitbit.SleepCollector
+	Work   *toggl.WorkCollector
 }
 
-func NewCollectors(models *data.Models) *Collectors {
+func NewCollectors(models *data.Models) *Collector {
 	f := &fitbit.SleepCollector{
 		Auth:  fitbit.FitbitAuth,
 		Token: &models.Tokens,
 		Scope: "sleep",
 	}
 
-	return &Collectors{
+	togg := &toggl.WorkCollector{
+		Auth:  toggl.TogglAuth,
+		Scope: "work",
+	}
+
+	return &Collector{
 		Models: models,
 		Sleep:  f,
+		Work:   togg,
 	}
 }
 
-func (co *Collectors) GetTodayLog() error {
+func (co *Collector) GetTodayLog() error {
 	today := time.Now()
 	strTime := today.Format("2006-01-02")
 	err := co.GetLog(strTime)
@@ -45,7 +58,7 @@ func (co *Collectors) GetTodayLog() error {
 	return nil
 }
 
-func (co *Collectors) GetLog(date string) error {
+func (co *Collector) GetLog(date string) error {
 	log.Println("Getting Record")
 	jsonRecord, err := co.Sleep.DayLog(date)
 	if err != nil {
@@ -62,7 +75,7 @@ func (co *Collectors) GetLog(date string) error {
 	return nil
 }
 
-func (co *Collectors) FromDayZero(limit time.Time) error {
+func (co *Collector) FromDayZero(limit time.Time) error {
 	zero, _ := time.Parse("2006-01-02", fitbit.ZeroDay) // From here
 	err := co.AllRangeLogs(zero, limit)
 	if err != nil {
@@ -71,7 +84,7 @@ func (co *Collectors) FromDayZero(limit time.Time) error {
 	return nil
 }
 
-func (co *Collectors) AllRangeLogs(zero, limit time.Time) error {
+func (co *Collector) AllRangeLogs(zero, limit time.Time) error {
 	maxYear, maxMonth, _ := limit.Date()
 
 	first := zero
@@ -99,7 +112,7 @@ func (co *Collectors) AllRangeLogs(zero, limit time.Time) error {
 
 // Request the record for the given months range and save them in the database on day at
 // a time.
-func (co *Collectors) monthRangeLog(first, last string) error {
+func (co *Collector) monthRangeLog(first, last string) error {
 	logs, err := co.Sleep.LogsRange(first, last)
 	if err != nil {
 		return err
@@ -125,7 +138,7 @@ func (co *Collectors) monthRangeLog(first, last string) error {
 }
 
 // parse json response and save it into database
-func (co *Collectors) saveLog(date string, jsonResponse []byte) error {
+func (co *Collector) saveLog(date string, jsonResponse []byte) error {
 	var sleepRecord data.SleepRecord
 	err := json.Unmarshal(jsonResponse, &sleepRecord)
 	sleepRecord.RawJson = jsonResponse
@@ -151,7 +164,7 @@ func (co *Collectors) saveLog(date string, jsonResponse []byte) error {
 	return nil
 }
 
-func (co *Collectors) SaveSleepHabit(sleepRecord *data.SleepRecord) error {
+func (co *Collector) SaveSleepHabit(sleepRecord *data.SleepRecord) error {
 	var habit *data.Habit = &data.Habit{
 		Date:   sleepRecord.Date,
 		Origin: sleepRecord.Provider,
@@ -178,7 +191,7 @@ func (co *Collectors) SaveSleepHabit(sleepRecord *data.SleepRecord) error {
 	return nil
 }
 
-func (co *Collectors) InitializeDayHabits() (err error) {
+func (co *Collector) InitializeDayHabits() (err error) {
 	types := []string{"sleep", "food", "fitness", "work"}
 	h := data.Habit{
 		State:  "no_info",
@@ -204,7 +217,7 @@ func (co *Collectors) InitializeDayHabits() (err error) {
 	return nil
 }
 
-func (co *Collectors) BuildHabitsFromSleepRecords() (err error) {
+func (co *Collector) BuildHabitsFromSleepRecords() (err error) {
 	all, err := co.Models.SleepRecords.GetAll()
 	if err != nil {
 		return err
