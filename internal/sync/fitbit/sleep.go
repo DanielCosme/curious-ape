@@ -18,13 +18,13 @@ const (
 
 var ErrNoRecord = fmt.Errorf("Error procesing the logs range result")
 
-type SleepCollector struct {
+type SleepProvider struct {
 	Auth  *auth.AuthConfig
 	Token *data.AuthTokenModel
 	Scope string
 }
 
-func (sc *SleepCollector) LogsRange(start, end string) (map[string][]byte, error) {
+func (sc *SleepProvider) LogsRange(start, end string) (map[string][]byte, error) {
 	url := fmt.Sprintf("%s%s/date/%s/%s.json", BaseUrl, sc.Scope, start, end)
 	result, err := sc.makeRequest(url)
 	if err != nil {
@@ -56,7 +56,7 @@ func (sc *SleepCollector) LogsRange(start, end string) (map[string][]byte, error
 	return response, nil
 }
 
-func (sc *SleepCollector) DayLog(date string) ([]byte, error) {
+func (sc *SleepProvider) DayLog(date string) ([]byte, error) {
 	url := fmt.Sprintf("%s%s/date/%s.json", BaseUrl, sc.Scope, date)
 
 	result, err := sc.makeRequest(url)
@@ -84,7 +84,7 @@ func (sc *SleepCollector) DayLog(date string) ([]byte, error) {
 	return response, nil
 }
 
-func (sc *SleepCollector) makeRequest(url string) (body []byte, err error) {
+func (sc *SleepProvider) makeRequest(url string) (body []byte, err error) {
 	isExpired := true
 	times := 0
 
@@ -123,7 +123,7 @@ func (sc *SleepCollector) makeRequest(url string) (body []byte, err error) {
 	return body, nil
 }
 
-func (sc *SleepCollector) refreshToken() (err error) {
+func (sc *SleepProvider) refreshToken() (err error) {
 	log.Println("Refreshing Token")
 	t, err := sc.Token.Get(sc.Auth.Provider)
 	if err != nil {
@@ -139,7 +139,7 @@ func (sc *SleepCollector) refreshToken() (err error) {
 	return nil
 }
 
-func (col *SleepCollector) AuthorizationURI() string {
+func (col *SleepProvider) AuthorizationURI() string {
 	params := map[string]string{
 		"client_id":     col.Auth.ClientID,
 		"response_type": "code",

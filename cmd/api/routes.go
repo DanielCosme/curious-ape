@@ -24,6 +24,9 @@ func (a *application) routes() http.Handler {
 		r.Get("/sleep/logs", a.listSleepRecordsHandler)
 		r.Get("/sleep/log/{date}", a.showSleepRecordHandler)
 
+		r.Get("/work/logs", a.listWorkRecordsHandler)
+		r.Get("/work/log/{date}", a.showWorkRecordHandler)
+
 		r.Get("/habit/{id}", a.showHabitHandler)
 		r.Put("/habit/{id}", a.updateHabitHandler)
 		r.Delete("/habit/{id}", a.deleteHabitHandler)

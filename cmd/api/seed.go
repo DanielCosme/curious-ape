@@ -7,12 +7,10 @@ import (
 )
 
 func (a *application) miscHandler(rw http.ResponseWriter, r *http.Request) {
-	log, err := a.collectors.Work.DayLog("2021-05-29")
-	if err != nil {
-		a.errorResponse(rw, r, http.StatusNotFound, err.Error())
-	}
+	go a.collectors.Work.GetRecords("2021-01-01", "2021-05-31")
 
-	msg := string(log)
+	// msg := string(log)
+	msg := "all good"
 	e := envelope{
 		"success": true,
 		"message": msg,
@@ -21,21 +19,28 @@ func (a *application) miscHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (a *application) seedDataHandler(rw http.ResponseWriter, r *http.Request) {
-	// build the app from scratch
 	t := time.Now()
-	err := a.collectors.FromDayZero(t)
+
+	err := a.collectors.Sleep.GetRecordsFromDayZero(t)
+	if err != nil {
+		a.errorResponse(rw, r, http.StatusNotFound, err)
+		return
+	}
+
+	go a.collectors.Work.GetRecordsFromDayZero(t)
+	if err != nil {
+		a.errorResponse(rw, r, http.StatusNotFound, err)
+		return
+	}
+
+	a.collectors.Sleep.BuildHabitsFromSleepRecords()
+	a.collectors.Work.BuildHabitsFromWorkRecords()
+	if err != nil {
+		a.errorResponse(rw, r, http.StatusNotFound, err)
+		return
+	}
+
 	ts := t.Format("2006-01-02")
-	if err != nil {
-		a.errorResponse(rw, r, http.StatusNotFound, err)
-		return
-	}
-
-	a.collectors.BuildHabitsFromSleepRecords()
-	if err != nil {
-		a.errorResponse(rw, r, http.StatusNotFound, err)
-		return
-	}
-
 	e := envelope{
 		"message": fmt.Sprintf("Sleep records and habits build until %v", ts),
 		"success": true,

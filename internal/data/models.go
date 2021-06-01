@@ -15,6 +15,7 @@ type Models struct {
 	Users        UserModel
 	SleepRecords SleepRecordModel
 	Tokens       AuthTokenModel
+	WorkRecords  WorkModel
 }
 
 func NewModels(db *sql.DB) *Models {
@@ -23,5 +24,6 @@ func NewModels(db *sql.DB) *Models {
 		Users:        UserModel{DB: db},
 		SleepRecords: SleepRecordModel{DB: db},
 		Tokens:       AuthTokenModel{DB: db},
+		WorkRecords:  WorkModel{DB: db},
 	}
 }

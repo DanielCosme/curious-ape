@@ -45,7 +45,7 @@ type application struct {
 	debug      *log.Logger
 	config     config
 	models     *data.Models
-	collectors *sync.Collector
+	collectors *sync.Collectors
 	user       *data.User
 }
 
@@ -116,7 +116,7 @@ func main() {
 		collectors: collector,
 		user:       &data.User{},
 	}
-	app.loadUser()
+	// app.loadUser()
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.port),

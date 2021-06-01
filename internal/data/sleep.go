@@ -60,7 +60,7 @@ func (sr *SleepRecordModel) GetAll() ([]*SleepRecord, error) {
 	stm := `SELECT id, date, duration, start_time, end_time, minutes_asleep, minutes_awake, minutes_in_bed, provider FROM sleep_records`
 	rows, err := sr.DB.Query(stm)
 	if err != nil {
-		return records, err
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -79,13 +79,13 @@ func (sr *SleepRecordModel) GetAll() ([]*SleepRecord, error) {
 		)
 
 		if err != nil {
-			return records, err
+			return nil, err
 		}
 
 		records = append(records, r)
 	}
 
-	return records, err
+	return records, nil
 }
 
 func (sr *SleepRecordModel) Insert(data SleepRecord) error {
