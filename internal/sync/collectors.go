@@ -7,6 +7,7 @@ import (
 
 	"github.com/danielcosme/curious-ape/internal/data"
 	"github.com/danielcosme/curious-ape/internal/sync/fitbit"
+	"github.com/danielcosme/curious-ape/internal/sync/google"
 	"github.com/danielcosme/curious-ape/internal/sync/toggl"
 )
 
@@ -20,6 +21,7 @@ type Collectors struct {
 	Models *data.Models
 	Sleep  *SleepCollector
 	Work   *WorkCollector
+	Fit    *google.FitnessProvider
 }
 
 func NewCollectors(models *data.Models) *Collectors {
@@ -40,10 +42,17 @@ func NewCollectors(models *data.Models) *Collectors {
 		},
 	}
 
+	gGit := &google.FitnessProvider{
+		Auth:  google.GoogleAuth,
+		Token: &models.Tokens,
+		Scope: "fitness",
+	}
+
 	return &Collectors{
 		Models: models,
 		Sleep:  f,
 		Work:   togg,
+		Fit:    gGit,
 	}
 }
 

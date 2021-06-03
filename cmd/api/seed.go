@@ -7,10 +7,12 @@ import (
 )
 
 func (a *application) miscHandler(rw http.ResponseWriter, r *http.Request) {
-	go a.collectors.Work.GetRecords("2021-01-01", "2021-05-31")
+	t, err := a.collectors.Fit.DayLog("2021-05-25")
+	if err != nil {
+		a.badRequestResponse(rw, r, err)
+	}
 
-	// msg := string(log)
-	msg := "all good"
+	msg := t
 	e := envelope{
 		"success": true,
 		"message": msg,

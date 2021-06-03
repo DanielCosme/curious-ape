@@ -18,8 +18,10 @@ func (a *application) routes() http.Handler {
 	mux.Use(a.authenticate)
 
 	mux.Route("/v1", func(r chi.Router) {
-		r.Get("/fitbit/success", a.successFitbitHandler)
 		r.Get("/fitbit/authorize", a.authorizeFitbitHandler)
+		r.Get("/fitbit/success", a.successFitbitHandler)
+		r.Get("/google/authorize", a.authorizeGoogleHandler)
+		r.Get("/google/success", a.successGoogleHandler)
 
 		r.Get("/sleep/logs", a.listSleepRecordsHandler)
 		r.Get("/sleep/log/{date}", a.showSleepRecordHandler)

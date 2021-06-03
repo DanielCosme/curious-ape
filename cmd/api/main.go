@@ -12,7 +12,6 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/danielcosme/curious-ape/internal/cron"
 	"github.com/danielcosme/curious-ape/internal/data"
 	"github.com/danielcosme/curious-ape/internal/sync"
 	_ "github.com/lib/pq"
@@ -105,8 +104,8 @@ func main() {
 
 	models := data.NewModels(db)
 	collector := sync.NewCollectors(models)
-	scheduler := &cron.Cron{Collector: collector}
-	go scheduler.Start()
+	//scheduler := &cron.Cron{Collector: collector}
+	//go scheduler.Start()
 
 	app := &application{
 		config:     cfg,
