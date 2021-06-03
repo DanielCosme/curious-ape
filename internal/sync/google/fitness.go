@@ -21,15 +21,67 @@ type FitnessProvider struct {
 	Scope string
 }
 
-func (fit *FitnessProvider) DayLog(date string) (map[string]string, error) {
-	d, _ := time.Parse("2006-01-02", date)
-	dISO, _ := d.MarshalText()
-	dISO2, _ := d.Add(time.Hour * 24).MarshalText()
-	startTime := string(dISO)
-	endTime := string(dISO2)
+func (fit *FitnessProvider) LogsRange(start, end string) ([]map[string]string, error) {
 	params := map[string]string{
-		"startTime":    startTime,
-		"endTime":      endTime,
+		"startTime":    formatDate(start, 1),
+		"endTime":      formatDate(end, 24),
+		"activityType": "97",
+	}
+	url := BaseUrl + "?" + auth.UrlEncode(params)
+	res, err := fit.makeRequest(url)
+	if err != nil {
+		return nil, err
+	}
+
+	var jsonResponse map[string]interface{}
+	err = json.Unmarshal(res, &jsonResponse)
+	if err != nil {
+		return nil, err
+	}
+	if len(jsonResponse) == 0 {
+		return nil, ErrNoRecord
+	}
+
+	result := []map[string]string{}
+	arr := jsonResponse["session"].([]interface{})
+
+	for _, session := range arr {
+		m := make(map[string]string)
+		s := session.(map[string]interface{})
+		for k, v := range s {
+			if k == "description" || k == "id" {
+				continue
+			}
+
+			str, ok := v.(string)
+			if !ok {
+				tmp, ok := v.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				m["packageName"] = tmp["packageName"].(string)
+				continue
+			}
+
+			m[k] = str
+		}
+		result = append(result, m)
+	}
+
+	return result, nil
+}
+
+func formatDate(date string, offset int) string {
+	d, _ := time.Parse("2006-01-02", date)
+	dur := time.Duration(offset)
+	dISO, _ := d.Add(time.Hour * dur).MarshalText()
+	return string(dISO)
+}
+
+func (fit *FitnessProvider) DayLog(date string) (map[string]string, error) {
+	params := map[string]string{
+		"startTime":    formatDate(date, 1),
+		"endTime":      formatDate(date, 24),
 		"activityType": "97",
 	}
 	url := BaseUrl + "?" + auth.UrlEncode(params)
@@ -57,6 +109,11 @@ func (fit *FitnessProvider) DayLog(date string) (map[string]string, error) {
 	for k, v := range m {
 		str, ok := v.(string)
 		if !ok {
+			tmp, ok := v.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			response["packageName"] = tmp["packageName"].(string)
 			continue
 		}
 		response[k] = str
@@ -85,7 +142,8 @@ func (fit *FitnessProvider) makeRequest(url string) (body []byte, err error) {
 			return nil, err
 		}
 
-		if res.StatusCode == http.StatusForbidden {
+		s := res.StatusCode
+		if s == http.StatusForbidden || s == http.StatusUnauthorized {
 			log.Println("Status code", res.StatusCode, "\nERR", string(body))
 			times++
 			err := fit.RefreshToken(token.RefreshToken)
