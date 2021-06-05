@@ -53,7 +53,7 @@ func (auth *AuthConfig) tokens(codeOrToken, grant string) (Token, error) {
 			"refresh_token": codeOrToken,
 		}
 	} else {
-		return token, fmt.Errorf("Invalid grant.")
+		return token, fmt.Errorf("invalid grant")
 	}
 
 	body := UrlEncode(params)
@@ -80,7 +80,7 @@ func (auth *AuthConfig) tokens(codeOrToken, grant string) (Token, error) {
 	token.Service = auth.Provider
 
 	if res.StatusCode == http.StatusBadRequest {
-		return token, errors.New("Failed to fetch or refresh tokens")
+		return token, errors.New("failed to fetch or refresh tokens")
 	}
 
 	return token, nil

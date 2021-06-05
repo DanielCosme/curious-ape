@@ -118,7 +118,6 @@ func main() {
 		collectors: collector,
 		user:       &data.User{},
 	}
-	// app.loadUser()
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.port),
@@ -156,12 +155,4 @@ func openDB(cfg config) (*sql.DB, error) {
 	}
 
 	return db, nil
-}
-
-func (a *application) loadUser() {
-	user, err := a.models.Users.GetByID(1)
-	if err != nil {
-		panic("unable to load admin info")
-	}
-	a.user = user
 }

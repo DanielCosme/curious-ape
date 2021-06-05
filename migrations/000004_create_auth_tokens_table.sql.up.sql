@@ -4,6 +4,6 @@ CREATE TABLE auth_tokens (
     refresh_token TEXT UNIQUE NOT NULL 
 );
 
-INSERT INTO auth_tokens (service, access_token, refresh_token)
-VALUES ('fitbit', '', '')
-VALUES ('google', '', '');
+INSERT INTO auth_tokens (service, access_token, refresh_token) VALUES 
+    ('fitbit', 'f', 'f'),
+    ('google', 'g', 'g');
