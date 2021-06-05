@@ -36,7 +36,6 @@ func (a *application) successGoogleHandler(rw http.ResponseWriter, r *http.Reque
 	e := envelope{
 		"message": "authorization successful",
 		"success": true,
-		"payload": payload,
 	}
 	a.writeJSON(rw, 200, e, nil)
 }

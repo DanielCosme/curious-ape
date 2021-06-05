@@ -11,19 +11,21 @@ var (
 )
 
 type Models struct {
-	Habits       HabitModel
-	Users        UserModel
-	SleepRecords SleepRecordModel
-	Tokens       AuthTokenModel
-	WorkRecords  WorkModel
+	Habits         HabitModel
+	Users          UserModel
+	SleepRecords   SleepRecordModel
+	Tokens         AuthTokenModel
+	WorkRecords    WorkModel
+	FitnessRecords FitnessModel
 }
 
 func NewModels(db *sql.DB) *Models {
 	return &Models{
-		Habits:       HabitModel{DB: db},
-		Users:        UserModel{DB: db},
-		SleepRecords: SleepRecordModel{DB: db},
-		Tokens:       AuthTokenModel{DB: db},
-		WorkRecords:  WorkModel{DB: db},
+		Habits:         HabitModel{DB: db},
+		Users:          UserModel{DB: db},
+		SleepRecords:   SleepRecordModel{DB: db},
+		Tokens:         AuthTokenModel{DB: db},
+		WorkRecords:    WorkModel{DB: db},
+		FitnessRecords: FitnessModel{DB: db},
 	}
 }

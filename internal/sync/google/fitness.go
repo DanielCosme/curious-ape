@@ -13,7 +13,7 @@ import (
 	"github.com/danielcosme/curious-ape/internal/data"
 )
 
-var ErrNoRecord = errors.New("no record")
+var ErrNoFitRecord = errors.New("no record")
 
 type FitnessProvider struct {
 	Auth  *auth.AuthConfig
@@ -39,7 +39,7 @@ func (fit *FitnessProvider) LogsRange(start, end string) ([]map[string]string, e
 		return nil, err
 	}
 	if len(jsonResponse) == 0 {
-		return nil, ErrNoRecord
+		return nil, ErrNoFitRecord
 	}
 
 	result := []map[string]string{}
@@ -97,16 +97,20 @@ func (fit *FitnessProvider) DayLog(date string) (map[string]string, error) {
 		return nil, err
 	}
 	if len(jsonResponse) == 0 {
-		return nil, ErrNoRecord
+		return nil, ErrNoFitRecord
 	}
 
 	arr := jsonResponse["session"].([]interface{})
 	if len(arr) == 0 {
-		return nil, ErrNoRecord
+		return nil, ErrNoFitRecord
 	}
 
 	m := arr[0].(map[string]interface{})
 	for k, v := range m {
+		if k == "description" || k == "id" {
+			continue
+		}
+
 		str, ok := v.(string)
 		if !ok {
 			tmp, ok := v.(map[string]interface{})

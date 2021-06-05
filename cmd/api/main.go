@@ -12,6 +12,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/danielcosme/curious-ape/internal/cron"
 	"github.com/danielcosme/curious-ape/internal/data"
 	"github.com/danielcosme/curious-ape/internal/sync"
 	_ "github.com/lib/pq"
@@ -38,6 +39,8 @@ type config struct {
 	}
 }
 
+var Count int
+
 // http handler dependencies.
 type application struct {
 	logger     *log.Logger
@@ -55,7 +58,7 @@ func main() {
 	flag.StringVar(&cfg.env, "env", "development", "Running environment")
 	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("APE_PG_DB_DSN"),
 		"PostgreSQL DSN")
-	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25,
+	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 50,
 		"PostgreSQL max open connections")
 	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25,
 		"PostgreSQL max idle connections")
@@ -104,8 +107,8 @@ func main() {
 
 	models := data.NewModels(db)
 	collector := sync.NewCollectors(models)
-	//scheduler := &cron.Cron{Collector: collector}
-	//go scheduler.Start()
+	scheduler := &cron.Cron{Collector: collector}
+	go scheduler.Start()
 
 	app := &application{
 		config:     cfg,

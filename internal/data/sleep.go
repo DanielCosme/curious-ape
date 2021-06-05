@@ -5,12 +5,6 @@ import (
 	"errors"
 )
 
-type SleepHabit struct {
-	ID    int
-	State string
-	Date  string
-}
-
 type SleepRecord struct {
 	ID            int    `json:"id"`
 	Date          string `json:"dateOfSleep"`

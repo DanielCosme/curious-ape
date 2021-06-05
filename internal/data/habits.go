@@ -1,8 +1,11 @@
 package data
 
 import (
+	"context"
 	"database/sql"
 	"errors"
+	"log"
+	"time"
 
 	"github.com/danielcosme/curious-ape/internal/validator"
 )
@@ -92,34 +95,35 @@ func (fh *HabitModel) UpdateOrCreate(habit *Habit) error {
 		}
 		return q.Err()
 	}
+	defer q.Close()
 
 	if err := q.Scan(&habit.ID); err != nil {
 		return err
 	}
 
-	if err := fh.Update(habit); err != nil {
+	err := fh.Update(habit)
+	if err != nil {
+		log.Println("ERROR HERE", err)
 		return err
 	}
 
 	return nil
 }
 
-func (fh *HabitModel) Update(habit *Habit) error {
+func (fh *HabitModel) Update(h *Habit) error {
 	stm := `
 		UPDATE habits
-		SET state = $1, "date" = $2, "type" = $3, "origin" = $4
-		WHERE id = $5
-		RETURNING state, "date", "type"`
+		SET state = $2, "origin" = $3
+		WHERE id = $1`
 
-	args := []interface{}{
-		habit.State,
-		habit.Date,
-		habit.Type,
-		habit.Origin,
-		habit.ID,
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+
+	_, err := fh.DB.ExecContext(ctx, stm, &h.ID, &h.State, &h.Origin)
+	if err != nil {
+		return err
 	}
-
-	return fh.DB.QueryRow(stm, args...).Scan(&habit.State, &habit.Date, &habit.Type)
+	return nil
 }
 
 func (fh *HabitModel) UpdateByDate(habit *Habit) error {

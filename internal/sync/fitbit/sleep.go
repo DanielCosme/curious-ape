@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	ZeroDay = "2020-02-01"
+	ZeroDay = "2021-01-01"
 	BaseUrl = "https://api.fitbit.com/1.2/user/-/"
 )
 

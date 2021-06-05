@@ -5,5 +5,5 @@ CREATE TABLE auth_tokens (
 );
 
 INSERT INTO auth_tokens (service, access_token, refresh_token)
-VALUES ('fitbit', '', '');
+VALUES ('fitbit', '', '')
 VALUES ('google', '', '');

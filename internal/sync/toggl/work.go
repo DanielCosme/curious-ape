@@ -12,7 +12,7 @@ import (
 
 // TODO make some of this options configurable (toml, env or yaml)
 const (
-	ZeroDay     = "2020-02-01"
+	ZeroDay     = "2021-01-01"
 	baseUrl     = "https://api.track.toggl.com/"
 	reportsPath = "reports/api/v2/"
 	summary     = "summary"

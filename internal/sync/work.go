@@ -78,7 +78,12 @@ func (co *WorkCollector) decodeAndSave(date string, jsonRecord []byte) error {
 	if err != nil {
 		if errors.Is(err, ErrNoRecord) {
 			log.Println(err.Error(), "for", date)
-			// log habit as no, not done or log it into the: to manually revise list.
+			wr := &data.WorkRecord{
+				Date:     date,
+				Provider: "missing/toggl",
+				Total:    0,
+			}
+			co.saveWorkHabit(wr)
 			return nil
 		}
 		return err
@@ -167,9 +172,18 @@ func (co *WorkCollector) BuildHabitsFromWorkRecords() (err error) {
 		}
 	}
 
-	return nil
-}
+	habits, err := co.Models.Habits.GetAll()
+	if err != nil {
+		return err
+	}
 
-func milisecondsToHours(mil int) int {
-	return 0
+	for _, habit := range habits {
+		if habit.State == "no_info" && habit.Type == "work" {
+			habit.State = "no"
+			habit.Origin = "missing/toggl"
+			co.Models.Habits.Update(habit)
+		}
+	}
+
+	return nil
 }

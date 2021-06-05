@@ -7,12 +7,27 @@ import (
 )
 
 func (a *application) miscHandler(rw http.ResponseWriter, r *http.Request) {
-	t, err := a.collectors.Fit.DayLog("2021-05-25")
+
+	a.collectors.AllHabitsInit()
+	err := a.collectors.Sleep.BuildHabitsFromSleepRecords()
 	if err != nil {
-		a.badRequestResponse(rw, r, err)
+		a.errorResponse(rw, r, 400, err)
+		return
 	}
 
-	msg := t
+	a.collectors.Work.BuildHabitsFromWorkRecords()
+	if err != nil {
+		a.errorResponse(rw, r, 400, err)
+		return
+	}
+	err = a.collectors.Fit.BuildHabitsFromFitnessRecords()
+	if err != nil {
+		a.errorResponse(rw, r, 400, err)
+		return
+	}
+
+	c := "all good"
+	msg := c
 	e := envelope{
 		"success": true,
 		"message": msg,
@@ -35,10 +50,9 @@ func (a *application) seedDataHandler(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.collectors.Sleep.BuildHabitsFromSleepRecords()
-	a.collectors.Work.BuildHabitsFromWorkRecords()
+	err = a.collectors.Fit.GetRecordsFromDayZero(t)
 	if err != nil {
-		a.errorResponse(rw, r, http.StatusNotFound, err)
+		a.errorResponse(rw, r, http.StatusNotFound, err.Error())
 		return
 	}
 

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -56,8 +55,6 @@ func (fit *FitnessProvider) RefreshToken(refreshToken string) (err error) {
 	if err != nil {
 		return err
 	}
-	log.Println("cur token", token.AccessToken)
-	log.Println("new token", payload.AccessToken)
 	token.AccessToken = payload.AccessToken
 	err = fit.Token.Update(*token)
 	if err != nil {
