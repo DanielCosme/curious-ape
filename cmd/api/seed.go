@@ -8,7 +8,6 @@ import (
 
 func (a *application) miscHandler(rw http.ResponseWriter, r *http.Request) {
 
-	a.collectors.AllHabitsInit()
 	err := a.collectors.Sleep.BuildHabitsFromSleepRecords()
 	if err != nil {
 		a.errorResponse(rw, r, 400, err)
@@ -38,13 +37,8 @@ func (a *application) miscHandler(rw http.ResponseWriter, r *http.Request) {
 func (a *application) seedDataHandler(rw http.ResponseWriter, r *http.Request) {
 	t := time.Now()
 
+	a.collectors.AllHabitsInit()
 	err := a.collectors.Sleep.GetRecordsFromDayZero(t)
-	if err != nil {
-		a.errorResponse(rw, r, http.StatusNotFound, err)
-		return
-	}
-
-	go a.collectors.Work.GetRecordsFromDayZero(t)
 	if err != nil {
 		a.errorResponse(rw, r, http.StatusNotFound, err)
 		return
@@ -56,9 +50,15 @@ func (a *application) seedDataHandler(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	go a.collectors.Work.GetRecordsFromDayZero(t)
+	if err != nil {
+		a.errorResponse(rw, r, http.StatusNotFound, err)
+		return
+	}
+
 	ts := t.Format("2006-01-02")
 	e := envelope{
-		"message": fmt.Sprintf("Sleep records and habits build until %v", ts),
+		"message": fmt.Sprintf("Records and habits build until %v", ts),
 		"success": true,
 	}
 	a.writeJSON(rw, http.StatusOK, e, nil)

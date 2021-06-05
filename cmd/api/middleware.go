@@ -16,10 +16,10 @@ func (a *application) authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		// for use later when stateless token functionality is implemented
 		// rw.Header().Add("Vary", "Authorization")
-		if a.config.env == "development" {
-			next.ServeHTTP(rw, r)
-			return
-		}
+		// if a.config.env == "development" {
+		// 	next.ServeHTTP(rw, r)
+		// 	return
+		// }
 
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
@@ -42,19 +42,25 @@ func (a *application) authenticate(next http.Handler) http.Handler {
 
 		headerParts = strings.Split(string(decoded), ":")
 		if len(headerParts) != 2 {
-			a.badRequestResponse(rw, r, errors.New("credentials need to be in username=password format"))
+			a.badRequestResponse(rw, r, errors.New("credentials need to be in username:password format"))
 			return
 		}
 		usr := headerParts[0]
 		pass := headerParts[1]
 
-		isMatch, err := a.user.Password.IsMatch(pass)
+		user, err := a.models.Users.GetByEmail(usr)
+		if err != nil {
+			a.invalidCredentialsResponse(rw, r)
+			return
+		}
+
+		isMatch, err := user.Password.IsMatch(pass)
 		if err != nil {
 			a.serverErrorResponse(rw, r, err)
 			return
 		}
 
-		if !isMatch || a.user.Email != usr {
+		if !isMatch {
 			a.invalidCredentialsResponse(rw, r)
 			return
 		}

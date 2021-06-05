@@ -48,7 +48,6 @@ type application struct {
 	config     config
 	models     *data.Models
 	collectors *sync.Collectors
-	user       *data.User
 }
 
 func main() {
@@ -116,7 +115,6 @@ func main() {
 		debug:      debug,
 		models:     models,
 		collectors: collector,
-		user:       &data.User{},
 	}
 
 	srv := &http.Server{
