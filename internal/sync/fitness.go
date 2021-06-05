@@ -45,10 +45,10 @@ func (co *FitnessCollector) GetRecords(start, finish string) error {
 		}
 	}
 
-	// err = co.BuildHabitsFromFitnessRecords()
-	// if err != nil {
-	// 	return err
-	// }
+	err = co.BuildHabitsFromFitnessRecords()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
