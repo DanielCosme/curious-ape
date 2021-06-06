@@ -86,7 +86,7 @@ vendor:
 # PRODUCTION
 # ==================================================================================== #
 
-production_host_ip = "ape.danicos.me"
+production_host_ip = "danicos.me"
 
 ## production/connect: connect to the production server
 .PHONY: production/connect
