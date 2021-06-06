@@ -15,6 +15,7 @@ import (
 	"github.com/danielcosme/curious-ape/internal/cron"
 	"github.com/danielcosme/curious-ape/internal/data"
 	"github.com/danielcosme/curious-ape/internal/sync"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -74,6 +75,11 @@ func main() {
 		fmt.Printf("Version:\t%s\n", version)
 		fmt.Printf("Build time:\t%s\n", buildTime)
 		os.Exit(0)
+	}
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
 	}
 
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
