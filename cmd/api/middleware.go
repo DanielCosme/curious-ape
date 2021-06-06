@@ -16,10 +16,10 @@ func (a *application) authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		// for use later when stateless token functionality is implemented
 		// rw.Header().Add("Vary", "Authorization")
-		// if a.config.env == "development" {
-		// 	next.ServeHTTP(rw, r)
-		// 	return
-		// }
+		if a.config.env == "development" {
+			next.ServeHTTP(rw, r)
+			return
+		}
 
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {

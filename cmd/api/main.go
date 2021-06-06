@@ -15,7 +15,6 @@ import (
 	"github.com/danielcosme/curious-ape/internal/cron"
 	"github.com/danielcosme/curious-ape/internal/data"
 	"github.com/danielcosme/curious-ape/internal/sync"
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -77,11 +76,6 @@ func main() {
 		os.Exit(0)
 	}
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 	debug := log.New(os.Stdout, "DEBUG\t", log.Ldate|log.Ltime|log.Llongfile)
 
@@ -95,11 +89,6 @@ func main() {
 
 	expvar.NewString("version").Set(version)
 
-	// Publish the number of active goroutines.
-	expvar.Publish("goroutines", expvar.Func(func() interface{} {
-		return runtime.NumGoroutine()
-	}))
-
 	// Publish the database connection pool statistics.
 	expvar.Publish("database", expvar.Func(func() interface{} {
 		return db.Stats()
@@ -107,7 +96,12 @@ func main() {
 
 	// Publish the current Unix timestamp.
 	expvar.Publish("timestamp", expvar.Func(func() interface{} {
-		return time.Now().Unix()
+		return time.Now()
+	}))
+
+	// Publish the number of active goroutines.
+	expvar.Publish("goroutines", expvar.Func(func() interface{} {
+		return runtime.NumGoroutine()
 	}))
 
 	models := data.NewModels(db)
