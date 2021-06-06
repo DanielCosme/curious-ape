@@ -6,6 +6,16 @@ import (
 	"time"
 )
 
+func (a *application) dayInitHandler(rw http.ResponseWriter, r *http.Request) {
+	t := time.Now()
+	err := a.collectors.InitializeDayHabits(t.Format("2006-01-02"))
+	if err != nil {
+		a.serverErrorResponse(rw, r, err)
+		return
+	}
+	a.writeJSON(rw, http.StatusOK, envelope{"success": "true"}, nil)
+}
+
 func (a *application) miscHandler(rw http.ResponseWriter, r *http.Request) {
 
 	err := a.collectors.Sleep.BuildHabitsFromSleepRecords()

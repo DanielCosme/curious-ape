@@ -19,11 +19,29 @@ func (cron *Cron) Start() {
 
 	yesterday := time.Now().AddDate(0, 0, -1)
 
-	ping, err := s.Every(1).Day().Tag("ping").At("00:00").Do(func() { log.Println("PING") })
-	job1, err := s.Every(1).Day().Tag("sleep").At("18:00").Do(cron.Collector.Sleep.GetCurrentDayRecord)
-	job2, err := s.Every(1).Day().Tag("habits").At("00:01").Do(cron.Collector.InitializeDayHabits, yesterday.AddDate(0, 0, -1).Format("2006-01-02"))
-	work, err := s.Every(1).Day().Tag("work").At("04:00").Do(cron.Collector.Work.GetRecord, yesterday)
-	fitJob, err := s.Every(1).Day().Tag("fitness").At("23:55").Do(cron.Collector.Fit.GetCurrentDayRecord)
+	ping, err := s.Every(1).Day().Tag("ping").At("00:00").
+		Do(func() { log.Println("PING") })
+	if err != nil {
+		log.Println(err)
+	}
+	job1, err := s.Every(1).Day().Tag("sleep").At("18:00").
+		Do(cron.Collector.Sleep.GetCurrentDayRecord)
+	if err != nil {
+		log.Println(err)
+	}
+	job2, err := s.Every(1).Day().Tag("habits").At("09:56").
+		Do(cron.Collector.InitializeDayHabits, yesterday.AddDate(0, 0, 1).Format("2006-01-02"))
+	if err != nil {
+		log.Println(err)
+	}
+
+	work, err := s.Every(1).Day().Tag("work").At("04:00").
+		Do(cron.Collector.Work.GetRecord, yesterday)
+	if err != nil {
+		log.Println(err)
+	}
+	fitJob, err := s.Every(1).Day().Tag("fitness").At("23:55").
+		Do(cron.Collector.Fit.GetCurrentDayRecord)
 	if err != nil {
 		log.Println(err)
 	}
