@@ -15,9 +15,9 @@ func (a *application) routes() http.Handler {
 	mux.Use(a.metrics)
 	mux.Use(a.recoverPanic)
 	mux.Use(a.rateLimit)
-	mux.Use(a.authenticate)
 
 	mux.Route("/v1", func(r chi.Router) {
+		r.Use(a.authenticate)
 		r.Get("/fitbit/authorize", a.authorizeFitbitHandler)
 		r.Get("/fitbit/success", a.successFitbitHandler)
 		r.Get("/google/authorize", a.authorizeGoogleHandler)
