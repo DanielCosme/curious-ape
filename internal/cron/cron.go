@@ -36,7 +36,7 @@ func (cron *Cron) Start() {
 	}
 
 	work, err := s.Every(1).Day().Tag("work").At("04:00").
-		Do(cron.Collector.Work.GetRecord, yesterday)
+		Do(cron.Collector.Work.GetRecord, yesterday.Format("2006-01-02"))
 	if err != nil {
 		log.Println(err)
 	}
@@ -54,3 +54,15 @@ func (cron *Cron) Start() {
 
 	s.StartAsync()
 }
+
+// func callJobFuncWithParams(jobFunc interface{}, params []interface{}) {
+// 	f := reflect.ValueOf(jobFunc)
+// 	if len(params) != f.Type().NumIn() {
+// 		return
+// 	}
+// 	in := make([]reflect.Value, len(params))
+// 	for k, param := range params {
+// 		in[k] = reflect.ValueOf(param)
+// 	}
+// 	f.Call(in)
+// }
