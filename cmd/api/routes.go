@@ -39,7 +39,7 @@ func (a *application) routes() http.Handler {
 
 		r.Get("/debug/seed", a.seedDataHandler)
 		r.Get("/debug/misc", a.miscHandler)
-		r.Get("/debug/day", a.dayInitHandler)
+		r.Get("/debug/day", a.dayGetHandler)
 	})
 
 	mux.Get("/healthcheck", a.healthcheckerHandler)

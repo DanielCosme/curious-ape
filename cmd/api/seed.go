@@ -6,14 +6,26 @@ import (
 	"time"
 )
 
-func (a *application) dayInitHandler(rw http.ResponseWriter, r *http.Request) {
-	t := time.Now()
-	err := a.collectors.InitializeDayHabits(t.Format("2006-01-02"))
-	if err != nil {
-		a.serverErrorResponse(rw, r, err)
-		return
+func (a *application) dayGetHandler(rw http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	d := r.Form.Get("day")
+
+	msg := "no params"
+	var suc bool
+	prov := r.Form.Get("provider")
+	switch prov {
+	case "work":
+		err := a.collectors.Work.GetRecord(d)
+		if err != nil {
+			a.serverErrorResponse(rw, r, err)
+			return
+		}
+		msg = "All Good"
+		suc = true
 	}
-	a.writeJSON(rw, http.StatusOK, envelope{"success": "true"}, nil)
+
+	e := envelope{"success": suc, "msg": msg}
+	a.writeJSON(rw, http.StatusOK, e, nil)
 }
 
 func (a *application) miscHandler(rw http.ResponseWriter, r *http.Request) {
