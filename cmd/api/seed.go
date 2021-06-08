@@ -22,6 +22,14 @@ func (a *application) dayGetHandler(rw http.ResponseWriter, r *http.Request) {
 		}
 		msg = "All Good"
 		suc = true
+	case "habits":
+		err := a.collectors.InitializeDayHabit()
+		if err != nil {
+			a.serverErrorResponse(rw, r, err)
+			return
+		}
+		msg = "All Good"
+		suc = true
 	}
 
 	e := envelope{"success": suc, "msg": msg}

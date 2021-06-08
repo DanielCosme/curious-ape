@@ -59,6 +59,11 @@ func NewCollectors(models *data.Models) *Collectors {
 	}
 }
 
+func (co *Collectors) InitializeDayHabit() (err error) {
+	t := time.Now().Format("2006-01-02")
+	return co.InitializeDayHabits(t)
+}
+
 func (co *Collectors) InitializeDayHabits(date string) (err error) {
 	types := []string{"sleep", "food", "fitness", "work"}
 	h := data.Habit{

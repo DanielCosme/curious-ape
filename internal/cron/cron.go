@@ -13,11 +13,8 @@ type Cron struct {
 }
 
 func (cron *Cron) Start() {
-	time.Sleep(1 * time.Millisecond)
 	t := time.Now().Location()
 	s := gocron.NewScheduler(t)
-
-	yesterday := time.Now().AddDate(0, 0, -1)
 
 	ping, err := s.Every(1).Day().Tag("ping").At("00:00").
 		Do(func() { log.Println("PING") })
@@ -29,14 +26,14 @@ func (cron *Cron) Start() {
 	if err != nil {
 		log.Println(err)
 	}
-	job2, err := s.Every(1).Day().Tag("habits").At("09:56").
-		Do(cron.Collector.InitializeDayHabits, yesterday.AddDate(0, 0, 1).Format("2006-01-02"))
+	job2, err := s.Every(1).Day().Tag("habits").At("00:01").
+		Do(cron.Collector.InitializeDayHabit)
 	if err != nil {
 		log.Println(err)
 	}
 
-	work, err := s.Every(1).Day().Tag("work").At("04:00").
-		Do(cron.Collector.Work.GetRecord, yesterday.Format("2006-01-02"))
+	work, err := s.Every(1).Day().Tag("work").At("23:58").
+		Do(cron.Collector.Work.GetCurrentDayRecord)
 	if err != nil {
 		log.Println(err)
 	}
