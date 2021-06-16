@@ -146,7 +146,7 @@ func (co *SleepCollector) saveSleepHabit(sleepRecord *data.SleepRecord) error {
 		return err
 	}
 
-	if hourInt > 6 {
+	if hourInt >= 6 {
 		habit.State = "no"
 	}
 
