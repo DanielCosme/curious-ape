@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"log"
+	"regexp"
 	"time"
 
 	"github.com/danielcosme/curious-ape/internal/validator"
@@ -103,7 +103,6 @@ func (fh *HabitModel) UpdateOrCreate(habit *Habit) error {
 
 	err := fh.Update(habit)
 	if err != nil {
-		log.Println("ERROR HERE", err)
 		return err
 	}
 
@@ -165,7 +164,13 @@ func (fh *HabitModel) Delete(id int) error {
 }
 
 // TODO Add more robust validation
+// validation for state and type + robust valiation for date
 func ValidateHabit(v *validator.Validator, habit *Habit) {
 	v.Check(habit.Date != "", "date", "must be provided")
 	v.Check(len([]rune(habit.Date)) == 10, "date", "must be exactly 10 characters long")
+	state := validator.Matches(habit.State, regexp.MustCompile(`^(yes|no)$`))
+	v.Check(state, "state", "state must be yes or no")
+
+	typeOfHabit := validator.Matches(habit.Type, regexp.MustCompile(`^(sleep|food|work|fitness)$`))
+	v.Check(typeOfHabit, "type", "type must be sleep/food/work/fitness")
 }

@@ -38,7 +38,7 @@ func (a *application) createHabitHandler(rw http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = a.models.Habits.Insert(habit)
+	err = a.models.Habits.UpdateOrCreate(habit)
 	if err != nil {
 		a.serverErrorResponse(rw, r, err)
 		return

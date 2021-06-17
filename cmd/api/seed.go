@@ -22,6 +22,14 @@ func (a *application) dayGetHandler(rw http.ResponseWriter, r *http.Request) {
 		}
 		msg = "All Good"
 		suc = true
+	case "fitness":
+		err := a.collectors.Fit.GetRecord(d)
+		if err != nil {
+			a.serverErrorResponse(rw, r, err)
+			return
+		}
+		msg = "All Good"
+		suc = true
 	case "habits":
 		err := a.collectors.InitializeDayHabit()
 		if err != nil {
