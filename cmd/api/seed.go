@@ -7,41 +7,29 @@ import (
 )
 
 func (a *application) dayGetHandler(rw http.ResponseWriter, r *http.Request) {
+	var msg string
+	var suc bool
 	r.ParseForm()
 	d := r.Form.Get("day")
 
-	msg := "no params"
-	var suc bool
 	prov := r.Form.Get("provider")
+	var err error
 	switch prov {
 	case "work":
-		err := a.collectors.Work.GetRecord(d)
-		if err != nil {
-			a.serverErrorResponse(rw, r, err)
-			return
-		}
-		msg = "All Good"
-		suc = true
+		err = a.collectors.Work.GetRecord(d)
 	case "fitness":
-		err := a.collectors.Fit.GetRecord(d)
-		if err != nil {
-			a.serverErrorResponse(rw, r, err)
-			return
-		}
-		msg = "All Good"
-		suc = true
+		err = a.collectors.Fit.GetRecord(d)
 	case "habits":
-		err := a.collectors.InitializeDayHabit()
-		if err != nil {
-			a.serverErrorResponse(rw, r, err)
-			return
-		}
-		msg = "All Good"
-		suc = true
+		err = a.collectors.InitializeDayHabit()
 	}
+	if err != nil {
+		a.serverErrorResponse(rw, r, err)
+		return
+	}
+	msg = "all good"
+	suc = true
 
-	e := envelope{"success": suc, "msg": msg}
-	a.writeJSON(rw, http.StatusOK, e, nil)
+	a.writeJSON(rw, http.StatusOK, envelope{"success": suc, "msg": msg}, nil)
 }
 
 func (a *application) miscHandler(rw http.ResponseWriter, r *http.Request) {
