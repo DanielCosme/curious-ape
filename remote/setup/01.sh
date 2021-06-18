@@ -80,6 +80,11 @@ curl -L https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt | sudo tee -
 apt update
 apt --yes install caddy
 
+# Install Grafana
+apt-get install -y adduser libfontconfig1
+wget https://dl.grafana.com/oss/release/grafana_8.0.2_amd64.deb
+dpkg -i grafana_8.0.2_amd64.deb
+
 echo "Script complete! Rebooting..."
 reboot
 
