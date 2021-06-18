@@ -168,8 +168,8 @@ func (fh *HabitModel) Delete(id int) error {
 func ValidateHabit(v *validator.Validator, habit *Habit) {
 	v.Check(habit.Date != "", "date", "must be provided")
 	v.Check(len([]rune(habit.Date)) == 10, "date", "must be exactly 10 characters long")
-	state := validator.Matches(habit.State, regexp.MustCompile(`^(yes|no)$`))
-	v.Check(state, "state", "state must be yes or no")
+	state := validator.Matches(habit.State, regexp.MustCompile(`^(yes|no|no_info)$`))
+	v.Check(state, "state", "state must be yes, no or no_info")
 
 	typeOfHabit := validator.Matches(habit.Type, regexp.MustCompile(`^(sleep|food|work|fitness)$`))
 	v.Check(typeOfHabit, "type", "type must be sleep/food/work/fitness")
