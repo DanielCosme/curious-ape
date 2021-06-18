@@ -7,8 +7,6 @@ import (
 )
 
 func (a *application) dayGetHandler(rw http.ResponseWriter, r *http.Request) {
-	var msg string
-	var suc bool
 	r.ParseForm()
 	d := r.Form.Get("day")
 
@@ -26,8 +24,8 @@ func (a *application) dayGetHandler(rw http.ResponseWriter, r *http.Request) {
 		a.serverErrorResponse(rw, r, err)
 		return
 	}
-	msg = "all good"
-	suc = true
+	msg := "all good"
+	suc := true
 
 	a.writeJSON(rw, http.StatusOK, envelope{"success": suc, "msg": msg}, nil)
 }
