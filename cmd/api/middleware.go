@@ -19,7 +19,6 @@ func (a *application) authenticate(next http.Handler) http.Handler {
 		usr, pass, ok := r.BasicAuth()
 		if ok {
 
-
 			user, err := a.models.Users.GetByEmail(usr)
 			if err != nil {
 				a.serverErrorResponse(rw, r, err)
@@ -34,6 +33,7 @@ func (a *application) authenticate(next http.Handler) http.Handler {
 
 			if isMatch {
 				next.ServeHTTP(rw, r)
+				return
 			}
 		}
 
