@@ -92,14 +92,8 @@ func (m *UserModel) GetByEmail(email string) (*User, error) {
 
 	var user User
 
-	err := m.DB.QueryRow(query, email).Scan(
-		&user.ID,
-		&user.CreatedAt,
-		&user.Name,
-		&user.Email,
-		&user.Password.hash,
-		&user.Activated,
-	)
+	err := m.DB.QueryRow(query, email).Scan(&user.ID, &user.CreatedAt, &user.Name,
+		&user.Email, &user.Password.hash, &user.Activated)
 
 	if err != nil {
 		switch {

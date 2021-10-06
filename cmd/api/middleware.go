@@ -1,12 +1,9 @@
 package main
 
 import (
-	"encoding/base64"
-	"errors"
 	"expvar"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"golang.org/x/time/rate"
@@ -14,58 +11,33 @@ import (
 
 func (a *application) authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		// for use later when stateless token functionality is implemented
-		// rw.Header().Add("Vary", "Authorization")
 		if a.config.env == "development" {
 			next.ServeHTTP(rw, r)
 			return
 		}
 
-		authHeader := r.Header.Get("Authorization")
-		if authHeader == "" {
-			a.unauthorizedResponse(rw, r)
-			return
+		usr, pass, ok := r.BasicAuth()
+		if ok {
+
+
+			user, err := a.models.Users.GetByEmail(usr)
+			if err != nil {
+				a.serverErrorResponse(rw, r, err)
+				return
+			}
+
+			isMatch, err := user.Password.IsMatch(pass)
+			if err != nil {
+				a.serverErrorResponse(rw, r, err)
+				return
+			}
+
+			if isMatch {
+				next.ServeHTTP(rw, r)
+			}
 		}
 
-		header := strings.Split(authHeader, " ") //[1:]
-		if len(header) != 2 && header[0] != "Basic" {
-			a.badRequestResponse(rw, r, errors.New("client needs to provide credentials"))
-			return
-		}
-		headerParts := header[1:]
-
-		decoded, err := base64.StdEncoding.DecodeString(headerParts[0])
-		if err != nil {
-			a.serverErrorResponse(rw, r, err)
-			return
-		}
-
-		headerParts = strings.Split(string(decoded), ":")
-		if len(headerParts) != 2 {
-			a.badRequestResponse(rw, r, errors.New("credentials need to be in username:password format"))
-			return
-		}
-		usr := headerParts[0]
-		pass := headerParts[1]
-
-		user, err := a.models.Users.GetByEmail(usr)
-		if err != nil {
-			a.invalidCredentialsResponse(rw, r)
-			return
-		}
-
-		isMatch, err := user.Password.IsMatch(pass)
-		if err != nil {
-			a.serverErrorResponse(rw, r, err)
-			return
-		}
-
-		if !isMatch {
-			a.invalidCredentialsResponse(rw, r)
-			return
-		}
-
-		next.ServeHTTP(rw, r)
+		a.invalidCredentialsResponse(rw, r)
 	})
 }
 

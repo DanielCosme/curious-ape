@@ -21,3 +21,6 @@ tmp/
 # Environment
 *.env*
 *.db
+
+# IDE
+.idea/
