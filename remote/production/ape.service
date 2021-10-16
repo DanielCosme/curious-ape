@@ -13,8 +13,8 @@ StartLimitIntervalSec=600
 StartLimitBurst=5
 
 [Service]
-# Execute the API binary as the greenlight user, loading the environment variables from
-# /etc/environment and using the working directory /home/greenlight.
+# Execute the API binary as the daniel   user, loading the environment variables from
+# /etc/environment and using the working directory /home/daniel.
 Type=exec
 User=daniel
 Group=daniel

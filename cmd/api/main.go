@@ -6,6 +6,9 @@ import (
 	"expvar"
 	"flag"
 	"fmt"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"log"
 	"net/http"
 	"os"
@@ -25,12 +28,15 @@ var (
 
 type config struct {
 	port int
-	env  string
-	db   struct {
+	env   string
+	pg_db struct {
 		dsn          string // data source name
 		maxOpenConns int
 		maxIdleConns int
 		maxIdleTime  string
+	}
+	mongo_db struct {
+		dsn          string // data source name
 	}
 	limiter struct {
 		rps     float64 // requests per second
@@ -55,18 +61,15 @@ func main() {
 
 	flag.IntVar(&cfg.port, "port", 3000, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Running environment")
-	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("APE_PG_DB_DSN"),
-		"PostgreSQL DSN")
-	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 50,
-		"PostgreSQL max open connections")
-	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25,
-		"PostgreSQL max idle connections")
-	flag.StringVar(&cfg.db.maxIdleTime, "db-max-idle-time", "15m",
-		"PostgreSQL max connection idle time")
+	flag.StringVar(&cfg.pg_db.dsn, "db-dsn","postgres://daniel:pa55word@localhost/ape?sslmode=disable", "PostgreSQL DSN")
+	flag.IntVar(&cfg.pg_db.maxOpenConns, "db-max-open-conns", 50, "PostgreSQL max open connections")
+	flag.IntVar(&cfg.pg_db.maxIdleConns, "db-max-idle-conns", 25, "PostgreSQL max idle connections")
+	flag.StringVar(&cfg.pg_db.maxIdleTime, "db-max-idle-time", "15m", "PostgreSQL max connection idle time")
 	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
 	displayVersion := flag.Bool("version", false, "Display version and exit")
+	flag.StringVar(&cfg.mongo_db.dsn, "mongo-db-dsn", "mongodb://localhost:27017", "mongo string connection")
 
 	flag.Parse()
 
@@ -79,7 +82,19 @@ func main() {
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 	debug := log.New(os.Stdout, "DEBUG\t", log.Ldate|log.Ltime|log.Llongfile)
 
-	// initialize db connection pool
+
+	//mongoDB, err := connectToMongo(cfg)
+	//if err != nil {
+	//	logger.Fatal(err)
+	//}
+	//defer func() {
+	//	if err = mongoDB.Disconnect(context.TODO()); err != nil {
+	//		panic(err)
+	//	}
+	//}()
+	// defer mongoDB.Disconnect(context.Background())
+
+	// initialize pg db connection pool
 	db, err := openDB(cfg)
 	if err != nil {
 		logger.Fatal(err)
@@ -130,15 +145,31 @@ func main() {
 	logger.Fatal(err)
 }
 
+func connectToMongo(cfg config) (*mongo.Client, error) {
+	// Create a new client and connect to the server
+	fmt.Println(cfg.mongo_db.dsn)
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(cfg.mongo_db.dsn))
+	if err != nil {
+		panic(err)
+	}
+	// Ping the primary
+	if err := client.Ping(context.TODO(), readpref.Primary()); err != nil {
+		panic(err)
+	}
+	fmt.Println("Successfully connected and pinged.")
+
+	return client, nil
+}
+
 func openDB(cfg config) (*sql.DB, error) {
-	db, err := sql.Open("postgres", cfg.db.dsn)
+	db, err := sql.Open("postgres", cfg.pg_db.dsn)
 	if err != nil {
 		return nil, err
 	}
 
-	db.SetMaxOpenConns(cfg.db.maxOpenConns)
-	db.SetMaxIdleConns(cfg.db.maxIdleConns)
-	duration, err := time.ParseDuration(cfg.db.maxIdleTime)
+	db.SetMaxOpenConns(cfg.pg_db.maxOpenConns)
+	db.SetMaxIdleConns(cfg.pg_db.maxIdleConns)
+	duration, err := time.ParseDuration(cfg.pg_db.maxIdleTime)
 	if err != nil {
 		return nil, err
 	}
