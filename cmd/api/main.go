@@ -83,16 +83,16 @@ func main() {
 	debug := log.New(os.Stdout, "DEBUG\t", log.Ldate|log.Ltime|log.Llongfile)
 
 
-	//mongoDB, err := connectToMongo(cfg)
-	//if err != nil {
-	//	logger.Fatal(err)
-	//}
-	//defer func() {
-	//	if err = mongoDB.Disconnect(context.TODO()); err != nil {
-	//		panic(err)
-	//	}
-	//}()
-	// defer mongoDB.Disconnect(context.Background())
+	mongoDB, err := connectToMongo(cfg)
+	if err != nil {
+		logger.Fatal(err)
+	}
+	defer func() {
+		if err = mongoDB.Disconnect(context.TODO()); err != nil {
+			panic(err)
+		}
+	}()
+	 defer mongoDB.Disconnect(context.Background())
 
 	// initialize pg db connection pool
 	db, err := openDB(cfg)
