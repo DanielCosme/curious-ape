@@ -119,3 +119,11 @@ production/configure/caddyfile:
 		sudo mv ~/Caddyfile /etc/caddy/ \
 		&& sudo systemctl reload caddy \
 	'
+
+# ==================================================================================== #
+# CLIENT
+# ==================================================================================== #
+
+.PHONY: cli/install
+cli/install:
+	go install ./cmd/cli/ape_cli.go
