@@ -6,9 +6,6 @@ import (
 	"expvar"
 	"flag"
 	"fmt"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"log"
 	"net/http"
 	"os"
@@ -69,7 +66,6 @@ func main() {
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
 	displayVersion := flag.Bool("version", false, "Display version and exit")
-	flag.StringVar(&cfg.mongo_db.dsn, "mongo-db-dsn", "mongodb://localhost:27017", "mongo string connection")
 
 	flag.Parse()
 
@@ -81,18 +77,6 @@ func main() {
 
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 	debug := log.New(os.Stdout, "DEBUG\t", log.Ldate|log.Ltime|log.Llongfile)
-
-
-	mongoDB, err := connectToMongo(cfg)
-	if err != nil {
-		logger.Fatal(err)
-	}
-	defer func() {
-		if err = mongoDB.Disconnect(context.TODO()); err != nil {
-			panic(err)
-		}
-	}()
-	 defer mongoDB.Disconnect(context.Background())
 
 	// initialize pg db connection pool
 	db, err := openDB(cfg)
@@ -143,22 +127,6 @@ func main() {
 	logger.Printf("Starting %s server on %d", cfg.env, cfg.port)
 	err = srv.ListenAndServe()
 	logger.Fatal(err)
-}
-
-func connectToMongo(cfg config) (*mongo.Client, error) {
-	// Create a new client and connect to the server
-	fmt.Println(cfg.mongo_db.dsn)
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(cfg.mongo_db.dsn))
-	if err != nil {
-		panic(err)
-	}
-	// Ping the primary
-	if err := client.Ping(context.TODO(), readpref.Primary()); err != nil {
-		panic(err)
-	}
-	fmt.Println("Successfully connected and pinged.")
-
-	return client, nil
 }
 
 func openDB(cfg config) (*sql.DB, error) {
