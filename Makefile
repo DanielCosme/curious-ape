@@ -126,4 +126,4 @@ production/configure/caddyfile:
 
 .PHONY: cli/install
 cli/install:
-	go install ./cmd/cli/ape_cli.go
+	go install ./cmd/cli/apectl.go
