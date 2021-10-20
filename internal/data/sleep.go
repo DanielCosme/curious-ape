@@ -2,7 +2,7 @@ package data
 
 import (
 	"database/sql"
-	"errors"
+	"github.com/danielcosme/curious-ape/internal/errors"
 )
 
 type SleepRecord struct {
@@ -40,7 +40,7 @@ func (sr *SleepRecordModel) Get(date string) (*SleepRecord, error) {
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return nil, ErrRecordNotFound
+			return nil, errors.ErrRecordNotFound
 		default:
 			return nil, err
 		}

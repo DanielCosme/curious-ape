@@ -2,7 +2,8 @@ package sync
 
 import (
 	"encoding/json"
-	"errors"
+	"github.com/danielcosme/curious-ape/internal/core"
+	"github.com/danielcosme/curious-ape/internal/errors"
 	"log"
 	"time"
 
@@ -76,7 +77,7 @@ func (co *WorkCollector) GetRecord(date string) error {
 func (co *WorkCollector) decodeAndSave(date string, jsonRecord []byte) error {
 	r, err := co.decode(date, jsonRecord)
 	if err != nil {
-		if errors.Is(err, ErrNoRecord) {
+		if errors.Is(err, errors.ErrNoRecord) {
 			log.Println(err.Error(), "for", date)
 			wr := &data.WorkRecord{
 				Date:     date,
@@ -107,7 +108,7 @@ func (co *WorkCollector) decode(date string, jsonResponse []byte) (*data.WorkRec
 	}
 	total, ok := jsonMap["total_grand"].(float64)
 	if !ok {
-		return nil, ErrNoRecord
+		return nil, errors.ErrNoRecord
 	}
 
 	workRecord.Date = date
@@ -134,7 +135,7 @@ func (co *WorkCollector) saveLog(wr *data.WorkRecord) error {
 
 func (co *WorkCollector) saveWorkHabit(wr *data.WorkRecord) error {
 	log.Println("Saving Work habit for", wr.Date)
-	var habit *data.Habit = &data.Habit{
+	habit := &core.Habit{
 		Date:   wr.Date,
 		Origin: wr.Provider,
 		Type:   "work",
@@ -181,7 +182,7 @@ func (co *WorkCollector) BuildHabitsFromWorkRecords() (err error) {
 		if habit.State == "no_info" && habit.Type == "work" {
 			habit.State = "no"
 			habit.Origin = "missing/toggl"
-			co.Models.Habits.Update(habit)
+			co.Models.Habits.Update(&habit)
 		}
 	}
 

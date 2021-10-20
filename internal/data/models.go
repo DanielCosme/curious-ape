@@ -2,30 +2,26 @@ package data
 
 import (
 	"database/sql"
-	"errors"
-)
-
-var (
-	ErrRecordNotFound = errors.New("record not found")
-	ErrEditConflict   = errors.New("edit conflict")
+	"github.com/danielcosme/curious-ape/internal/core"
+	"github.com/danielcosme/curious-ape/internal/data/pg"
 )
 
 type Models struct {
-	Habits         HabitModel
+	Habits         core.HabitModel
 	Users          UserModel
 	SleepRecords   SleepRecordModel
 	Tokens         AuthTokenModel
 	WorkRecords    WorkModel
-	FitnessRecords FitnessModel
+	FitnessRecords core.FitnessModel
 }
 
 func NewModels(db *sql.DB) *Models {
 	return &Models{
-		Habits:         HabitModel{DB: db},
+		Habits:         &pg.HabitModel{DB: db},
 		Users:          UserModel{DB: db},
 		SleepRecords:   SleepRecordModel{DB: db},
 		Tokens:         AuthTokenModel{DB: db},
 		WorkRecords:    WorkModel{DB: db},
-		FitnessRecords: FitnessModel{DB: db},
+		FitnessRecords: &pg.FitnessModel{DB: db},
 	}
 }

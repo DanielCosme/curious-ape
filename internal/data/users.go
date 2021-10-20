@@ -3,7 +3,7 @@ package data
 import (
 	"context"
 	"database/sql"
-	"errors"
+	"github.com/danielcosme/curious-ape/internal/errors"
 	"time"
 
 	"github.com/danielcosme/curious-ape/internal/validator"
@@ -75,7 +75,7 @@ func (m *UserModel) GetByID(id int) (*User, error) {
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return nil, ErrRecordNotFound
+			return nil, errors.ErrRecordNotFound
 		default:
 			return nil, err
 		}
@@ -104,7 +104,7 @@ func (m *UserModel) GetByEmail(email string) (*User, error) {
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return nil, ErrRecordNotFound
+			return nil, errors.ErrRecordNotFound
 		default:
 			return nil, err
 		}
@@ -137,7 +137,7 @@ func (m *UserModel) Update(user *User) error {
 		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
 			return ErrDuplicateEmail
 		case errors.Is(err, sql.ErrNoRows):
-			return ErrEditConflict
+			return errors.ErrEditConflict
 		default:
 			return err
 		}

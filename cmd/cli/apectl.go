@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/danielcosme/curious-ape/internal/data/pg"
 	"io"
 	"log"
 	"net/http"
@@ -13,7 +14,6 @@ import (
 	"time"
 
 	"github.com/danielcosme/curious-ape/internal/auth"
-	"github.com/danielcosme/curious-ape/internal/data"
 	"github.com/danielcosme/curious-ape/internal/validator"
 )
 
@@ -70,7 +70,7 @@ func main() {
 			fmt.Println("need at least 3 arguments")
 			break
 		}
-		habit := &data.Habit{
+		habit := &pg.Habit{
 			Type:   args[1],
 			State:  args[2],
 			Date:   date,
@@ -93,7 +93,7 @@ func main() {
 		var state string
 		start, end := getDates()
 		maxDay, maxMonth, maxYear := end.Date()
-		habit := data.Habit{
+		habit := pg.Habit{
 			Type:   args[1],
 			Origin: man,
 		}
@@ -137,7 +137,7 @@ func getDates() (first, last time.Time) {
 	return first, last
 }
 
-func (app *application) AddHabit(habit data.Habit) {
+func (app *application) AddHabit(habit pg.Habit) {
 	fmt.Println("Adding", habit.Type, "habit for", habit.Date)
 	validateHabit(&habit)
 
@@ -156,9 +156,9 @@ func (app *application) AddHabit(habit data.Habit) {
 	fmt.Println("All Good!")
 }
 
-func validateHabit(habit *data.Habit) {
+func validateHabit(habit *pg.Habit) {
 	val := validator.New()
-	data.ValidateHabit(val, habit)
+	pg.ValidateHabit(val, habit)
 	if !val.Valid() {
 		log.Fatal(val.Errors)
 	}

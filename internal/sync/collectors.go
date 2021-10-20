@@ -1,7 +1,7 @@
 package sync
 
 import (
-	"errors"
+	"github.com/danielcosme/curious-ape/internal/core"
 	"log"
 	"time"
 
@@ -11,11 +11,6 @@ import (
 	"github.com/danielcosme/curious-ape/internal/sync/toggl"
 )
 
-var (
-	ErrTokenExpired = errors.New("token expired")
-	ErrUnauthorized = errors.New("server needs to authorize again")
-	ErrNoRecord     = errors.New("provider has no record")
-)
 
 type Collectors struct {
 	Models *data.Models
@@ -66,7 +61,7 @@ func (co *Collectors) InitializeDayHabit() (err error) {
 
 func (co *Collectors) InitializeDayHabits(date string) (err error) {
 	types := []string{"sleep", "food", "fitness", "work"}
-	h := data.Habit{
+	h := core.Habit{
 		State:  "no_info",
 		Date:   date,
 		Origin: "automated",

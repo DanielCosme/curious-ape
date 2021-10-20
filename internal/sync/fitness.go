@@ -1,6 +1,7 @@
 package sync
 
 import (
+	"github.com/danielcosme/curious-ape/internal/core"
 	"log"
 	"strconv"
 	"strings"
@@ -72,7 +73,7 @@ func (co *FitnessCollector) GetRecord(date string) error {
 }
 
 func (co *FitnessCollector) saveFitnessHabit(date, prov string, state bool) error {
-	var habit *data.Habit = &data.Habit{
+	habit := &core.Habit{
 		Date:   date,
 		Origin: prov,
 		Type:   "fitness",
@@ -97,10 +98,10 @@ func (co *FitnessCollector) saveLog(record map[string]string) error {
 		return err
 	}
 	date := time.Unix(int64(start/1000), 0).Format("2006-01-02")
-	r := &data.FitnessRecord{
+	r := &core.FitnessRecord{
 		Date:               date,
-		StartInMiliseconds: start,
-		EndInMiliseconds:   end,
+		StartInMilliseconds: start,
+		EndInMilliseconds:   end,
 		Provider:           record["packageName"],
 	}
 
@@ -142,7 +143,7 @@ func (co *FitnessCollector) BuildHabitsFromFitnessRecords() (err error) {
 	return nil
 }
 
-func mapRecords(col []*data.FitnessRecord) map[string]string {
+func mapRecords(col []*core.FitnessRecord) map[string]string {
 	mapRecords := make(map[string]string)
 	for _, v := range col {
 		date := strings.Split(v.Date, "T")[0]

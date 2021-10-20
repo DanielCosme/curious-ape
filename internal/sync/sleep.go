@@ -2,6 +2,7 @@ package sync
 
 import (
 	"encoding/json"
+	"github.com/danielcosme/curious-ape/internal/core"
 	"log"
 	"strconv"
 	"strings"
@@ -132,7 +133,7 @@ func (co *SleepCollector) saveLog(jsonResponse []byte) error {
 }
 
 func (co *SleepCollector) saveSleepHabit(sleepRecord *data.SleepRecord) error {
-	var habit *data.Habit = &data.Habit{
+	habit := &core.Habit{
 		Date:   sleepRecord.Date,
 		Origin: sleepRecord.Provider,
 		Type:   "sleep",
@@ -172,7 +173,7 @@ func (co *SleepCollector) BuildHabitsFromSleepRecords() (err error) {
 		}
 
 		if i+1 == l {
-			log.Println("succesfully added", l, "habits")
+			log.Println("successfully added", l, "habits")
 		}
 	}
 
