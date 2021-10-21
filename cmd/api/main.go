@@ -100,6 +100,11 @@ func main() {
 		return runtime.NumGoroutine()
 	}))
 
+	_ = os.Setenv("TOGGL_PASS", "api_token")
+	_ = os.Setenv("TOGGL_TOKEN", "aeeedd1c24f3d2e16c7450a282c62094")
+
+
+
 	models := models.NewModels(db)
 	collector := sync.NewCollectors(models)
 	scheduler := &cron.Cron{Collector: collector}

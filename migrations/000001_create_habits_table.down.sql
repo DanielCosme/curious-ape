@@ -1,5 +1,0 @@
-DROP TABLE IF EXISTS habits;
-
-DROP TYPE IF EXISTS habit_state;
-DROP TYPE IF EXISTS habit_type;
-
