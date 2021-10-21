@@ -1,22 +1,15 @@
-package data
+package pg
 
 import (
 	"database/sql"
+	"github.com/danielcosme/curious-ape/internal/core"
 )
-
-type WorkRecord struct {
-	ID       int    `json:"id"`
-	Date     string `json:"date"`
-	Total    int    `json:"total_grand"`
-	RawJson  string `json:"rawJson"`
-	Provider string `json:"provider"`
-}
 
 type WorkModel struct {
 	DB *sql.DB
 }
 
-func (wm *WorkModel) Insert(wr *WorkRecord) error {
+func (wm *WorkModel) Insert(wr *core.WorkRecord) error {
 	stm := `INSERT INTO work_records ("date", "grand_total", raw_json, provider)
 			VALUES($1, $2, $3, $4)`
 	_, err := wm.DB.Exec(stm, wr.Date, wr.Total, wr.RawJson, wr.Provider)
@@ -26,8 +19,8 @@ func (wm *WorkModel) Insert(wr *WorkRecord) error {
 	return nil
 }
 
-func (wm *WorkModel) Get(date string) (*WorkRecord, error) {
-	r := &WorkRecord{}
+func (wm *WorkModel) Get(date string) (*core.WorkRecord, error) {
+	r := &core.WorkRecord{}
 	stm := `SELECT id, "date", grand_total, provider FROM work_records WHERE "date" = $1`
 	row := wm.DB.QueryRow(stm, date)
 
@@ -38,8 +31,8 @@ func (wm *WorkModel) Get(date string) (*WorkRecord, error) {
 	return r, nil
 }
 
-func (wm *WorkModel) GetAll() ([]*WorkRecord, error) {
-	records := []*WorkRecord{}
+func (wm *WorkModel) GetAll() ([]*core.WorkRecord, error) {
+	records := []*core.WorkRecord{}
 	stm := `Select id, "date", grand_total, provider from work_records`
 	rows, err := wm.DB.Query(stm)
 	if err != nil {
@@ -47,7 +40,7 @@ func (wm *WorkModel) GetAll() ([]*WorkRecord, error) {
 	}
 
 	for rows.Next() {
-		r := &WorkRecord{}
+		r := &core.WorkRecord{}
 		err := rows.Scan(&r.ID, &r.Date, &r.Total, &r.Provider)
 		if err != nil {
 			return nil, err

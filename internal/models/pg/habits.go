@@ -11,7 +11,6 @@ import (
 	"github.com/danielcosme/curious-ape/internal/validator"
 )
 
-
 type HabitModel struct {
 	DB *sql.DB
 }

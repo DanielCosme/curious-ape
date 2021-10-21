@@ -7,12 +7,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/danielcosme/curious-ape/internal/data"
+	"github.com/danielcosme/curious-ape/internal/models"
 	"github.com/danielcosme/curious-ape/internal/sync/google"
 )
 
 type FitnessCollector struct {
-	Models *data.Models
+	Models *models.DB
 	*google.FitnessProvider
 }
 
@@ -99,10 +99,10 @@ func (co *FitnessCollector) saveLog(record map[string]string) error {
 	}
 	date := time.Unix(int64(start/1000), 0).Format("2006-01-02")
 	r := &core.FitnessRecord{
-		Date:               date,
+		Date:                date,
 		StartInMilliseconds: start,
 		EndInMilliseconds:   end,
-		Provider:           record["packageName"],
+		Provider:            record["packageName"],
 	}
 
 	err = co.Models.FitnessRecords.Insert(r)

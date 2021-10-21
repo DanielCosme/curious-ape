@@ -7,12 +7,12 @@ import (
 	"log"
 	"time"
 
-	"github.com/danielcosme/curious-ape/internal/data"
+	"github.com/danielcosme/curious-ape/internal/models"
 	"github.com/danielcosme/curious-ape/internal/sync/toggl"
 )
 
 type WorkCollector struct {
-	Models *data.Models
+	Models *models.DB
 	*toggl.WorkProvider
 }
 
@@ -79,7 +79,7 @@ func (co *WorkCollector) decodeAndSave(date string, jsonRecord []byte) error {
 	if err != nil {
 		if errors.Is(err, errors.ErrNoRecord) {
 			log.Println(err.Error(), "for", date)
-			wr := &data.WorkRecord{
+			wr := &core.WorkRecord{
 				Date:     date,
 				Provider: "missing/toggl",
 				Total:    0,
@@ -99,9 +99,9 @@ func (co *WorkCollector) decodeAndSave(date string, jsonRecord []byte) error {
 	return nil
 }
 
-func (co *WorkCollector) decode(date string, jsonResponse []byte) (*data.WorkRecord, error) {
+func (co *WorkCollector) decode(date string, jsonResponse []byte) (*core.WorkRecord, error) {
 	var jsonMap map[string]interface{}
-	workRecord := &data.WorkRecord{}
+	workRecord := &core.WorkRecord{}
 
 	if err := json.Unmarshal(jsonResponse, &jsonMap); err != nil {
 		return nil, err
@@ -119,7 +119,7 @@ func (co *WorkCollector) decode(date string, jsonResponse []byte) (*data.WorkRec
 	return workRecord, nil
 }
 
-func (co *WorkCollector) saveLog(wr *data.WorkRecord) error {
+func (co *WorkCollector) saveLog(wr *core.WorkRecord) error {
 	err := co.Models.WorkRecords.Insert(wr)
 	if err != nil {
 		return err
@@ -133,7 +133,7 @@ func (co *WorkCollector) saveLog(wr *data.WorkRecord) error {
 	return nil
 }
 
-func (co *WorkCollector) saveWorkHabit(wr *data.WorkRecord) error {
+func (co *WorkCollector) saveWorkHabit(wr *core.WorkRecord) error {
 	log.Println("Saving Work habit for", wr.Date)
 	habit := &core.Habit{
 		Date:   wr.Date,

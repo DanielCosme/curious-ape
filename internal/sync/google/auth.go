@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/danielcosme/curious-ape/internal/core"
 	"io"
 	"net/http"
 	"os"
@@ -38,7 +39,7 @@ func (fit *FitnessProvider) AuthorizationURI() string {
 	return urlEncoded
 }
 
-func (fit *FitnessProvider) ExchangeCodeForToken(code string) (payload *auth.Token, err error) {
+func (fit *FitnessProvider) ExchangeCodeForToken(code string) (payload *core.Token, err error) {
 	payload, err = fit.tokens(code, "authorization")
 	if err != nil {
 		return nil, err
@@ -63,8 +64,8 @@ func (fit *FitnessProvider) RefreshToken(refreshToken string) (err error) {
 	return nil
 }
 
-func (fit *FitnessProvider) tokens(codeOrToken, grant string) (*auth.Token, error) {
-	var token *auth.Token
+func (fit *FitnessProvider) tokens(codeOrToken, grant string) (*core.Token, error) {
+	var token *core.Token
 	var params map[string]string
 	if grant == "authorization" {
 		params = map[string]string{

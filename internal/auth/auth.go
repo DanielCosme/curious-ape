@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/danielcosme/curious-ape/internal/core"
 	"io"
 	"net/http"
 )
@@ -17,18 +18,12 @@ type AuthConfig struct {
 	Provider         string
 }
 
-type Token struct {
-	Service      string `json:"-"`
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-}
-
-func (auth *AuthConfig) ExchangeCodeForToken(code string) (payload Token, err error) {
+func (auth *AuthConfig) ExchangeCodeForToken(code string) (payload core.Token, err error) {
 	payload, err = auth.tokens(code, "authorization")
 	return payload, err
 }
 
-func (auth *AuthConfig) RefreshToken(refreshToken string) (payload Token, err error) {
+func (auth *AuthConfig) RefreshToken(refreshToken string) (payload core.Token, err error) {
 	payload, err = auth.tokens(refreshToken, "refresh")
 	if err != nil {
 		return payload, err
@@ -37,8 +32,8 @@ func (auth *AuthConfig) RefreshToken(refreshToken string) (payload Token, err er
 }
 
 // TODO read body for error
-func (auth *AuthConfig) tokens(codeOrToken, grant string) (Token, error) {
-	var token Token
+func (auth *AuthConfig) tokens(codeOrToken, grant string) (core.Token, error) {
+	var token core.Token
 	var params map[string]string
 	if grant == "authorization" {
 		params = map[string]string{

@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/danielcosme/curious-ape/internal/core"
-	"github.com/danielcosme/curious-ape/internal/data/pg"
 	"github.com/danielcosme/curious-ape/internal/errors"
+	"github.com/danielcosme/curious-ape/internal/models/pg"
 	"net/http"
 	"strconv"
 	"strings"
