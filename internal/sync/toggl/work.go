@@ -18,7 +18,7 @@ const (
 	summary     = "summary"
 	user_agent  = "cosmedaniel8@gmail.com"
 	wid         = "3338214"
-	project_ids = "160884301,159981833,169021695,170288296"
+	project_ids = "160884301,159981833,169021695,170288296,172502248"
 	// since yyyy-mm-dd
 	// until yyyy-mm-dd
 )
@@ -92,6 +92,7 @@ func makeURL(date string) string {
 		"user_agent":   user_agent,
 		"workspace_id": wid,
 		"since":        date,
+		"project_ids":  project_ids,
 		"until":        date,
 	}
 	urlEncoded := url + "?" + auth.UrlEncode(urlParams)

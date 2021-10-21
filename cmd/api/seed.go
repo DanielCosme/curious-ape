@@ -61,20 +61,20 @@ func (a *application) miscHandler(rw http.ResponseWriter, r *http.Request) {
 func (a *application) seedDataHandler(rw http.ResponseWriter, r *http.Request) {
 	t := time.Now()
 
-	a.collectors.AllHabitsInit()
-	err := a.collectors.Sleep.GetRecordsFromDayZero(t)
-	if err != nil {
-		a.errorResponse(rw, r, http.StatusNotFound, err)
-		return
-	}
+	// a.collectors.AllHabitsInit()
+	// err := a.collectors.Sleep.GetRecordsFromDayZero(t)
+	// if err != nil {
+	// 	a.errorResponse(rw, r, http.StatusNotFound, err)
+	// 	return
+	// }
 
-	err = a.collectors.Fit.GetRecordsFromDayZero(t)
-	if err != nil {
-		a.errorResponse(rw, r, http.StatusNotFound, err.Error())
-		return
-	}
+	// err = a.collectors.Fit.GetRecordsFromDayZero(t)
+	// if err != nil {
+	// 	a.errorResponse(rw, r, http.StatusNotFound, err.Error())
+	// 	return
+	// }
 
-	go a.collectors.Work.GetRecordsFromDayZero(t)
+	err := a.collectors.Work.GetRecordsFromDayZero(t)
 	if err != nil {
 		a.errorResponse(rw, r, http.StatusNotFound, err)
 		return

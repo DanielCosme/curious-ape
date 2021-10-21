@@ -40,7 +40,7 @@ func (co *WorkCollector) GetRecords(start, end string) error {
 }
 
 func (co *WorkCollector) GetRecordsFromDayZero(limit time.Time) error {
-	zero := "2021-01-01"
+	zero := "2021-08-01"
 	log.Println(zero, limit)
 	err := co.GetRecords(zero, limit.Format("2006-01-02"))
 	if err != nil {
@@ -142,8 +142,8 @@ func (co *WorkCollector) saveWorkHabit(wr *core.WorkRecord) error {
 		State:  "yes",
 	}
 
-	targetInMiliseconds := 18000000 // 5 hours
-	if wr.Total < targetInMiliseconds {
+	targetInMilliseconds := 18000000 // 5 hours
+	if wr.Total < targetInMilliseconds {
 		habit.State = "no"
 	}
 
@@ -169,7 +169,7 @@ func (co *WorkCollector) BuildHabitsFromWorkRecords() (err error) {
 		}
 
 		if i+1 == l {
-			log.Println("succesfully added", l, "habits")
+			log.Println("successfully added", l, "habits")
 		}
 	}
 
