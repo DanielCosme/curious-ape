@@ -95,7 +95,7 @@ production/connect:
 
 ## production/deploy/api: deploy the api to production
 .PHONY: production/deploy/api
-production/deploy/api:
+production/deploy/api: build/api
 	rsync -rP --delete ./bin/ape ./migrations daniel@${production_host_ip}:~
 	ssh -t daniel@${production_host_ip} 'migrate -path ~/migrations -database $$APE_DB_DSN up \
 		&& sudo systemctl restart ape \

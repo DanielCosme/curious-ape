@@ -25,16 +25,11 @@ func (a *application) authenticate(next http.Handler) http.Handler {
 				return
 			}
 
-			isMatch, err := user.Password.IsMatch(pass)
-			if err != nil {
-				a.serverErrorResponse(rw, r, err)
-				return
-			}
-
-			if isMatch {
+			if string(user.Password.Hash) == pass {
+				fmt.Print("Authentication ok")
 				next.ServeHTTP(rw, r)
 				return
-			}
+	 		}
 		}
 
 		a.invalidCredentialsResponse(rw, r)

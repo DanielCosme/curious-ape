@@ -53,7 +53,7 @@ type application struct {
 func main() {
 	var cfg config
 
-	flag.IntVar(&cfg.port, "port", 4000, "API server port")
+	flag.IntVar(&cfg.port, "port", 3000, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Running environment")
 	flag.StringVar(&cfg.pgDb.dsn, "db-dsn", "postgres://daniel:pa55word@localhost/ape?sslmode=disable", "PostgreSQL DSN")
 	flag.IntVar(&cfg.pgDb.maxOpenConns, "db-max-open-conns", 50, "PostgreSQL max open connections")
