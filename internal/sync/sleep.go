@@ -2,17 +2,18 @@ package sync
 
 import (
 	"encoding/json"
+	"github.com/danielcosme/curious-ape/internal/core"
 	"log"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/danielcosme/curious-ape/internal/data"
+	"github.com/danielcosme/curious-ape/internal/models"
 	"github.com/danielcosme/curious-ape/internal/sync/fitbit"
 )
 
 type SleepCollector struct {
-	Models *data.Models
+	Models *models.DB
 	*fitbit.SleepProvider
 }
 
@@ -106,7 +107,7 @@ func (co *SleepCollector) getMonthRecords(first, last string) error {
 
 // parse json response and save it into database
 func (co *SleepCollector) saveLog(jsonResponse []byte) error {
-	var sleepRecord data.SleepRecord
+	var sleepRecord core.SleepRecord
 	err := json.Unmarshal(jsonResponse, &sleepRecord)
 	sleepRecord.RawJson = jsonResponse
 	sleepRecord.Provider = co.Auth.Provider
@@ -115,7 +116,7 @@ func (co *SleepCollector) saveLog(jsonResponse []byte) error {
 		return err
 	}
 
-	err = co.Models.SleepRecords.Insert(sleepRecord)
+	err = co.Models.SleepRecords.Insert(&sleepRecord)
 	if err != nil {
 		log.Println("ERR", err.Error())
 		return err
@@ -131,8 +132,8 @@ func (co *SleepCollector) saveLog(jsonResponse []byte) error {
 	return nil
 }
 
-func (co *SleepCollector) saveSleepHabit(sleepRecord *data.SleepRecord) error {
-	var habit *data.Habit = &data.Habit{
+func (co *SleepCollector) saveSleepHabit(sleepRecord *core.SleepRecord) error {
+	habit := &core.Habit{
 		Date:   sleepRecord.Date,
 		Origin: sleepRecord.Provider,
 		Type:   "sleep",
@@ -172,7 +173,7 @@ func (co *SleepCollector) BuildHabitsFromSleepRecords() (err error) {
 		}
 
 		if i+1 == l {
-			log.Println("succesfully added", l, "habits")
+			log.Println("successfully added", l, "habits")
 		}
 	}
 

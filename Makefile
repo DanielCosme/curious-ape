@@ -22,7 +22,7 @@ confirm:
 ## run/api: run the cmd/api application
 .PHONY: run/api
 run/api:
-	go run ./cmd/api -db-dsn=${APE_PG_DB_DSN}
+	go run ./cmd/api
 
 ## db/psql: connect to the database using psql
 .PHONY: db/psql
@@ -119,3 +119,11 @@ production/configure/caddyfile:
 		sudo mv ~/Caddyfile /etc/caddy/ \
 		&& sudo systemctl reload caddy \
 	'
+
+# ==================================================================================== #
+# CLIENT
+# ==================================================================================== #
+
+.PHONY: cli/install
+cli/install:
+	go install ./cmd/cli/apectl.go

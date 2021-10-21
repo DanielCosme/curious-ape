@@ -3,12 +3,12 @@ package fitbit
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/danielcosme/curious-ape/internal/core"
 	"io"
 	"log"
 	"net/http"
 
 	"github.com/danielcosme/curious-ape/internal/auth"
-	"github.com/danielcosme/curious-ape/internal/data"
 )
 
 const (
@@ -20,7 +20,7 @@ var ErrNoRecord = fmt.Errorf("Error procesing the logs range result")
 
 type SleepProvider struct {
 	Auth  *auth.AuthConfig
-	Token *data.AuthTokenModel
+	Token core.AuthTokenModel
 	Scope string
 }
 

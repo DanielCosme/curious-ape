@@ -1,29 +1,17 @@
-package data
+package pg
 
 import (
 	"database/sql"
-	"errors"
+	"github.com/danielcosme/curious-ape/internal/core"
+	"github.com/danielcosme/curious-ape/internal/errors"
 )
-
-type SleepRecord struct {
-	ID            int    `json:"id"`
-	Date          string `json:"dateOfSleep"`
-	Duration      int    `json:"duration"`
-	StartTime     string `json:"startTime"`
-	EndTime       string `json:"endTime"`
-	MinutesAsleep int    `json:"minutesAsleep"`
-	MinutesAwake  int    `json:"minutesAwake"`
-	MinutesInBed  int    `json:"timeInBed"`
-	Provider      string `json:"-"`
-	RawJson       []byte `json:"-"`
-}
 
 type SleepRecordModel struct {
 	DB *sql.DB
 }
 
-func (sr *SleepRecordModel) Get(date string) (*SleepRecord, error) {
-	r := &SleepRecord{}
+func (sr *SleepRecordModel) Get(date string) (*core.SleepRecord, error) {
+	r := &core.SleepRecord{}
 	stm := `SELECT id, date, duration, start_time, end_time, minutes_asleep, minutes_awake, minutes_in_bed FROM sleep_records WHERE "date" = $1`
 	row := sr.DB.QueryRow(stm, date)
 	err := row.Scan(
@@ -40,7 +28,7 @@ func (sr *SleepRecordModel) Get(date string) (*SleepRecord, error) {
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return nil, ErrRecordNotFound
+			return nil, errors.ErrRecordNotFound
 		default:
 			return nil, err
 		}
@@ -49,8 +37,8 @@ func (sr *SleepRecordModel) Get(date string) (*SleepRecord, error) {
 	return r, nil
 }
 
-func (sr *SleepRecordModel) GetAll() ([]*SleepRecord, error) {
-	records := []*SleepRecord{}
+func (sr *SleepRecordModel) GetAll() ([]*core.SleepRecord, error) {
+	records := []*core.SleepRecord{}
 	stm := `SELECT id, date, duration, start_time, end_time, minutes_asleep, minutes_awake, minutes_in_bed, provider FROM sleep_records`
 	rows, err := sr.DB.Query(stm)
 	if err != nil {
@@ -59,7 +47,7 @@ func (sr *SleepRecordModel) GetAll() ([]*SleepRecord, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		r := &SleepRecord{}
+		r := &core.SleepRecord{}
 		err := rows.Scan(
 			&r.ID,
 			&r.Date,
@@ -82,7 +70,7 @@ func (sr *SleepRecordModel) GetAll() ([]*SleepRecord, error) {
 	return records, nil
 }
 
-func (sr *SleepRecordModel) Insert(data SleepRecord) error {
+func (sr *SleepRecordModel) Insert(data *core.SleepRecord) error {
 	stm := `INSERT INTO sleep_records (date, duration, start_time, end_time, minutes_asleep,
 									minutes_awake, minutes_in_bed, provider, raw_json)
 			VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)`

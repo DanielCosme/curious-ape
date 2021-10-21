@@ -2,9 +2,11 @@ package main
 
 import (
 	"errors"
+	"github.com/danielcosme/curious-ape/internal/core"
+	errors2 "github.com/danielcosme/curious-ape/internal/errors"
+	"github.com/danielcosme/curious-ape/internal/models/pg"
 	"net/http"
 
-	"github.com/danielcosme/curious-ape/internal/data"
 	"github.com/danielcosme/curious-ape/internal/validator"
 )
 
@@ -21,7 +23,7 @@ func (a *application) registerUserHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	user := &data.User{
+	user := &core.User{
 		Name:      input.Name,
 		Email:     input.Email,
 		Activated: false,
@@ -34,7 +36,7 @@ func (a *application) registerUserHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	v := validator.New()
-	if data.ValidateUser(v, user); !v.Valid() {
+	if pg.ValidateUser(v, user); !v.Valid() {
 		a.failedValidationResponse(w, r, v.Errors)
 		return
 	}
@@ -42,7 +44,7 @@ func (a *application) registerUserHandler(w http.ResponseWriter, r *http.Request
 	err = a.models.Users.Insert(user)
 	if err != nil {
 		switch {
-		case errors.Is(err, data.ErrDuplicateEmail):
+		case errors.Is(err, errors2.ErrDuplicateEmail):
 			v.AddError("email", "a user with this email address already exists")
 			a.failedValidationResponse(w, r, v.Errors)
 		default:

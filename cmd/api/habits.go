@@ -1,13 +1,14 @@
 package main
 
 import (
-	"errors"
 	"fmt"
+	"github.com/danielcosme/curious-ape/internal/core"
+	"github.com/danielcosme/curious-ape/internal/errors"
+	"github.com/danielcosme/curious-ape/internal/models/pg"
 	"net/http"
 	"strconv"
 	"strings"
 
-	"github.com/danielcosme/curious-ape/internal/data"
 	"github.com/danielcosme/curious-ape/internal/validator"
 	"github.com/go-chi/chi/v5"
 )
@@ -26,14 +27,14 @@ func (a *application) createHabitHandler(rw http.ResponseWriter, r *http.Request
 		return
 	}
 
-	habit := &data.Habit{
+	habit := &core.Habit{
 		Date:   input.Date,
 		State:  input.State,
 		Origin: input.Origin,
 		Type:   input.Type,
 	}
 	v := validator.New()
-	if data.ValidateHabit(v, habit); !v.Valid() {
+	if pg.ValidateHabit(v, habit); !v.Valid() {
 		a.failedValidationResponse(rw, r, v.Errors)
 		return
 	}
@@ -77,7 +78,7 @@ func (a *application) showHabitHandler(rw http.ResponseWriter, r *http.Request) 
 	habit, err := a.models.Habits.Get(idInt)
 	if err != nil {
 		switch {
-		case errors.Is(err, data.ErrRecordNotFound):
+		case errors.Is(err, errors.ErrRecordNotFound):
 			a.notFoundResponse(rw, r)
 		default:
 			a.serverErrorResponse(rw, r, err)
@@ -102,7 +103,7 @@ func (a *application) updateHabitHandler(rw http.ResponseWriter, r *http.Request
 	habit, err := a.models.Habits.Get(idInt)
 	if err != nil {
 		switch {
-		case errors.Is(err, data.ErrRecordNotFound):
+		case errors.Is(err, errors.ErrRecordNotFound):
 			a.notFoundResponse(rw, r)
 		default:
 			a.serverErrorResponse(rw, r, err)
@@ -136,7 +137,7 @@ func (a *application) updateHabitHandler(rw http.ResponseWriter, r *http.Request
 	habit.Type = input.Type
 	habit.Origin = input.Origin
 	v := validator.New()
-	if data.ValidateHabit(v, habit); !v.Valid() {
+	if pg.ValidateHabit(v, habit); !v.Valid() {
 		a.failedValidationResponse(rw, r, v.Errors)
 		return
 	}
@@ -164,7 +165,7 @@ func (a *application) deleteHabitHandler(rw http.ResponseWriter, r *http.Request
 	err = a.models.Habits.Delete(id)
 	if err != nil {
 		switch {
-		case errors.Is(err, data.ErrRecordNotFound):
+		case errors.Is(err, errors.ErrRecordNotFound):
 			a.notFoundResponse(rw, r)
 		default:
 			a.serverErrorResponse(rw, r, err)
@@ -172,7 +173,7 @@ func (a *application) deleteHabitHandler(rw http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = a.writeJSON(rw, http.StatusOK, envelope{"message": "food habit log succesfully deleted"}, nil)
+	err = a.writeJSON(rw, http.StatusOK, envelope{"message": "food habit log successfully deleted"}, nil)
 	if err != nil {
 		a.serverErrorResponse(rw, r, err)
 	}

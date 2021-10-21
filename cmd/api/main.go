@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/danielcosme/curious-ape/internal/cron"
-	"github.com/danielcosme/curious-ape/internal/data"
+	"github.com/danielcosme/curious-ape/internal/models"
 	"github.com/danielcosme/curious-ape/internal/sync"
 	_ "github.com/lib/pq"
 )
@@ -26,7 +26,7 @@ var (
 type config struct {
 	port int
 	env  string
-	db   struct {
+	pgDb struct {
 		dsn          string // data source name
 		maxOpenConns int
 		maxIdleConns int
@@ -46,7 +46,7 @@ type application struct {
 	logger     *log.Logger
 	debug      *log.Logger
 	config     config
-	models     *data.Models
+	models     *models.DB
 	collectors *sync.Collectors
 }
 
@@ -55,14 +55,10 @@ func main() {
 
 	flag.IntVar(&cfg.port, "port", 3000, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Running environment")
-	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("APE_PG_DB_DSN"),
-		"PostgreSQL DSN")
-	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 50,
-		"PostgreSQL max open connections")
-	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25,
-		"PostgreSQL max idle connections")
-	flag.StringVar(&cfg.db.maxIdleTime, "db-max-idle-time", "15m",
-		"PostgreSQL max connection idle time")
+	flag.StringVar(&cfg.pgDb.dsn, "db-dsn", "postgres://daniel:pa55word@localhost/ape?sslmode=disable", "PostgreSQL DSN")
+	flag.IntVar(&cfg.pgDb.maxOpenConns, "db-max-open-conns", 50, "PostgreSQL max open connections")
+	flag.IntVar(&cfg.pgDb.maxIdleConns, "db-max-idle-conns", 25, "PostgreSQL max idle connections")
+	flag.StringVar(&cfg.pgDb.maxIdleTime, "db-max-idle-time", "15m", "PostgreSQL max connection idle time")
 	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
@@ -79,7 +75,7 @@ func main() {
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 	debug := log.New(os.Stdout, "DEBUG\t", log.Ldate|log.Ltime|log.Llongfile)
 
-	// initialize db connection pool
+	// initialize pg db connection pool
 	db, err := openDB(cfg)
 	if err != nil {
 		logger.Fatal(err)
@@ -104,7 +100,7 @@ func main() {
 		return runtime.NumGoroutine()
 	}))
 
-	models := data.NewModels(db)
+	models := models.NewModels(db)
 	collector := sync.NewCollectors(models)
 	scheduler := &cron.Cron{Collector: collector}
 	go scheduler.Start()
@@ -131,14 +127,14 @@ func main() {
 }
 
 func openDB(cfg config) (*sql.DB, error) {
-	db, err := sql.Open("postgres", cfg.db.dsn)
+	db, err := sql.Open("postgres", cfg.pgDb.dsn)
 	if err != nil {
 		return nil, err
 	}
 
-	db.SetMaxOpenConns(cfg.db.maxOpenConns)
-	db.SetMaxIdleConns(cfg.db.maxIdleConns)
-	duration, err := time.ParseDuration(cfg.db.maxIdleTime)
+	db.SetMaxOpenConns(cfg.pgDb.maxOpenConns)
+	db.SetMaxIdleConns(cfg.pgDb.maxIdleConns)
+	duration, err := time.ParseDuration(cfg.pgDb.maxIdleTime)
 	if err != nil {
 		return nil, err
 	}

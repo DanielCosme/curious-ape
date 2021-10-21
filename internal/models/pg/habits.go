@@ -1,28 +1,21 @@
-package data
+package pg
 
 import (
 	"context"
 	"database/sql"
-	"errors"
+	"github.com/danielcosme/curious-ape/internal/core"
+	"github.com/danielcosme/curious-ape/internal/errors"
 	"regexp"
 	"time"
 
 	"github.com/danielcosme/curious-ape/internal/validator"
 )
 
-type Habit struct {
-	ID     int    `json:"id"`
-	State  string `json:"state"`
-	Date   string `json:"date"`
-	Origin string `json:"origin"`
-	Type   string `json:"type"`
-}
-
 type HabitModel struct {
 	DB *sql.DB
 }
 
-func (hm *HabitModel) GetAll() ([]*Habit, error) {
+func (hm *HabitModel) GetAll() ([]core.Habit, error) {
 	query := `
 		SELECT id, state, date, origin, type FROM habits`
 	rows, err := hm.DB.Query(query)
@@ -31,9 +24,9 @@ func (hm *HabitModel) GetAll() ([]*Habit, error) {
 	}
 	defer rows.Close()
 
-	habits := []*Habit{}
+	habits := []core.Habit{}
 	for rows.Next() {
-		var habit Habit
+		var habit core.Habit
 
 		err := rows.Scan(
 			&habit.ID,
@@ -46,13 +39,13 @@ func (hm *HabitModel) GetAll() ([]*Habit, error) {
 			return nil, err
 		}
 
-		habits = append(habits, &habit)
+		habits = append(habits, habit)
 	}
 
 	return habits, nil
 }
 
-func (fh *HabitModel) Insert(habit *Habit) error {
+func (fh *HabitModel) Insert(habit *core.Habit) error {
 	query := `
 		INSERT INTO habits (state, "date", "type", origin)
 		VALUES ($1, $2, $3, $4)
@@ -61,11 +54,11 @@ func (fh *HabitModel) Insert(habit *Habit) error {
 	return fh.DB.QueryRow(query, args...).Scan(&habit.ID)
 }
 
-func (fh *HabitModel) Get(id int) (*Habit, error) {
+func (fh *HabitModel) Get(id int) (*core.Habit, error) {
 	query := `
 		SELECT id, state, "date", "type", origin FROM habits
 		WHERE id = $1`
-	var habit Habit
+	var habit core.Habit
 	err := fh.DB.QueryRow(query, id).Scan(
 		&habit.ID,
 		&habit.State,
@@ -77,7 +70,7 @@ func (fh *HabitModel) Get(id int) (*Habit, error) {
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return nil, ErrRecordNotFound
+			return nil, errors.ErrRecordNotFound
 		default:
 			return nil, err
 		}
@@ -86,7 +79,7 @@ func (fh *HabitModel) Get(id int) (*Habit, error) {
 	return &habit, nil
 }
 
-func (fh *HabitModel) UpdateOrCreate(habit *Habit) error {
+func (fh *HabitModel) UpdateOrCreate(habit *core.Habit) error {
 	stm := `SELECT id FROM habits WHERE "date" = $1 and "type" = $2`
 	q, _ := fh.DB.Query(stm, habit.Date, habit.Type)
 	if !q.Next() {
@@ -109,7 +102,7 @@ func (fh *HabitModel) UpdateOrCreate(habit *Habit) error {
 	return nil
 }
 
-func (fh *HabitModel) Update(h *Habit) error {
+func (fh *HabitModel) Update(h *core.Habit) error {
 	stm := `
 		UPDATE habits
 		SET state = $2, "origin" = $3
@@ -125,7 +118,7 @@ func (fh *HabitModel) Update(h *Habit) error {
 	return nil
 }
 
-func (fh *HabitModel) UpdateByDate(habit *Habit) error {
+func (fh *HabitModel) UpdateByDate(habit *core.Habit) error {
 	stm := `
 		UPDATE habits
 		SET state = $1, origin = $2
@@ -157,7 +150,7 @@ func (fh *HabitModel) Delete(id int) error {
 	}
 
 	if rowsAffected == 0 {
-		return ErrRecordNotFound
+		return errors.ErrRecordNotFound
 	}
 
 	return nil
@@ -165,7 +158,7 @@ func (fh *HabitModel) Delete(id int) error {
 
 // TODO Add more robust validation
 // validation for state and type + robust valiation for date
-func ValidateHabit(v *validator.Validator, habit *Habit) {
+func ValidateHabit(v *validator.Validator, habit *core.Habit) {
 	v.Check(habit.Date != "", "date", "must be provided")
 	v.Check(len([]rune(habit.Date)) == 10, "date", "must be exactly 10 characters long")
 	state := validator.Matches(habit.State, regexp.MustCompile(`^(yes|no|no_info)$`))

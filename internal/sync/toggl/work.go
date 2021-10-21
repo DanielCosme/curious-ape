@@ -91,7 +91,6 @@ func makeURL(date string) string {
 	urlParams := map[string]string{
 		"user_agent":   user_agent,
 		"workspace_id": wid,
-		"project_ids":  project_ids,
 		"since":        date,
 		"until":        date,
 	}
