@@ -10,8 +10,7 @@ func (a *application) logError(r *http.Request, err error) {
 }
 
 // json formated error messages.
-func (a *application) errorResponse(rw http.ResponseWriter, r *http.Request, status int,
-	message interface{}) {
+func (a *application) errorResponse(rw http.ResponseWriter, r *http.Request, status int, message interface{}) {
 	e := envelope{
 		"error":   message,
 		"success": false,
@@ -62,6 +61,6 @@ func (a *application) unauthorizedResponse(rw http.ResponseWriter, r *http.Reque
 }
 
 func (a *application) invalidCredentialsResponse(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Add("WWW-Authenticate", "basic")
+	rw.Header().Set("WWW-Authenticate", `Basic realm="restricted", charset="UTF-8"`)
 	a.errorResponse(rw, r, http.StatusUnauthorized, "invalid credentials")
 }
