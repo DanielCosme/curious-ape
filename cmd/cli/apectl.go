@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/danielcosme/curious-ape/internal/core"
+	"github.com/danielcosme/curious-ape/internal/models/pg"
 	"io"
 	"log"
 	"net/http"
@@ -13,14 +15,12 @@ import (
 	"time"
 
 	"github.com/danielcosme/curious-ape/internal/auth"
-	"github.com/danielcosme/curious-ape/internal/data"
 	"github.com/danielcosme/curious-ape/internal/validator"
 )
 
 const (
 	layout   = "2006-01-02"
 	credPath = "/.config/ape/cred.txt"
-	baseUrl  = "https://ape.danicos.me/v1/"
 	add      = "add"
 	del      = "del"
 	get      = "get"
@@ -32,6 +32,8 @@ const (
 // TODO installation script
 type config struct {
 	credentials string
+	host        string
+	dev         bool
 }
 
 type application struct {
@@ -44,10 +46,16 @@ func main() {
 
 	today := time.Now().Format(layout)
 	flag.StringVar(&date, "date", today, "date for habit to manipulate")
+	flag.BoolVar(&app.cfg.dev, "dev", false, "Change host based on this flag, local host or prod")
+
 	flag.Parse()
 	args := flag.Args()
 
 	app.cfg.credentials = readCredentials()
+	app.cfg.host = "https://ape.danicos.me/v1/"
+	if app.cfg.dev {
+		app.cfg.host = "http:/localhost:3000/v1"
+	}
 
 	argsLen := len(args)
 	if argsLen < 1 {
@@ -56,12 +64,14 @@ func main() {
 	operation := args[0]
 
 	switch operation {
+	case "get-host":
+		fmt.Println(app.cfg.host)
 	case add:
 		if argsLen < 3 {
 			fmt.Println("need at least 3 arguments")
 			break
 		}
-		habit := &data.Habit{
+		habit := &core.Habit{
 			Type:   args[1],
 			State:  args[2],
 			Date:   date,
@@ -84,7 +94,7 @@ func main() {
 		var state string
 		start, end := getDates()
 		maxDay, maxMonth, maxYear := end.Date()
-		habit := data.Habit{
+		habit := core.Habit{
 			Type:   args[1],
 			Origin: man,
 		}
@@ -128,7 +138,7 @@ func getDates() (first, last time.Time) {
 	return first, last
 }
 
-func (app *application) AddHabit(habit data.Habit) {
+func (app *application) AddHabit(habit core.Habit) {
 	fmt.Println("Adding", habit.Type, "habit for", habit.Date)
 	validateHabit(&habit)
 
@@ -136,7 +146,7 @@ func (app *application) AddHabit(habit data.Habit) {
 	panicIfErr(err)
 	reader := strings.NewReader(string(jsonBody))
 
-	url := baseUrl + "habits"
+	url := app.cfg.host + "habits"
 	res, err := app.makeRequest("POST", url, reader)
 	panicIfErr(err)
 	body, err := io.ReadAll(res.Body)
@@ -147,9 +157,9 @@ func (app *application) AddHabit(habit data.Habit) {
 	fmt.Println("All Good!")
 }
 
-func validateHabit(habit *data.Habit) {
+func validateHabit(habit *core.Habit) {
 	val := validator.New()
-	data.ValidateHabit(val, habit)
+	pg.ValidateHabit(val, habit)
 	if !val.Valid() {
 		log.Fatal(val.Errors)
 	}
@@ -164,7 +174,7 @@ func (app *application) Login(usr, pas string) {
 	encoded := auth.EncodeCredentials(usr, pas)
 	app.cfg.credentials = encoded
 
-	res, err := app.makeRequest("GET", baseUrl+"habits/1", nil)
+	res, err := app.makeRequest("GET", app.cfg.host+"habits/1", nil)
 	panicIfErr(err)
 	if res.StatusCode == http.StatusUnauthorized {
 		log.Fatal("invalid credentials")

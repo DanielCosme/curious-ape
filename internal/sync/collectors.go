@@ -1,35 +1,29 @@
 package sync
 
 import (
-	"errors"
+	"github.com/danielcosme/curious-ape/internal/core"
 	"log"
 	"time"
 
-	"github.com/danielcosme/curious-ape/internal/data"
+	"github.com/danielcosme/curious-ape/internal/models"
 	"github.com/danielcosme/curious-ape/internal/sync/fitbit"
 	"github.com/danielcosme/curious-ape/internal/sync/google"
 	"github.com/danielcosme/curious-ape/internal/sync/toggl"
 )
 
-var (
-	ErrTokenExpired = errors.New("token expired")
-	ErrUnauthorized = errors.New("server needs to authorize again")
-	ErrNoRecord     = errors.New("provider has no record")
-)
-
 type Collectors struct {
-	Models *data.Models
+	Models *models.DB
 	Sleep  *SleepCollector
 	Work   *WorkCollector
 	Fit    *FitnessCollector
 }
 
-func NewCollectors(models *data.Models) *Collectors {
+func NewCollectors(models *models.DB) *Collectors {
 	f := &SleepCollector{
 		Models: models,
 		SleepProvider: &fitbit.SleepProvider{
 			Auth:  fitbit.FitbitAuth,
-			Token: &models.Tokens,
+			Token: models.Tokens,
 			Scope: "sleep",
 		},
 	}
@@ -46,7 +40,7 @@ func NewCollectors(models *data.Models) *Collectors {
 		Models: models,
 		FitnessProvider: &google.FitnessProvider{
 			Auth:  google.GoogleAuth,
-			Token: &models.Tokens,
+			Token: models.Tokens,
 			Scope: "fitness",
 		},
 	}
@@ -66,7 +60,7 @@ func (co *Collectors) InitializeDayHabit() (err error) {
 
 func (co *Collectors) InitializeDayHabits(date string) (err error) {
 	types := []string{"sleep", "food", "fitness", "work"}
-	h := data.Habit{
+	h := core.Habit{
 		State:  "no_info",
 		Date:   date,
 		Origin: "automated",

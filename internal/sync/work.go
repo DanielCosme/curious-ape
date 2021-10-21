@@ -2,16 +2,17 @@ package sync
 
 import (
 	"encoding/json"
-	"errors"
+	"github.com/danielcosme/curious-ape/internal/core"
+	"github.com/danielcosme/curious-ape/internal/errors"
 	"log"
 	"time"
 
-	"github.com/danielcosme/curious-ape/internal/data"
+	"github.com/danielcosme/curious-ape/internal/models"
 	"github.com/danielcosme/curious-ape/internal/sync/toggl"
 )
 
 type WorkCollector struct {
-	Models *data.Models
+	Models *models.DB
 	*toggl.WorkProvider
 }
 
@@ -76,9 +77,9 @@ func (co *WorkCollector) GetRecord(date string) error {
 func (co *WorkCollector) decodeAndSave(date string, jsonRecord []byte) error {
 	r, err := co.decode(date, jsonRecord)
 	if err != nil {
-		if errors.Is(err, ErrNoRecord) {
+		if errors.Is(err, errors.ErrNoRecord) {
 			log.Println(err.Error(), "for", date)
-			wr := &data.WorkRecord{
+			wr := &core.WorkRecord{
 				Date:     date,
 				Provider: "missing/toggl",
 				Total:    0,
@@ -98,16 +99,16 @@ func (co *WorkCollector) decodeAndSave(date string, jsonRecord []byte) error {
 	return nil
 }
 
-func (co *WorkCollector) decode(date string, jsonResponse []byte) (*data.WorkRecord, error) {
+func (co *WorkCollector) decode(date string, jsonResponse []byte) (*core.WorkRecord, error) {
 	var jsonMap map[string]interface{}
-	workRecord := &data.WorkRecord{}
+	workRecord := &core.WorkRecord{}
 
 	if err := json.Unmarshal(jsonResponse, &jsonMap); err != nil {
 		return nil, err
 	}
 	total, ok := jsonMap["total_grand"].(float64)
 	if !ok {
-		return nil, ErrNoRecord
+		return nil, errors.ErrNoRecord
 	}
 
 	workRecord.Date = date
@@ -118,7 +119,7 @@ func (co *WorkCollector) decode(date string, jsonResponse []byte) (*data.WorkRec
 	return workRecord, nil
 }
 
-func (co *WorkCollector) saveLog(wr *data.WorkRecord) error {
+func (co *WorkCollector) saveLog(wr *core.WorkRecord) error {
 	err := co.Models.WorkRecords.Insert(wr)
 	if err != nil {
 		return err
@@ -132,9 +133,9 @@ func (co *WorkCollector) saveLog(wr *data.WorkRecord) error {
 	return nil
 }
 
-func (co *WorkCollector) saveWorkHabit(wr *data.WorkRecord) error {
+func (co *WorkCollector) saveWorkHabit(wr *core.WorkRecord) error {
 	log.Println("Saving Work habit for", wr.Date)
-	var habit *data.Habit = &data.Habit{
+	habit := &core.Habit{
 		Date:   wr.Date,
 		Origin: wr.Provider,
 		Type:   "work",
@@ -181,7 +182,7 @@ func (co *WorkCollector) BuildHabitsFromWorkRecords() (err error) {
 		if habit.State == "no_info" && habit.Type == "work" {
 			habit.State = "no"
 			habit.Origin = "missing/toggl"
-			co.Models.Habits.Update(habit)
+			co.Models.Habits.Update(&habit)
 		}
 	}
 

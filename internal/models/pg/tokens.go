@@ -1,17 +1,16 @@
-package data
+package pg
 
 import (
 	"database/sql"
+	"github.com/danielcosme/curious-ape/internal/core"
 	"log"
-
-	"github.com/danielcosme/curious-ape/internal/auth"
 )
 
 type AuthTokenModel struct {
 	DB *sql.DB
 }
 
-func (a *AuthTokenModel) Update(t auth.Token) error {
+func (a *AuthTokenModel) Update(t core.Token) error {
 	stm := `UPDATE auth_tokens SET access_token = $1, refresh_token = $2
 			WHERE service = $3`
 	args := []interface{}{t.AccessToken, t.RefreshToken, t.Service}
@@ -24,8 +23,8 @@ func (a *AuthTokenModel) Update(t auth.Token) error {
 	return nil
 }
 
-func (a *AuthTokenModel) Get(srv string) (*auth.Token, error) {
-	t := &auth.Token{}
+func (a *AuthTokenModel) Get(srv string) (*core.Token, error) {
+	t := &core.Token{}
 	stm := `SELECT access_token, refresh_token FROM auth_tokens
 			WHERE service = $1`
 

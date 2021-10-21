@@ -4,20 +4,20 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/danielcosme/curious-ape/internal/core"
 	"io"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/danielcosme/curious-ape/internal/auth"
-	"github.com/danielcosme/curious-ape/internal/data"
 )
 
 var ErrNoFitRecord = errors.New("no record")
 
 type FitnessProvider struct {
 	Auth  *auth.AuthConfig
-	Token *data.AuthTokenModel
+	Token core.AuthTokenModel
 	Scope string
 }
 
