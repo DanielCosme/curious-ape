@@ -50,11 +50,17 @@ git_description = $(shell git describe --always --dirty --tags --long)
 linker_flags = '-s -X main.buildTime=${current_time} -X main.version=${git_description} -extldflags "-static"'
 
 ## build/api: build the cmd/api application
-.PHONY: build/api
-build/api:
+.PHONY: build/api/linux
+build/api/linux:
 	@echo 'Building cmd/api...'
 	@echo $current_time
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/ape ./cmd/api
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/ape ./cmd/httpd
+
+.PHONY: build/api/mac
+build/api/mac:
+	@echo 'Building cmd/api...'
+	@echo $current_time
+	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/ape ./cmd/httpd
 
 # ==================================================================================== #
 # QUALITY CONTROL
