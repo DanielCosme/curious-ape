@@ -6,21 +6,21 @@ import (
 )
 
 type HabitsInteractor struct {
-	Service repository.Habit
+	repo repository.Habit
 }
 
-func (hc *HabitsInteractor) Create(h *entity.Habit) (*entity.Habit, error) {
+func (hi *HabitsInteractor) Create(h *entity.Habit) (*entity.Habit, error) {
 	// At least one history entry?
-	if err := hc.Service.Create(h); err != nil {
+	if err := hi.repo.Create(h); err != nil {
 		return nil, err
 	}
 	return h, nil
 }
 
-func (hc *HabitsInteractor) GetAll() ([]*entity.Habit, error) {
-	q := entity.HabitQuery{
+func (hi *HabitsInteractor) GetAll() ([]*entity.Habit, error) {
+	q := &entity.HabitQuery{
 		Query:     nil,
 		DateQuery: nil,
 	}
-	return hc.Service.Find(q)
+	return hi.repo.Find(q)
 }

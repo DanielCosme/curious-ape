@@ -2,15 +2,20 @@ package application
 
 import (
 	"database/sql"
-	"github.com/danielcosme/curious-ape/internal/datasources/sqlite"
+
+	"github.com/danielcosme/curious-ape/internal/core/repository"
+	"github.com/danielcosme/curious-ape/internal/datasource/sqlite"
 )
 
 type App struct {
-	Habits *HabitsInteractor
+	Habits repository.Habit
 }
 
 func New(db *sql.DB) *App {
 	return &App{
-		Habits: &HabitsInteractor{Service: sqlite.New(db)},
+		Habits: sqlite.NewHabitsService(db),
 	}
+}
+
+func (a *App) tester() {
 }

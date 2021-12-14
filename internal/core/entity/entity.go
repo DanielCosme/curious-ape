@@ -6,21 +6,23 @@ import (
 	"github.com/danielcosme/curious-ape/internal/utils/uuid"
 )
 
-type ID string
+type UUID string
 
 type Entity struct {
-	ID
+	UUID
+	ID        string
+	NID       int
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
-func generateID() ID {
-	return ID(uuid.NewUUID())
+func generateID() UUID {
+	return UUID(uuid.NewUUID())
 }
 
 func NewEntity() *Entity {
 	return &Entity{
-		ID:        generateID(),
+		UUID:      generateID(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}

@@ -23,8 +23,8 @@ type HabitType struct {
 
 type HabitHistoryEntry struct {
 	Entity
-	HabitID     ID
-	Name        string // provider, client, automated? (fitbit, google, web, android, system, cron, event)
+	HabitID UUID
+	Name    string // provider, client, automated? (fitbit, google, web, android, system, cron, event)
 	Automated   bool   // manual or automated
 	Success     bool   // yes or not
 	Description string // by missing record, by waking up before 7, 5hours of work, because I can, etc.

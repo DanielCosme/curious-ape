@@ -2,33 +2,63 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
-	"github.com/danielcosme/curious-ape/internal/core/application"
-	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"log"
+	"net/http"
+	"time"
+
+	"github.com/danielcosme/curious-ape/internal/core/application"
+	"github.com/danielcosme/curious-ape/internal/datasource/sqlite"
+	"github.com/danielcosme/curious-ape/internal/transport/httprest"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type Config struct {
-}
-
-type RestAPI struct {
-	App    *application.App
-	Config *Config
+type config struct {
+	Database struct {
+		DNS string
+	}
 }
 
 func main() {
-	db, err := sql.Open("sqlite3", "./ape.db")
+	// Load configuration: env, file, flags
+	// Dial data sources: databases...
+	// Initialize transport: server, router, logger, etc...
+	//		Wrap and invoke application logic.
+	// Listen and serve
+	cfg := &config{}
+	cfg.Database.DNS = "ape.db"
+
+	db, err := openDB(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
 
-	p := &RestAPI{
+	api := &httprest.API{
 		App: application.New(db),
 	}
+	
+	api.Server = &http.Server{
+		Addr:              ":4000",
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 30 * time.Second,
+	}
 
-	_, _ = p.App.Habits.Create(&entity.Habit{})
-	fmt.Println("The end")
+	if err := api.Run() ; err != nil {
+		log.Fatal()
+	}
+}
+
+func openDB(cfg *config) (*sql.DB, error) {
+	db, err := sql.Open(sqlite.DriverName, cfg.Database.DNS)
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
 }

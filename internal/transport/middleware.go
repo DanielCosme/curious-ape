@@ -1,4 +1,4 @@
-package api
+package transport
 
 //
 // import (
@@ -37,20 +37,6 @@ package api
 // 	})
 // }
 //
-// func (a *main.application) recoverPanic(next http.Handler) http.Handler {
-// 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-// 		// Create a deferred function (which will always be run in the event of a panic
-// 		// as Go unwinds the stack).
-// 		defer func() {
-// 			if err := recover(); err != nil {
-// 				rw.Header().Set("Connection", "close")
-// 				a.serverErrorResponse(rw, r, fmt.Errorf("%s", err))
-// 			}
-// 		}()
-//
-// 		next.ServeHTTP(rw, r)
-// 	})
-// }
 //
 // func (a *main.application) rateLimit(next http.Handler) http.Handler {
 // 	limiter := rate.NewLimiter(rate.Limit(a.config.limiter.rps), a.config.limiter.burst)

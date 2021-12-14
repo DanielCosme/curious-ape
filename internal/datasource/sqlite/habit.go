@@ -10,11 +10,11 @@ type HabitService struct {
 	db *sql.DB
 }
 
-func New (db *sql.DB) *HabitService {
+func NewHabitsService(db *sql.DB) *HabitService {
 	return &HabitService{db}
 }
 
-func (h HabitService) GetByID(id entity.ID) (*entity.Habit, error) {
+func (h HabitService) GetByID(id entity.UUID) (*entity.Habit, error) {
 	panic("implement me")
 }
 
@@ -23,7 +23,7 @@ func (h HabitService) Create(habit *entity.Habit) error {
 	return nil
 }
 
-func (h HabitService) Find(query entity.HabitQuery) ([]*entity.Habit, error) {
+func (h HabitService) Find(query *entity.HabitQuery) ([]*entity.Habit, error) {
 	panic("implement me")
 }
 
@@ -31,7 +31,7 @@ func (h HabitService) Update(habit *entity.Habit) (*entity.Habit, error) {
 	panic("implement me")
 }
 
-func (h HabitService) Delete(id entity.ID) error {
+func (h HabitService) Delete(id entity.UUID) error {
 	panic("implement me")
 }
 
@@ -42,4 +42,3 @@ func (h HabitService) CreateHistoryEntry(hhe *entity.HabitHistoryEntry) error {
 func (h HabitService) CreateCustomHabit(habitType *entity.HabitType) error {
 	panic("implement me")
 }
-
