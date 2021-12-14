@@ -14,11 +14,15 @@ type API struct {
 }
 
 func (a *API) Run() error {
-	fmt.Printf("Http server listening on: %s", a.Server.Addr)
+	fmt.Printf("Http server listening on: %s\n", a.Server.Addr)
 	a.Handler = a.Routes()
 	return a.ListenAndServe()
 }
 
 func (a *API) Ping(rw http.ResponseWriter, r *http.Request) {
 	rest.JSON(rw, http.StatusOK, rest.Envelope{"message": "pong"})
+}
+
+func (a *API) NotFound(rw http.ResponseWriter, r *http.Request) {
+	rest.JSON(rw, http.StatusNotFound, rest.Envelope{"error": "not found"})
 }
