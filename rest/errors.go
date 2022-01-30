@@ -2,13 +2,25 @@ package rest
 
 import "net/http"
 
-type HTTPErr struct {
-	Code     int    `json:"-"`
-	Message  string `json:"message"`
-	Internal error  `json:"-"`
+func ErrResponse(w http.ResponseWriter, code int, payload interface{}) {
+	JSON(w, code, Payload("error", payload))
 }
 
+func ErrBadRequest(w http.ResponseWriter, payload interface{}) {
+	ErrResponse(w, http.StatusBadRequest, payload)
+}
 
-func NewErr(rw http.ResponseWriter, code int, msg string) {
-	rw.WriteHeader(code)
+func ErrInternalServer(w http.ResponseWriter) {
+	s := http.StatusInternalServerError
+	ErrResponse(w, s, http.StatusText(s))
+}
+
+func ErrNotFound(w http.ResponseWriter) {
+	s := http.StatusNotFound
+	ErrResponse(w, s, http.StatusText(s))
+}
+
+func ErrMethodNotSupported(w http.ResponseWriter) {
+	s := http.StatusMethodNotAllowed
+	ErrResponse(w, s, http.StatusText(s))
 }

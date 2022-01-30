@@ -1,44 +1,52 @@
 package sqlite
 
 import (
-	"database/sql"
-	"fmt"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
+	"github.com/jmoiron/sqlx"
 )
 
-type HabitService struct {
-	db *sql.DB
+type HabitsDataSource struct {
+	DB *sqlx.DB
 }
 
-func NewHabitsService(db *sql.DB) *HabitService {
-	return &HabitService{db}
+func NewHabitsDataSource(db *sqlx.DB) *HabitsDataSource {
+	return &HabitsDataSource{db}
 }
 
-func (h HabitService) GetByID(id entity.UUID) (*entity.Habit, error) {
+func (ds HabitsDataSource) GetByUUID(id string) (*entity.Habit, error) {
+	var habit *entity.Habit
+	query := `SELECT * FROM habits where uuid=$1`
+	return habit, ds.DB.Get(habit, query, id)
+}
+
+func (ds HabitsDataSource) Create(h *entity.Habit) error {
+	query := `
+		INSERT INTO habits ( id, state, time, creation_time, update_time ) 
+		VALUES (:id, :state, :time, :creation_time, :update_time)
+		RETURNING id
+	`
+	_, err := ds.DB.NamedExec(query, h)
+	return err
+}
+
+func (ds HabitsDataSource) Find(filter *entity.HabitQuery) ([]*entity.Habit, error) {
+	habits := []*entity.Habit{}
+	query := `SELECT * from habits`
+	return habits, ds.DB.Select(&habits, query)
+}
+
+func (ds HabitsDataSource) Update(habit *entity.Habit) (*entity.Habit, error) {
 	panic("implement me")
 }
 
-func (h HabitService) Create(habit *entity.Habit) error {
-	fmt.Println("We have created")
-	return nil
-}
-
-func (h HabitService) Find(query *entity.HabitQuery) ([]*entity.Habit, error) {
+func (ds HabitsDataSource) Delete(id string) error {
 	panic("implement me")
 }
 
-func (h HabitService) Update(habit *entity.Habit) (*entity.Habit, error) {
+func (ds HabitsDataSource) CreateHistoryEntry(hhe *entity.HabitHistoryEntry) error {
 	panic("implement me")
 }
 
-func (h HabitService) Delete(id entity.UUID) error {
-	panic("implement me")
-}
-
-func (h HabitService) CreateHistoryEntry(hhe *entity.HabitHistoryEntry) error {
-	panic("implement me")
-}
-
-func (h HabitService) CreateCustomHabit(habitType *entity.HabitType) error {
+func (ds HabitsDataSource) CreateCustomHabit(habitType *entity.HabitType) error {
 	panic("implement me")
 }

@@ -1,30 +1,23 @@
 package entity
 
-import (
-	habitsC "github.com/danielcosme/curious-ape/internal/core/entity/constants/habit"
-	"time"
-)
-
 type Habit struct {
 	Entity
-	Day     Day
-	Time    time.Time
-	Type    HabitType
-	History []HabitHistoryEntry
-	// generated
-	State habitsC.State
+	Day   Day
+	State HabitState `db:"state"`
+	Type  *HabitType
+	// History []*HabitHistoryEntry
 }
 
 type HabitType struct {
 	Entity
 	Name string
-	Code habitsC.Code
+	Code HabitCode
 }
 
 type HabitHistoryEntry struct {
 	Entity
-	HabitID UUID
-	Name    string // provider, client, automated? (fitbit, google, web, android, system, cron, event)
+	HabitID     string
+	Name        string // provider, client, automated? (fitbit, google, web, android, system, cron, event)
 	Automated   bool   // manual or automated
 	Success     bool   // yes or not
 	Description string // by missing record, by waking up before 7, 5hours of work, because I can, etc.
@@ -33,5 +26,23 @@ type HabitHistoryEntry struct {
 type HabitQuery struct {
 	*Query
 	*DateQuery
-	Code habitsC.Code
+	Code HabitCode
 }
+
+type HabitState string
+
+const (
+	Done    HabitState = "done"
+	NoInfo  HabitState = "no-info"
+	NotDone HabitState = "not-done"
+)
+
+type HabitCode string
+
+const (
+	Food     HabitCode = "food"
+	DeepWork HabitCode = "deep-work"
+	Fitness  HabitCode = "fitness"
+	WakeUp   HabitCode = "wake-up"
+	Custom   HabitCode = "custom"
+)

@@ -9,34 +9,35 @@ import (
 	"strings"
 )
 
-type Envelope map[string]interface{}
-
-const HeaderContentType = "Content-Type"
-
-func JSON(rw http.ResponseWriter, status int, data Envelope) error {
-	return writeJSON(rw, status, data, nil)
+func JSON(w http.ResponseWriter, status int, data *Envelope) {
+	writeJSON(w, status, data, nil)
 }
 
-func JSONWithHeaders(rw http.ResponseWriter, status int, data Envelope, headers http.Header) error {
-	return writeJSON(rw, status, data, headers)
+func JSONStatusOk(w http.ResponseWriter, data *Envelope) {
+	writeJSON(w, http.StatusOK, data, nil)
 }
 
-func writeJSON(rw http.ResponseWriter, status int, data Envelope, headers http.Header) error {
+func JSONWithHeaders(w http.ResponseWriter, status int, data *Envelope, headers http.Header) {
+	writeJSON(w, status, data, headers)
+}
+
+func writeJSON(w http.ResponseWriter, status int, data *Envelope, headers http.Header) {
 	js, err := json.Marshal(data)
 	if err != nil {
-		return err
+		panic(err.Error())
 	}
 
-	WriteHeaders(rw, headers)
-	rw.Header().Set(HeaderContentType, "application/json")
-	rw.WriteHeader(status)
-	_, err = rw.Write(js)
-	return err
+	WriteHeaders(w, headers)
+	w.Header().Set(HeaderContentType, "application/json")
+	w.WriteHeader(status)
+	if data != nil {
+		_, _ = w.Write(js)
+	}
 }
 
-func WriteHeaders(rw http.ResponseWriter, headers http.Header) {
+func WriteHeaders(w http.ResponseWriter, headers http.Header) {
 	for k, v := range headers {
-		rw.Header()[k] = v
+		w.Header()[k] = v
 	}
 }
 

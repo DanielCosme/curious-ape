@@ -1,16 +1,15 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/danielcosme/curious-ape/internal/core/application"
 	"github.com/danielcosme/curious-ape/internal/datasource/sqlite"
-	"github.com/danielcosme/curious-ape/internal/transport/httprest"
+	"github.com/danielcosme/curious-ape/internal/transport"
 
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/jmoiron/sqlx"
 )
 
 type config struct {
@@ -28,37 +27,19 @@ func main() {
 	cfg := &config{}
 	cfg.Database.DNS = "ape.db"
 
-	db, err := openDB(cfg)
-	if err != nil {
-		log.Fatal(err)
-	}
+	db := sqlx.MustConnect(sqlite.DriverName, cfg.Database.DNS)
 
-	api := &httprest.API{
+	api := &transport.Transport{
 		App: application.New(db),
-	}
-	
-	api.Server = &http.Server{
-		Addr:              ":4000",
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
+		Server: &http.Server{
+			Addr:         ":4000",
+			IdleTimeout:  time.Minute,
+			ReadTimeout:  10 * time.Second,
+			WriteTimeout: 30 * time.Second,
+		},
 	}
 
-	if err := api.Run() ; err != nil {
+	if err := api.ListenAndServe(); err != nil {
 		log.Fatal()
 	}
-}
-
-func openDB(cfg *config) (*sql.DB, error) {
-	db, err := sql.Open(sqlite.DriverName, cfg.Database.DNS)
-	if err != nil {
-		return nil, err
-	}
-
-	err = db.Ping()
-	if err != nil {
-		return nil, err
-	}
-
-	return db, nil
 }

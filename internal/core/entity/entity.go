@@ -1,28 +1,20 @@
 package entity
 
 import (
-	"time"
-
 	"github.com/danielcosme/curious-ape/internal/utils/uuid"
+	"time"
 )
 
-type UUID string
-
 type Entity struct {
-	UUID
-	ID        string
-	NID       int
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        uint      `db:"id"`
+	UUID      string    `db:"uuid"`
+	CreatedAt time.Time `db:"creation_time"`
+	UpdatedAt time.Time `db:"update_time"`
 }
 
-func generateID() UUID {
-	return UUID(uuid.NewUUID())
-}
-
-func NewEntity() *Entity {
-	return &Entity{
-		UUID:      generateID(),
+func NewEntity() Entity {
+	return Entity{
+		UUID:      uuid.NewUUID(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}

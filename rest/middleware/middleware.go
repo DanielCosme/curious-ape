@@ -19,13 +19,13 @@ func (m *Middleware) Use(middleware HTTPMiddleware) {
 }
 
 func (m *Middleware) Commit(h http.Handler) http.Handler {
-	for i := len(m.middlewares) -1; i >= 0 ; i-- {
+	for i := len(m.middlewares) - 1; i >= 0; i-- {
 		h = m.middlewares[i](h)
 	}
 
 	return h
 }
 
-func(m *Middleware) Then(f http.HandlerFunc) http.Handler{
+func (m *Middleware) Then(f http.HandlerFunc) http.Handler {
 	return m.Commit(f)
 }
