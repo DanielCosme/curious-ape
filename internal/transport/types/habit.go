@@ -2,13 +2,14 @@ package types
 
 import (
 	"github.com/danielcosme/curious-ape/internal/core/entity"
+	"github.com/danielcosme/curious-ape/internal/dates"
 	"time"
 )
 
 type HabitTransport struct {
 	ID           int                `json:"id"`
 	Success      bool               `json:"success"`
-	Date         time.Time          `json:"date,omitempty"`
+	Date         *time.Time         `json:"date,omitempty"`
 	CategoryID   int                `json:"category_id,omitempty"`
 	CategoryCode string             `json:"category_code,omitempty"`
 	Type         entity.HabitType   `json:"category_type,omitempty"`
@@ -32,13 +33,18 @@ func (ht *HabitTransport) ToHabit() *entity.Habit {
 }
 
 func FromHabitToTransport(h *entity.Habit) *HabitTransport {
-	return &HabitTransport{
+	ht := &HabitTransport{
 		ID:          h.ID,
 		Success:     h.Success,
 		Origin:      h.Origin,
-		Date:        h.Day.Date,
 		Type:        h.Category.Type,
 		IsAutomated: h.IsAutomated,
 		Note:        h.Note,
 	}
+
+	if h.Day != nil {
+		ht.Date = dates.ToPtr(h.Day.Date)
+	}
+
+	return ht
 }

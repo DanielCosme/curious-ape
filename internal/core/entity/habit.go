@@ -55,6 +55,7 @@ const (
 
 type HabitFilter struct {
 	ID          []int
+	DayIDs      []int
 	CategoryIDs []int
 }
 

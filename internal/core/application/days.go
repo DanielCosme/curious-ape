@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/core/repository"
+	"github.com/danielcosme/curious-ape/internal/datasource"
 	"github.com/danielcosme/curious-ape/internal/dates"
 	"time"
 )
@@ -19,7 +20,7 @@ func (a *App) DayCreate(d *entity.Day) (*entity.Day, error) {
 }
 
 func (a *App) DaysGetAll() ([]*entity.Day, error) {
-	return a.db.Days.Find(entity.DayFilter{})
+	return a.db.Days.Find(entity.DayFilter{}, datasource.DaysPipeline(a.db)...)
 }
 
 func (a *App) DayGetByDate(date time.Time) (*entity.Day, error) {

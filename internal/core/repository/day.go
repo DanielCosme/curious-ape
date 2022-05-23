@@ -5,7 +5,18 @@ import (
 )
 
 type Day interface {
-	Create(day *entity.Day) error
-	Get(filter entity.DayFilter) (*entity.Day, error)
-	Find(filter entity.DayFilter) ([]*entity.Day, error)
+	Create(*entity.Day) error
+	Get(entity.DayFilter, ...entity.DayJoin) (*entity.Day, error)
+	Find(entity.DayFilter, ...entity.DayJoin) ([]*entity.Day, error)
+	// Helpers
+	ToIDs([]*entity.Day) []int
+}
+
+func ExecuteDaysPipeline(days []*entity.Day, joins ...entity.DayJoin) error {
+	for _, j := range joins {
+		if err := j(days); err != nil {
+			return err
+		}
+	}
+	return nil
 }

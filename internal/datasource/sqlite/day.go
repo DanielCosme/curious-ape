@@ -22,7 +22,7 @@ func (ds *DaysDataSource) Create(d *entity.Day) error {
 	return err
 }
 
-func (ds *DaysDataSource) Get(filter entity.DayFilter) (*entity.Day, error) {
+func (ds *DaysDataSource) Get(filter entity.DayFilter, joins ...entity.DayJoin) (*entity.Day, error) {
 	day := new(entity.Day)
 	q, args := newDayQueryBuilder(filter).Generate()
 	return day, parseError(ds.DB.Get(day, q, args...))
@@ -40,7 +40,7 @@ func parseError(err error) error {
 	}
 }
 
-func (ds *DaysDataSource) Find(filter entity.DayFilter) ([]*entity.Day, error) {
+func (ds *DaysDataSource) Find(filter entity.DayFilter, joins ...entity.DayJoin) ([]*entity.Day, error) {
 	days := []*entity.Day{}
 	query := `SELECT * from "days"`
 	if len(filter.IDs) > 0 {
@@ -49,10 +49,16 @@ func (ds *DaysDataSource) Find(filter entity.DayFilter) ([]*entity.Day, error) {
 			return nil, err
 		}
 
-		return days, ds.DB.Select(&days, q, args...)
+		if err := ds.DB.Select(&days, q, args...); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := ds.DB.Select(&days, query); err != nil {
+			return nil, err
+		}
 	}
 
-	return days, ds.DB.Select(&days, query)
+	return days, repository.ExecuteDaysPipeline(days, joins...)
 }
 
 func newDayQueryBuilder(f entity.DayFilter) *QueryBuilder {
@@ -106,4 +112,12 @@ func (g *QueryBuilder) Generate() (string, []interface{}) {
 	query += strings.Join(lines, " OR ")
 
 	return query, args
+}
+
+func (ds *DaysDataSource) ToIDs(days []*entity.Day) []int {
+	ids := []int{}
+	for _, d := range days {
+		ids = append(ids, d.ID)
+	}
+	return ids
 }

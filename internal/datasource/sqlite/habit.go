@@ -38,9 +38,22 @@ func (ds *HabitsDataSource) Create(h *entity.Habit, joins ...entity.HabitJoin) e
 func (ds *HabitsDataSource) Find(filter entity.HabitFilter, joins ...entity.HabitJoin) ([]*entity.Habit, error) {
 	habits := []*entity.Habit{}
 	query := `SELECT * from habits`
-	if err := ds.DB.Select(&habits, query); err != nil {
-		return nil, err
+
+	if len(filter.DayIDs) > 0 {
+		q, args, err := sqlx.In(fmt.Sprintf("%s WHERE day_id IN (?)", query), filter.DayIDs)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := ds.DB.Select(&habits, q, args...); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := ds.DB.Select(&habits, query); err != nil {
+			return nil, err
+		}
 	}
+
 	return habits, repository.ExecuteHabitsPipeline(habits, joins...)
 }
 
