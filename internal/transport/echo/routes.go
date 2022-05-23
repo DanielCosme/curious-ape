@@ -34,6 +34,8 @@ func Routes(a *application.App) http.Handler {
 		habitsByID := habits.Group("/:id", middleware.SetHabit(a))
 		{
 			habitsByID.GET("", h.HabitGetByID)
+			habitsByID.PUT("", h.HabitFullUpdate)
+			habitsByID.DELETE("", h.HabitDelete)
 		}
 	}
 

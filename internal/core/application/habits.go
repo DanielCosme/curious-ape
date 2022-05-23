@@ -25,6 +25,15 @@ func (a *App) HabitCreate(d *entity.Day, h *entity.Habit) (*entity.Habit, error)
 	return h, nil
 }
 
+func (a *App) HabitFullUpdate(habit, data *entity.Habit) (*entity.Habit, error) {
+	data.ID = habit.ID
+	return a.db.Habits.Update(data, datasource.HabitsPipeline(a.db)...)
+}
+
+func (a *App) HabitDelete(habit *entity.Habit) error {
+	return a.db.Habits.Delete(habit.ID)
+}
+
 func (a *App) HabitsGetAll(from, to time.Time) ([]*entity.Habit, error) {
 	return a.db.Habits.Find(entity.HabitFilter{}, datasource.HabitsPipeline(a.db)...)
 }

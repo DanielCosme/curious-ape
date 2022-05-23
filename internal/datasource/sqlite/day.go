@@ -107,4 +107,3 @@ func (g *QueryBuilder) Generate() (string, []interface{}) {
 
 	return query, args
 }
-

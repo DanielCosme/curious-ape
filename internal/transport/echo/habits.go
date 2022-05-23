@@ -10,10 +10,6 @@ import (
 )
 
 func (h *Handler) HabitsGetAll(c echo.Context) error {
-	// If there is a day, then filter by day
-	// Check also for date ranges
-	// else return the whole thing
-
 	hs, err := h.App.HabitsGetAll(time.Now(), time.Now())
 	if err != nil {
 		return err
@@ -52,6 +48,26 @@ func (h *Handler) HabitCreate(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, types.FromHabitToTransport(habit))
+}
+
+func (h *Handler) HabitFullUpdate(c echo.Context) error {
+	habit := c.Get("habit").(*entity.Habit)
+
+	data := &types.HabitTransport{}
+	if err := c.Bind(data); err != nil {
+		return err
+	}
+
+	habit, err := h.App.HabitFullUpdate(habit, data.ToHabit())
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, types.FromHabitToTransport(habit))
+}
+
+func (h *Handler) HabitDelete(c echo.Context) error {
+	habit := c.Get("habit").(*entity.Habit)
+	return h.App.HabitDelete(habit)
 }
 
 func (h *Handler) HabitsGetAllCategories(c echo.Context) error {

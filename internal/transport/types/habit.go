@@ -6,6 +6,7 @@ import (
 )
 
 type HabitTransport struct {
+	ID           int                `json:"id"`
 	Success      bool               `json:"success"`
 	Date         time.Time          `json:"date,omitempty"`
 	CategoryID   int                `json:"category_id,omitempty"`
@@ -13,6 +14,7 @@ type HabitTransport struct {
 	Type         entity.HabitType   `json:"category_type,omitempty"`
 	Origin       entity.HabitOrigin `json:"origin,omitempty"`
 	Note         string             `json:"note,omitempty"`
+	IsAutomated  bool               `json:"is_automated,omitempty"`
 }
 
 func (ht *HabitTransport) ToHabit() *entity.Habit {
@@ -31,9 +33,12 @@ func (ht *HabitTransport) ToHabit() *entity.Habit {
 
 func FromHabitToTransport(h *entity.Habit) *HabitTransport {
 	return &HabitTransport{
-		Success: h.Success,
-		Origin:  h.Origin,
-		Date:    h.Day.Date,
-		Type:    h.Category.Type,
+		ID:          h.ID,
+		Success:     h.Success,
+		Origin:      h.Origin,
+		Date:        h.Day.Date,
+		Type:        h.Category.Type,
+		IsAutomated: h.IsAutomated,
+		Note:        h.Note,
 	}
 }

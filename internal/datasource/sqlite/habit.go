@@ -44,12 +44,23 @@ func (ds *HabitsDataSource) Find(filter entity.HabitFilter, joins ...entity.Habi
 	return habits, repository.ExecuteHabitsPipeline(habits, joins...)
 }
 
-func (ds *HabitsDataSource) Update(habit *entity.Habit, joins ...entity.HabitJoin) (*entity.Habit, error) {
-	panic("implement me")
+func (ds *HabitsDataSource) Update(data *entity.Habit, joins ...entity.HabitJoin) (*entity.Habit, error) {
+	query := `
+		UPDATE habits
+		SET success = :success, origin = :origin, is_automated = :is_automated, note = :note
+		WHERE id = :id
+	`
+	_, err := ds.DB.NamedExec(query, data)
+	if err != nil {
+		return nil, err
+	}
+	return ds.Get(entity.HabitFilter{ID: []int{data.ID}}, joins...)
 }
 
 func (ds *HabitsDataSource) Delete(id int) error {
-	panic("implement me")
+	q := `DELETE FROM habits WHERE id = ?`
+	_, err := ds.DB.Exec(q, id)
+	return err
 }
 
 func (ds *HabitsDataSource) FindHabitCategories(filter entity.HabitFilter) ([]*entity.HabitCategory, error) {

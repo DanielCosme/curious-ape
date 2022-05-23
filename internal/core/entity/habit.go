@@ -54,8 +54,8 @@ const (
 )
 
 type HabitFilter struct {
-	ID           []int
-	CategoryIDs  []int
+	ID          []int
+	CategoryIDs []int
 }
 
 type HabitJoin func(hs []*Habit) error
