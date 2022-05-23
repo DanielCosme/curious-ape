@@ -1,48 +1,61 @@
 package entity
 
+const HabitCodeDefault = "default"
+
 type Habit struct {
-	Entity
-	Day   Day
-	State HabitState `db:"state"`
-	Type  *HabitType
-	// History []*HabitHistoryEntry
+	// Repository
+	ID         int `db:"id"`
+	DayID      int `db:"day_id"`
+	CategoryID int `db:"habit_category_id"`
+	// Core
+	IsAutomated bool        `db:"is_automated"`
+	Success     bool        `db:"success"`
+	Note        string      `db:"note"`
+	Origin      HabitOrigin `db:"origin"`
+	// Generated
+	Category *HabitCategory `db:"habit_categories"`
+	Day      *Day           `db:"day"`
 }
 
-type HabitType struct {
-	Entity
-	Name string
-	Code HabitCode
+type HabitCategory struct {
+	ID          int       `db:"id"`
+	Name        string    `db:"name"`
+	Type        HabitType `db:"type"`
+	Code        string    `db:"code"`
+	Description string    `db:"description"`
+	Color       string    `db:"color"`
 }
 
-type HabitHistoryEntry struct {
-	Entity
-	HabitID     string
-	Name        string // provider, client, automated? (fitbit, google, web, android, system, cron, event)
-	Automated   bool   // manual or automated
-	Success     bool   // yes or not
-	Description string // by missing record, by waking up before 7, 5hours of work, because I can, etc.
-}
-
-type HabitQuery struct {
-	*Query
-	*DateQuery
-	Code HabitCode
-}
-
-type HabitState string
+type HabitType string
 
 const (
-	Done    HabitState = "done"
-	NoInfo  HabitState = "no-info"
-	NotDone HabitState = "not-done"
+	HabitTypeFood     HabitType = "food"
+	HabitTypeWakeUp   HabitType = "wake-up"
+	HabitTypeFitness  HabitType = "fitness"
+	HabitTypeDeepWork HabitType = "deep-work"
+	HabitTypeCustom   HabitType = "custom"
 )
 
-type HabitCode string
+func IsValidHabitCategoryType(habitType HabitType) bool {
+	switch habitType {
+	case HabitTypeFood, HabitTypeCustom, HabitTypeFitness, HabitTypeWakeUp, HabitTypeDeepWork:
+		return true
+	}
+	return false
+}
+
+type HabitOrigin string
 
 const (
-	Food     HabitCode = "food"
-	DeepWork HabitCode = "deep-work"
-	Fitness  HabitCode = "fitness"
-	WakeUp   HabitCode = "wake-up"
-	Custom   HabitCode = "custom"
+	HabitOriginClient    HabitOrigin = "client"
+	HabitOriginProvider  HabitOrigin = "provider"
+	HabitOriginWebSystem HabitOrigin = "system"
+	HabitOriginUnknown   HabitOrigin = "unknown"
 )
+
+type HabitFilter struct {
+	ID           []int
+	CategoryIDs  []int
+}
+
+type HabitJoin func(hs []*Habit) error

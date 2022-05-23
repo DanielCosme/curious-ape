@@ -2,30 +2,37 @@ package application
 
 import (
 	"github.com/danielcosme/curious-ape/internal/core/entity"
-	"github.com/danielcosme/curious-ape/internal/core/repository"
+	"github.com/danielcosme/curious-ape/internal/datasource"
 	"time"
 )
 
-type HabitsInteractor struct {
-	db repository.Habit
-}
-
-func (hi *HabitsInteractor) Create(h *entity.Habit) (*entity.Habit, error) {
-	// At least one history entry?
-	t := time.Now()
-	h.Entity = entity.NewEntity()
-	h.Time = t
-
-	if err := hi.db.Create(nil); err != nil {
+func (a *App) HabitCreate(d *entity.Day, h *entity.Habit) (*entity.Habit, error) {
+	hc, err := a.db.Habits.GetHabitCategory(entity.HabitFilter{ID: []int{h.CategoryID}})
+	if err != nil {
 		return nil, err
 	}
+
+	if h.Origin == "" {
+		h.Origin = entity.HabitOriginUnknown
+	}
+
+	h.DayID = d.ID
+	h.CategoryID = hc.ID
+	if err := a.db.Habits.Create(h, datasource.HabitsPipeline(a.db)...); err != nil {
+		return nil, err
+	}
+
 	return h, nil
 }
 
-func (hi *HabitsInteractor) GetAll() ([]*entity.Habit, error) {
-	return hi.db.Find(nil)
+func (a *App) HabitsGetAll(from, to time.Time) ([]*entity.Habit, error) {
+	return a.db.Habits.Find(entity.HabitFilter{}, datasource.HabitsPipeline(a.db)...)
 }
 
-func (hi *HabitsInteractor) GetByID(id string) (*entity.Habit, error) {
-	return hi.db.GetByUUID(id)
+func (a *App) HabitGetByID(id int) (*entity.Habit, error) {
+	return a.db.Habits.Get(entity.HabitFilter{ID: []int{id}}, datasource.HabitsPipeline(a.db)...)
+}
+
+func (a *App) HabitsGetCategories() ([]*entity.HabitCategory, error) {
+	return a.db.Habits.FindHabitCategories(entity.HabitFilter{})
 }

@@ -1,6 +1,6 @@
 package rest
 
 const (
-	HeaderContentType = "Content-Type"
+	HeaderContentType = "Content-Code"
 	HeaderConnection  = "Connection"
 )

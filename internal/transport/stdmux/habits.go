@@ -19,7 +19,7 @@ package stdmux
 // 		State  string `json:"state"`
 // 		Date   string `json:"date"`
 // 		Origin string `json:"origin"`
-// 		Type   string `json:"type"`
+// 		Code   string `json:"type"`
 // 	}
 //
 // 	err := a.readJSON(rw, r, &input)
@@ -32,7 +32,7 @@ package stdmux
 // 		Date:   input.Date,
 // 		State:  input.State,
 // 		Origin: input.Origin,
-// 		Type:   input.Type,
+// 		Code:   input.Code,
 // 	}
 // 	v := validator.New()
 // 	if pg.ValidateHabit(v, habit); !v.Valid() {
@@ -47,7 +47,7 @@ package stdmux
 // 	}
 //
 // 	headers := make(http.Header)
-// 	headers.Set("Location", fmt.Sprintf("/v1/habits/%d", habit.ID))
+// 	headers.Set("Location", fmt.Sprintf("/v1/habits/%d", habit.IDs))
 //
 // 	err = a.writeJSON(rw, http.StatusCreated, envelope{"Habit": habit}, headers)
 // 	if err != nil {
@@ -56,7 +56,7 @@ package stdmux
 // }
 //
 // func (a *application) listHabitsHandler(rw http.ResponseWriter, r *http.Request) {
-// 	habits, err := a.models.Habits.GetAll()
+// 	habits, err := a.models.Habits.DayGetAll()
 // 	if err != nil {
 // 		a.serverErrorResponse(rw, r, err)
 // 		return
@@ -116,7 +116,7 @@ package stdmux
 // 		State  string `json:"state"`
 // 		Date   string `json:"date"`
 // 		Origin string `json:"origin"`
-// 		Type   string `json:"type"`
+// 		Code   string `json:"type"`
 // 	}
 // 	err = a.readJSON(rw, r, &input)
 // 	if err != nil {
@@ -128,14 +128,14 @@ package stdmux
 // 		return
 // 	}
 //
-// 	if habit.Type != input.Type {
+// 	if habit.Code != input.Code {
 // 		a.badRequestResponse(rw, r, fmt.Errorf("habits must be the same type"))
 // 		return
 // 	}
 //
 // 	habit.State = input.State
 // 	habit.Date = input.Date
-// 	habit.Type = input.Type
+// 	habit.Code = input.Code
 // 	habit.Origin = input.Origin
 // 	v := validator.New()
 // 	if pg.ValidateHabit(v, habit); !v.Valid() {

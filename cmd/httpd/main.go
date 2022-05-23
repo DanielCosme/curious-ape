@@ -27,6 +27,7 @@ func main() {
 	cfg := &config{}
 	cfg.Database.DNS = "ape.db"
 
+	// panics if it cannot connect
 	db := sqlx.MustConnect(sqlite.DriverName, cfg.Database.DNS)
 
 	api := &transport.Transport{
