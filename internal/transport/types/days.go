@@ -9,7 +9,7 @@ type DayTransport struct {
 
 func DayToTransport(d *entity.Day) *DayTransport {
 	dt := &DayTransport{
-		Date:   entity.FormatDate(d.Date),
+		Date: entity.FormatDate(d.Date),
 	}
 
 	if len(d.Habits) > 0 {

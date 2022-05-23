@@ -7,14 +7,23 @@ import (
 )
 
 type App struct {
-	db *repository.Models
+	db  *repository.Models
+	env *Environment
 }
 
-func New(db *sqlx.DB) *App {
+type AppOptions struct {
+	ENV *Environment
+	DB  *sqlx.DB
+}
+
+type Environment struct{}
+
+func New(opts *AppOptions) *App {
 	return &App{
 		db: &repository.Models{
-			Habits: &sqlite.HabitsDataSource{DB: db},
-			Days:   &sqlite.DaysDataSource{DB: db},
+			Habits: &sqlite.HabitsDataSource{DB: opts.DB},
+			Days:   &sqlite.DaysDataSource{DB: opts.DB},
 		},
+		env: opts.ENV,
 	}
 }
