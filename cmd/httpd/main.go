@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/danielcosme/curious-ape/internal/core/application"
+	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/datasource/sqlite"
 	"github.com/danielcosme/curious-ape/internal/transport"
 	"github.com/jmoiron/sqlx"
@@ -21,6 +22,9 @@ func main() {
 	api := &transport.Transport{
 		App: application.New(&application.AppOptions{
 			DB: db,
+			ENV: &application.Environment{
+				Fitbit: cfg.Integrations.Fitbit,
+			},
 		}),
 		Server: &http.Server{
 			Addr:         fmt.Sprintf(":%d", cfg.Server.Port),
@@ -42,6 +46,9 @@ type config struct {
 	Server struct {
 		Port int `json:"port"`
 	} `json:"server"`
+	Integrations struct {
+		Fitbit *entity.Oauth2Config `json:"fitbit"`
+	} `json:"integrations"`
 }
 
 func readConfiguration() *config {

@@ -39,5 +39,11 @@ func Routes(a *application.App) http.Handler {
 		}
 	}
 
+	oauths := e.Group("/oauth2")
+	{
+		oauths.GET("/:provider/connect", h.Oauth2Connect)
+		oauths.GET("/:provider/success", h.Oauth2Success)
+	}
+
 	return e
 }
