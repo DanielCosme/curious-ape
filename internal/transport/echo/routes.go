@@ -39,6 +39,11 @@ func Routes(a *application.App) http.Handler {
 		}
 	}
 
+	sleepRecords := e.Group("/sleep")
+	{
+		sleepRecords.GET("/debug", h.FitbitDebug)
+	}
+
 	oauths := e.Group("/oauth2")
 	{
 		oauths.GET("/:provider/connect", h.Oauth2Connect)

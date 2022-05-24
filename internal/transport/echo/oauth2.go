@@ -18,9 +18,8 @@ func (h *Handler) Oauth2Success(c echo.Context) error {
 
 func (h *Handler) Oauth2Connect(c echo.Context) error {
 	provider := c.Param("provider")
-	c.Set("provider", provider)
 
-	url, err :=  h.App.Oauth2ConnectProvider(provider)
+	url, err := h.App.Oauth2ConnectProvider(provider)
 	if err != nil {
 		return err
 	}

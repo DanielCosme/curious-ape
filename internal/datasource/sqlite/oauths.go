@@ -36,11 +36,11 @@ func (ds *Oauth2DataSource) Get(filter entity.Oauth2Filter) (*entity.Oauth2, err
 	o := new(entity.Oauth2)
 	q := `SELECT * FROM oauths`
 
-	if len(filter.IDs) > 0 {
-		q = fmt.Sprintf("%s %s",q, "WHERE id = ?")
+	if filter.ID > 0 {
+		q = fmt.Sprintf("%s %s", q, "WHERE id = ?")
 		return o, parseError(ds.DB.Get(o, q, filter.IDs[0]))
-	} else if len(filter.Providers) > 0 {
-		q = fmt.Sprintf("%s %s",q, "WHERE provider = ?")
+	} else if filter.Provider != "" {
+		q = fmt.Sprintf("%s %s", q, "WHERE provider = ?")
 		return o, parseError(ds.DB.Get(o, q, filter.Providers[0]))
 	}
 	return nil, repository.ErrNotFound

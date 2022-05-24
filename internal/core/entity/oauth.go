@@ -2,19 +2,19 @@ package entity
 
 import "time"
 
-type IntegrationProviders string
+type IntegrationProvider string
 
 const (
 	ProviderFitbit = "fitbit"
 )
 
 type Oauth2 struct {
-	ID           int                  `db:"id"`
-	Provider     IntegrationProviders `db:"provider"`
-	AccessToken  string               `db:"access_token"`
-	RefreshToken string               `db:"refresh_token"`
-	Type         string               `db:"type"`
-	Expiration   time.Time            `db:"expiration"`
+	ID           int                 `db:"id"`
+	Provider     IntegrationProvider `db:"provider"`
+	AccessToken  string              `db:"access_token"`
+	RefreshToken string              `db:"refresh_token"`
+	Type         string              `db:"type"`
+	Expiration   time.Time           `db:"expiration"`
 }
 
 type Oauth2Config struct {
@@ -27,6 +27,8 @@ type Oauth2Config struct {
 }
 
 type Oauth2Filter struct {
+	ID        int
+	Provider  IntegrationProvider
 	IDs       []int
-	Providers []IntegrationProviders
+	Providers []IntegrationProvider
 }
