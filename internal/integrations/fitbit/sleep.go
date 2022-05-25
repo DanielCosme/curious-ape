@@ -1,6 +1,7 @@
 package fitbit
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 )
@@ -10,8 +11,14 @@ type SleepService struct {
 }
 
 type SleepEnvelope struct {
-	Sleep   []Sleep `json:"sleep"`
-	Summary Summary `json:"summary"`
+	Sleep   []Sleep              `json:"sleep"`
+	Summary SleepEnvelopeSummary `json:"summary"`
+}
+type SleepEnvelopeSummary struct {
+	Stages             Stages `json:"stages"`
+	TotalMinutesAsleep int    `json:"totalMinutesAsleep"`
+	TotalSleepRecords  int    `json:"totalSleepRecords"`
+	TotalTimeInBed     int    `json:"totalTimeInBed"`
 }
 type Summary struct {
 	Deep  Deep  `json:"deep"`
@@ -80,6 +87,8 @@ type Stages struct {
 }
 
 func (s *SleepService) GetLogByDate(time time.Time) (*SleepEnvelope, error) {
-	err := s.client.Call(http.MethodGet, nil, nil, nil)
-	return nil, err
+	var se *SleepEnvelope
+	uri := fmt.Sprintf("/1.2/user/-/sleep/date/%s.json", formatDate(time))
+	err := s.client.Call(http.MethodGet, uri, nil, &se)
+	return se, err
 }

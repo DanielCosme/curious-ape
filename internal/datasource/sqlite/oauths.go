@@ -29,7 +29,7 @@ func (ds *Oauth2DataSource) Update(o *entity.Oauth2) (*entity.Oauth2, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ds.Get(entity.Oauth2Filter{IDs: []int{o.ID}})
+	return ds.Get(entity.Oauth2Filter{ID: o.ID})
 }
 
 func (ds *Oauth2DataSource) Get(filter entity.Oauth2Filter) (*entity.Oauth2, error) {
@@ -38,10 +38,10 @@ func (ds *Oauth2DataSource) Get(filter entity.Oauth2Filter) (*entity.Oauth2, err
 
 	if filter.ID > 0 {
 		q = fmt.Sprintf("%s %s", q, "WHERE id = ?")
-		return o, parseError(ds.DB.Get(o, q, filter.IDs[0]))
+		return o, parseError(ds.DB.Get(o, q, filter.ID))
 	} else if filter.Provider != "" {
 		q = fmt.Sprintf("%s %s", q, "WHERE provider = ?")
-		return o, parseError(ds.DB.Get(o, q, filter.Providers[0]))
+		return o, parseError(ds.DB.Get(o, q, filter.Provider))
 	}
 	return nil, repository.ErrNotFound
 }

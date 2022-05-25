@@ -71,6 +71,7 @@ func (a *App) Oauth2GetClient(provider entity.IntegrationProvider) (*http.Client
 	if newToken.AccessToken != t.AccessToken {
 		// If token was refreshed we persist the new token info
 		_, err = a.db.Oauths.Update(&entity.Oauth2{
+			ID:           o.ID,
 			AccessToken:  newToken.AccessToken,
 			RefreshToken: newToken.RefreshToken,
 			Type:         newToken.TokenType,
