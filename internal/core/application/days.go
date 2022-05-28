@@ -5,7 +5,7 @@ import (
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/core/repository"
 	"github.com/danielcosme/curious-ape/internal/datasource"
-	"github.com/danielcosme/curious-ape/internal/dates"
+	"github.com/danielcosme/curious-ape/sdk/dates"
 	"time"
 )
 

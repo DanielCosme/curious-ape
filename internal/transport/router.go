@@ -11,7 +11,7 @@ type Router struct {
 	Echo   http.Handler
 }
 
-func (a *Transport) Routes() http.Handler {
+func (a *API) Routes() http.Handler {
 	return &Router{
 		StdMux: stdmux.Routes(a.App),
 		Echo:   echo.Routes(a.App),

@@ -2,7 +2,7 @@ package types
 
 import (
 	"github.com/danielcosme/curious-ape/internal/core/entity"
-	"github.com/danielcosme/curious-ape/internal/dates"
+	"github.com/danielcosme/curious-ape/sdk/dates"
 	"time"
 )
 

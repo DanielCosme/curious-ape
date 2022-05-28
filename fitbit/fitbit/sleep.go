@@ -11,8 +11,8 @@ type SleepService struct {
 }
 
 type SleepEnvelope struct {
-	Sleep   []Sleep              `json:"sleep"`
-	Summary SleepEnvelopeSummary `json:"summary"`
+	Sleep   []Sleep               `json:"sleep"`
+	Summary *SleepEnvelopeSummary `json:"summary,omitempty"`
 }
 type SleepEnvelopeSummary struct {
 	Stages             Stages `json:"stages"`
@@ -32,9 +32,9 @@ type Sleep struct {
 	Efficiency          int    `json:"efficiency"`
 	EndTime             string `json:"endTime"`
 	InfoCode            int    `json:"infoCode"`
-	IsMainSleep         bool   `json:"isMainSleep"`
-	Levels              Levels `json:"levels"`
-	LogID               int64  `json:"logId"`
+	IsMainSleep bool   `json:"isMainSleep"`
+	Levels      Levels `json:"levels"`
+	LogID       int64  `json:"logId"`
 	MinutesAfterWakeup  int    `json:"minutesAfterWakeup"`
 	MinutesAsleep       int    `json:"minutesAsleep"`
 	MinutesAwake        int    `json:"minutesAwake"`
@@ -85,6 +85,9 @@ type Stages struct {
 	Rem   int `json:"rem"`
 	Wake  int `json:"wake"`
 }
+
+// TODO reject/send-error if sleep record is not of type stages
+// TODO check for empty sleep logs, sleep array on envelope len == 0
 
 func (s *SleepService) GetLogByDate(time time.Time) (*SleepEnvelope, error) {
 	var se *SleepEnvelope

@@ -4,16 +4,16 @@ import (
 	"github.com/danielcosme/curious-ape/internal/core/application"
 	"github.com/danielcosme/curious-ape/internal/transport/echo/middleware"
 	"github.com/labstack/echo/v4"
-	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"net/http"
+	"strconv"
 )
 
 func Routes(a *application.App) http.Handler {
 	h := Handler{App: a}
 	e := echo.New()
-
-	e.Use(echoMiddleware.Recover())
-	e.Use(echoMiddleware.Logger())
+	e.HTTPErrorHandler = createErrHandler(a)
+	e.Use(middleware.Logger(a))
+	e.Use(middleware.Recover(a))
 
 	e.GET("/ping", h.Ping)
 
@@ -51,4 +51,18 @@ func Routes(a *application.App) http.Handler {
 	}
 
 	return e
+}
+
+
+func createErrHandler(a *application.App) echo.HTTPErrorHandler {
+	return func (err error, c echo.Context) {
+		if c.Response().Committed {
+			return
+		}
+
+		props := map[string]string{}
+		props["Code"] = strconv.Itoa(c.Response().Status)
+		props["Method"] = c.Request().Method
+		a.Error(err, props)
+	}
 }

@@ -86,7 +86,7 @@ func (a *App) oauth2GetConfigurationForProvider(provider entity.IntegrationProvi
 	var config *entity.Oauth2Config
 	switch provider {
 	case entity.ProviderFitbit:
-		config = a.env.Fitbit
+		config = a.cfg.Fitbit
 	default:
 		return nil
 	}

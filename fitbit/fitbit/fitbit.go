@@ -11,8 +11,6 @@ const BaseURL = "https://api.fitbit.com"
 // Fitbit-Rate-Limit-Remaining: The number of calls remaining before hitting the rate limit.
 // Fitbit-Rate-Limit-Reset: The number of seconds until the rate limit resets.
 
-// TODO next -> centralized error logging/handling with echo
-
 type API struct {
 	Sleep *SleepService
 }
