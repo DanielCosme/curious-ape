@@ -8,7 +8,7 @@ import (
 func (h *Handler) Oauth2FitbitConnect(rw http.ResponseWriter, r *http.Request) {
 	url, err := h.App.Oauth2ConnectProvider("fitbit")
 	if err != nil {
-		rest.ErrInternalServer(rw, r)
+		rest.ErrInternalServer(rw)
 		return
 	}
 
@@ -21,7 +21,7 @@ func (h *Handler) Oauth2FitbitSuccess(rw http.ResponseWriter, r *http.Request) {
 	code := r.Form.Get("code")
 	err := h.App.Oauth2Success("fitbit", code)
 	if err != nil {
-		rest.ErrInternalServer(rw, r)
+		rest.ErrInternalServer(rw)
 		return
 	}
 

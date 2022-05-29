@@ -9,7 +9,7 @@ func MiddlewareRecoverPanic(next http.Handler) http.Handler {
 		defer func() {
 			if err := recover(); err != nil {
 				rw.Header().Set(HeaderConnection, "close")
-				ErrInternalServer(rw, r)
+				ErrInternalServer(rw)
 			}
 		}()
 
@@ -21,7 +21,7 @@ func MiddlewareParseForm(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		err := r.ParseForm()
 		if err != nil {
-			ErrInternalServer(rw, r)
+			ErrInternalServer(rw)
 			return
 		}
 

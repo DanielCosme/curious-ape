@@ -6,6 +6,7 @@ import (
 	"github.com/danielcosme/curious-ape/sdk/errors"
 	"io"
 	"os"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -143,7 +144,6 @@ func (l *Logger) Error(err error) {
 }
 
 func (l *Logger) ErrorP(err error, properties map[string]string) {
-
 	l.printP(LevelError, err.Error(), properties, getStack(err))
 }
 
@@ -184,14 +184,22 @@ func (l *Logger) printP(level Level, message string, properties map[string]strin
 	}
 	// TODO send with colors only if the writer is a tty
 
+	keys := make([]string, 0, len(properties))
+	for k := range properties {
+		keys = append(keys, k)
+	}
+	if !sort.StringsAreSorted(keys) {
+		sort.Strings(keys)
+	}
+
 	var lines []string
 	lines = append(lines, fmt.Sprintf("%-16s", level.StringColor()))
 	lines = append(lines, colors.Purple(aux.Time))
 	if message != "" {
 		lines = append(lines, message)
 	}
-	for k, v := range properties {
-		lines = append(lines, fmt.Sprintf("%s: %s", colors.Green(k), v))
+	for _, k := range keys {
+		lines = append(lines, fmt.Sprintf("%s: %s", colors.Green(k), properties[k]))
 	}
 
 	if level >= LevelError && len(stackTrace) > 0 {

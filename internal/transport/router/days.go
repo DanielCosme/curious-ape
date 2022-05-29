@@ -9,7 +9,7 @@ import (
 func (h *Handler) DaysGetAll(rw http.ResponseWriter, r *http.Request) {
 	days, err := h.App.DaysGetAll()
 	if err != nil {
-		rest.ErrBadRequest(rw, r, err)
+		rest.ErrBadRequest(rw, err)
 		return
 	}
 

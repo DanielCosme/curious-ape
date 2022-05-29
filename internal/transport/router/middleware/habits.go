@@ -17,13 +17,13 @@ func SetHabit(a *application.App) rest.HTTPMiddleware {
 			if idStr := r.Form.Get("habit_id"); idStr != "" {
 				id, err := strconv.Atoi(idStr)
 				if err != nil {
-					rest.ErrInternalServer(rw, r)
+					rest.ErrInternalServer(rw)
 					return
 				}
 
 				habit, err = a.HabitGetByID(id)
 				if err != nil {
-					rest.ErrNotFound(rw, r)
+					rest.ErrNotFound(rw)
 					return
 				}
 			}

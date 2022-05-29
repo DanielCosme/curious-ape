@@ -14,7 +14,8 @@ func Routes(a *application.App) http.Handler {
 	mux := http.NewServeMux()
 	md := rest.NewMiddleware()
 
-	md.Use(rest.MiddlewareRecoverPanic)
+	md.Use(middleware.Logger(a))
+	md.Use(middleware.RecoverPanic(a))
 	md.Use(rest.MiddlewareParseForm)
 
 	mux.HandleFunc("/", h.NotFound)

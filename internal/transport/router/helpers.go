@@ -11,10 +11,10 @@ import (
 func JsonCheckError(rw http.ResponseWriter, r *http.Request, status int, data interface{}, err error) {
 	if err != nil {
 		if errors.Is(err, entity.ErrNotFound) {
-			rest.ErrResponse(rw, r, http.StatusNotFound, err)
+			rest.ErrResponse(rw, http.StatusNotFound, err)
 			return
 		} else {
-			rest.ErrResponse(rw, r, http.StatusInternalServerError, err)
+			rest.ErrResponse(rw, http.StatusInternalServerError, err)
 			return
 		}
 	}

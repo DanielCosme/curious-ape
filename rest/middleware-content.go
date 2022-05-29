@@ -11,7 +11,7 @@ func CheckJsonContentType(next http.Handler) http.Handler {
 
 		mt, _, err := mime.ParseMediaType(contentType)
 		if err != nil || mt != "application/json" {
-			ErrResponse(w, r, http.StatusUnsupportedMediaType, "content-type header must be application/json")
+			ErrResponse(w, http.StatusUnsupportedMediaType, "content-type header must be application/json")
 			return
 		}
 

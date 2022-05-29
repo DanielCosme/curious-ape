@@ -16,13 +16,13 @@ func SetDay(a *application.App) rest.HTTPMiddleware {
 			if key := r.Header.Get("X-APE-DATE"); key != "" {
 				date, err := entity.ParseDate(key)
 				if err != nil {
-					rest.ErrBadRequest(rw, r, err.Error())
+					rest.ErrBadRequest(rw, err.Error())
 					return
 				}
 
 				day, err = a.DayGetByDate(date)
 				if err != nil {
-					rest.ErrNotFound(rw, r)
+					rest.ErrNotFound(rw)
 				}
 			}
 

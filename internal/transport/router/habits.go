@@ -33,7 +33,7 @@ func (h *Handler) Habits(rw http.ResponseWriter, r *http.Request) {
 
 		err := rest.ReadJSON(r, &data)
 		if err != nil {
-			rest.ErrInternalServer(rw, r)
+			rest.ErrInternalServer(rw)
 			return
 		}
 
@@ -42,7 +42,7 @@ func (h *Handler) Habits(rw http.ResponseWriter, r *http.Request) {
 	case http.MethodPut:
 		err := rest.ReadJSON(r, &data)
 		if err != nil {
-			rest.ErrInternalServer(rw, r)
+			rest.ErrInternalServer(rw)
 			return
 		}
 
@@ -52,7 +52,7 @@ func (h *Handler) Habits(rw http.ResponseWriter, r *http.Request) {
 		err := h.App.HabitDelete(habit)
 		JsonCheckError(rw, r, http.StatusOK, nil, err)
 	default:
-		rest.ErrNotAllowed(rw, r)
+		rest.ErrNotAllowed(rw)
 	}
 }
 
