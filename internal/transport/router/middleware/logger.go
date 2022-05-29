@@ -38,12 +38,9 @@ func Logger(a *application.App) rest.HTTPMiddleware {
 			} else if status < 500 {
 				// from 400 to 500
 				a.Log.WarningP(rwPlus.Err.Error(), properties)
-			} else if !rwPlus.HasPanic {
+			} else {
 				// 500 and above
 				a.Log.ErrorP(rwPlus.Err, properties)
-			} else {
-				// if panic was recovered
-				a.Log.FatalP(rwPlus.Err, properties)
 			}
 		})
 	}
