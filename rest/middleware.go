@@ -1,4 +1,4 @@
-package middleware
+package rest
 
 import "net/http"
 
@@ -8,7 +8,7 @@ type Middleware struct {
 
 type HTTPMiddleware func(http.Handler) http.Handler
 
-func New(mds ...HTTPMiddleware) *Middleware {
+func NewMiddleware(mds ...HTTPMiddleware) *Middleware {
 	return &Middleware{
 		middlewares: mds,
 	}

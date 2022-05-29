@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/core/repository"
+	"github.com/danielcosme/curious-ape/sdk/errors"
 	"github.com/jmoiron/sqlx"
 	"strings"
 )
@@ -26,18 +27,6 @@ func (ds *DaysDataSource) Get(filter entity.DayFilter, joins ...entity.DayJoin) 
 	day := new(entity.Day)
 	q, args := newDayQueryBuilder(filter).Generate()
 	return day, parseError(ds.DB.Get(day, q, args...))
-}
-
-func parseError(err error) error {
-	if err == nil {
-		return nil
-	}
-	switch err.Error() {
-	case sql.ErrNoRows.Error():
-		return repository.ErrNotFound
-	default:
-		return fmt.Errorf("%s %w", repository.ErrNotImplemented, err)
-	}
 }
 
 func (ds *DaysDataSource) Find(filter entity.DayFilter, joins ...entity.DayJoin) ([]*entity.Day, error) {
@@ -120,4 +109,16 @@ func (ds *DaysDataSource) ToIDs(days []*entity.Day) []int {
 		ids = append(ids, d.ID)
 	}
 	return ids
+}
+
+func parseError(err error) error {
+	if err == nil {
+		return nil
+	}
+	switch err.Error() {
+	case sql.ErrNoRows.Error():
+		return entity.ErrNotFound
+	default:
+		return errors.NewFatal(err.Error())
+	}
 }

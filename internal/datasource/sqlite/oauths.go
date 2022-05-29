@@ -3,7 +3,6 @@ package sqlite
 import (
 	"fmt"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
-	"github.com/danielcosme/curious-ape/internal/core/repository"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -43,7 +42,7 @@ func (ds *Oauth2DataSource) Get(filter entity.Oauth2Filter) (*entity.Oauth2, err
 		q = fmt.Sprintf("%s %s", q, "WHERE provider = ?")
 		return o, parseError(ds.DB.Get(o, q, filter.Provider))
 	}
-	return nil, repository.ErrNotFound
+	return nil, entity.ErrNotFound
 }
 
 func (ds *Oauth2DataSource) Find(filter entity.Oauth2Filter) ([]*entity.Oauth2, error) {

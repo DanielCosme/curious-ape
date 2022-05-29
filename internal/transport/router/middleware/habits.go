@@ -5,12 +5,11 @@ import (
 	"github.com/danielcosme/curious-ape/internal/core/application"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/rest"
-	"github.com/danielcosme/curious-ape/rest/middleware"
 	"net/http"
 	"strconv"
 )
 
-func SetHabit(a *application.App) middleware.HTTPMiddleware {
+func SetHabit(a *application.App) rest.HTTPMiddleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 			var habit *entity.Habit

@@ -9,20 +9,20 @@ import (
 	"strings"
 )
 
-func JSON(rw http.ResponseWriter, status int, data interface{}) {
-	writeJSON(rw, status, data, nil)
+func JSON(rw http.ResponseWriter, status int, body interface{}) {
+	writeJSON(rw, status, body, nil)
 }
 
-func JSONStatusOk(rw http.ResponseWriter, data *E) {
-	writeJSON(rw, http.StatusOK, data, nil)
+func JSONWithHeaders(rw http.ResponseWriter, status int, body interface{}, headers http.Header) {
+	writeJSON(rw, status, body, headers)
 }
 
-func JSONWithHeaders(rw http.ResponseWriter, status int, content *E, headers http.Header) {
-	writeJSON(rw, status, content, headers)
+func JSONStatusOk(rw http.ResponseWriter, body interface{}) {
+	writeJSON(rw, http.StatusOK, body, nil)
 }
 
-func writeJSON(rw http.ResponseWriter, status int, data interface{}, headers http.Header) {
-	js, err := json.Marshal(data)
+func writeJSON(rw http.ResponseWriter, status int, body interface{}, headers http.Header) {
+	js, err := json.Marshal(body)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -30,7 +30,7 @@ func writeJSON(rw http.ResponseWriter, status int, data interface{}, headers htt
 	WriteHeaders(rw, headers)
 	rw.Header().Set(HeaderContentType, "application/json")
 	rw.WriteHeader(status)
-	if data != nil {
+	if body != nil {
 		_, _ = rw.Write(js)
 	}
 }

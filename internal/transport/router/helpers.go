@@ -1,5 +1,27 @@
 package router
 
+import (
+	"net/http"
+
+	"github.com/danielcosme/curious-ape/internal/core/entity"
+	"github.com/danielcosme/curious-ape/rest"
+	"github.com/danielcosme/curious-ape/sdk/errors"
+)
+
+func JsonCheckError(rw http.ResponseWriter, r *http.Request, status int, data interface{}, err error) {
+	if err != nil {
+		if errors.Is(err, entity.ErrNotFound) {
+			rest.ErrResponse(rw, r, http.StatusNotFound, err)
+			return
+		} else {
+			rest.ErrResponse(rw, r, http.StatusInternalServerError, err)
+			return
+		}
+	}
+
+	rest.JSON(rw, status, data)
+}
+
 // // The background() helper accepts an arbitrary function as a parameter.
 // func (a *main.application) background(fn func()) {
 // 	// Launch a background goroutine.

@@ -5,11 +5,10 @@ import (
 	"github.com/danielcosme/curious-ape/internal/core/application"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/rest"
-	"github.com/danielcosme/curious-ape/rest/middleware"
 	"net/http"
 )
 
-func SetDay(a *application.App) middleware.HTTPMiddleware {
+func SetDay(a *application.App) rest.HTTPMiddleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 			var day *entity.Day

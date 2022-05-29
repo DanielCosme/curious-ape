@@ -1,18 +1,15 @@
-package middleware
+package rest
 
 import (
-	"github.com/danielcosme/curious-ape/rest"
-	"log"
 	"net/http"
 )
 
-func RecoverPanic(next http.Handler) http.Handler {
+func MiddlewareRecoverPanic(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
-				rw.Header().Set(rest.HeaderConnection, "close")
-				log.Printf("Panic: %s", err)
-				rest.ErrInternalServer(rw, r)
+				rw.Header().Set(HeaderConnection, "close")
+				ErrInternalServer(rw, r)
 			}
 		}()
 
@@ -20,11 +17,11 @@ func RecoverPanic(next http.Handler) http.Handler {
 	})
 }
 
-func Misc(next http.Handler) http.Handler {
+func MiddlewareParseForm(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		err := r.ParseForm()
 		if err != nil {
-			rest.ErrInternalServer(rw, r)
+			ErrInternalServer(rw, r)
 			return
 		}
 

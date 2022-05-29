@@ -17,5 +17,5 @@ func (h *Handler) DaysGetAll(rw http.ResponseWriter, r *http.Request) {
 	for _, d := range days {
 		daysTransport = append(daysTransport, types.DayToTransport(d))
 	}
-	rest.JSONStatusOk(rw, &rest.E{"days": daysTransport})
+	rest.JSONStatusOk(rw, &envelope{"days": daysTransport})
 }

@@ -12,7 +12,7 @@ func ErrResponse(w http.ResponseWriter, r *http.Request, code int, payload inter
 		payload = payload.(error).Error()
 	}
 
-	JSON(w, code, &E{"error": payload})
+	JSON(w, code, &envelope{"error": payload})
 }
 
 func ErrBadRequest(rw http.ResponseWriter, r *http.Request, payload interface{}) {
@@ -27,6 +27,6 @@ func ErrNotFound(rw http.ResponseWriter, r *http.Request) {
 	ErrResponse(rw, r, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 }
 
-func ErrMethodNotSupported(rw http.ResponseWriter, r *http.Request) {
+func ErrNotAllowed(rw http.ResponseWriter, r *http.Request) {
 	ErrResponse(rw, r, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 }
