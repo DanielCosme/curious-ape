@@ -1,4 +1,4 @@
-package stdmux
+package router
 
 import (
 	"github.com/danielcosme/curious-ape/rest"

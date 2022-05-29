@@ -11,9 +11,7 @@ import (
 
 func (a *App) Oauth2ConnectProvider(provider string) (string, error) {
 	p := entity.IntegrationProvider(provider)
-	_, err := a.db.Oauths.Get(entity.Oauth2Filter{
-		Providers: []entity.IntegrationProvider{p},
-	})
+	_, err := a.db.Oauths.Get(entity.Oauth2Filter{Provider: p})
 	if err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
 			if err = a.db.Oauths.Create(&entity.Oauth2{Provider: p}); err != nil {
@@ -38,7 +36,7 @@ func (a *App) Oauth2Success(provider, code string) error {
 		return err
 	}
 
-	o, err := a.db.Oauths.Get(entity.Oauth2Filter{Providers: []entity.IntegrationProvider{p}})
+	o, err := a.db.Oauths.Get(entity.Oauth2Filter{Provider: p})
 	if err != nil {
 		return err
 	}

@@ -1,26 +1,32 @@
 package rest
 
-import "net/http"
+import (
+	"context"
+	"net/http"
+)
 
-func ErrResponse(w http.ResponseWriter, code int, payload interface{}) {
-	JSON(w, code, Payload("error", payload))
+func ErrResponse(w http.ResponseWriter, r *http.Request, code int, payload interface{}) {
+	r = r.Clone(context.WithValue(r.Context(), "error", payload))
+	switch payload.(type) {
+	case error:
+		payload = payload.(error).Error()
+	}
+
+	JSON(w, code, &E{"error": payload})
 }
 
-func ErrBadRequest(w http.ResponseWriter, payload interface{}) {
-	ErrResponse(w, http.StatusBadRequest, payload)
+func ErrBadRequest(rw http.ResponseWriter, r *http.Request, payload interface{}) {
+	ErrResponse(rw, r, http.StatusBadRequest, payload)
 }
 
-func ErrInternalServer(w http.ResponseWriter) {
-	s := http.StatusInternalServerError
-	ErrResponse(w, s, http.StatusText(s))
+func ErrInternalServer(rw http.ResponseWriter, r *http.Request) {
+	ErrResponse(rw, r, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 }
 
-func ErrNotFound(w http.ResponseWriter) {
-	s := http.StatusNotFound
-	ErrResponse(w, s, http.StatusText(s))
+func ErrNotFound(rw http.ResponseWriter, r *http.Request) {
+	ErrResponse(rw, r, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 }
 
-func ErrMethodNotSupported(w http.ResponseWriter) {
-	s := http.StatusMethodNotAllowed
-	ErrResponse(w, s, http.StatusText(s))
+func ErrMethodNotSupported(rw http.ResponseWriter, r *http.Request) {
+	ErrResponse(rw, r, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 }

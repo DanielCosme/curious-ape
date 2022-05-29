@@ -1,4 +1,4 @@
-package stdmux
+package router
 
 // // The background() helper accepts an arbitrary function as a parameter.
 // func (a *main.application) background(fn func()) {

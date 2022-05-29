@@ -1,21 +1,21 @@
-package echo
+package router
 
 import (
 	"github.com/danielcosme/curious-ape/internal/transport/types"
-	"github.com/labstack/echo/v4"
+	"github.com/danielcosme/curious-ape/rest"
 	"net/http"
 )
 
-func (h *Handler) DaysGetAll(c echo.Context) error {
+func (h *Handler) DaysGetAll(rw http.ResponseWriter, r *http.Request) {
 	days, err := h.App.DaysGetAll()
 	if err != nil {
-		return err
+		rest.ErrBadRequest(rw, r, err)
+		return
 	}
 
 	daysTransport := []*types.DayTransport{}
 	for _, d := range days {
 		daysTransport = append(daysTransport, types.DayToTransport(d))
 	}
-
-	return c.JSON(http.StatusOK, daysTransport)
+	rest.JSONStatusOk(rw, &rest.E{"days": daysTransport})
 }

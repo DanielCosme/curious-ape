@@ -1,7 +1,7 @@
 package transport
 
 import (
-	"fmt"
+	"github.com/danielcosme/curious-ape/sdk/log"
 	"net/http"
 
 	"github.com/danielcosme/curious-ape/internal/core/application"
@@ -13,8 +13,9 @@ type API struct {
 	Server *http.Server
 }
 
-func (a *API) Run() error {
-	fmt.Printf("Http server listening on: %s\n", a.Server.Addr)
-	a.Server.Handler = a.Routes()
-	return a.Server.ListenAndServe()
+func (api *API) Run() error {
+	api.Server.Handler = api.Routes()
+
+	api.App.Log.InfoP("HTTP server listening", log.Prop{"addr": api.Server.Addr})
+	return api.Server.ListenAndServe()
 }

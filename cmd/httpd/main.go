@@ -2,32 +2,33 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"flag"
 	"fmt"
 	"github.com/danielcosme/curious-ape/internal/core/application"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/datasource/sqlite"
 	"github.com/danielcosme/curious-ape/internal/transport"
-	"github.com/danielcosme/curious-ape/sdk/logape"
+	"github.com/danielcosme/curious-ape/sdk/errors"
+	"github.com/danielcosme/curious-ape/sdk/log"
 	"github.com/jmoiron/sqlx"
-	"log"
 	"net/http"
 	"os"
 	"time"
 )
 
 func main() {
-	// Initialize configuration
+	// flags & configuration
 	cfg := new(config)
-
 	flag.StringVar(&cfg.Environment, "env", "", "Sets the running environment for the application")
 	flag.Parse()
-
-	// panics if there are any errors
 	readConfiguration(cfg)
+
+	// logger initialization
+	logger := log.New(os.Stdout, log.LevelTrace, time.RFC822)
+	log.DefaultLogger = logger
+
+	// SQL datasource initialization
 	db := sqlx.MustConnect(sqlite.DriverName, cfg.Database.DNS)
-	logger := logape.New(os.Stdout, logape.LevelTrace, time.RubyDate)
 
 	api := &transport.API{
 		App: application.New(&application.AppOptions{
@@ -47,7 +48,7 @@ func main() {
 	}
 
 	if err := api.Run(); err != nil {
-		log.Fatal()
+		logger.Fatal(err)
 	}
 }
 
@@ -74,7 +75,7 @@ func readConfiguration(cfg *config) *config {
 	case "prod":
 		rawFile, err = os.ReadFile(".env.json")
 	default:
-		err = errors.New("no environment provided")
+		err = errors.NewFatal("no valid environment provided")
 	}
 	panicIfErr(err)
 
@@ -85,6 +86,6 @@ func readConfiguration(cfg *config) *config {
 
 func panicIfErr(err error) {
 	if err != nil {
-		log.Fatalln(err)
+		log.DefaultLogger.Fatal(err)
 	}
 }

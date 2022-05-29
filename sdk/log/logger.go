@@ -1,4 +1,4 @@
-package logape
+package log
 
 import (
 	"fmt"
@@ -52,7 +52,7 @@ func (l Level) StringColor() string {
 	case LevelInfo:
 		return colors.Blue("INFO")
 	case LevelWarning:
-		return colors.Yellow("Warning")
+		return colors.Yellow("WARNING")
 	case LevelError:
 		return colors.Red("ERROR")
 	case LevelFatal:
@@ -68,6 +68,19 @@ type Logger struct {
 	mu         sync.Mutex
 	timeFormat string
 }
+
+var DefaultLogger = &defaultLogger
+var defaultLogger Logger
+
+func init() {
+	defaultLogger = Logger{
+		out:        os.Stdout,
+		minLevel:   0,
+		timeFormat: time.RFC3339,
+	}
+}
+
+type Prop map[string]string
 
 func New(out io.Writer, minLevel Level, timeFormat string) *Logger {
 	return &Logger{
@@ -118,18 +131,15 @@ func (l *Logger) Warning(args ...interface{}) {
 }
 
 func (l *Logger) WarningP(message string, properties map[string]string) {
-	l.printP(LevelInfo, message, properties, nil)
+	l.printP(LevelWarning, message, properties, nil)
 }
 
 func (l *Logger) Warningf(message string, args ...interface{}) {
-	l.printf(LevelInfo, message, args...)
+	l.printf(LevelWarning, message, args...)
 }
 
 func (l *Logger) Error(err error) {
-
-	// err.(stacktra)
-
-	l.printP(LevelError, err.Error(), nil, nil)
+	l.printP(LevelError, err.Error(), nil, getStack(err))
 }
 
 func (l *Logger) ErrorP(err error, properties map[string]string) {
@@ -138,12 +148,12 @@ func (l *Logger) ErrorP(err error, properties map[string]string) {
 }
 
 func (l *Logger) Fatal(err error) {
-	l.printP(LevelFatal, err.Error(), nil, nil)
+	l.printP(LevelFatal, err.Error(), nil, getStack(err))
 	os.Exit(1) // For entries at the FATAL level, we also terminate the application.
 }
 
 func (l *Logger) FatalP(err error, properties map[string]string) {
-	l.printP(LevelFatal, err.Error(), properties, nil)
+	l.printP(LevelFatal, err.Error(), properties, getStack(err))
 	os.Exit(1) // For entries at the FATAL level, we also terminate the application.
 }
 
@@ -172,11 +182,14 @@ func (l *Logger) printP(level Level, message string, properties map[string]strin
 		Message:    message,
 		Properties: properties,
 	}
+	// TODO send with colors only if the writer is a tty
 
 	var lines []string
-	lines = append(lines, level.StringColor())
+	lines = append(lines, fmt.Sprintf("%-16s", level.StringColor()))
 	lines = append(lines, colors.Purple(aux.Time))
-	lines = append(lines, message)
+	if message != "" {
+		lines = append(lines, message)
+	}
 	for k, v := range properties {
 		lines = append(lines, fmt.Sprintf("%s: %s", colors.Green(k), v))
 	}
@@ -221,4 +234,3 @@ func getStack(err error) []byte {
 	}
 	return stack
 }
-

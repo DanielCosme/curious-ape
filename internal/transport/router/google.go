@@ -1,4 +1,4 @@
-package stdmux
+package router
 
 //
 // import (
@@ -6,12 +6,12 @@ package stdmux
 // 	"net/http"
 // )
 //
-// func (a *main.application) authorizeFitbitHandler(rw http.ResponseWriter, r *http.Request) {
-// 	reqURL := a.collectors.Sleep.AuthorizationURI()
+// func (a *main.application) authorizeGoogleHandler(rw http.ResponseWriter, r *http.Request) {
+// 	reqURL := a.collectors.Fit.AuthorizationURI()
 // 	http.Redirect(rw, r, reqURL, http.StatusFound)
 // }
 //
-// func (a *main.application) successFitbitHandler(rw http.ResponseWriter, r *http.Request) {
+// func (a *main.application) successGoogleHandler(rw http.ResponseWriter, r *http.Request) {
 // 	err := r.ParseForm()
 // 	if err != nil {
 // 		a.serverErrorResponse(rw, r, err)
@@ -23,13 +23,13 @@ package stdmux
 // 		return
 // 	}
 //
-// 	payload, err := a.collectors.Sleep.Auth.ExchangeCodeForToken(code)
+// 	payload, err := a.collectors.Fit.ExchangeCodeForToken(code)
 // 	if err != nil {
 // 		a.serverErrorResponse(rw, r, err)
 // 		return
 // 	}
 //
-// 	err = a.models.Tokens.Update(payload)
+// 	err = a.models.Tokens.Update(*payload)
 // 	if err != nil {
 // 		a.serverErrorResponse(rw, r, err)
 // 	}
