@@ -141,7 +141,7 @@ func (ds *HabitsDataSource) GetHabitLog(filter entity.HabitFilter) (*entity.Habi
 	query := `SELECT * FROM habit_logs `
 
 	if filter.Origin != "" {
-		query = fmt.Sprintf("%s WHERE id = ? AND origin = ?", query)
+		query = fmt.Sprintf("%s WHERE habit_id = ? AND origin = ?", query)
 		return hl, catchErr(ds.DB.Get(hl, query, filter.ID, filter.Origin))
 	}
 

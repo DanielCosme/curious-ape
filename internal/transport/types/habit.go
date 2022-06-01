@@ -21,10 +21,10 @@ type HabitTransport struct {
 }
 
 type HabitTransportLog struct {
-	Success     bool               `json:"success,omitempty"`
-	Origin      entity.HabitOrigin `json:"origin,omitempty"`
+	Success     bool               `json:"success"`
+	Origin      entity.HabitOrigin `json:"origin"`
 	Note        string             `json:"note,omitempty"`
-	IsAutomated bool               `json:"is_automated,omitempty"`
+	IsAutomated bool               `json:"is_automated"`
 }
 
 func (ht *HabitTransport) ToHabit() *entity.Habit {

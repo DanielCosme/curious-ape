@@ -38,7 +38,7 @@ func (h *Handler) Habits(rw http.ResponseWriter, r *http.Request) {
 		}
 
 		newHabit, err := h.App.HabitCreate(day, data.ToHabit())
-		JsonCheckError(rw, r, http.StatusCreated, envelope{"habit": newHabit}, err)
+		JsonCheckError(rw, r, http.StatusCreated, envelope{"habit": types.FromHabitToTransport(newHabit)}, err)
 	case http.MethodPut:
 		err := rest.ReadJSON(r, &data)
 		if err != nil {
@@ -47,7 +47,7 @@ func (h *Handler) Habits(rw http.ResponseWriter, r *http.Request) {
 		}
 
 		habitUpdated, err := h.App.HabitFullUpdate(habit, data.ToHabit())
-		JsonCheckError(rw, r, http.StatusOK, envelope{"habit": habitUpdated}, err)
+		JsonCheckError(rw, r, http.StatusOK, envelope{"habit": types.FromHabitToTransport(habitUpdated)}, err)
 	case http.MethodDelete:
 		err := h.App.HabitDelete(habit)
 		JsonCheckError(rw, r, http.StatusOK, nil, err)

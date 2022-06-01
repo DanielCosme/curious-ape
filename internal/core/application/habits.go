@@ -14,7 +14,7 @@ func (a *App) HabitCreate(day *entity.Day, data *entity.Habit) (*entity.Habit, e
 		return nil, err
 	}
 
-	h, err := a.getOrCreateHabit(day.ID, habitCategory.ID)
+	habit, err := a.getOrCreateHabit(day.ID, habitCategory.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -22,12 +22,11 @@ func (a *App) HabitCreate(day *entity.Day, data *entity.Habit) (*entity.Habit, e
 	// TODO hardcode origins for habit logs and create a validator for it
 	// Create the habit log
 	for _, l := range data.Logs {
-		hl, err := a.db.Habits.GetHabitLog(entity.HabitFilter{Origin: l.Origin, ID: h.ID})
+		hl, err := a.db.Habits.GetHabitLog(entity.HabitFilter{Origin: l.Origin, ID: habit.ID})
 		if err != nil {
-			a.Log.Trace("Habit log err", err.Error())
 			if errors.Is(err, entity.ErrNotFound) {
 				// if it does not exist create it
-				l.HabitID = h.ID
+				l.HabitID = habit.ID
 				err := a.db.Habits.CreateHabitLog(l)
 				if err != nil {
 					return nil, err
@@ -36,31 +35,45 @@ func (a *App) HabitCreate(day *entity.Day, data *entity.Habit) (*entity.Habit, e
 				return nil, err
 			}
 		} else {
-			a.Log.Trace("Habit log exists then we update")
 			// if it exists update it
 			hl.Origin = l.Origin
 			hl.Note = l.Note
 			hl.Success = l.Success
 			hl.IsAutomated = l.IsAutomated
-			hl, err = a.db.Habits.UpdateHabitLog(hl)
+			_, err = a.db.Habits.UpdateHabitLog(hl)
 			if err != nil {
 				return nil, err
 			}
 		}
-
-		// Calculate status
-		if l.Success {
-			h.Status = entity.HabitStatusDone
-		} else {
-			h.Status = entity.HabitStatusNotDone
-		}
-		_, err = a.db.Habits.Update(h)
-		if err != nil {
-			return nil, err
-		}
 	}
 
-	return h, repository.ExecuteHabitsPipeline([]*entity.Habit{h}, datasource.HabitsPipeline(a.db)...)
+	// Calculate habit status based on the logs
+	if err := repository.ExecuteHabitsPipeline([]*entity.Habit{habit}, datasource.HabitsJoinLogs(a.db)); err != nil {
+		return nil, err
+	}
+
+	status := entity.HabitStatusNoInfo
+	// re-calculate habit status
+	for _, log := range habit.Logs {
+		if !log.IsAutomated {
+			// if the log is manually added
+			if log.Success {
+				status = entity.HabitStatusDone
+			} else {
+				status = entity.HabitStatusNotDone
+			}
+			break
+		} else {
+			if log.Success {
+				status = entity.HabitStatusDone
+			} else if status == entity.HabitStatusNoInfo {
+				status = entity.HabitStatusNotDone
+			}
+		}
+	}
+	habit.Status = status
+
+	return a.db.Habits.Update(habit, datasource.HabitsPipeline(a.db)...)
 }
 
 func (a *App) HabitFullUpdate(habit, data *entity.Habit) (*entity.Habit, error) {
