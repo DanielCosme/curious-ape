@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
+	"github.com/danielcosme/curious-ape/internal/core/repository"
 	"golang.org/x/oauth2"
 	"net/http"
 )
@@ -12,7 +13,7 @@ func (a *App) Oauth2ConnectProvider(provider string) (string, error) {
 	p := entity.IntegrationProvider(provider)
 	_, err := a.db.Oauths.Get(entity.Oauth2Filter{Provider: p})
 	if err != nil {
-		if errors.Is(err, entity.ErrNotFound) {
+		if errors.Is(err, repository.ErrNotFound) {
 			if err = a.db.Oauths.Create(&entity.Oauth2{Provider: p}); err != nil {
 				return "", err
 			}

@@ -117,7 +117,7 @@ func catchErr(err error) error {
 	}
 	switch err.Error() {
 	case sql.ErrNoRows.Error():
-		return entity.ErrNotFound
+		return repository.ErrNotFound
 	default:
 		return errors.NewFatal(err.Error())
 	}

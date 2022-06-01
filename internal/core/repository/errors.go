@@ -1,4 +1,4 @@
-package entity
+package repository
 
 import "github.com/danielcosme/curious-ape/sdk/errors"
 
