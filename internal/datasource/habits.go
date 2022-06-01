@@ -58,7 +58,7 @@ func HabitsJoinCategories(m *repository.Models) entity.HabitJoin {
 func HabitsJoinLogs(m *repository.Models) entity.HabitJoin {
 	return func(hs []*entity.Habit) error {
 		if len(hs) > 0 {
-			hls, err := m.Habits.FindHabitLogs(entity.HabitFilter{HabitLogIDs: m.Habits.ToIDs(hs)})
+			hls, err := m.Habits.FindHabitLogs(entity.HabitFilter{IDs: m.Habits.ToIDs(hs)})
 			if err != nil {
 				return err
 			}
