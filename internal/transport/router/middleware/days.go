@@ -22,7 +22,8 @@ func SetDay(a *application.App) rest.HTTPMiddleware {
 
 				day, err = a.DayGetByDate(date)
 				if err != nil {
-					rest.ErrNotFound(rw)
+					rest.ErrResponse(rw, http.StatusNotFound, err)
+					return
 				}
 			}
 

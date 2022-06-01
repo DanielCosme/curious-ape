@@ -37,10 +37,10 @@ func (ds *Oauth2DataSource) Get(filter entity.Oauth2Filter) (*entity.Oauth2, err
 
 	if filter.ID > 0 {
 		q = fmt.Sprintf("%s %s", q, "WHERE id = ?")
-		return o, parseError(ds.DB.Get(o, q, filter.ID))
+		return o, catchErr(ds.DB.Get(o, q, filter.ID))
 	} else if filter.Provider != "" {
 		q = fmt.Sprintf("%s %s", q, "WHERE provider = ?")
-		return o, parseError(ds.DB.Get(o, q, filter.Provider))
+		return o, catchErr(ds.DB.Get(o, q, filter.Provider))
 	}
 	return nil, entity.ErrNotFound
 }

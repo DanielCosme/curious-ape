@@ -13,20 +13,21 @@ func DaysPipeline(m *repository.Models) []entity.DayJoin {
 
 func DaysJoinHabits(m *repository.Models) entity.DayJoin {
 	return func(days []*entity.Day) error {
-		hs, err := m.Habits.Find(entity.HabitFilter{DayIDs: m.Days.ToIDs(days)}, HabitsJoinCategories(m))
-		if err != nil {
-			return err
-		}
+		if len(days) > 0 {
+			hs, err := m.Habits.Find(entity.HabitFilter{DayIDs: m.Days.ToIDs(days)}, HabitsJoinCategories(m))
+			if err != nil {
+				return err
+			}
 
-		habitsByDateID := map[int][]*entity.Habit{}
-		for _, h := range hs {
-			habitsByDateID[h.DayID] = append(habitsByDateID[h.DayID], h)
-		}
+			habitsByDateID := map[int][]*entity.Habit{}
+			for _, h := range hs {
+				habitsByDateID[h.DayID] = append(habitsByDateID[h.DayID], h)
+			}
 
-		for _, d := range days {
-			d.Habits = habitsByDateID[d.ID]
+			for _, d := range days {
+				d.Habits = habitsByDateID[d.ID]
+			}
 		}
-
 		return nil
 	}
 }

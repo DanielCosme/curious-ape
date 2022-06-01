@@ -26,7 +26,7 @@ func (ds *DaysDataSource) Create(d *entity.Day) error {
 func (ds *DaysDataSource) Get(filter entity.DayFilter, joins ...entity.DayJoin) (*entity.Day, error) {
 	day := new(entity.Day)
 	q, args := newDayQueryBuilder(filter).Generate()
-	return day, parseError(ds.DB.Get(day, q, args...))
+	return day, catchErr(ds.DB.Get(day, q, args...))
 }
 
 func (ds *DaysDataSource) Find(filter entity.DayFilter, joins ...entity.DayJoin) ([]*entity.Day, error) {
@@ -59,7 +59,7 @@ func newDayQueryBuilder(f entity.DayFilter) *QueryBuilder {
 	for _, v := range f.IDs {
 		q.Add("id", v)
 	}
-	for _, v := range f.Date {
+	for _, v := range f.Dates {
 		q.Add("date", v)
 	}
 
@@ -111,7 +111,7 @@ func (ds *DaysDataSource) ToIDs(days []*entity.Day) []int {
 	return ids
 }
 
-func parseError(err error) error {
+func catchErr(err error) error {
 	if err == nil {
 		return nil
 	}

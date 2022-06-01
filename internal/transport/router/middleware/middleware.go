@@ -16,7 +16,6 @@ func RecoverPanic(a *application.App) rest.HTTPMiddleware {
 					rw.Header().Set("Connection", "close")
 					rw.WriteHeader(http.StatusInternalServerError)
 					rwPlus := rw.(*rest.ResponseWriterPlus)
-					rwPlus.HasPanic = true
 					rwPlus.Err = errors.NewFatal(fmt.Sprintf("%v", err))
 				}
 			}()

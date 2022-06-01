@@ -13,6 +13,10 @@ type Day interface {
 }
 
 func ExecuteDaysPipeline(days []*entity.Day, joins ...entity.DayJoin) error {
+	if !(len(days) > 0) {
+		return nil
+	}
+
 	for _, j := range joins {
 		if err := j(days); err != nil {
 			return err

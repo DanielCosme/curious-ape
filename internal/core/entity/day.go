@@ -31,6 +31,8 @@ type Day struct {
 type DayJoin func([]*Day) error
 
 type DayFilter struct {
-	IDs  []int
-	Date []time.Time
+	ID    int
+	Date  time.Time
+	IDs   []int
+	Dates []time.Time
 }

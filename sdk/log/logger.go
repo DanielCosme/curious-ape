@@ -28,17 +28,17 @@ const (
 func (l Level) String() string {
 	switch l {
 	case LevelTrace:
-		return "TRACE"
+		return "TRAC"
 	case LevelDebug:
-		return "DEBUG"
+		return "DEBU"
 	case LevelInfo:
 		return "INFO"
 	case LevelWarning:
-		return "Warning"
+		return "WARN"
 	case LevelError:
-		return "ERROR"
+		return "ERRO"
 	case LevelFatal:
-		return "FATAL"
+		return "FATL"
 	default:
 		return ""
 	}
@@ -47,17 +47,17 @@ func (l Level) String() string {
 func (l Level) StringColor() string {
 	switch l {
 	case LevelTrace:
-		return colors.Gray("TRACE")
+		return colors.Gray(l.String())
 	case LevelDebug:
-		return colors.White("DEBUG")
+		return colors.White(l.String())
 	case LevelInfo:
-		return colors.Blue("INFO")
+		return colors.Blue(l.String())
 	case LevelWarning:
-		return colors.Yellow("WARNING")
+		return colors.Yellow(l.String())
 	case LevelError:
-		return colors.Red("ERROR")
+		return colors.Red(l.String())
 	case LevelFatal:
-		return colors.Red("FATAL")
+		return colors.Red(l.String())
 	default:
 		return ""
 	}
@@ -193,7 +193,7 @@ func (l *Logger) printP(level Level, message string, properties map[string]strin
 	}
 
 	var lines []string
-	lines = append(lines, fmt.Sprintf("%-16s", level.StringColor()))
+	lines = append(lines, fmt.Sprintf("%s", level.StringColor()))
 	lines = append(lines, colors.Purple(aux.Time))
 	if message != "" {
 		lines = append(lines, message)

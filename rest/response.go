@@ -6,7 +6,6 @@ type ResponseWriterPlus struct {
 	http.ResponseWriter
 	status   int
 	Err      error
-	HasPanic bool
 }
 
 func NewResponseWriterPlus(rw http.ResponseWriter) *ResponseWriterPlus {

@@ -8,13 +8,11 @@ type Habit struct {
 	DayID      int `db:"day_id"`
 	CategoryID int `db:"habit_category_id"`
 	// Core
-	IsAutomated bool        `db:"is_automated"`
-	Success     bool        `db:"success"`
-	Note        string      `db:"note"`
-	Origin      HabitOrigin `db:"origin"`
+	Status HabitStatus `db:"status"`
 	// Generated
-	Category *HabitCategory `db:"habit_categories"`
-	Day      *Day           `db:"day"`
+	Day      *Day
+	Category *HabitCategory
+	Logs     []*HabitLog
 }
 
 type HabitCategory struct {
@@ -24,6 +22,15 @@ type HabitCategory struct {
 	Code        string    `db:"code"`
 	Description string    `db:"description"`
 	Color       string    `db:"color"`
+}
+
+type HabitLog struct {
+	ID          int         `db:"id"`
+	HabitID     int         `db:"habit_id"`
+	Note        string      `db:"note"`
+	Origin      HabitOrigin `db:"origin"`
+	IsAutomated bool        `db:"is_automated"`
+	Success     bool        `db:"success"`
 }
 
 type HabitType string
@@ -53,10 +60,24 @@ const (
 	HabitOriginUnknown   HabitOrigin = "unknown"
 )
 
+type HabitStatus string
+
+const (
+	HabitStatusDone    HabitStatus = "done"
+	HabitStatusNotDone HabitStatus = "not-done"
+	HabitStatusNoInfo  HabitStatus = "no-info"
+)
+
 type HabitFilter struct {
-	ID          []int
+	ID          int
+	DayID       int
+	CategoryID  int
+	HabitLogID  int
+	IDs         []int
 	DayIDs      []int
 	CategoryIDs []int
+	HabitLogIDs []int
+	Origin      HabitOrigin
 }
 
 type HabitJoin func(hs []*Habit) error

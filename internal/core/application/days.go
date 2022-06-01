@@ -23,7 +23,7 @@ func (a *App) DaysGetAll() ([]*entity.Day, error) {
 }
 
 func (a *App) DayGetByDate(date time.Time) (*entity.Day, error) {
-	d, err := a.db.Days.Get(entity.DayFilter{Date: []time.Time{date}})
+	d, err := a.db.Days.Get(entity.DayFilter{Date: date})
 	if err != nil && errors.Is(err, entity.ErrNotFound) {
 		// if it does not exist, create new and return.
 		return a.DayCreate(&entity.Day{Date: date})

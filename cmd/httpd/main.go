@@ -4,16 +4,19 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"time"
+
 	"github.com/danielcosme/curious-ape/internal/core/application"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/datasource/sqlite"
 	"github.com/danielcosme/curious-ape/internal/transport"
 	"github.com/danielcosme/curious-ape/sdk/errors"
-	"github.com/danielcosme/curious-ape/sdk/log"
+	logape "github.com/danielcosme/curious-ape/sdk/log"
+
 	"github.com/jmoiron/sqlx"
-	"net/http"
-	"os"
-	"time"
 )
 
 func main() {
@@ -24,8 +27,8 @@ func main() {
 	readConfiguration(cfg)
 
 	// logger initialization
-	logger := log.New(os.Stdout, log.LevelTrace, time.RFC822)
-	log.DefaultLogger = logger
+	logger := logape.New(os.Stdout, logape.LevelTrace, time.RFC822)
+	logape.DefaultLogger = logger
 
 	// SQL datasource initialization
 	db := sqlx.MustConnect(sqlite.DriverName, cfg.Database.DNS)
@@ -44,6 +47,7 @@ func main() {
 			IdleTimeout:  time.Minute,
 			ReadTimeout:  10 * time.Second,
 			WriteTimeout: 30 * time.Second,
+			ErrorLog:     log.New(logger, "", 0),
 		},
 	}
 
@@ -86,6 +90,6 @@ func readConfiguration(cfg *config) *config {
 
 func panicIfErr(err error) {
 	if err != nil {
-		log.DefaultLogger.Fatal(err)
+		logape.DefaultLogger.Fatal(err)
 	}
 }
