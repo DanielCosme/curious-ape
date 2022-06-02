@@ -25,7 +25,8 @@ type Day struct {
 	ID   int       `db:"id"`
 	Date time.Time `db:"date"`
 	// generated
-	Habits []*Habit
+	Habits    []*Habit
+	SleepLogs []*SleepLog
 }
 
 type DayJoin func([]*Day) error

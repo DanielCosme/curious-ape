@@ -12,7 +12,7 @@ import (
 func (a *App) Oauth2ConnectProvider(provider string) (string, error) {
 	p := entity.IntegrationProvider(provider)
 	o, err := a.db.Oauths.Get(entity.Oauth2Filter{Provider: []entity.IntegrationProvider{p}})
-	if err != nil && !errors.Is(err, repository.ErrNotFound){
+	if err != nil && !errors.Is(err, repository.ErrNotFound) {
 		return "", err
 	}
 	if o == nil {

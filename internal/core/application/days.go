@@ -4,13 +4,12 @@ import (
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/core/repository"
 	"github.com/danielcosme/curious-ape/internal/datasource"
-	"github.com/danielcosme/curious-ape/sdk/dates"
 	"github.com/danielcosme/curious-ape/sdk/errors"
 	"time"
 )
 
 func (a *App) DayCreate(d *entity.Day) (*entity.Day, error) {
-	d.Date = dates.ToUTC(d.Date)
+	d.Date = time.Date(d.Date.Year(), d.Date.Month(), d.Date.Day(), 0, 0, 0, 0, time.UTC)
 	if err := a.db.Days.Create(d); err != nil {
 		return nil, err
 	}
@@ -24,7 +23,7 @@ func (a *App) DaysGetAll() ([]*entity.Day, error) {
 
 func (a *App) DayGetByDate(date time.Time) (*entity.Day, error) {
 	d, err := a.db.Days.Get(entity.DayFilter{Dates: []time.Time{date}})
-	if err != nil && !errors.Is(err, repository.ErrNotFound){
+	if err != nil && !errors.Is(err, repository.ErrNotFound) {
 		return nil, err
 	}
 	if d == nil {

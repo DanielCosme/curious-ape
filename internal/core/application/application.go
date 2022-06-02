@@ -28,9 +28,10 @@ type Environment struct {
 func New(opts *AppOptions) *App {
 	a := &App{
 		db: &repository.Models{
-			Habits: &sqlite.HabitsDataSource{DB: opts.DB},
-			Days:   &sqlite.DaysDataSource{DB: opts.DB},
-			Oauths: &sqlite.Oauth2DataSource{DB: opts.DB},
+			Habits:    &sqlite.HabitsDataSource{DB: opts.DB},
+			Days:      &sqlite.DaysDataSource{DB: opts.DB},
+			Oauths:    &sqlite.Oauth2DataSource{DB: opts.DB},
+			SleepLogs: &sqlite.SleepLogDataSource{DB: opts.DB},
 		},
 		cfg: opts.Config,
 		Log: opts.Logger,

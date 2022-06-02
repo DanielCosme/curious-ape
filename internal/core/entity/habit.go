@@ -55,8 +55,8 @@ type HabitOrigin string
 
 const (
 	HabitOriginClient    HabitOrigin = "client"   // android/web/cli
-	HabitOriginProvider  HabitOrigin = "provider" // collector?
-	HabitOriginWebSystem HabitOrigin = "system"   // internal app
+	HabitOriginProvider  HabitOrigin = "provider" // fitbit, google etc
+	HabitOriginWebSystem HabitOrigin = "system"   // internal from manual entries?
 	HabitOriginUnknown   HabitOrigin = "unknown"  // ??
 )
 

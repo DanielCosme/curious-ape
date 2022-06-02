@@ -23,7 +23,7 @@ func (a *App) HabitCreate(day *entity.Day, data *entity.Habit) (*entity.Habit, e
 	// Create the habit log
 	for _, dataLog := range data.Logs {
 		hl, err := a.db.Habits.GetHabitLog(entity.HabitLogFilter{Origin: []entity.HabitOrigin{dataLog.Origin}, HabitID: []int{habit.ID}})
-		if err != nil && !errors.Is(err, repository.ErrNotFound){
+		if err != nil && !errors.Is(err, repository.ErrNotFound) {
 			return nil, err
 		}
 
@@ -77,7 +77,7 @@ func (a *App) HabitsGetCategories() ([]*entity.HabitCategory, error) {
 func (a *App) getOrCreateHabit(dayID, categoryID int) (*entity.Habit, error) {
 	// First check that the habit already exists
 	h, err := a.db.Habits.Get(entity.HabitFilter{DayID: []int{dayID}, CategoryID: []int{categoryID}})
-	if err != nil && !errors.Is(err, repository.ErrNotFound){
+	if err != nil && !errors.Is(err, repository.ErrNotFound) {
 		return nil, err
 	}
 	if h == nil {

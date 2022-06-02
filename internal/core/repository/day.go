@@ -13,6 +13,7 @@ type Day interface {
 }
 
 func ExecuteDaysPipeline(days []*entity.Day, joins ...entity.DayJoin) error {
+	// TODO implement async pipeline execution
 	if !(len(days) > 0) {
 		return nil
 	}
