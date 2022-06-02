@@ -5,7 +5,6 @@ import (
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/core/repository"
 	"github.com/danielcosme/curious-ape/sdk/errors"
-	"github.com/danielcosme/curious-ape/sdk/log"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -49,14 +48,13 @@ func (ds *DaysDataSource) ToIDs(days []*entity.Day) []int {
 }
 
 func catchErr(err error) error {
-	// we want to returned errors defined by the application and not by sql specific errors
 	if err == nil {
 		return nil
 	}
+
 	switch err.Error() {
 	case sql.ErrNoRows.Error():
-		log.DefaultLogger.Warning(err.Error())
-		return nil // when not found we don't really consider this an error
+		return repository.ErrNotFound
 	default:
 		return errors.NewFatal(err.Error())
 	}

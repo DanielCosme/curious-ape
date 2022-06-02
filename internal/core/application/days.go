@@ -2,8 +2,10 @@ package application
 
 import (
 	"github.com/danielcosme/curious-ape/internal/core/entity"
+	"github.com/danielcosme/curious-ape/internal/core/repository"
 	"github.com/danielcosme/curious-ape/internal/datasource"
 	"github.com/danielcosme/curious-ape/sdk/dates"
+	"github.com/danielcosme/curious-ape/sdk/errors"
 	"time"
 )
 
@@ -22,7 +24,7 @@ func (a *App) DaysGetAll() ([]*entity.Day, error) {
 
 func (a *App) DayGetByDate(date time.Time) (*entity.Day, error) {
 	d, err := a.db.Days.Get(entity.DayFilter{Dates: []time.Time{date}})
-	if err != nil {
+	if err != nil && !errors.Is(err, repository.ErrNotFound){
 		return nil, err
 	}
 	if d == nil {

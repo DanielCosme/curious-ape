@@ -4,6 +4,7 @@ import (
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/core/repository"
 	"github.com/danielcosme/curious-ape/internal/datasource"
+	"github.com/danielcosme/curious-ape/sdk/errors"
 	"time"
 )
 
@@ -22,7 +23,7 @@ func (a *App) HabitCreate(day *entity.Day, data *entity.Habit) (*entity.Habit, e
 	// Create the habit log
 	for _, dataLog := range data.Logs {
 		hl, err := a.db.Habits.GetHabitLog(entity.HabitLogFilter{Origin: []entity.HabitOrigin{dataLog.Origin}, HabitID: []int{habit.ID}})
-		if err != nil {
+		if err != nil && !errors.Is(err, repository.ErrNotFound){
 			return nil, err
 		}
 
@@ -76,7 +77,7 @@ func (a *App) HabitsGetCategories() ([]*entity.HabitCategory, error) {
 func (a *App) getOrCreateHabit(dayID, categoryID int) (*entity.Habit, error) {
 	// First check that the habit already exists
 	h, err := a.db.Habits.Get(entity.HabitFilter{DayID: []int{dayID}, CategoryID: []int{categoryID}})
-	if err != nil {
+	if err != nil && !errors.Is(err, repository.ErrNotFound){
 		return nil, err
 	}
 	if h == nil {
@@ -93,24 +94,24 @@ func (a *App) getOrCreateHabit(dayID, categoryID int) (*entity.Habit, error) {
 
 func calculateHabitStatusFromLogs(logs []*entity.HabitLog) entity.HabitStatus {
 	status := entity.HabitStatusNoInfo
-	// TODO-fix this
-	// re-calculate habit status
 	for _, log := range logs {
 		if !log.IsAutomated {
-			// if the log is manually added
 			if log.Success {
-				status = entity.HabitStatusDone
-				break
-			} else {
-				status = entity.HabitStatusNotDone
+				return entity.HabitStatusDone
 			}
-		} else {
-			if log.Success {
-				status = entity.HabitStatusDone
-			} else if status == entity.HabitStatusNoInfo {
+			status = entity.HabitStatusNotDone
+		}
+	}
+	if status == entity.HabitStatusNoInfo {
+		for _, log := range logs {
+			if log.IsAutomated {
+				if log.Success {
+					return entity.HabitStatusDone
+				}
 				status = entity.HabitStatusNotDone
 			}
 		}
 	}
+
 	return status
 }

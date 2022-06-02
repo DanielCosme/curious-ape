@@ -39,7 +39,7 @@ func (ds *Oauth2DataSource) Update(o *entity.Oauth2) (*entity.Oauth2, error) {
 func (ds *Oauth2DataSource) Get(filter entity.Oauth2Filter) (*entity.Oauth2, error) {
 	o := new(entity.Oauth2)
 	query, args := oauthFilter(filter).generate()
-	if err := ds.DB.Get(query, query, args...); err != nil {
+	if err := ds.DB.Get(o, query, args...); err != nil {
 		return nil, catchErr(err)
 	}
 	return o, nil
@@ -71,7 +71,7 @@ func oauthFilter(f entity.Oauth2Filter) *sqlBuilder {
 		for i, v := range f.Provider {
 			values[i] = v
 		}
-		b.AddFilter("providers", values)
+		b.AddFilter("provider", values)
 	}
 
 	return b
