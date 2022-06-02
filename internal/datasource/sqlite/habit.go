@@ -1,7 +1,6 @@
 package sqlite
 
 import (
-	"fmt"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/core/repository"
 	"github.com/jmoiron/sqlx"
@@ -11,23 +10,23 @@ type HabitsDataSource struct {
 	DB *sqlx.DB
 }
 
+func (ds *HabitsDataSource) Create(h *entity.Habit) error {
+	query := `
+		INSERT INTO habits (day_id, habit_category_id, status) 
+		VALUES (:day_id, :habit_category_id, :status)
+	`
+	res, err := ds.DB.NamedExec(query, h)
+	if err != nil {
+		return catchErr(err)
+	}
+	id, _ := res.LastInsertId()
+	h.ID = int(id)
+	return nil
+}
+
 func (ds *HabitsDataSource) Get(filter entity.HabitFilter, joins ...entity.HabitJoin) (*entity.Habit, error) {
 	habit := new(entity.Habit)
-	var args []interface{}
-	query := `SELECT * FROM habits `
-
-	if filter.DayID > 0 {
-		query += fmt.Sprintf("WHERE day_id = ?")
-		args = append(args, filter.DayID)
-		if filter.CategoryID > 0 {
-			query += fmt.Sprintf(" AND habit_category_id = ?")
-			args = append(args, filter.CategoryID)
-		}
-	} else if filter.ID > 0 {
-		query += fmt.Sprintf("WHERE id = ?")
-		args = append(args, filter.ID)
-	}
-
+	query, args := habitFilter(filter).generate()
 	if err := ds.DB.Get(habit, query, args...); err != nil {
 		return nil, catchErr(err)
 	}
@@ -35,41 +34,13 @@ func (ds *HabitsDataSource) Get(filter entity.HabitFilter, joins ...entity.Habit
 	return habit, catchErr(repository.ExecuteHabitsPipeline([]*entity.Habit{habit}, joins...))
 }
 
-func (ds *HabitsDataSource) Create(h *entity.Habit, joins ...entity.HabitJoin) error {
-	query := `
-		INSERT INTO habits (day_id, habit_category_id, status) 
-		VALUES (:day_id, :habit_category_id, :status)
-	`
-	res, err := ds.DB.NamedExec(query, h)
-	if err != nil {
-		return err
-	}
-
-	id, err := res.LastInsertId()
-	h.ID = int(id)
-	return repository.ExecuteHabitsPipeline([]*entity.Habit{h}, joins...)
-}
-
 func (ds *HabitsDataSource) Find(filter entity.HabitFilter, joins ...entity.HabitJoin) ([]*entity.Habit, error) {
 	habits := []*entity.Habit{}
-	query := `SELECT * from habits`
-
-	if len(filter.DayIDs) > 0 {
-		q, args, err := sqlx.In(fmt.Sprintf("%s WHERE day_id IN (?)", query), filter.DayIDs)
-		if err != nil {
-			return nil, err
-		}
-
-		if err := ds.DB.Select(&habits, q, args...); err != nil {
-			return nil, err
-		}
-	} else {
-		if err := ds.DB.Select(&habits, query); err != nil {
-			return nil, err
-		}
+	query, args := habitFilter(filter).generate()
+	if err := ds.DB.Select(&habits, query, args...); err != nil {
+		return nil, catchErr(err)
 	}
-
-	return habits, repository.ExecuteHabitsPipeline(habits, joins...)
+	return habits, catchErr(repository.ExecuteHabitsPipeline(habits, joins...))
 }
 
 func (ds *HabitsDataSource) Update(data *entity.Habit, joins ...entity.HabitJoin) (*entity.Habit, error) {
@@ -80,38 +51,32 @@ func (ds *HabitsDataSource) Update(data *entity.Habit, joins ...entity.HabitJoin
 	`
 	_, err := ds.DB.NamedExec(query, data)
 	if err != nil {
-		return nil, err
+		return nil, catchErr(err)
 	}
-	return ds.Get(entity.HabitFilter{ID: data.ID}, joins...)
+	return ds.Get(entity.HabitFilter{ID: []int{data.ID}}, joins...)
 }
 
 func (ds *HabitsDataSource) Delete(id int) error {
-	q := `DELETE FROM habits WHERE id = ?`
-	_, err := ds.DB.Exec(q, id)
-	return err
+	_, err := ds.DB.Exec(`DELETE FROM habits WHERE id = ?`, id)
+	return catchErr(err)
 }
 
-func (ds *HabitsDataSource) FindHabitCategories(filter entity.HabitFilter) ([]*entity.HabitCategory, error) {
+func (ds *HabitsDataSource) FindHabitCategories(filter entity.HabitCategoryFilter) ([]*entity.HabitCategory, error) {
 	cs := []*entity.HabitCategory{}
-	var args []interface{}
-	query := `SELECT * FROM habit_categories`
-
-	if len(filter.CategoryIDs) > 0 {
-		q, args, err := sqlx.In(fmt.Sprintf("%s WHERE id IN (?)", query), filter.CategoryIDs)
-		if err != nil {
-			return nil, err
-		}
-
-		return cs, ds.DB.Select(&cs, q, args...)
+	query, args := habitCategoryFilter(filter).generate()
+	if err := ds.DB.Select(&cs, query, args...); err != nil {
+		return nil, catchErr(err)
 	}
-
-	return cs, ds.DB.Select(&cs, query, args...)
+	return cs, nil
 }
 
-func (ds *HabitsDataSource) GetHabitCategory(filter entity.HabitFilter) (*entity.HabitCategory, error) {
+func (ds *HabitsDataSource) GetHabitCategory(filter entity.HabitCategoryFilter) (*entity.HabitCategory, error) {
 	hc := new(entity.HabitCategory)
-	// query, args := newHabitCategoryQueryBuilder().Generate()
-	return hc, catchErr(ds.DB.Get(hc, "SELECT * FROM habit_categories WHERE id=?", filter.CategoryID))
+	query, args := habitCategoryFilter(filter).generate()
+	if err := ds.DB.Get(hc, query, args...); err != nil {
+		return nil, catchErr(err)
+	}
+	return hc, nil
 }
 
 func (ds *HabitsDataSource) CreateHabitLog(hl *entity.HabitLog) error {
@@ -119,8 +84,13 @@ func (ds *HabitsDataSource) CreateHabitLog(hl *entity.HabitLog) error {
 		INSERT INTO habit_logs (habit_id, origin, is_automated, success, note) 
 		VALUES (:habit_id, :origin, :is_automated, :success, :note)
 	`
-	_, err := ds.DB.NamedExec(query, hl)
-	return err
+	res, err := ds.DB.NamedExec(query, hl)
+	if err != nil {
+		return catchErr(err)
+	}
+	id, _ := res.LastInsertId()
+	hl.ID = int(id)
+	return nil
 }
 
 func (ds *HabitsDataSource) UpdateHabitLog(data *entity.HabitLog) (*entity.HabitLog, error) {
@@ -131,42 +101,32 @@ func (ds *HabitsDataSource) UpdateHabitLog(data *entity.HabitLog) (*entity.Habit
 	`
 	_, err := ds.DB.NamedExec(query, data)
 	if err != nil {
-		return nil, err
+		return nil, catchErr(err)
 	}
-	return ds.GetHabitLog(entity.HabitFilter{ID: data.ID})
+	return ds.GetHabitLog(entity.HabitLogFilter{ID: []int{data.ID}})
 }
 
-func (ds *HabitsDataSource) GetHabitLog(filter entity.HabitFilter) (*entity.HabitLog, error) {
+func (ds *HabitsDataSource) GetHabitLog(filter entity.HabitLogFilter) (*entity.HabitLog, error) {
 	hl := &entity.HabitLog{}
-	query := `SELECT * FROM habit_logs `
-
-	if filter.Origin != "" {
-		query = fmt.Sprintf("%s WHERE habit_id = ? AND origin = ?", query)
-		return hl, catchErr(ds.DB.Get(hl, query, filter.ID, filter.Origin))
+	query, args := habitLogFilter(filter).generate()
+	if err := ds.DB.Get(hl, query, args...); err != nil {
+		return nil, catchErr(err)
 	}
-
-	return hl, catchErr(ds.DB.Get(hl, query, filter.ID))
+	return hl, nil
 }
 
-func (ds *HabitsDataSource) FindHabitLogs(filter entity.HabitFilter) ([]*entity.HabitLog, error) {
-	hl := []*entity.HabitLog{}
-	var args []interface{}
-	query := `SELECT * FROM habit_logs`
-
-	if len(filter.IDs) > 0 {
-		var err error
-		query, args, err = sqlx.In(fmt.Sprintf("%s WHERE habit_id IN (?)", query), filter.IDs)
-		if err != nil {
-			return nil, err
-		}
+func (ds *HabitsDataSource) FindHabitLogs(filter entity.HabitLogFilter) ([]*entity.HabitLog, error) {
+	hls := []*entity.HabitLog{}
+	query, args := habitLogFilter(filter).generate()
+	if err := ds.DB.Select(&hls, query, args...); err != nil {
+		return nil, catchErr(err)
 	}
-
-	return hl, ds.DB.Select(&hl, query, args...)
+	return hls, nil
 }
 
 func (ds *HabitsDataSource) DeleteHabitLog(id int) error {
 	_, err := ds.DB.Exec(`DELETE FROM habit_logs WHERE id = ?`, id)
-	return err
+	return catchErr(err)
 }
 
 func (ds *HabitsDataSource) ToDayIDs(hs []*entity.Habit) []int {
@@ -203,4 +163,54 @@ func (ds *HabitsDataSource) ToIDs(hs []*entity.Habit) []int {
 		}
 	}
 	return IDs
+}
+
+func habitFilter(f entity.HabitFilter) *sqlBuilder {
+	b := newBuilder("habits")
+
+	if len(f.ID) > 0 {
+		b.AddFilter("id", intToInterface(f.ID))
+	}
+
+	if len(f.DayID) > 0 {
+		b.AddFilter("day_id", intToInterface(f.DayID))
+	}
+
+	if len(f.CategoryID) > 0 {
+		b.AddFilter("habit_category_id", intToInterface(f.CategoryID))
+	}
+
+	return b
+}
+
+func habitCategoryFilter(f entity.HabitCategoryFilter) *sqlBuilder {
+	b := newBuilder("habit_categories")
+
+	if len(f.ID) > 0 {
+		b.Data = append(b.Data, filterData{columnName: "id", values: intToInterface(f.ID)})
+	}
+
+	return b
+}
+
+func habitLogFilter(f entity.HabitLogFilter) *sqlBuilder {
+	b := newBuilder("habit_logs")
+
+	if len(f.ID) > 0 {
+		b.AddFilter("id", intToInterface(f.ID))
+	}
+
+	if len(f.HabitID) > 0 {
+		b.AddFilter("habit_id", intToInterface(f.HabitID))
+	}
+
+	if len(f.Origin) > 0 {
+		values := make([]interface{}, len(f.Origin))
+		for i, v := range f.Origin {
+			values[i] = v
+		}
+		b.AddFilter("origin", values)
+	}
+
+	return b
 }

@@ -4,8 +4,8 @@ import "net/http"
 
 type ResponseWriterPlus struct {
 	http.ResponseWriter
-	status   int
-	Err      error
+	status int
+	Err    error
 }
 
 func NewResponseWriterPlus(rw http.ResponseWriter) *ResponseWriterPlus {

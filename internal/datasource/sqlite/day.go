@@ -2,10 +2,10 @@ package sqlite
 
 import (
 	"database/sql"
-	"fmt"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/core/repository"
 	"github.com/danielcosme/curious-ape/sdk/errors"
+	"github.com/danielcosme/curious-ape/sdk/log"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -24,35 +24,19 @@ func (ds *DaysDataSource) Create(d *entity.Day) error {
 
 func (ds *DaysDataSource) Get(filter entity.DayFilter, joins ...entity.DayJoin) (*entity.Day, error) {
 	day := new(entity.Day)
-	var args []interface{}
-	q := `SELECT * FROM days`
-
-	if !filter.Date.IsZero() {
-		q = fmt.Sprintf("%s WHERE date = ?", q)
-		args = append(args, filter.Date)
+	q, args := dayFilter(filter).generate()
+	if err := ds.DB.Get(day, q, args...); err != nil {
+		return nil, catchErr(err)
 	}
-
-	return day, catchErr(ds.DB.Get(day, q, args...))
+	return day, repository.ExecuteDaysPipeline([]*entity.Day{day}, joins...)
 }
 
 func (ds *DaysDataSource) Find(filter entity.DayFilter, joins ...entity.DayJoin) ([]*entity.Day, error) {
 	days := []*entity.Day{}
-	query := `SELECT * from "days"`
-	if len(filter.IDs) > 0 {
-		q, args, err := sqlx.In(fmt.Sprintf("%s WHERE id IN (?)", query), filter.IDs)
-		if err != nil {
-			return nil, err
-		}
-
-		if err := ds.DB.Select(&days, q, args...); err != nil {
-			return nil, err
-		}
-	} else {
-		if err := ds.DB.Select(&days, query); err != nil {
-			return nil, err
-		}
+	q, args := dayFilter(filter).generate()
+	if err := ds.DB.Select(&days, q, args...); err != nil {
+		return nil, err
 	}
-
 	return days, repository.ExecuteDaysPipeline(days, joins...)
 }
 
@@ -65,13 +49,29 @@ func (ds *DaysDataSource) ToIDs(days []*entity.Day) []int {
 }
 
 func catchErr(err error) error {
+	// we want to returned errors defined by the application and not by sql specific errors
 	if err == nil {
 		return nil
 	}
 	switch err.Error() {
 	case sql.ErrNoRows.Error():
-		return repository.ErrNotFound
+		log.DefaultLogger.Warning(err.Error())
+		return nil // when not found we don't really consider this an error
 	default:
 		return errors.NewFatal(err.Error())
 	}
+}
+
+func dayFilter(f entity.DayFilter) *sqlBuilder {
+	b := newBuilder("days")
+
+	if len(f.IDs) > 0 {
+		b.AddFilter("id", intToInterface(f.IDs))
+	}
+
+	if len(f.Dates) > 0 {
+		b.AddFilter("date", dateToInterface(f.Dates))
+	}
+
+	return b
 }

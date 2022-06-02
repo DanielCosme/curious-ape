@@ -17,7 +17,7 @@ type HabitTransport struct {
 	Origin       entity.HabitOrigin   `json:"origin,omitempty"`
 	Note         string               `json:"note,omitempty"`
 	IsAutomated  bool                 `json:"is_automated,omitempty"`
-	Logs         []*HabitTransportLog `json:"logs"`
+	Logs         []*HabitTransportLog `json:"logs,omitempty"`
 }
 
 type HabitTransportLog struct {
@@ -42,21 +42,24 @@ func (ht *HabitTransport) ToHabit() *entity.Habit {
 }
 
 func FromHabitToTransport(h *entity.Habit) *HabitTransport {
-	ht := &HabitTransport{
-		ID:     h.ID,
-		Type:   h.Category.Type,
-		Status: h.Status,
-	}
+	if h != nil {
+		ht := &HabitTransport{
+			ID:     h.ID,
+			Type:   h.Category.Type,
+			Status: h.Status,
+		}
 
-	if h.Day != nil {
-		ht.Date = dates.ToPtr(h.Day.Date)
-	}
+		if h.Day != nil {
+			ht.Date = dates.ToPtr(h.Day.Date)
+		}
 
-	for _, l := range h.Logs {
-		ht.Logs = append(ht.Logs, fromHabitLogToTransport(l))
-	}
+		for _, l := range h.Logs {
+			ht.Logs = append(ht.Logs, fromHabitLogToTransport(l))
+		}
 
-	return ht
+		return ht
+	}
+	return nil
 }
 
 func fromHabitLogToTransport(hl *entity.HabitLog) *HabitTransportLog {

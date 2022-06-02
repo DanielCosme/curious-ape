@@ -27,8 +27,6 @@ type Oauth2Config struct {
 }
 
 type Oauth2Filter struct {
-	ID        int
-	Provider  IntegrationProvider
-	IDs       []int
-	Providers []IntegrationProvider
+	ID       []int
+	Provider []IntegrationProvider
 }

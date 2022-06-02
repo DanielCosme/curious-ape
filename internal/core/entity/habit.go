@@ -54,10 +54,10 @@ func IsValidHabitCategoryType(habitType HabitType) bool {
 type HabitOrigin string
 
 const (
-	HabitOriginClient    HabitOrigin = "client"
-	HabitOriginProvider  HabitOrigin = "provider"
-	HabitOriginWebSystem HabitOrigin = "system"
-	HabitOriginUnknown   HabitOrigin = "unknown"
+	HabitOriginClient    HabitOrigin = "client"   // android/web/cli
+	HabitOriginProvider  HabitOrigin = "provider" // collector?
+	HabitOriginWebSystem HabitOrigin = "system"   // internal app
+	HabitOriginUnknown   HabitOrigin = "unknown"  // ??
 )
 
 type HabitStatus string
@@ -69,15 +69,19 @@ const (
 )
 
 type HabitFilter struct {
-	ID          int
-	DayID       int
-	CategoryID  int
-	HabitLogID  int
-	IDs         []int
-	DayIDs      []int
-	CategoryIDs []int
-	HabitLogIDs []int
-	Origin      HabitOrigin
+	ID         []int
+	DayID      []int
+	CategoryID []int
+}
+
+type HabitCategoryFilter struct {
+	ID []int
+}
+
+type HabitLogFilter struct {
+	ID      []int
+	HabitID []int
+	Origin  []HabitOrigin
 }
 
 type HabitJoin func(hs []*Habit) error

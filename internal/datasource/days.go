@@ -14,7 +14,7 @@ func DaysPipeline(m *repository.Models) []entity.DayJoin {
 func DaysJoinHabits(m *repository.Models) entity.DayJoin {
 	return func(days []*entity.Day) error {
 		if len(days) > 0 {
-			hs, err := m.Habits.Find(entity.HabitFilter{DayIDs: m.Days.ToIDs(days)}, HabitsJoinCategories(m))
+			hs, err := m.Habits.Find(entity.HabitFilter{DayID: m.Days.ToIDs(days)}, HabitsJoinCategories(m))
 			if err != nil {
 				return err
 			}

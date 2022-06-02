@@ -11,7 +11,7 @@ import (
 func RecoverPanic(a *application.App) rest.HTTPMiddleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-			defer func () {
+			defer func() {
 				if err := recover(); err != nil {
 					rw.Header().Set("Connection", "close")
 					rw.WriteHeader(http.StatusInternalServerError)

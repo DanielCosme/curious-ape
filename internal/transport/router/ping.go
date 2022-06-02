@@ -8,4 +8,3 @@ import (
 func (h *Handler) Ping(rw http.ResponseWriter, r *http.Request) {
 	rest.JSONStatusOk(rw, nil)
 }
-

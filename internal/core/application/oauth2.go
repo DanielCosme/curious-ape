@@ -2,22 +2,19 @@ package application
 
 import (
 	"context"
-	"errors"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
-	"github.com/danielcosme/curious-ape/internal/core/repository"
 	"golang.org/x/oauth2"
 	"net/http"
 )
 
 func (a *App) Oauth2ConnectProvider(provider string) (string, error) {
 	p := entity.IntegrationProvider(provider)
-	_, err := a.db.Oauths.Get(entity.Oauth2Filter{Provider: p})
+	o, err := a.db.Oauths.Get(entity.Oauth2Filter{Provider: []entity.IntegrationProvider{p}})
 	if err != nil {
-		if errors.Is(err, repository.ErrNotFound) {
-			if err = a.db.Oauths.Create(&entity.Oauth2{Provider: p}); err != nil {
-				return "", err
-			}
-		} else {
+		return "", err
+	}
+	if o == nil {
+		if err = a.db.Oauths.Create(&entity.Oauth2{Provider: p}); err != nil {
 			return "", err
 		}
 	}
@@ -36,7 +33,7 @@ func (a *App) Oauth2Success(provider, code string) error {
 		return err
 	}
 
-	o, err := a.db.Oauths.Get(entity.Oauth2Filter{Provider: p})
+	o, err := a.db.Oauths.Get(entity.Oauth2Filter{Provider: []entity.IntegrationProvider{p}})
 	if err != nil {
 		return err
 	}
@@ -53,10 +50,11 @@ func (a *App) Oauth2Success(provider, code string) error {
 func (a *App) Oauth2GetClient(provider entity.IntegrationProvider) (*http.Client, error) {
 	config := a.oauth2GetConfigurationForProvider(provider)
 
-	o, err := a.db.Oauths.Get(entity.Oauth2Filter{Provider: provider})
+	o, err := a.db.Oauths.Get(entity.Oauth2Filter{Provider: []entity.IntegrationProvider{provider}})
 	if err != nil {
 		return nil, err
 	}
+
 	t := &oauth2.Token{
 		AccessToken:  o.AccessToken,
 		RefreshToken: o.RefreshToken,

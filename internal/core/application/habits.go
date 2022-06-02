@@ -4,12 +4,11 @@ import (
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/core/repository"
 	"github.com/danielcosme/curious-ape/internal/datasource"
-	"github.com/danielcosme/curious-ape/sdk/errors"
 	"time"
 )
 
 func (a *App) HabitCreate(day *entity.Day, data *entity.Habit) (*entity.Habit, error) {
-	habitCategory, err := a.db.Habits.GetHabitCategory(entity.HabitFilter{CategoryID: data.CategoryID})
+	habitCategory, err := a.db.Habits.GetHabitCategory(entity.HabitCategoryFilter{ID: []int{data.CategoryID}})
 	if err != nil {
 		return nil, err
 	}
@@ -21,57 +20,33 @@ func (a *App) HabitCreate(day *entity.Day, data *entity.Habit) (*entity.Habit, e
 
 	// TODO hardcode origins for habit logs and create a validator for it
 	// Create the habit log
-	for _, l := range data.Logs {
-		hl, err := a.db.Habits.GetHabitLog(entity.HabitFilter{Origin: l.Origin, ID: habit.ID})
+	for _, dataLog := range data.Logs {
+		hl, err := a.db.Habits.GetHabitLog(entity.HabitLogFilter{Origin: []entity.HabitOrigin{dataLog.Origin}, HabitID: []int{habit.ID}})
 		if err != nil {
-			if errors.Is(err, repository.ErrNotFound) {
-				// if it does not exist create it
-				l.HabitID = habit.ID
-				err := a.db.Habits.CreateHabitLog(l)
-				if err != nil {
-					return nil, err
-				}
-			} else {
-				return nil, err
-			}
+			return nil, err
+		}
+
+		// if it does not exist create it
+		if hl == nil {
+			dataLog.HabitID = habit.ID
+			err = a.db.Habits.CreateHabitLog(dataLog)
 		} else {
 			// if it exists update it
-			hl.Origin = l.Origin
-			hl.Note = l.Note
-			hl.Success = l.Success
-			hl.IsAutomated = l.IsAutomated
+			hl.Origin = dataLog.Origin
+			hl.Note = dataLog.Note
+			hl.Success = dataLog.Success
+			hl.IsAutomated = dataLog.IsAutomated
 			_, err = a.db.Habits.UpdateHabitLog(hl)
-			if err != nil {
-				return nil, err
-			}
+		}
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	// Calculate habit status based on the logs
 	if err := repository.ExecuteHabitsPipeline([]*entity.Habit{habit}, datasource.HabitsJoinLogs(a.db)); err != nil {
 		return nil, err
 	}
-
-	status := entity.HabitStatusNoInfo
-	// re-calculate habit status
-	for _, log := range habit.Logs {
-		if !log.IsAutomated {
-			// if the log is manually added
-			if log.Success {
-				status = entity.HabitStatusDone
-			} else {
-				status = entity.HabitStatusNotDone
-			}
-			break
-		} else {
-			if log.Success {
-				status = entity.HabitStatusDone
-			} else if status == entity.HabitStatusNoInfo {
-				status = entity.HabitStatusNotDone
-			}
-		}
-	}
-	habit.Status = status
+	habit.Status = calculateHabitStatusFromLogs(habit.Logs)
 
 	return a.db.Habits.Update(habit, datasource.HabitsPipeline(a.db)...)
 }
@@ -91,28 +66,51 @@ func (a *App) HabitsGetAll(from, to time.Time) ([]*entity.Habit, error) {
 }
 
 func (a *App) HabitGetByID(id int) (*entity.Habit, error) {
-	return a.db.Habits.Get(entity.HabitFilter{ID: id}, datasource.HabitsPipeline(a.db)...)
+	return a.db.Habits.Get(entity.HabitFilter{ID: []int{id}}, datasource.HabitsPipeline(a.db)...)
 }
 
 func (a *App) HabitsGetCategories() ([]*entity.HabitCategory, error) {
-	return a.db.Habits.FindHabitCategories(entity.HabitFilter{})
+	return a.db.Habits.FindHabitCategories(entity.HabitCategoryFilter{})
 }
 
 func (a *App) getOrCreateHabit(dayID, categoryID int) (*entity.Habit, error) {
 	// First check that the habit already exists
-	h, err := a.db.Habits.Get(entity.HabitFilter{DayID: dayID, CategoryID: categoryID})
+	h, err := a.db.Habits.Get(entity.HabitFilter{DayID: []int{dayID}, CategoryID: []int{categoryID}})
 	if err != nil {
-		if errors.Is(err, repository.ErrNotFound) {
-			// If it does not exist we create it
-			h = &entity.Habit{
-				DayID:      dayID,
-				CategoryID: categoryID,
-				Status:     entity.HabitStatusNoInfo,
+		return nil, err
+	}
+	if h == nil {
+		// If it does not exist we create it
+		h = &entity.Habit{
+			DayID:      dayID,
+			CategoryID: categoryID,
+			Status:     entity.HabitStatusNoInfo,
+		}
+		err = a.db.Habits.Create(h)
+	}
+	return h, err
+}
+
+func calculateHabitStatusFromLogs(logs []*entity.HabitLog) entity.HabitStatus {
+	status := entity.HabitStatusNoInfo
+	// TODO-fix this
+	// re-calculate habit status
+	for _, log := range logs {
+		if !log.IsAutomated {
+			// if the log is manually added
+			if log.Success {
+				status = entity.HabitStatusDone
+				break
+			} else {
+				status = entity.HabitStatusNotDone
 			}
-			if err = a.db.Habits.Create(h); err != nil {
-				return nil, err
+		} else {
+			if log.Success {
+				status = entity.HabitStatusDone
+			} else if status == entity.HabitStatusNoInfo {
+				status = entity.HabitStatusNotDone
 			}
 		}
 	}
-	return h, err
+	return status
 }

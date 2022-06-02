@@ -4,7 +4,7 @@ import "github.com/danielcosme/curious-ape/internal/core/entity"
 
 type Habit interface {
 	// habit
-	Create(*entity.Habit, ...entity.HabitJoin) error
+	Create(*entity.Habit) error
 	Update(*entity.Habit, ...entity.HabitJoin) (*entity.Habit, error)
 	Get(entity.HabitFilter, ...entity.HabitJoin) (*entity.Habit, error)
 	Find(entity.HabitFilter, ...entity.HabitJoin) ([]*entity.Habit, error)
@@ -12,16 +12,16 @@ type Habit interface {
 	// habit log
 	CreateHabitLog(*entity.HabitLog) error
 	UpdateHabitLog(*entity.HabitLog) (*entity.HabitLog, error)
-	GetHabitLog(entity.HabitFilter) (*entity.HabitLog, error)
-	FindHabitLogs(entity.HabitFilter) ([]*entity.HabitLog, error)
+	GetHabitLog(entity.HabitLogFilter) (*entity.HabitLog, error)
+	FindHabitLogs(entity.HabitLogFilter) ([]*entity.HabitLog, error)
 	DeleteHabitLog(id int) error
 	// habit category
-	GetHabitCategory(filter entity.HabitFilter) (*entity.HabitCategory, error)
-	FindHabitCategories(filter entity.HabitFilter) ([]*entity.HabitCategory, error)
+	GetHabitCategory(entity.HabitCategoryFilter) (*entity.HabitCategory, error)
+	FindHabitCategories(entity.HabitCategoryFilter) ([]*entity.HabitCategory, error)
 	// Helpers
-	ToIDs(hs []*entity.Habit) []int
-	ToDayIDs(hs []*entity.Habit) []int
-	ToCategoryIDs(hs []*entity.Habit) []int
+	ToIDs([]*entity.Habit) []int
+	ToDayIDs([]*entity.Habit) []int
+	ToCategoryIDs([]*entity.Habit) []int
 }
 
 func ExecuteHabitsPipeline(hs []*entity.Habit, hjs ...entity.HabitJoin) error {
