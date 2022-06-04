@@ -54,7 +54,7 @@ func (ds SleepLogDataSource) Get(filter entity.SleepLogFilter, joins ...entity.S
 func (ds SleepLogDataSource) Find(filter entity.SleepLogFilter, joins ...entity.SleepLogJoin) ([]*entity.SleepLog, error) {
 	sls := []*entity.SleepLog{}
 	query, args := sleepLogFilter(filter).generate()
-	if err := ds.DB.Select(sls, query, args...); err != nil {
+	if err := ds.DB.Select(&sls, query, args...); err != nil {
 		return nil, catchErr(err)
 	}
 	return sls, catchErr(repository.ExecuteSleepLogPipeline(sls, joins...))
@@ -73,7 +73,7 @@ func sleepLogFilter(f entity.SleepLogFilter) *sqlBuilder {
 	}
 
 	if len(f.DayID) > 0 {
-		b.AddFilter("day_id", intToInterface(f.ID))
+		b.AddFilter("day_id", intToInterface(f.DayID))
 	}
 
 	return b

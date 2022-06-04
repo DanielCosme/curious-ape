@@ -13,12 +13,12 @@ type SleepLog struct {
 	Origin      SleepLogOrigin `db:"origin"`
 	Raw         string         `db:"raw"`
 	// Minutes
-	TotalTimeInBed int `db:"total_time_in_bed"`
-	MinutesAsleep  int `db:"minutes_asleep"`
-	MinutesRem     int `db:"minutes_rem"`
-	MinutesDeep    int `db:"minutes_deep"`
-	MinutesLight   int `db:"minutes_light"`
-	MinutesAwake   int `db:"minutes_awake"`
+	TimeInBed     time.Duration `db:"total_time_in_bed"`
+	MinutesAsleep time.Duration `db:"minutes_asleep"`
+	MinutesRem    time.Duration `db:"minutes_rem"`
+	MinutesDeep   time.Duration `db:"minutes_deep"`
+	MinutesLight  time.Duration `db:"minutes_light"`
+	MinutesAwake  time.Duration `db:"minutes_awake"`
 	// Generated
 	Day *Day
 }

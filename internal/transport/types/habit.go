@@ -8,9 +8,9 @@ import (
 
 type HabitTransport struct {
 	ID           int                  `json:"id"`
+	Date         *time.Time           `json:"date,omitempty"`
 	Status       entity.HabitStatus   `json:"status"`
 	Success      bool                 `json:"success,omitempty"`
-	Date         *time.Time           `json:"date,omitempty"`
 	CategoryID   int                  `json:"category_id,omitempty"`
 	CategoryCode string               `json:"category_code,omitempty"`
 	Type         entity.HabitType     `json:"category_type,omitempty"`

@@ -27,8 +27,3 @@ func (h *Handler) Oauth2FitbitSuccess(rw http.ResponseWriter, r *http.Request) {
 
 	rest.JSONStatusOk(rw, nil)
 }
-
-func (h *Handler) SleepDebug(rw http.ResponseWriter, r *http.Request) {
-	data, err := h.App.SleepDebug()
-	JsonCheckError(rw, r, http.StatusOK, data, err)
-}
