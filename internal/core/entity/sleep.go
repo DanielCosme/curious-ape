@@ -1,0 +1,38 @@
+package entity
+
+import "time"
+
+type SleepLog struct {
+	// Repository
+	ID          int            `db:"id"`
+	DayID       int            `db:"day_id"`
+	StartTime   time.Time      `db:"start_time"`
+	EndTime     time.Time      `db:"end_time"`
+	IsMainSleep bool           `db:"is_main_sleep"`
+	IsAutomated bool           `db:"is_automated"`
+	Origin      SleepLogOrigin `db:"origin"`
+	Raw         string         `db:"raw"`
+	// Minutes
+	TimeInBed     time.Duration `db:"total_time_in_bed"`
+	MinutesAsleep time.Duration `db:"minutes_asleep"`
+	MinutesRem    time.Duration `db:"minutes_rem"`
+	MinutesDeep   time.Duration `db:"minutes_deep"`
+	MinutesLight  time.Duration `db:"minutes_light"`
+	MinutesAwake  time.Duration `db:"minutes_awake"`
+	// Generated
+	Day *Day
+}
+
+type SleepLogOrigin string
+
+const (
+	SleepLogOriginFitbit SleepLogOrigin = "fitbit"
+	SleepLogOriginManual SleepLogOrigin = "manual"
+)
+
+type SleepLogFilter struct {
+	ID    []int
+	DayID []int
+}
+
+type SleepLogJoin func(hs []*SleepLog) error
