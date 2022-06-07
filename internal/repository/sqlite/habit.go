@@ -129,7 +129,7 @@ func (ds *HabitsDataSource) DeleteHabitLog(id int) error {
 	return catchErr(err)
 }
 
-func habitFilter(f entity.HabitFilter) *sqlBuilder {
+func habitFilter(f entity.HabitFilter) *sqlQueryBuilder {
 	b := newBuilder("habits")
 
 	if len(f.ID) > 0 {
@@ -147,7 +147,7 @@ func habitFilter(f entity.HabitFilter) *sqlBuilder {
 	return b
 }
 
-func habitCategoryFilter(f entity.HabitCategoryFilter) *sqlBuilder {
+func habitCategoryFilter(f entity.HabitCategoryFilter) *sqlQueryBuilder {
 	b := newBuilder("habit_categories")
 
 	if len(f.ID) > 0 {
@@ -157,7 +157,7 @@ func habitCategoryFilter(f entity.HabitCategoryFilter) *sqlBuilder {
 	return b
 }
 
-func habitLogFilter(f entity.HabitLogFilter) *sqlBuilder {
+func habitLogFilter(f entity.HabitLogFilter) *sqlQueryBuilder {
 	b := newBuilder("habit_logs")
 
 	if len(f.ID) > 0 {

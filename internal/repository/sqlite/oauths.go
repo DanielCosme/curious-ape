@@ -59,7 +59,7 @@ func (ds *Oauth2DataSource) Delete(id int) error {
 	return catchErr(err)
 }
 
-func oauthFilter(f entity.Oauth2Filter) *sqlBuilder {
+func oauthFilter(f entity.Oauth2Filter) *sqlQueryBuilder {
 	b := newBuilder("oauths")
 
 	if len(f.ID) > 0 {

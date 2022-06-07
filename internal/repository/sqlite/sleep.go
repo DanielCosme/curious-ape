@@ -65,7 +65,7 @@ func (ds SleepLogDataSource) Delete(id int) error {
 	return catchErr(err)
 }
 
-func sleepLogFilter(f entity.SleepLogFilter) *sqlBuilder {
+func sleepLogFilter(f entity.SleepLogFilter) *sqlQueryBuilder {
 	b := newBuilder("sleep_logs")
 
 	if len(f.ID) > 0 {

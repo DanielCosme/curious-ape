@@ -9,7 +9,7 @@ import (
 
 const DriverName = "sqlite3"
 
-type sqlBuilder struct {
+type sqlQueryBuilder struct {
 	TableName string
 	Data      []filterData
 }
@@ -19,15 +19,15 @@ type filterData struct {
 	values     []interface{}
 }
 
-func newBuilder(tableName string) *sqlBuilder {
-	return &sqlBuilder{TableName: tableName, Data: []filterData{}}
+func newBuilder(tableName string) *sqlQueryBuilder {
+	return &sqlQueryBuilder{TableName: tableName, Data: []filterData{}}
 }
 
-func (qb *sqlBuilder) AddFilter(columnName string, values []interface{}) {
+func (qb *sqlQueryBuilder) AddFilter(columnName string, values []interface{}) {
 	qb.Data = append(qb.Data, filterData{columnName, values})
 }
 
-func (qb *sqlBuilder) generate() (string, []interface{}) {
+func (qb *sqlQueryBuilder) generate() (string, []interface{}) {
 	var args []interface{}
 	q := fmt.Sprintf("SELECT * FROM %s ", qb.TableName)
 

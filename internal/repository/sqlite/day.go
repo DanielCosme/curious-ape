@@ -52,7 +52,7 @@ func catchErr(err error) error {
 	}
 }
 
-func dayFilter(f entity.DayFilter) *sqlBuilder {
+func dayFilter(f entity.DayFilter) *sqlQueryBuilder {
 	b := newBuilder("days")
 
 	if len(f.IDs) > 0 {
