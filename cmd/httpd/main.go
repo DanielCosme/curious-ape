@@ -11,7 +11,7 @@ import (
 
 	"github.com/danielcosme/curious-ape/internal/core/application"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
-	"github.com/danielcosme/curious-ape/internal/datasource/sqlite"
+	"github.com/danielcosme/curious-ape/internal/repository/sqlite"
 	"github.com/danielcosme/curious-ape/internal/transport"
 	"github.com/danielcosme/curious-ape/sdk/errors"
 	logape "github.com/danielcosme/curious-ape/sdk/log"

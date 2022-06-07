@@ -1,7 +1,7 @@
 package router
 
 import (
-	"github.com/danielcosme/curious-ape/internal/core/repository"
+	"github.com/danielcosme/curious-ape/internal/core/database"
 	"net/http"
 
 	"github.com/danielcosme/curious-ape/rest"
@@ -10,7 +10,7 @@ import (
 
 func JsonCheckError(rw http.ResponseWriter, r *http.Request, status int, data interface{}, err error) {
 	if err != nil {
-		if errors.Is(err, repository.ErrNotFound) {
+		if errors.Is(err, database.ErrNotFound) {
 			rest.ErrResponse(rw, http.StatusNotFound, err)
 			return
 		} else {

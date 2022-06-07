@@ -1,4 +1,4 @@
-package repository
+package database
 
 type Models struct {
 	Habits    Habit

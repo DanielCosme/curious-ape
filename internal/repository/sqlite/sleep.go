@@ -1,8 +1,8 @@
 package sqlite
 
 import (
+	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
-	"github.com/danielcosme/curious-ape/internal/core/repository"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -48,7 +48,7 @@ func (ds SleepLogDataSource) Get(filter entity.SleepLogFilter, joins ...entity.S
 	if err := ds.DB.Get(sl, query, args...); err != nil {
 		return nil, catchErr(err)
 	}
-	return sl, catchErr(repository.ExecuteSleepLogPipeline([]*entity.SleepLog{sl}, joins...))
+	return sl, catchErr(database.ExecuteSleepLogPipeline([]*entity.SleepLog{sl}, joins...))
 }
 
 func (ds SleepLogDataSource) Find(filter entity.SleepLogFilter, joins ...entity.SleepLogJoin) ([]*entity.SleepLog, error) {
@@ -57,7 +57,7 @@ func (ds SleepLogDataSource) Find(filter entity.SleepLogFilter, joins ...entity.
 	if err := ds.DB.Select(&sls, query, args...); err != nil {
 		return nil, catchErr(err)
 	}
-	return sls, catchErr(repository.ExecuteSleepLogPipeline(sls, joins...))
+	return sls, catchErr(database.ExecuteSleepLogPipeline(sls, joins...))
 }
 
 func (ds SleepLogDataSource) Delete(id int) error {
@@ -77,28 +77,4 @@ func sleepLogFilter(f entity.SleepLogFilter) *sqlBuilder {
 	}
 
 	return b
-}
-
-func (ds *SleepLogDataSource) ToDayIDs(sls []*entity.SleepLog) []int {
-	dayIDs := []int{}
-	dayIDsMap := map[int]int{}
-	for _, h := range sls {
-		if _, ok := dayIDsMap[h.DayID]; !ok {
-			dayIDs = append(dayIDs, h.DayID)
-			dayIDsMap[h.DayID] = h.DayID
-		}
-	}
-	return dayIDs
-}
-
-func (ds *SleepLogDataSource) ToIDs(hs []*entity.SleepLog) []int {
-	IDs := []int{}
-	mapHabitIDs := map[int]int{}
-	for _, h := range hs {
-		if _, ok := mapHabitIDs[h.ID]; !ok {
-			IDs = append(IDs, h.ID)
-			mapHabitIDs[h.ID] = h.ID
-		}
-	}
-	return IDs
 }

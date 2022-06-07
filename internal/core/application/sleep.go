@@ -2,8 +2,8 @@ package application
 
 import (
 	"github.com/danielcosme/curious-ape/fitbit/fitbit"
+	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
-	"github.com/danielcosme/curious-ape/internal/datasource"
 	"time"
 )
 
@@ -27,7 +27,7 @@ func (a *App) GetSleepLogsForDay(d *entity.Day) ([]*entity.SleepLog, error) {
 		}
 	}
 
-	return a.db.SleepLogs.Find(entity.SleepLogFilter{ID: a.db.SleepLogs.ToIDs(logs)}, datasource.SleepLogsPipeline(a.db)...)
+	return a.db.SleepLogs.Find(entity.SleepLogFilter{ID: database.SleepToIDs(logs)}, database.SleepLogsPipeline(a.db)...)
 }
 
 func FromFitbitSleepToLog(d *entity.Day, sleepEnvelope *fitbit.SleepEnvelope) []*entity.SleepLog {

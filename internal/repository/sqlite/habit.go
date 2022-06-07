@@ -1,8 +1,8 @@
 package sqlite
 
 import (
+	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
-	"github.com/danielcosme/curious-ape/internal/core/repository"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -31,7 +31,7 @@ func (ds *HabitsDataSource) Get(filter entity.HabitFilter, joins ...entity.Habit
 		return nil, catchErr(err)
 	}
 
-	return habit, catchErr(repository.ExecuteHabitsPipeline([]*entity.Habit{habit}, joins...))
+	return habit, catchErr(database.ExecuteHabitsPipeline([]*entity.Habit{habit}, joins...))
 }
 
 func (ds *HabitsDataSource) Find(filter entity.HabitFilter, joins ...entity.HabitJoin) ([]*entity.Habit, error) {
@@ -40,7 +40,7 @@ func (ds *HabitsDataSource) Find(filter entity.HabitFilter, joins ...entity.Habi
 	if err := ds.DB.Select(&habits, query, args...); err != nil {
 		return nil, catchErr(err)
 	}
-	return habits, catchErr(repository.ExecuteHabitsPipeline(habits, joins...))
+	return habits, catchErr(database.ExecuteHabitsPipeline(habits, joins...))
 }
 
 func (ds *HabitsDataSource) Update(data *entity.Habit, joins ...entity.HabitJoin) (*entity.Habit, error) {
@@ -127,42 +127,6 @@ func (ds *HabitsDataSource) FindHabitLogs(filter entity.HabitLogFilter) ([]*enti
 func (ds *HabitsDataSource) DeleteHabitLog(id int) error {
 	_, err := ds.DB.Exec(`DELETE FROM habit_logs WHERE id = ?`, id)
 	return catchErr(err)
-}
-
-func (ds *HabitsDataSource) ToDayIDs(hs []*entity.Habit) []int {
-	dayIDs := []int{}
-	dayIDsMap := map[int]int{}
-	for _, h := range hs {
-		if _, ok := dayIDsMap[h.DayID]; !ok {
-			dayIDs = append(dayIDs, h.DayID)
-			dayIDsMap[h.DayID] = h.DayID
-		}
-	}
-	return dayIDs
-}
-
-func (ds *HabitsDataSource) ToCategoryIDs(hs []*entity.Habit) []int {
-	categoryIDs := []int{}
-	categoryIDsMap := map[int]int{}
-	for _, h := range hs {
-		if _, ok := categoryIDsMap[h.CategoryID]; !ok {
-			categoryIDs = append(categoryIDs, h.CategoryID)
-			categoryIDsMap[h.CategoryID] = h.CategoryID
-		}
-	}
-	return categoryIDs
-}
-
-func (ds *HabitsDataSource) ToIDs(hs []*entity.Habit) []int {
-	IDs := []int{}
-	mapHabitIDs := map[int]int{}
-	for _, h := range hs {
-		if _, ok := mapHabitIDs[h.ID]; !ok {
-			IDs = append(IDs, h.ID)
-			mapHabitIDs[h.ID] = h.ID
-		}
-	}
-	return IDs
 }
 
 func habitFilter(f entity.HabitFilter) *sqlBuilder {

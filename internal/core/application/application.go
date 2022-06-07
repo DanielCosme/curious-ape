@@ -2,17 +2,21 @@ package application
 
 import (
 	"github.com/danielcosme/curious-ape/internal/core/entity"
-	"github.com/danielcosme/curious-ape/internal/core/repository"
-	"github.com/danielcosme/curious-ape/internal/datasource/sqlite"
+	"github.com/danielcosme/curious-ape/internal/core/database"
+	"github.com/danielcosme/curious-ape/internal/repository/sqlite"
 	"github.com/danielcosme/curious-ape/sdk/log"
 	"github.com/jmoiron/sqlx"
 )
 
 type App struct {
-	db  *repository.Models
+	db  *database.Models
 	cfg *Environment
 	Log *log.Logger
 }
+
+// Endpoints and application methods to sync manually
+// 		Then I will set up cron-jobs on my linux server to invoke them, because they are hosted on the same machine
+//		there is no need for authentication
 
 type AppOptions struct {
 	DB     *sqlx.DB
@@ -27,7 +31,7 @@ type Environment struct {
 
 func New(opts *AppOptions) *App {
 	a := &App{
-		db: &repository.Models{
+		db: &database.Models{
 			Habits:    &sqlite.HabitsDataSource{DB: opts.DB},
 			Days:      &sqlite.DaysDataSource{DB: opts.DB},
 			Oauths:    &sqlite.Oauth2DataSource{DB: opts.DB},

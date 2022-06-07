@@ -2,8 +2,8 @@ package sqlite
 
 import (
 	"database/sql"
+	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
-	"github.com/danielcosme/curious-ape/internal/core/repository"
 	"github.com/danielcosme/curious-ape/sdk/errors"
 	"github.com/jmoiron/sqlx"
 )
@@ -27,7 +27,7 @@ func (ds *DaysDataSource) Get(filter entity.DayFilter, joins ...entity.DayJoin) 
 	if err := ds.DB.Get(day, q, args...); err != nil {
 		return nil, catchErr(err)
 	}
-	return day, repository.ExecuteDaysPipeline([]*entity.Day{day}, joins...)
+	return day, database.ExecuteDaysPipeline([]*entity.Day{day}, joins...)
 }
 
 func (ds *DaysDataSource) Find(filter entity.DayFilter, joins ...entity.DayJoin) ([]*entity.Day, error) {
@@ -36,15 +36,7 @@ func (ds *DaysDataSource) Find(filter entity.DayFilter, joins ...entity.DayJoin)
 	if err := ds.DB.Select(&days, q, args...); err != nil {
 		return nil, err
 	}
-	return days, repository.ExecuteDaysPipeline(days, joins...)
-}
-
-func (ds *DaysDataSource) ToIDs(days []*entity.Day) []int {
-	ids := []int{}
-	for _, d := range days {
-		ids = append(ids, d.ID)
-	}
-	return ids
+	return days, database.ExecuteDaysPipeline(days, joins...)
 }
 
 func catchErr(err error) error {
@@ -54,7 +46,7 @@ func catchErr(err error) error {
 
 	switch err.Error() {
 	case sql.ErrNoRows.Error():
-		return repository.ErrNotFound
+		return database.ErrNotFound
 	default:
 		return errors.NewFatal(err.Error())
 	}
