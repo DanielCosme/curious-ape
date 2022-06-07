@@ -3,8 +3,8 @@ package router
 import (
 	"net/http"
 
+	"github.com/danielcosme/curious-ape/internal/api/router/middleware"
 	"github.com/danielcosme/curious-ape/internal/core/application"
-	"github.com/danielcosme/curious-ape/internal/transport/router/middleware"
 	"github.com/danielcosme/curious-ape/rest"
 )
 

@@ -1,7 +1,7 @@
 package router
 
 import (
-	"github.com/danielcosme/curious-ape/internal/transport/types"
+	"github.com/danielcosme/curious-ape/internal/api/types"
 	"github.com/danielcosme/curious-ape/rest"
 	"net/http"
 )

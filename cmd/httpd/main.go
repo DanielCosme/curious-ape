@@ -9,10 +9,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/danielcosme/curious-ape/internal/api"
 	"github.com/danielcosme/curious-ape/internal/core/application"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/repository/sqlite"
-	"github.com/danielcosme/curious-ape/internal/transport"
 	"github.com/danielcosme/curious-ape/sdk/errors"
 	logape "github.com/danielcosme/curious-ape/sdk/log"
 
@@ -33,7 +33,7 @@ func main() {
 	// SQL datasource initialization
 	db := sqlx.MustConnect(sqlite.DriverName, cfg.Database.DNS)
 
-	api := &transport.API{
+	api := &api.Transport{
 		App: application.New(&application.AppOptions{
 			DB: db,
 			Config: &application.Environment{

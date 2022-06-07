@@ -1,6 +1,7 @@
 package fitbit
 
 import (
+	"io"
 	"net/http"
 	"time"
 )
@@ -15,8 +16,8 @@ type API struct {
 	Sleep *SleepService
 }
 
-func NewAPI(client *http.Client) *API {
-	c := &API{Sleep: &SleepService{client: Client{client}}}
+func NewAPI(client *http.Client, out io.Writer) *API {
+	c := &API{Sleep: &SleepService{client: Client{Client: client, out: out}}}
 	return c
 }
 

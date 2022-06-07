@@ -1,7 +1,7 @@
-package transport
+package api
 
 import (
-	"github.com/danielcosme/curious-ape/internal/transport/router"
+	"github.com/danielcosme/curious-ape/internal/api/router"
 	"net/http"
 )
 
@@ -10,9 +10,9 @@ type Mux struct {
 	// Echo   http.Handler
 }
 
-func (api *API) Routes() http.Handler {
+func (t *Transport) Routes() http.Handler {
 	return &Mux{
-		StdMux: router.Routes(api.App),
+		StdMux: router.Routes(t.App),
 		// Echo:   echo.Routes(a.App),
 	}
 }

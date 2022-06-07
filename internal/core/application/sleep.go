@@ -1,9 +1,10 @@
 package application
 
 import (
-	"github.com/danielcosme/curious-ape/fitbit/fitbit"
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
+	"github.com/danielcosme/curious-ape/internal/integrations/fitbit"
+
 	"time"
 )
 
@@ -14,13 +15,12 @@ func (a *App) GetSleepLogsForDay(d *entity.Day) ([]*entity.SleepLog, error) {
 		return nil, err
 	}
 
-	api := fitbit.NewAPI(client)
-	fitbitSl, err := api.Sleep.GetLogByDate(d.Date)
+	fitbitSl, err := a.Sync.FitbitClient(client).Sleep.GetLogByDate(d.Date)
 	if err != nil {
 		return nil, err
 	}
 
-	logs := FromFitbitSleepToLog(d, fitbitSl)
+	logs := fromFitbitSleepToLog(d, fitbitSl)
 	for _, l := range logs {
 		if err := a.db.SleepLogs.Create(l); err != nil {
 			return nil, err
@@ -30,7 +30,7 @@ func (a *App) GetSleepLogsForDay(d *entity.Day) ([]*entity.SleepLog, error) {
 	return a.db.SleepLogs.Find(entity.SleepLogFilter{ID: database.SleepToIDs(logs)}, database.SleepLogsPipeline(a.db)...)
 }
 
-func FromFitbitSleepToLog(d *entity.Day, sleepEnvelope *fitbit.SleepEnvelope) []*entity.SleepLog {
+func fromFitbitSleepToLog(d *entity.Day, sleepEnvelope *fitbit.SleepEnvelope) []*entity.SleepLog {
 	sleepLogs := []*entity.SleepLog{}
 
 	for _, fsl := range sleepEnvelope.Sleep {

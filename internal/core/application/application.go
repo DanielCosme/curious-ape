@@ -1,17 +1,20 @@
 package application
 
 import (
-	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/core/database"
+	"github.com/danielcosme/curious-ape/internal/core/entity"
+	"github.com/danielcosme/curious-ape/internal/integrations"
 	"github.com/danielcosme/curious-ape/internal/repository/sqlite"
 	"github.com/danielcosme/curious-ape/sdk/log"
+
 	"github.com/jmoiron/sqlx"
 )
 
 type App struct {
-	db  *database.Models
-	cfg *Environment
-	Log *log.Logger
+	db   *database.Models
+	cfg  *Environment
+	Log  *log.Logger
+	Sync *integrations.Sync
 }
 
 // Endpoints and application methods to sync manually
@@ -37,8 +40,9 @@ func New(opts *AppOptions) *App {
 			Oauths:    &sqlite.Oauth2DataSource{DB: opts.DB},
 			SleepLogs: &sqlite.SleepLogDataSource{DB: opts.DB},
 		},
-		cfg: opts.Config,
-		Log: opts.Logger,
+		cfg:  opts.Config,
+		Log:  opts.Logger,
+		Sync: integrations.NewSync(opts.Logger),
 	}
 
 	a.Log.InfoP("Application running", log.Prop{"environment": a.cfg.Env})

@@ -27,22 +27,22 @@ type Summary struct {
 	Wake  Wake  `json:"wake"`
 }
 type Sleep struct {
-	DateOfSleep         string  `json:"dateOfSleep"`
-	Duration            int     `json:"duration"`
-	Efficiency          int     `json:"efficiency"`
-	EndTime             string  `json:"endTime"`
-	InfoCode            int     `json:"infoCode"`
-	IsMainSleep         bool    `json:"isMainSleep"`
-	Levels              Levels  `json:"levels"`
-	LogID               int64   `json:"logId"`
-	MinutesAfterWakeup  int     `json:"minutesAfterWakeup"`
-	MinutesAsleep       int     `json:"minutesAsleep"`
-	MinutesAwake        int     `json:"minutesAwake"`
-	MinutesToFallAsleep int     `json:"minutesToFallAsleep"`
-	LogType             string  `json:"logType"`
-	StartTime           string  `json:"startTime"`
-	TimeInBed           int     `json:"timeInBed"`
-	Type                string  `json:"type"`
+	DateOfSleep         string `json:"dateOfSleep"`
+	Duration            int    `json:"duration"`
+	Efficiency          int    `json:"efficiency"`
+	EndTime             string `json:"endTime"`
+	InfoCode            int    `json:"infoCode"`
+	IsMainSleep         bool   `json:"isMainSleep"`
+	Levels              Levels `json:"levels"`
+	LogID               int64  `json:"logId"`
+	MinutesAfterWakeup  int    `json:"minutesAfterWakeup"`
+	MinutesAsleep       int    `json:"minutesAsleep"`
+	MinutesAwake        int    `json:"minutesAwake"`
+	MinutesToFallAsleep int    `json:"minutesToFallAsleep"`
+	LogType             string `json:"logType"`
+	StartTime           string `json:"startTime"`
+	TimeInBed           int    `json:"timeInBed"`
+	Type                string `json:"type"`
 }
 type Levels struct {
 	Data      []Data      `json:"data"`
