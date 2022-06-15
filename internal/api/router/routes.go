@@ -27,9 +27,11 @@ func Routes(a *application.App) http.Handler {
 	mux.HandleFunc("/days", h.DaysGetAll)
 
 	mux.Handle("/sleep", rest.NewMiddleware(middleware.SetDay(a)).Then(h.SleepLogs))
+	mux.HandleFunc("/sleep/sync", h.SleepLogs)
 
 	mux.HandleFunc("/oauth2/fitbit/connect", h.Oauth2FitbitConnect)
 	mux.HandleFunc("/oauth2/fitbit/success", h.Oauth2FitbitSuccess)
+
 
 	return md.Commit(mux)
 }

@@ -32,3 +32,31 @@ func (a *App) DayGetByDate(date time.Time) (*entity.Day, error) {
 
 	return d, nil
 }
+
+func (a *App) daysGetByDateRange(start, end time.Time) ([]*entity.Day, error) {
+	days := []*entity.Day{}
+
+	for _, date := range datesRange(start, end) {
+		d, err := a.DayGetByDate(date)
+		if err != nil {
+			return nil, err
+		}
+
+		days = append(days, d)
+	}
+
+	return days, nil
+}
+
+func datesRange(start, end time.Time) []time.Time {
+	dates := []time.Time{}
+	inter := start
+
+	for inter.Before(end) {
+		dates = append(dates, inter)
+		inter = inter.AddDate(0, 0, 1)
+	}
+	dates = append(dates, end)
+
+	return dates
+}

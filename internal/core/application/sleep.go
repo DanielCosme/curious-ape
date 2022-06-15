@@ -1,41 +1,100 @@
 package application
 
 import (
+	errors2 "errors"
+	"fmt"
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/integrations/fitbit"
+	"github.com/danielcosme/curious-ape/sdk/errors"
+	"github.com/danielcosme/curious-ape/sdk/log"
 
 	"time"
 )
 
 func (a *App) GetSleepLogsForDay(d *entity.Day) ([]*entity.SleepLog, error) {
 	// Get client, refreshes token if necessary
-	client, err := a.Oauth2GetClient(entity.ProviderFitbit)
-	if err != nil {
-		return nil, err
-	}
+	// client, err := a.Oauth2GetClient(entity.ProviderFitbit)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	fitbitSl, err := a.Sync.FitbitClient(client).Sleep.GetLogByDate(d.Date)
-	if err != nil {
-		return nil, err
-	}
+	// fitbitSl, err := a.Sync.FitbitClient(client).Sleep.GetLogByDate(d.Date)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	logs := fromFitbitSleepToLog(d, fitbitSl)
-	for _, l := range logs {
-		if err := a.db.SleepLogs.Create(l); err != nil {
-			return nil, err
-		}
-	}
+	// logs := fromFitbitSleepToLog(d, fitbitSl)
+	// for _, l := range logs {
+	// 	if err := a.db.SleepLogs.Create(l); err != nil {
+	// 		return nil, err
+	// 	}
+	// }
 
-	return a.db.SleepLogs.Find(entity.SleepLogFilter{ID: database.SleepToIDs(logs)}, database.SleepLogsPipeline(a.db)...)
+	return a.getSleepLogs(entity.SleepLogFilter{DayID: []int{d.ID}})
 }
 
-func fromFitbitSleepToLog(d *entity.Day, sleepEnvelope *fitbit.SleepEnvelope) []*entity.SleepLog {
-	sleepLogs := []*entity.SleepLog{}
+func (a *App) GetAllSleepLogs() ([]*entity.SleepLog, error) {
+	return a.getSleepLogs(entity.SleepLogFilter{})
+}
+
+func (a *App) getSleepLogs(f entity.SleepLogFilter) ([]*entity.SleepLog, error) {
+	return a.db.SleepLogs.Find(f, database.SleepLogsJoinDay(a.db))
+}
+
+func (a *App) SyncSleepLogs(start, end time.Time) error {
+	// Get client, refreshes token if necessary
+	client, err := a.Oauth2GetClient(entity.ProviderFitbit)
+	if err != nil {
+		return err
+	}
+
+	fitbitSl, err := a.Sync.FitbitClient(client).Sleep.GetLogByDateRange(start, end)
+	if err != nil {
+		return err
+	}
+
+	days, err := a.daysGetByDateRange(start, end)
+	if err != nil {
+		return err
+	}
+
+	return a.saveSleepLogsFromFitbit(days, fitbitSl)
+}
+
+func (a *App) SyncSleepLog(date time.Time) error {
+	day, err := a.DayGetByDate(date)
+	if err != nil {
+		return err
+	}
+
+	// Get client, refreshes token if necessary
+	client, err := a.Oauth2GetClient(entity.ProviderFitbit)
+	if err != nil {
+		return err
+	}
+
+	fitbitSl, err := a.Sync.FitbitClient(client).Sleep.GetLogByDate(date)
+	if err != nil {
+		return err
+	}
+
+	return a.saveSleepLogsFromFitbit([]*entity.Day{day}, fitbitSl)
+}
+
+func (a *App) saveSleepLogsFromFitbit(days []*entity.Day, sleepEnvelope *fitbit.SleepEnvelope) error {
+	mapDays := database.DayToMapByISODate(days)
 
 	for _, fsl := range sleepEnvelope.Sleep {
+		dayID := 0
+		if d, ok := mapDays[fsl.DateOfSleep]; ok {
+			dayID = d.ID
+		} else {
+			return errors.New(fmt.Sprintf("not day match for fitbit log on %s", fsl.DateOfSleep))
+		}
+
 		mySl := &entity.SleepLog{
-			DayID:         d.ID,
+			DayID:         dayID,
 			StartTime:     parseFitbitTime(fsl.StartTime),
 			EndTime:       parseFitbitTime(fsl.EndTime),
 			IsMainSleep:   fsl.IsMainSleep,
@@ -48,10 +107,23 @@ func fromFitbitSleepToLog(d *entity.Day, sleepEnvelope *fitbit.SleepEnvelope) []
 			MinutesDeep:   fromIntMinutesToDuration(fsl.Levels.Summary.Deep.Minutes),
 			MinutesLight:  fromIntMinutesToDuration(fsl.Levels.Summary.Light.Minutes),
 		}
-		sleepLogs = append(sleepLogs, mySl)
+
+		if err := a.db.SleepLogs.Create(mySl); err != nil {
+			if errors2.Is(err, database.ErrUniqueCheckFailed) {
+				a.Log.Error(err)
+			} else {
+				return err
+			}
+		} else {
+			prop := log.Prop{
+				"provider": "fitbit",
+				"date": fsl.DateOfSleep,
+			}
+			a.Log.InfoP("Created sleep log", prop)
+		}
 	}
 
-	return sleepLogs
+	return nil
 }
 
 func fromIntMinutesToDuration(i int) time.Duration {

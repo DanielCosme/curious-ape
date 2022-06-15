@@ -6,6 +6,7 @@ import (
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/sdk/errors"
 	"github.com/jmoiron/sqlx"
+	"strings"
 )
 
 type DaysDataSource struct {
@@ -48,6 +49,9 @@ func catchErr(err error) error {
 	case sql.ErrNoRows.Error():
 		return database.ErrNotFound
 	default:
+		if strings.Contains(err.Error(), "UNIQUE constraint failed:") {
+			return database.ErrUniqueCheckFailed
+		}
 		return errors.NewFatal(err.Error())
 	}
 }

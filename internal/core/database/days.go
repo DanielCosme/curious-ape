@@ -80,3 +80,11 @@ func DayToIDs(days []*entity.Day) []int {
 	}
 	return ids
 }
+
+func DayToMapByISODate(days []*entity.Day) map[string]*entity.Day {
+	mapDays := map[string]*entity.Day{}
+	for _, d := range days {
+		mapDays[entity.FormatDate(d.Date)] = d
+	}
+	return mapDays
+}

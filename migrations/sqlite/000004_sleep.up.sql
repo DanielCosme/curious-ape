@@ -15,5 +15,6 @@ CREATE TABLE IF NOT EXISTS sleep_logs (
     minutes_awake       INTEGER default 0,
     raw                 TEXT,
 
-    FOREIGN KEY (day_id) REFERENCES "days" (id) ON DELETE CASCADE
+    FOREIGN KEY (day_id) REFERENCES "days" (id) ON DELETE CASCADE,
+    UNIQUE (day_id, is_main_sleep)
 );
