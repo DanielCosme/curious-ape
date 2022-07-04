@@ -5,6 +5,7 @@ import (
 	"github.com/danielcosme/curious-ape/internal/core/application"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/rest"
+	"github.com/go-chi/chi/v5"
 	"net/http"
 )
 
@@ -13,7 +14,7 @@ func SetDay(a *application.App) rest.HTTPMiddleware {
 		return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 			var day *entity.Day
 
-			if key := r.Header.Get("X-APE-DATE"); key != "" {
+			if key := chi.URLParam(r, "date"); key != "" {
 				date, err := entity.ParseDate(key)
 				if err != nil {
 					rest.ErrBadRequest(rw, err.Error())

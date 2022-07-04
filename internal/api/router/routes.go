@@ -1,6 +1,7 @@
 package router
 
 import (
+	"github.com/go-chi/chi/v5"
 	"net/http"
 
 	"github.com/danielcosme/curious-ape/internal/api/router/middleware"
@@ -18,14 +19,6 @@ func Routes(a *application.App) http.Handler {
 	md.Use(middleware.RecoverPanic(a))
 	md.Use(rest.MiddlewareParseForm)
 
-	mux.HandleFunc("/", h.NotFound)
-	mux.HandleFunc("/ping", h.Ping)
-
-	mux.Handle("/habits", rest.NewMiddleware(middleware.SetDay(a), middleware.SetHabit(a)).Then(h.Habits))
-	mux.HandleFunc("/habits/categories", h.HabitCategories)
-
-	mux.HandleFunc("/days", h.DaysGetAll)
-
 	mux.Handle("/sleep", rest.NewMiddleware(middleware.SetDay(a)).Then(h.SleepLogs))
 	mux.HandleFunc("/sleep/sync", h.SleepLogs)
 
@@ -34,4 +27,45 @@ func Routes(a *application.App) http.Handler {
 
 
 	return md.Commit(mux)
+}
+
+func ChiRoutes(a *application.App) http.Handler {
+	h := Handler{App: a}
+
+	r := chi.NewRouter()
+
+	//  POST /days/____/habits/create
+	//	GET /days/___/habits 	-> all habits for day?
+
+	//  GET /habits 		-> all habits
+	//  GET /habits/1 		-> habit by ID
+	//  PUT /habits/1 		-> habit by ID
+	//  DELETE /habits/1 	-> habit by ID
+
+	r.Use(middleware.Logger(a))
+	r.Use(middleware.RecoverPanic(a))
+	r.Use(rest.MiddlewareParseForm)
+
+	r.Get("/ping", h.Ping)
+
+	r.Route("/days", func(r chi.Router) {
+		r.Get("/", h.DaysGetAll)
+		r.Route("/{date}", func(r chi.Router) {
+			r.Use(middleware.SetDay(a))
+			r.Post("/habits", h.HabitCreate)
+		})
+	})
+	r.Route("/habits", func(r chi.Router) {
+		r.Get("/", h.HabitsGetAll)
+		r.Get("/categories", h.HabitsGetCategories)
+		r.Route("/{habitID}", func(r chi.Router) {
+			r.Use(middleware.SetHabit(a))
+			r.Get("/", h.HabitGet)
+			r.Put("/", h.HabitUpdate)
+			r.Delete("/", h.HabitDelete)
+		})
+	})
+
+	r.NotFound(h.NotFound)
+	return r
 }

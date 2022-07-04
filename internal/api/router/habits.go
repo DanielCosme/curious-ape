@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (h *Handler) HabitCategories(rw http.ResponseWriter, r *http.Request) {
+func (h *Handler) HabitsGetCategories(rw http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		categories, err := h.App.HabitsGetCategories()
@@ -16,50 +16,65 @@ func (h *Handler) HabitCategories(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) Habits(rw http.ResponseWriter, r *http.Request) {
-	var data *types.HabitTransport
+func (h *Handler) HabitGet(rw http.ResponseWriter, r *http.Request) {
 	habit := r.Context().Value("habit").(*entity.Habit)
-
-	switch r.Method {
-	case http.MethodGet:
-		if habit != nil {
-			rest.JSONStatusOk(rw, envelope{"habit": types.FromHabitToTransport(habit)})
-		} else {
-			hs, err := h.HabitsGetAll()
-			JsonCheckError(rw, r, http.StatusOK, envelope{"habits": hs}, err)
-		}
-	case http.MethodPost:
-		day := r.Context().Value("day").(*entity.Day)
-
-		err := rest.ReadJSON(r, &data)
-		if err != nil {
-			rest.ErrInternalServer(rw)
-			return
-		}
-
-		newHabit, err := h.App.HabitCreate(day, data.ToHabit())
-		JsonCheckError(rw, r, http.StatusCreated, envelope{"habit": types.FromHabitToTransport(newHabit)}, err)
-	case http.MethodPut:
-		err := rest.ReadJSON(r, &data)
-		if err != nil {
-			rest.ErrInternalServer(rw)
-			return
-		}
-
-		habitUpdated, err := h.App.HabitFullUpdate(habit, data.ToHabit())
-		JsonCheckError(rw, r, http.StatusOK, envelope{"habit": types.FromHabitToTransport(habitUpdated)}, err)
-	case http.MethodDelete:
-		err := h.App.HabitDelete(habit)
-		JsonCheckError(rw, r, http.StatusOK, nil, err)
-	default:
-		rest.ErrNotAllowed(rw)
-	}
+	rest.JSONStatusOk(rw, envelope{"habit": types.FromHabitToTransport(habit)})
 }
 
-func (h *Handler) HabitsGetAll() ([]*types.HabitTransport, error) {
+func (h *Handler) HabitCreate(rw http.ResponseWriter, r *http.Request) {
+	day := r.Context().Value("day").(*entity.Day)
+
+	var data *types.HabitTransport
+	err := rest.ReadJSON(r, &data)
+	if err != nil {
+		rest.ErrInternalServer(rw)
+		return
+	}
+
+	newHabit, err := h.App.HabitCreate(day, data.ToHabit())
+	JsonCheckError(rw, r, http.StatusCreated, envelope{"habit": types.FromHabitToTransport(newHabit)}, err)
+}
+
+func (h *Handler) HabitUpdate(rw http.ResponseWriter, r *http.Request) {
+	habit := r.Context().Value("habit").(*entity.Habit)
+
+	var data *types.HabitTransport
+	err := rest.ReadJSON(r, &data)
+	if err != nil {
+		rest.ErrInternalServer(rw)
+		return
+	}
+
+	habitUpdated, err := h.App.HabitFullUpdate(habit, data.ToHabit())
+	JsonCheckError(rw, r, http.StatusOK, envelope{"habit": types.FromHabitToTransport(habitUpdated)}, err)
+}
+
+func (h *Handler) HabitDelete(rw http.ResponseWriter, r *http.Request) {
+	habit := r.Context().Value("habit").(*entity.Habit)
+	err := h.App.HabitDelete(habit)
+	JsonCheckError(rw, r, http.StatusOK, nil, err)
+}
+
+func (h *Handler) HabitsGetAll(rw http.ResponseWriter, r *http.Request) {
+	// should I send a filter here?
+
+	// I could have a day object
+	// Create with URL param  ?day=2022-01-02
+
+	// Get all
+	// Get all by day
+	// Get all from day to day
+	// day := r.Context().Value("day").(*entity.Day)
+	// entity.HabitFilter{
+	// 	ID:         nil,
+	// 	DayID:      []int{day.ID},
+	// 	CategoryID: nil,
+	// }
+
 	hs, err := h.App.HabitsGetAll(time.Now(), time.Now())
 	if err != nil {
-		return nil, err
+		rest.ErrNotFound(rw)
+		return
 	}
 
 	habits := []*types.HabitTransport{}
@@ -67,5 +82,6 @@ func (h *Handler) HabitsGetAll() ([]*types.HabitTransport, error) {
 		habits = append(habits, types.FromHabitToTransport(habit))
 	}
 
-	return habits, nil
+	rest.JSONStatusOk(rw, envelope{"habits": hs})
+	return
 }
