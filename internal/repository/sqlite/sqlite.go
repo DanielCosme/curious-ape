@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"fmt"
+	"github.com/danielcosme/curious-ape/internal/core/entity"
 	_ "github.com/mattn/go-sqlite3"
 	"strings"
 	"time"
@@ -65,6 +66,14 @@ func intToInterface(ints []int) []interface{} {
 func dateToInterface(ds []time.Time) []interface{} {
 	iSlice := make([]interface{}, len(ds))
 	for i, v := range ds {
+		iSlice[i] = v
+	}
+	return iSlice
+}
+
+func habitTypeToInterface(hts []entity.HabitType) []interface{} {
+	iSlice := make([]interface{}, len(hts))
+	for i, v := range hts {
 		iSlice[i] = v
 	}
 	return iSlice

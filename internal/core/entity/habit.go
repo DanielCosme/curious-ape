@@ -25,23 +25,27 @@ type HabitCategory struct {
 }
 
 type HabitLog struct {
-	ID          int         `db:"id"`
-	HabitID     int         `db:"habit_id"`
-	Note        string      `db:"note"`
-	Origin      HabitOrigin `db:"origin"`
-	IsAutomated bool        `db:"is_automated"`
-	Success     bool        `db:"success"`
+	ID          int        `db:"id"`
+	HabitID     int        `db:"habit_id"`
+	Note        string     `db:"note"`
+	Origin      DataSource `db:"origin"`
+	IsAutomated bool       `db:"is_automated"`
+	Success     bool       `db:"success"`
 }
 
 type HabitType string
 
 const (
 	HabitTypeFood     HabitType = "food"
-	HabitTypeWakeUp   HabitType = "wake-up"
+	HabitTypeWakeUp   HabitType = "wake_up"
 	HabitTypeFitness  HabitType = "fitness"
-	HabitTypeDeepWork HabitType = "deep-work"
+	HabitTypeDeepWork HabitType = "deep_work"
 	HabitTypeCustom   HabitType = "custom"
 )
+
+func (ht HabitType) Str() string {
+	return string(ht)
+}
 
 func IsValidHabitCategoryType(habitType HabitType) bool {
 	switch habitType {
@@ -50,15 +54,6 @@ func IsValidHabitCategoryType(habitType HabitType) bool {
 	}
 	return false
 }
-
-type HabitOrigin string
-
-const (
-	HabitOriginClient    HabitOrigin = "client"   // android/web/cli
-	HabitOriginProvider  HabitOrigin = "provider" // fitbit, google etc
-	HabitOriginWebSystem HabitOrigin = "system"   // internal from manual entries?
-	HabitOriginUnknown   HabitOrigin = "unknown"  // ??
-)
 
 type HabitStatus string
 
@@ -75,13 +70,14 @@ type HabitFilter struct {
 }
 
 type HabitCategoryFilter struct {
-	ID []int
+	ID   []int
+	Type []HabitType
 }
 
 type HabitLogFilter struct {
 	ID      []int
 	HabitID []int
-	Origin  []HabitOrigin
+	Origin  []DataSource
 }
 
 type HabitJoin func(hs []*Habit) error

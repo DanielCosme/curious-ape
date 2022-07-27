@@ -89,14 +89,14 @@ type Stages struct {
 // TODO reject/send-error if sleep record is not of type stages
 // TODO check for empty sleep logs, sleep array on envelope len == 0
 
-func (s *SleepService) GetLogByDate(time time.Time) (*SleepEnvelope, error) {
+func (s *SleepService) GetByDate(time time.Time) (*SleepEnvelope, error) {
 	var se *SleepEnvelope
 	uri := fmt.Sprintf("/1.2/user/-/sleep/date/%s.json", formatDate(time))
 	err := s.client.Call(http.MethodGet, uri, nil, &se)
 	return se, err
 }
 
-func (s *SleepService) GetLogByDateRange(start, end time.Time) (*SleepEnvelope, error) {
+func (s *SleepService) GetByDateRange(start, end time.Time) (*SleepEnvelope, error) {
 	var se *SleepEnvelope
 	uri := fmt.Sprintf("/1.2/user/-/sleep/date/%s/%s.json", formatDate(start), formatDate(end))
 	err := s.client.Call(http.MethodGet, uri, nil, &se)

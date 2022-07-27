@@ -154,6 +154,10 @@ func habitCategoryFilter(f entity.HabitCategoryFilter) *sqlQueryBuilder {
 		b.Data = append(b.Data, filterData{columnName: "id", values: intToInterface(f.ID)})
 	}
 
+	if len(f.Type) > 0 {
+		b.Data = append(b.Data, filterData{columnName: "type", values: habitTypeToInterface(f.Type)})
+	}
+
 	return b
 }
 

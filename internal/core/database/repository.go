@@ -1,8 +1,8 @@
 package database
 
 type Models struct {
-	Habits    Habit
 	Days      Day
+	Habits    Habit
 	Oauths    Oauth2
 	SleepLogs SleepLog
 }

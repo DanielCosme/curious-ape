@@ -14,17 +14,17 @@ type HabitTransport struct {
 	CategoryID   int                  `json:"category_id,omitempty"`
 	CategoryCode string               `json:"category_code,omitempty"`
 	Type         entity.HabitType     `json:"category_type,omitempty"`
-	Origin       entity.HabitOrigin   `json:"origin,omitempty"`
+	Origin       entity.DataSource    `json:"origin,omitempty"`
 	Note         string               `json:"note,omitempty"`
 	IsAutomated  bool                 `json:"is_automated,omitempty"`
 	Logs         []*HabitTransportLog `json:"logs,omitempty"`
 }
 
 type HabitTransportLog struct {
-	Success     bool               `json:"success"`
-	Origin      entity.HabitOrigin `json:"origin"`
-	Note        string             `json:"note,omitempty"`
-	IsAutomated bool               `json:"is_automated"`
+	Success     bool              `json:"success"`
+	Origin      entity.DataSource `json:"origin"`
+	Note        string            `json:"note,omitempty"`
+	IsAutomated bool              `json:"is_automated"`
 }
 
 func (ht *HabitTransport) ToHabit() *entity.Habit {

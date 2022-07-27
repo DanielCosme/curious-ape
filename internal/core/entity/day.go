@@ -3,6 +3,7 @@ package entity
 import "time"
 
 const ISO8601 = "2006-01-02"
+const HumanDate = "Monday, 02 January 2006"
 const Timestamp = "15:04:05"
 
 type Day struct {

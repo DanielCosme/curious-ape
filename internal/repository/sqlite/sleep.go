@@ -12,9 +12,9 @@ type SleepLogDataSource struct {
 
 func (ds SleepLogDataSource) Create(log *entity.SleepLog) error {
 	q := `
-		INSERT INTO sleep_logs (day_id, start_time, end_time, is_main_sleep, is_automated, origin, total_time_in_bed,
+		INSERT INTO sleep_logs (day_id, date, start_time, end_time, is_main_sleep, is_automated, origin, total_time_in_bed,
 		                        minutes_asleep, minutes_deep, minutes_rem, minutes_light, minutes_awake, raw)	
-		values (:day_id, :start_time, :end_time, :is_main_sleep, :is_automated, :origin, :total_time_in_bed,
+		values (:day_id, :date, :start_time, :end_time, :is_main_sleep, :is_automated, :origin, :total_time_in_bed,
 		                        :minutes_asleep, :minutes_deep, :minutes_rem, :minutes_light, :minutes_awake, :raw) `
 	res, err := ds.DB.NamedExec(q, log)
 	if err != nil {
@@ -28,7 +28,7 @@ func (ds SleepLogDataSource) Create(log *entity.SleepLog) error {
 func (ds SleepLogDataSource) Update(log *entity.SleepLog, joins ...entity.SleepLogJoin) (*entity.SleepLog, error) {
 	q := `
 		 UPDATE sleep_logs 
-		 SET day_id = :day_id, start_time = :start_time, end_time = :end_time, is_main_sleep = :is_main_sleep, 
+		 SET day_id = :day_id, date = :date, start_time = :start_time, end_time = :end_time, is_main_sleep = :is_main_sleep, 
 		     is_automated = :is_automated, origin = :origin, total_time_in_bed = :total_time_in_bed, 
 			 minutes_asleep = :minutes_asleep, minutes_rem = :minutes_rem, minutes_light = :minutes_light, 
 		     minutes_awake = :minutes_awake, raw = :raw	

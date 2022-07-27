@@ -14,7 +14,7 @@ func (h *Handler) SyncSleepByDate(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.App.SyncSleepLog(startDate)
+	err = h.App.FitbitSyncSleepLog(startDate)
 	JsonCheckError(rw, r, http.StatusOK, envelope{"success": "ok"}, err)
 }
 
@@ -30,6 +30,11 @@ func (h *Handler) SyncSleepByDateRange(rw http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err = h.App.SyncSleepLogs(startDate, endDate)
+	err = h.App.FitbitSyncSleepLogsByDateRange(startDate, endDate)
+	JsonCheckError(rw, r, http.StatusOK, envelope{"success": "ok"}, err)
+}
+
+func (h *Handler) SyncSleep(rw http.ResponseWriter, r *http.Request) {
+	err := h.App.FitbitSyncSleepLogs()
 	JsonCheckError(rw, r, http.StatusOK, envelope{"success": "ok"}, err)
 }

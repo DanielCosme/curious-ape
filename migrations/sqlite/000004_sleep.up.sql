@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS sleep_logs (
     id                  INTEGER primary key,
     day_id              INTEGER not null,
 
+    "date"              DATE not null,
     start_time          DATE not null,
     end_time            DATE not null,
     is_main_sleep       BOOLEAN default true,

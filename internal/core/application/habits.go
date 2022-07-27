@@ -1,9 +1,12 @@
 package application
 
 import (
+	"fmt"
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/sdk/errors"
+	"github.com/danielcosme/curious-ape/sdk/log"
+	"strconv"
 	"time"
 )
 
@@ -21,7 +24,7 @@ func (a *App) HabitCreate(day *entity.Day, data *entity.Habit) (*entity.Habit, e
 	// TODO hardcode origins for habit logs and create a validator for it?
 	// Create the habit log
 	for _, dataLog := range data.Logs {
-		hl, err := a.db.Habits.GetHabitLog(entity.HabitLogFilter{Origin: []entity.HabitOrigin{dataLog.Origin}, HabitID: []int{habit.ID}})
+		hl, err := a.db.Habits.GetHabitLog(entity.HabitLogFilter{Origin: []entity.DataSource{dataLog.Origin}, HabitID: []int{habit.ID}})
 		if err != nil && !errors.Is(err, database.ErrNotFound) {
 			return nil, err
 		}
@@ -49,6 +52,51 @@ func (a *App) HabitCreate(day *entity.Day, data *entity.Habit) (*entity.Habit, e
 	habit.Status = calculateHabitStatusFromLogs(habit.Logs)
 
 	return a.db.Habits.Update(habit, database.HabitsPipeline(a.db)...)
+}
+
+func (a *App) HabitCreateFromSleepLog(sleepLog entity.SleepLog) error {
+	if !sleepLog.IsMainSleep {
+		return nil
+	}
+
+	habitCategory, err := a.db.Habits.GetHabitCategory(entity.HabitCategoryFilter{Type: []entity.HabitType{entity.HabitTypeWakeUp}})
+	if err != nil {
+		return err
+	}
+
+	var success bool
+	wakeUPTime := toWakeUpTime(sleepLog.EndTime)
+	if sleepLog.EndTime.Before(wakeUPTime) {
+		success = true
+	}
+
+	habit := &entity.Habit{
+		DayID:      sleepLog.DayID,
+		CategoryID: habitCategory.ID,
+		Logs: []*entity.HabitLog{{
+			Success:     success,
+			IsAutomated: true,
+			Origin:      entity.Fitbit,
+			Note:        fmt.Sprintf("Wake up time %s", sleepLog.EndTime.Format(entity.Timestamp)),
+		}},
+	}
+	habit, err = a.HabitCreate(sleepLog.Day, habit)
+	if err != nil {
+		return err
+	}
+
+	a.Log.InfoP("Habit log created", log.Prop{
+		"Type":    habitCategory.Type.Str(),
+		"Success": strconv.FormatBool(success),
+		"Origin":  entity.Fitbit.Str(),
+		"date":    sleepLog.Date.Format(entity.HumanDate),
+	})
+	return nil
+}
+
+// 6 a.m.
+func toWakeUpTime(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day(), 6, 0, 0, 0, t.Location())
 }
 
 func (a *App) HabitFullUpdate(habit, data *entity.Habit) (*entity.Habit, error) {
