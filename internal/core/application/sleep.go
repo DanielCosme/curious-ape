@@ -16,8 +16,36 @@ func (a *App) GetSleepLogsForDay(d *entity.Day) ([]*entity.SleepLog, error) {
 	return a.getSleepLogs(entity.SleepLogFilter{DayID: []int{d.ID}})
 }
 
-func (a *App) GetAllSleepLogs() ([]*entity.SleepLog, error) {
+func (a *App) GetSleepLogs() ([]*entity.SleepLog, error) {
 	return a.getSleepLogs(entity.SleepLogFilter{})
+}
+
+func (a *App) SleepLogDeleteByID(id int) error {
+	return a.db.SleepLogs.Delete(id)
+}
+
+func (a *App) SleepFromRestCreate(sleepLog *entity.SleepLog) (*entity.SleepLog, error) {
+	if sleepLog.Raw == "" {
+		if sleepLog.Origin == "" {
+			sleepLog.Origin = entity.Manual
+		}
+
+		start := sleepLog.StartTime.AddDate(0, 0, -1)
+		sleepLog.TimeInBed = sleepLog.EndTime.Sub(start)
+		sleepLog.MinutesAsleep = time.Duration(float64(sleepLog.TimeInBed) * 0.87)
+		// Calculate an average of 13% of bedtime awake
+		sleepLog.MinutesAwake = time.Duration(float64(sleepLog.TimeInBed) * 0.13)
+		a.Log.DebugP("manual sleep log", log.Prop{
+			"Time in bed": sleepLog.TimeInBed.String(),
+			"Asleep":      sleepLog.MinutesAwake.String(),
+			"Awake":       sleepLog.MinutesAwake.String(),
+		})
+	}
+
+	if err := a.saveSleepLogs([]*entity.SleepLog{sleepLog}); err != nil {
+		return nil, err
+	}
+	return a.db.SleepLogs.Get(entity.SleepLogFilter{ID: []int{sleepLog.ID}})
 }
 
 func (a *App) getSleepLogs(f entity.SleepLogFilter) ([]*entity.SleepLog, error) {
@@ -47,7 +75,7 @@ func (a *App) FitbitSyncSleepLogs() error {
 				return err
 			}
 			// Save log
-			if err := a.SaveSleepLogs(sleepLogs); err != nil {
+			if err := a.saveSleepLogs(sleepLogs); err != nil {
 				return err
 			}
 		}
@@ -78,7 +106,7 @@ func (a *App) FitbitSyncSleepLogsByDateRange(start, end time.Time) error {
 		return err
 	}
 
-	return a.SaveSleepLogs(sleepLogs)
+	return a.saveSleepLogs(sleepLogs)
 }
 
 func (a *App) FitbitSyncSleepLog(date time.Time) error {
@@ -105,7 +133,7 @@ func (a *App) FitbitSyncSleepLog(date time.Time) error {
 	}
 
 	// Persist
-	return a.SaveSleepLogs(sleepLogs)
+	return a.saveSleepLogs(sleepLogs)
 }
 
 func toSleepLogFromFitbit(days []*entity.Day, sleepRecords []fitbit.Sleep) ([]*entity.SleepLog, error) {
@@ -149,7 +177,7 @@ func toSleepLogFromFitbit(days []*entity.Day, sleepRecords []fitbit.Sleep) ([]*e
 	return sleepLogs, nil
 }
 
-func (a *App) SaveSleepLogs(logs []*entity.SleepLog) error {
+func (a *App) saveSleepLogs(logs []*entity.SleepLog) error {
 	for _, l := range logs {
 		testerLog, err := a.db.SleepLogs.Get(entity.SleepLogFilter{DayID: []int{l.Day.ID}})
 		if err != nil && !errors.Is(err, database.ErrNotFound) {

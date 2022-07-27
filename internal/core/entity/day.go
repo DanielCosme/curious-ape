@@ -5,6 +5,7 @@ import "time"
 const ISO8601 = "2006-01-02"
 const HumanDate = "Monday, 02 January 2006"
 const Timestamp = "15:04:05"
+const Time = "15:04"
 
 type Day struct {
 	ID   int       `db:"id"`
@@ -42,6 +43,10 @@ func ParseDate(d string) (time.Time, error) {
 		return t, err
 	}
 	return NormalizeDate(t, time.UTC), nil
+}
+
+func ParseTime(t string) (time.Time, error) {
+	return time.Parse(Time, t)
 }
 
 func FormatDate(t time.Time) string {
