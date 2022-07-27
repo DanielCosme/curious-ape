@@ -5,6 +5,35 @@ import "time"
 const ISO8601 = "2006-01-02"
 const Timestamp = "15:04:05"
 
+type Day struct {
+	ID   int       `db:"id"`
+	Date time.Time `db:"date"`
+	// generated
+	Habits    []*Habit
+	SleepLogs []*SleepLog
+	Tags      []*Tag
+	// Days will have tags
+	// Should the tags by their own entity, or just an array of strings?
+	// e.g [Sick, BadDay, Sunrise, CA, CO]
+	// Country Tags??
+	// Mood Tags??
+	// Weather Tags??
+	// Health Tags?? -> Covid, Covid-Recovery
+	// Weather && Location on that day
+	// Location -> Where did I wake up && went to sleep this day?
+	// Tags should be dynamic and be able to be created by me ay any time.
+	// Habit Tags?
+}
+
+type Tag struct{}
+
+type DayJoin func([]*Day) error
+
+type DayFilter struct {
+	IDs   []int
+	Dates []time.Time
+}
+
 func ParseDate(d string) (time.Time, error) {
 	var t time.Time
 	t, err := time.Parse(ISO8601, d)
@@ -20,19 +49,4 @@ func FormatDate(t time.Time) string {
 
 func NormalizeDate(t time.Time, loc *time.Location) time.Time {
 	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, loc)
-}
-
-type Day struct {
-	ID   int       `db:"id"`
-	Date time.Time `db:"date"`
-	// generated
-	Habits    []*Habit
-	SleepLogs []*SleepLog
-}
-
-type DayJoin func([]*Day) error
-
-type DayFilter struct {
-	IDs   []int
-	Dates []time.Time
 }

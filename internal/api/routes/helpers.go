@@ -1,4 +1,4 @@
-package router
+package routes
 
 import (
 	"github.com/danielcosme/curious-ape/internal/core/database"

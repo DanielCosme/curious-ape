@@ -1,6 +1,9 @@
 package rest
 
-import "net/http"
+import (
+	"github.com/danielcosme/curious-ape/sdk/errors"
+	"net/http"
+)
 
 type ResponseWriterPlus struct {
 	http.ResponseWriter
@@ -20,6 +23,10 @@ func (rw *ResponseWriterPlus) WriteHeader(code int) {
 func (rw *ResponseWriterPlus) Status() int {
 	if rw.status == 0 {
 		return http.StatusOK
+	}
+	if rw.Err == nil && rw.status == http.StatusMethodNotAllowed {
+		// TODO handle this properly by setting a method not allowed handler on chi routes
+		rw.Err = errors.New("unknown error")
 	}
 	return rw.status
 }

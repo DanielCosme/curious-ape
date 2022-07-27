@@ -117,7 +117,7 @@ func (a *App) saveSleepLogsFromFitbit(days []*entity.Day, sleepEnvelope *fitbit.
 		} else {
 			prop := log.Prop{
 				"provider": "fitbit",
-				"date": fsl.DateOfSleep,
+				"date":     fsl.DateOfSleep,
 			}
 			a.Log.InfoP("Created sleep log", prop)
 		}

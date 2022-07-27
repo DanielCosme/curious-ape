@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/danielcosme/curious-ape/internal/api/router"
+	"github.com/danielcosme/curious-ape/internal/api/routes"
 	"net/http"
 )
 
@@ -13,9 +13,9 @@ type Mux struct {
 
 func (t *Transport) Routes() http.Handler {
 	return &Mux{
-		// StdMux: router.Routes(t.App),
+		// StdMux: routes.Routes(t.App),
 		// Echo:   echo.Routes(a.App),
-		Chi: router.ChiRoutes(t.App),
+		Chi: routes.ChiRoutes(t.App),
 	}
 }
 
@@ -23,7 +23,7 @@ func (router *Mux) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	// we wrap the ServeMux in case in the future we want different handlers (echo, chi, etc) for different versions
 	// 		of the API, v1, v2, etc...
 
-	// router.StdMux.ServeHTTP(rw, r)
-	// router.Echo.ServeHTTP(rw, r)
+	// routes.StdMux.ServeHTTP(rw, r)
+	// routes.Echo.ServeHTTP(rw, r)
 	router.Chi.ServeHTTP(rw, r)
 }

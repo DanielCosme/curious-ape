@@ -18,7 +18,7 @@ func (a *App) HabitCreate(day *entity.Day, data *entity.Habit) (*entity.Habit, e
 		return nil, err
 	}
 
-	// TODO hardcode origins for habit logs and create a validator for it
+	// TODO hardcode origins for habit logs and create a validator for it?
 	// Create the habit log
 	for _, dataLog := range data.Logs {
 		hl, err := a.db.Habits.GetHabitLog(entity.HabitLogFilter{Origin: []entity.HabitOrigin{dataLog.Origin}, HabitID: []int{habit.ID}})

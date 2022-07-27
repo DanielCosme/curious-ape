@@ -28,12 +28,11 @@ func (ds *Oauth2DataSource) Update(o *entity.Oauth2) (*entity.Oauth2, error) {
 		SET access_token = :access_token, refresh_token = :refresh_token, expiration = :expiration, type = :type
 		WHERE id = :id
 	`
-	res, err := ds.DB.NamedExec(q, o)
+	_, err := ds.DB.NamedExec(q, o)
 	if err != nil {
 		return nil, catchErr(err)
 	}
-	id, _ := res.LastInsertId()
-	return ds.Get(entity.Oauth2Filter{ID: []int{int(id)}})
+	return ds.Get(entity.Oauth2Filter{ID: []int{o.ID}})
 }
 
 func (ds *Oauth2DataSource) Get(filter entity.Oauth2Filter) (*entity.Oauth2, error) {
