@@ -85,6 +85,8 @@ func (a *App) oauth2GetConfigurationForProvider(provider entity.IntegrationProvi
 	switch provider {
 	case entity.ProviderFitbit:
 		config = a.cfg.Fitbit
+	case entity.ProviderGoogle:
+		config = a.cfg.Google
 	default:
 		return nil
 	}

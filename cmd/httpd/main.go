@@ -39,6 +39,7 @@ func main() {
 			Config: &application.Environment{
 				Env:    cfg.Environment,
 				Fitbit: cfg.Integrations.Fitbit,
+				Google: cfg.Integrations.Google,
 			},
 			Logger: logger,
 		}),
@@ -65,6 +66,7 @@ type config struct {
 	} `json:"server"`
 	Integrations struct {
 		Fitbit *entity.Oauth2Config `json:"fitbit"`
+		Google *entity.Oauth2Config `json:"google"`
 	} `json:"integrations"`
 	Environment string `json:"environment"`
 }

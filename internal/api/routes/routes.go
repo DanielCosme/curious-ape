@@ -52,6 +52,10 @@ func ChiRoutes(a *application.App) http.Handler {
 			r.Post("/", h.SleepCreate)
 		})
 	})
+	// Fitness
+	r.Route("/fitness", func(r chi.Router) {
+		r.Get("/", h.FitnessGet)
+	})
 	// Sync
 	r.Route("/sync", func(r chi.Router) {
 		r.Post("/sleep", h.SyncSleep)

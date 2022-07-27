@@ -1,9 +1,9 @@
-package fitbit
+package google
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"github.com/danielcosme/curious-ape/sdk/errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -15,7 +15,7 @@ type Client struct {
 	out io.Writer
 }
 
-func (c *Client) Call(method string, path string, urlParams url.Values, i interface{}) error {
+func (c *Client) Call(method, path string, urlParams url.Values, i interface{}) error {
 	reqURL := BaseURL + path
 	if urlParams != nil {
 		reqURL = fmt.Sprintf("%s?%s", reqURL, urlParams.Encode())
@@ -38,17 +38,17 @@ func (c *Client) Call(method string, path string, urlParams url.Values, i interf
 	}
 
 	if strconv.Itoa(res.StatusCode)[:1] != "2" {
-		return c.catchFitbitError(body)
+		return c.catchGoogleError(body)
 	}
 	if !json.Valid(body) {
+		c.out.Write(body)
 		return errors.New("response body is not valid json")
 	}
 
 	return json.Unmarshal(body, i)
 }
 
-func (c *Client) catchFitbitError(b []byte) error {
-	// TODO unmarshal json if any and return string error
+func (c *Client) catchGoogleError(b []byte) error {
 	c.out.Write(b)
-	return errors.New("fitbit api error")
+	return errors.New("google api error")
 }

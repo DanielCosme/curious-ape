@@ -6,6 +6,7 @@ type IntegrationProvider string
 
 const (
 	ProviderFitbit = "fitbit"
+	ProviderGoogle = "google"
 )
 
 type Oauth2 struct {

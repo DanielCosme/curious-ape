@@ -29,6 +29,7 @@ type AppOptions struct {
 
 type Environment struct {
 	Fitbit *entity.Oauth2Config
+	Google *entity.Oauth2Config
 	Env    string
 }
 
