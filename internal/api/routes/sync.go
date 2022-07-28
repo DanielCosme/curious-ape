@@ -59,9 +59,9 @@ func (h *Handler) Sync(rw http.ResponseWriter, r *http.Request) {
 	if param := chi.URLParam(r, "resourceToSync"); isValidResource(param) {
 		switch param {
 		case "sleep":
-			err = h.App.SyncFitbitSleep()
+			err = h.App.SyncSleep()
 		case "fitness":
-			// err = h.App.SyncFitnessLog()
+			err = h.App.SyncFitness()
 		}
 		JsonCheckError(rw, r, http.StatusOK, envelope{"success": "ok"}, err)
 		return

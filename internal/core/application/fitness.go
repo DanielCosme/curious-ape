@@ -25,6 +25,39 @@ func (a *App) DeleteFitnessLog(fl *entity.FitnessLog) error {
 	return a.db.FitnessLogs.Delete(fl.ID)
 }
 
+func (a *App) SyncFitness() error {
+	days, err := a.db.Days.Find(entity.DayFilter{}, database.DaysJoinFitnessLogs(a.db))
+	if err != nil {
+		return err
+	}
+	client, err := a.Oauth2GetClient(entity.ProviderGoogle)
+	if err != nil {
+		return err
+	}
+	googleApi := a.Sync.GoogleClient(client)
+
+	for _, d := range days {
+		// TODO this needs to account in the future for many types of fitness logs
+		if len(d.FitnessLogs) == 0 {
+			payload, err := googleApi.Fitness.GetFitnessSessions(dates.ToBeginningOfDay(d.Date), dates.ToEndOfDay(d.Date))
+			if err != nil {
+				return err
+			}
+			fitnessLogs, withoutLog, err := toFitnessLogFromGoogle([]*entity.Day{d}, payload)
+			if err != nil {
+				return err
+			}
+
+			a.createFailedHabitForDays(withoutLog, entity.HabitTypeFitness, entity.Google)
+			if err := a.createFitnessLogs(fitnessLogs); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 func (a *App) SyncFitnessByDateRAnge(start, end time.Time) error {
 	client, err := a.Oauth2GetClient(entity.ProviderGoogle)
 	if err != nil {

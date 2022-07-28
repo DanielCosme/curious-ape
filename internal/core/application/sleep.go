@@ -58,7 +58,7 @@ func (a *App) GetSleepLogs(f entity.SleepLogFilter) ([]*entity.SleepLog, error) 
 	return a.db.SleepLogs.Find(f, database.SleepLogsJoinDay(a.db))
 }
 
-func (a *App) SyncFitbitSleep() error {
+func (a *App) SyncSleep() error {
 	days, err := a.db.Days.Find(entity.DayFilter{}, database.DaysJoinSleepLogs(a.db))
 	if err != nil {
 		return err
