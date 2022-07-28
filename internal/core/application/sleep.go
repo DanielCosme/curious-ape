@@ -31,12 +31,12 @@ func (a *App) SleepFromRestCreate(sleepLog *entity.SleepLog) (*entity.SleepLog, 
 		}
 
 		start := sleepLog.StartTime.AddDate(0, 0, -1)
-		sleepLog.TimeInBed = sleepLog.EndTime.Sub(start)
-		sleepLog.MinutesAsleep = time.Duration(float64(sleepLog.TimeInBed) * 0.87)
+		sleepLog.MinutesInBed = sleepLog.EndTime.Sub(start)
+		sleepLog.MinutesAsleep = time.Duration(float64(sleepLog.MinutesInBed) * 0.87)
 		// Calculate an average of 13% of bedtime awake
-		sleepLog.MinutesAwake = time.Duration(float64(sleepLog.TimeInBed) * 0.13)
+		sleepLog.MinutesAwake = time.Duration(float64(sleepLog.MinutesInBed) * 0.13)
 		a.Log.DebugP("manual sleep log", log.Prop{
-			"Time in bed": sleepLog.TimeInBed.String(),
+			"Time in bed": sleepLog.MinutesInBed.String(),
 			"Asleep":      sleepLog.MinutesAwake.String(),
 			"Awake":       sleepLog.MinutesAwake.String(),
 		})
@@ -157,7 +157,7 @@ func toSleepLogFromFitbit(days []*entity.Day, sleepRecords []fitbit.Sleep) ([]*e
 			IsMainSleep:   s.IsMainSleep,
 			IsAutomated:   true,
 			Origin:        entity.Fitbit,
-			TimeInBed:     fitbit.ToDuration(s.TimeInBed),
+			MinutesInBed:  fitbit.ToDuration(s.TimeInBed),
 			MinutesAsleep: fitbit.ToDuration(s.MinutesAsleep),
 			MinutesAwake:  fitbit.ToDuration(s.MinutesAwake),
 			MinutesRem:    fitbit.ToDuration(s.Levels.Summary.Rem.Minutes),

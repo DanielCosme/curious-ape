@@ -34,12 +34,11 @@ func (ds SleepLogDataSource) Update(log *entity.SleepLog, joins ...entity.SleepL
 		     minutes_awake = :minutes_awake, raw = :raw	
 		WHERE id = :id
 	`
-	res, err := ds.DB.NamedExec(q, log)
+	_, err := ds.DB.NamedExec(q, log)
 	if err != nil {
 		return nil, catchErr(err)
 	}
-	id, _ := res.LastInsertId()
-	return ds.Get(entity.SleepLogFilter{ID: []int{int(id)}}, joins...)
+	return ds.Get(entity.SleepLogFilter{ID: []int{log.ID}}, joins...)
 }
 
 func (ds SleepLogDataSource) Get(filter entity.SleepLogFilter, joins ...entity.SleepLogJoin) (*entity.SleepLog, error) {

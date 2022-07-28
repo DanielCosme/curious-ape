@@ -50,5 +50,5 @@ func (h *Handler) SleepCreate(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	sleepLog, err = h.App.SleepFromRestCreate(sleepLog)
-	JsonCheckError(rw, r, http.StatusOK, envelope{"sleep_logs": types.FromSleepLogToTransport(sleepLog)}, err)
+	JsonCheckError(rw, r, http.StatusCreated, envelope{"sleep_logs": types.FromSleepLogToTransport(sleepLog)}, err)
 }

@@ -3,7 +3,6 @@ package entity
 import "time"
 
 type SleepLog struct {
-	// Repository
 	ID          int        `db:"id"`
 	DayID       int        `db:"day_id"`
 	Date        time.Time  `db:"date"`
@@ -14,7 +13,7 @@ type SleepLog struct {
 	Origin      DataSource `db:"origin"`
 	Raw         string     `db:"raw"`
 	// Minutes
-	TimeInBed     time.Duration `db:"total_time_in_bed"`
+	MinutesInBed  time.Duration `db:"total_time_in_bed"`
 	MinutesAsleep time.Duration `db:"minutes_asleep"`
 	MinutesRem    time.Duration `db:"minutes_rem"`
 	MinutesDeep   time.Duration `db:"minutes_deep"`
