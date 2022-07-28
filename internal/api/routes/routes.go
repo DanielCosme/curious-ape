@@ -73,10 +73,10 @@ func ChiRoutes(a *application.App) http.Handler {
 		})
 	})
 	// Sync
-	r.Route("/sync", func(r chi.Router) {
-		r.Post("/sleep", h.SyncSleep)
-		r.Post("/sleep/date/{start}", h.SyncSleepByDate)
-		r.Post("/sleep/date/{startDate}/{endDate}", h.SyncSleepByDateRange)
+	r.Route("/sync/{resourceToSync}", func(r chi.Router) {
+		r.Post("/", h.Sync)
+		r.Post("/date/{start}", h.SyncByDate)
+		r.Post("/date/{startDate}/{endDate}", h.SyncByDateRange)
 	})
 	// Oauth2
 	r.Route("/oauth2/{provider}", func(r chi.Router) {

@@ -90,7 +90,7 @@ func (a *App) SyncFitbitSleep() error {
 	return nil
 }
 
-func (a *App) SyncFitbitSleepByDateRange(start, end time.Time) error {
+func (a *App) SyncSleepByDateRange(start, end time.Time) error {
 	// Get client, refreshes token if necessary
 	client, err := a.Oauth2GetClient(entity.ProviderFitbit)
 	if err != nil {

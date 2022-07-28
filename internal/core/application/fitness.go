@@ -1,12 +1,15 @@
 package application
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
+	"github.com/danielcosme/curious-ape/internal/integrations/google"
 	"github.com/danielcosme/curious-ape/sdk/dates"
 	"github.com/danielcosme/curious-ape/sdk/errors"
 	"github.com/danielcosme/curious-ape/sdk/log"
+	"strconv"
 	"time"
 )
 
@@ -22,16 +25,131 @@ func (a *App) DeleteFitnessLog(fl *entity.FitnessLog) error {
 	return a.db.FitnessLogs.Delete(fl.ID)
 }
 
-func (a *App) SyncFitnessLog(date time.Time) error {
+func (a *App) SyncFitnessByDateRAnge(start, end time.Time) error {
 	client, err := a.Oauth2GetClient(entity.ProviderGoogle)
+	if err != nil {
+		return err
+	}
+	days, err := a.daysGetByDateRange(start, end)
 	if err != nil {
 		return err
 	}
 
 	googleAPI := a.Sync.GoogleClient(client)
-	_, err = googleAPI.Fitness.GetFitnessSessions(dates.ToBeginningOfDay(date), dates.ToEndOfDay(date))
-	// TODO continue here
-	return err
+	gFitnessLogs, err := googleAPI.Fitness.GetFitnessSessions(dates.ToBeginningOfDay(start), dates.ToEndOfDay(end))
+	if err != nil {
+		return err
+	}
+
+	fitnessLogs, daysWithoutLog, err := toFitnessLogFromGoogle(days, gFitnessLogs)
+	if err != nil {
+		return err
+	}
+	// In case of missing logs for day create the habit log in failed state.
+	a.createFailedHabitForDays(daysWithoutLog, entity.HabitTypeFitness, entity.Google)
+
+	return a.createFitnessLogs(fitnessLogs)
+}
+
+func (a *App) SyncFitnessLog(date time.Time) error {
+	day, err := a.DayGetByDate(date)
+	if err != nil {
+		return err
+	}
+
+	client, err := a.Oauth2GetClient(entity.ProviderGoogle)
+	if err != nil {
+		return err
+	}
+	googleAPI := a.Sync.GoogleClient(client)
+	gFitnessLogs, err := googleAPI.Fitness.GetFitnessSessions(dates.ToBeginningOfDay(date), dates.ToEndOfDay(date))
+	if err != nil {
+		return err
+	}
+
+	fitnessLogs, daysWithoutLog, err := toFitnessLogFromGoogle([]*entity.Day{day}, gFitnessLogs)
+	if err != nil {
+		return err
+	}
+	// In case of missing logs for day create the habit log in failed state.
+	a.createFailedHabitForDays(daysWithoutLog, entity.HabitTypeFitness, entity.Google)
+
+	return a.createFitnessLogs(fitnessLogs)
+}
+
+func toFitnessLogFromGoogle(days []*entity.Day, gfls []google.Session) ([]*entity.FitnessLog, []*entity.Day, error) {
+	fitnessLogs := make([]*entity.FitnessLog, 0, len(gfls))
+	daysWithWithoutLog := []*entity.Day{}
+
+	mapGoogleFitnessLogByDate := map[string]google.Session{}
+	for _, gfl := range gfls {
+		millis, _ := strconv.Atoi(gfl.StartTimeMillis)
+		dateOfWorkout := time.UnixMilli(int64(millis))
+		mapGoogleFitnessLogByDate[dateOfWorkout.Format(entity.ISO8601)] = gfl
+	}
+
+	for _, day := range days {
+		if gfl, ok := mapGoogleFitnessLogByDate[day.FormatDate()]; ok {
+			millis, _ := strconv.Atoi(gfl.StartTimeMillis)
+			startTime := time.UnixMilli(int64(millis))
+			millis, _ = strconv.Atoi(gfl.StartTimeMillis)
+			endTime := time.UnixMilli(int64(millis))
+
+			fitnessLog := &entity.FitnessLog{
+				DayID:     day.ID,
+				Title:     gfl.Name,
+				Date:      day.Date,
+				StartTime: startTime,
+				EndTime:   endTime,
+				Origin:    entity.Google,
+				Note:      fmt.Sprintf("from: %s", gfl.Application.PackageName),
+				Day:       day,
+			}
+
+			switch gfl.ActivityType {
+			case 97: // weightlifting
+				fitnessLog.Type = entity.StrengthTraining
+			default:
+				return nil, nil, errors.New("google: cannot determine type of activity type")
+			}
+
+			raw, err := json.Marshal(gfl)
+			if err != nil {
+				return nil, nil, err
+			}
+
+			fitnessLog.Raw = string(raw)
+			fitnessLogs = append(fitnessLogs, fitnessLog)
+		} else {
+			daysWithWithoutLog = append(daysWithWithoutLog, day)
+		}
+	}
+
+	return fitnessLogs, daysWithWithoutLog, nil
+}
+
+func (a *App) createFailedHabitForDays(days []*entity.Day, category entity.HabitType, source entity.DataSource) {
+	habitCategory, err := a.GetHabitCategoryByType(category)
+	if err != nil {
+		a.Log.Error(err)
+	}
+
+	for _, day := range days {
+		habit := &entity.Habit{
+			DayID:      day.ID,
+			CategoryID: habitCategory.ID,
+			Logs: []*entity.HabitLog{{
+				Success:     false,
+				IsAutomated: source != entity.Manual,
+				Origin:      source,
+				Note:        fmt.Sprintf("From missing log on data source"),
+			}},
+		}
+		habit, err = a.HabitCreate(day, habit)
+		if err != nil {
+			a.Log.Error(err)
+		}
+	}
 }
 
 func (a *App) CreateFitnessLogFromApi(fitnessLog *entity.FitnessLog) (*entity.FitnessLog, error) {
@@ -90,14 +208,14 @@ func (a *App) HabitUpsertFromFitnessLog(fl *entity.FitnessLog) error {
 
 	var success bool
 	if fl.Type == entity.StrengthTraining {
-		success = true
+		success = true // TODO later this will be dynamic based on the type of activity and the value of some fields.
 
 		habit := &entity.Habit{
 			DayID:      fl.DayID,
 			CategoryID: habitCategory.ID,
 			Logs: []*entity.HabitLog{{
 				Success:     success,
-				IsAutomated: fl.Origin == entity.Manual,
+				IsAutomated: fl.Origin != entity.Manual,
 				Origin:      fl.Origin,
 				Note:        fmt.Sprintf("Fitness log of type %s", fl.Type),
 			}},

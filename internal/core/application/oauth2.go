@@ -22,7 +22,17 @@ func (a *App) Oauth2ConnectProvider(provider string) (string, error) {
 	}
 
 	config := a.oauth2GetConfigurationForProvider(p)
-	uri := config.AuthCodeURL("")
+
+	opts := []oauth2.AuthCodeOption{}
+	switch p {
+	case entity.ProviderGoogle:
+		opts = append(opts,
+			oauth2.SetAuthURLParam("access_type", "offline"),
+			oauth2.SetAuthURLParam("approval_prompt", "force"),
+		)
+	}
+
+	uri := config.AuthCodeURL("", opts...)
 	return uri, nil
 }
 
@@ -57,27 +67,36 @@ func (a *App) Oauth2GetClient(provider entity.IntegrationProvider) (*http.Client
 		return nil, err
 	}
 
-	t := &oauth2.Token{
+	token := &oauth2.Token{
 		AccessToken:  o.AccessToken,
 		RefreshToken: o.RefreshToken,
 		Expiry:       o.Expiration,
 		TokenType:    o.Type,
 	}
 
-	// Check if token is still valid, if not refresh it
-	newToken, err := config.TokenSource(context.Background(), t).Token()
-	if newToken.AccessToken != t.AccessToken {
-		// If token was refreshed we persist the new token info
-		_, err = a.db.Oauths.Update(&entity.Oauth2{
-			ID:           o.ID,
-			AccessToken:  newToken.AccessToken,
-			RefreshToken: newToken.RefreshToken,
-			Type:         newToken.TokenType,
-			Expiration:   newToken.Expiry,
-		})
+	switch provider {
+	case entity.ProviderFitbit:
+		newToken, err := config.TokenSource(context.Background(), token).Token()
+		// Check if token is still valid, if not refresh it
+		if newToken.AccessToken != token.AccessToken {
+			// If token was refreshed we persist the new token info
+			_, err = a.db.Oauths.Update(&entity.Oauth2{
+				ID:           o.ID,
+				AccessToken:  newToken.AccessToken,
+				RefreshToken: newToken.RefreshToken,
+				Type:         newToken.TokenType,
+				Expiration:   newToken.Expiry,
+			})
+			token = newToken
+		}
+		if err != nil {
+			return nil, err
+		}
+	default:
+		// by default, we assume these tokens do not expire
 	}
 
-	return config.Client(context.Background(), newToken), err
+	return config.Client(context.Background(), token), err
 }
 
 func (a *App) oauth2GetConfigurationForProvider(provider entity.IntegrationProvider) *oauth2.Config {
