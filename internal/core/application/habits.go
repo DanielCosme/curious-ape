@@ -85,7 +85,7 @@ func (a *App) HabitUpsertFromSleepLog(sleepLog entity.SleepLog) error {
 		CategoryID: habitCategory.ID,
 		Logs: []*entity.HabitLog{{
 			Success:     success,
-			IsAutomated: sleepLog.Origin == entity.Manual,
+			IsAutomated: sleepLog.Origin != entity.Manual,
 			Origin:      sleepLog.Origin,
 			Note:        fmt.Sprintf("Wake up time %s", sleepLog.EndTime.Format(entity.Timestamp)),
 		}},
