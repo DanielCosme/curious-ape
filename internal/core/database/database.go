@@ -1,6 +1,6 @@
 package database
 
-type Models struct {
+type Repository struct {
 	Days        Day
 	Habits      Habit
 	Oauths      Oauth2

@@ -24,14 +24,15 @@ func ExecuteDaysPipeline(days []*entity.Day, joins ...entity.DayJoin) error {
 	return nil
 }
 
-func DaysPipeline(m *Models) []entity.DayJoin {
+func DaysPipeline(m *Repository) []entity.DayJoin {
 	return []entity.DayJoin{
 		DaysJoinHabits(m),
 		DaysJoinSleepLogs(m),
+		DaysJoinFitnessLogs(m),
 	}
 }
 
-func DaysJoinHabits(m *Models) entity.DayJoin {
+func DaysJoinHabits(m *Repository) entity.DayJoin {
 	return func(days []*entity.Day) error {
 		if len(days) > 0 {
 			hs, err := m.Habits.Find(entity.HabitFilter{DayID: DayToIDs(days)}, HabitsJoinCategories(m))
@@ -52,7 +53,7 @@ func DaysJoinHabits(m *Models) entity.DayJoin {
 	}
 }
 
-func DaysJoinSleepLogs(m *Models) entity.DayJoin {
+func DaysJoinSleepLogs(m *Repository) entity.DayJoin {
 	return func(days []*entity.Day) error {
 		if len(days) > 0 {
 			sleepLogs, err := m.SleepLogs.Find(entity.SleepLogFilter{DayID: DayToIDs(days)})
@@ -67,6 +68,27 @@ func DaysJoinSleepLogs(m *Models) entity.DayJoin {
 
 			for _, d := range days {
 				d.SleepLogs = sleepLogsByDateID[d.ID]
+			}
+		}
+		return nil
+	}
+}
+
+func DaysJoinFitnessLogs(m *Repository) entity.DayJoin {
+	return func(days []*entity.Day) error {
+		if len(days) > 0 {
+			fitnessLogs, err := m.FitnessLogs.Find(entity.FitnessLogFilter{DayID: DayToIDs(days)})
+			if err != nil {
+				return err
+			}
+
+			fitnessLogsByDateID := map[int][]*entity.FitnessLog{}
+			for _, log := range fitnessLogs {
+				fitnessLogsByDateID[log.DayID] = append(fitnessLogsByDateID[log.DayID], log)
+			}
+
+			for _, d := range days {
+				d.FitnessLogs = fitnessLogsByDateID[d.ID]
 			}
 		}
 		return nil

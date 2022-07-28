@@ -11,7 +11,7 @@ import (
 )
 
 type App struct {
-	db   *database.Models
+	db   *database.Repository
 	cfg  *Environment
 	Log  *log.Logger
 	Sync *integrations.Sync
@@ -35,7 +35,7 @@ type Environment struct {
 
 func New(opts *AppOptions) *App {
 	a := &App{
-		db: &database.Models{
+		db: &database.Repository{
 			Habits:      &sqlite.HabitsDataSource{DB: opts.DB},
 			Days:        &sqlite.DaysDataSource{DB: opts.DB},
 			Oauths:      &sqlite.Oauth2DataSource{DB: opts.DB},

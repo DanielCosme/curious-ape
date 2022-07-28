@@ -8,7 +8,7 @@ import (
 	"github.com/danielcosme/curious-ape/sdk/errors"
 )
 
-func JsonCheckError(rw http.ResponseWriter, r *http.Request, status int, data interface{}, err error) {
+func JsonCheckError(rw http.ResponseWriter, r *http.Request, desiredStatus int, data interface{}, err error) {
 	if err != nil {
 		if errors.Is(err, database.ErrNotFound) {
 			rest.ErrResponse(rw, http.StatusNotFound, err)
@@ -19,7 +19,7 @@ func JsonCheckError(rw http.ResponseWriter, r *http.Request, status int, data in
 		}
 	}
 
-	rest.JSON(rw, status, data)
+	rest.JSON(rw, desiredStatus, data)
 }
 
 // // The background() helper accepts an arbitrary function as a parameter.

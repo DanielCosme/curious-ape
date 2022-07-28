@@ -12,8 +12,8 @@ type FitnessLogDataSource struct {
 
 func (ds FitnessLogDataSource) Create(log *entity.FitnessLog) error {
 	q := `
-		INSERT INTO fitness_logs (day_id, date, start_time, end_time, title, origin, note, raw)	
-		values (:day_id, :date, :start_time, :end_time, :title, :origin, :note, :raw) `
+		INSERT INTO fitness_logs (day_id, date, type, start_time, end_time, title, origin, note, raw)	
+		values (:day_id, :date, :type, :start_time, :end_time, :title, :origin, :note, :raw) `
 	res, err := ds.DB.NamedExec(q, log)
 	if err != nil {
 		return catchErr(err)
@@ -30,12 +30,10 @@ func (ds FitnessLogDataSource) Update(log *entity.FitnessLog, join ...entity.Fit
 		    origin = :origin, note = :note, raw = :raw
 		WHERE id = :id
 	`
-	res, err := ds.DB.NamedExec(q, log)
+	_, err := ds.DB.NamedExec(q, log)
 	if err != nil {
 		return nil, catchErr(err)
 	}
-	id, _ := res.LastInsertId()
-	log.ID = int(id)
 	return ds.Get(entity.FitnessLogFilter{ID: []int{log.ID}})
 }
 
@@ -51,7 +49,7 @@ func (ds FitnessLogDataSource) Get(filter entity.FitnessLogFilter, joins ...enti
 func (ds FitnessLogDataSource) Find(filter entity.FitnessLogFilter, joins ...entity.FitnessLogJoin) ([]*entity.FitnessLog, error) {
 	fls := []*entity.FitnessLog{}
 	query, args := fitnessLogFilter(filter).generate()
-	if err := ds.DB.Select(fls, query, args...); err != nil {
+	if err := ds.DB.Select(&fls, query, args...); err != nil {
 		return nil, catchErr(err)
 	}
 	return fls, catchErr(database.ExecuteFitnessLogPipeline(fls, joins...))

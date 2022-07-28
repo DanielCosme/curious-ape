@@ -3,9 +3,10 @@ package types
 import "github.com/danielcosme/curious-ape/internal/core/entity"
 
 type DayTransport struct {
-	Date      string               `json:"date"`
-	Habits    []*HabitTransport    `json:"habits,omitempty"`
-	SleepLogs []*SleepLogTransport `json:"sleep_logs,omitempty"` // TODO-daniel make a transport obj for sleep logs
+	Date        string                 `json:"date"`
+	Habits      []*HabitTransport      `json:"habits,omitempty"`
+	SleepLogs   []*SleepLogTransport   `json:"sleep_logs,omitempty"`
+	FitnessLogs []*FitnessLogTransport `json:"fitnessLogs"`
 }
 
 func DayToTransport(d *entity.Day) *DayTransport {
@@ -21,6 +22,10 @@ func DayToTransport(d *entity.Day) *DayTransport {
 
 	if len(d.SleepLogs) > 0 {
 		dt.SleepLogs = FromSleepLogToTransportSlice(d.SleepLogs)
+	}
+
+	if len(d.FitnessLogs) > 0 {
+		dt.FitnessLogs = FromFitnessLogToTransportSlice(d.FitnessLogs)
 	}
 
 	return dt

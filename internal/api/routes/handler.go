@@ -7,3 +7,7 @@ type Handler struct {
 }
 
 type envelope map[string]interface{}
+
+func envelopeSuccess() envelope {
+	return envelope{"success": "ok"}
+}

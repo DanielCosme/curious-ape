@@ -11,9 +11,10 @@ type Day struct {
 	ID   int       `db:"id"`
 	Date time.Time `db:"date"`
 	// generated
-	Habits    []*Habit
-	SleepLogs []*SleepLog
-	Tags      []*Tag
+	Habits      []*Habit
+	SleepLogs   []*SleepLog
+	FitnessLogs []*FitnessLog
+	Tags        []*Tag
 	// Days will have tags
 	// Should the tags by their own entity, or just an array of strings?
 	// e.g [Sick, BadDay, Sunrise, CA, CO]
@@ -25,6 +26,10 @@ type Day struct {
 	// Location -> Where did I wake up && went to sleep this day?
 	// Tags should be dynamic and be able to be created by me ay any time.
 	// Habit Tags?
+}
+
+func (d *Day) FormatDate() string {
+	return d.Date.Format(ISO8601)
 }
 
 type Tag struct{}

@@ -33,7 +33,7 @@ func ExecuteHabitsPipeline(hs []*entity.Habit, hjs ...entity.HabitJoin) error {
 	return nil
 }
 
-func HabitsPipeline(m *Models) []entity.HabitJoin {
+func HabitsPipeline(m *Repository) []entity.HabitJoin {
 	return []entity.HabitJoin{
 		HabitsJoinDay(m),
 		HabitsJoinCategories(m),
@@ -41,7 +41,7 @@ func HabitsPipeline(m *Models) []entity.HabitJoin {
 	}
 }
 
-func HabitsJoinDay(m *Models) entity.HabitJoin {
+func HabitsJoinDay(m *Repository) entity.HabitJoin {
 	return func(hs []*entity.Habit) error {
 		if len(hs) > 0 {
 			days, err := m.Days.Find(entity.DayFilter{IDs: HabitToDayIDs(hs)})
@@ -62,7 +62,7 @@ func HabitsJoinDay(m *Models) entity.HabitJoin {
 	}
 }
 
-func HabitsJoinCategories(m *Models) entity.HabitJoin {
+func HabitsJoinCategories(m *Repository) entity.HabitJoin {
 	return func(hs []*entity.Habit) error {
 		if len(hs) > 0 {
 			cts, err := m.Habits.FindHabitCategories(entity.HabitCategoryFilter{ID: HabitToCategoryIDs(hs)})
@@ -83,7 +83,7 @@ func HabitsJoinCategories(m *Models) entity.HabitJoin {
 	}
 }
 
-func HabitsJoinLogs(m *Models) entity.HabitJoin {
+func HabitsJoinLogs(m *Repository) entity.HabitJoin {
 	return func(hs []*entity.Habit) error {
 		if len(hs) > 0 {
 			hls, err := m.Habits.FindHabitLogs(entity.HabitLogFilter{HabitID: HabitToIDs(hs)})

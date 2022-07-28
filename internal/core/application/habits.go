@@ -30,9 +30,11 @@ func (a *App) HabitCreate(day *entity.Day, data *entity.Habit) (*entity.Habit, e
 		}
 
 		// if it does not exist create it
+		var op string
 		if hl == nil {
 			dataLog.HabitID = habit.ID
 			err = a.db.Habits.CreateHabitLog(dataLog)
+			op = "created"
 		} else {
 			// if it exists update it
 			hl.Origin = dataLog.Origin
@@ -40,10 +42,18 @@ func (a *App) HabitCreate(day *entity.Day, data *entity.Habit) (*entity.Habit, e
 			hl.Success = dataLog.Success
 			hl.IsAutomated = dataLog.IsAutomated
 			_, err = a.db.Habits.UpdateHabitLog(hl)
+			op = "updated"
 		}
 		if err != nil {
 			return nil, err
 		}
+
+		a.Log.InfoP(fmt.Sprintf("habit log succesfully %s", op), log.Prop{
+			"Type":    habitCategory.Type.Str(),
+			"Success": strconv.FormatBool(dataLog.Success),
+			"Origin":  dataLog.Origin.Str(),
+			"date":    day.Date.Format(entity.HumanDate),
+		})
 	}
 
 	if err := database.ExecuteHabitsPipeline([]*entity.Habit{habit}, database.HabitsJoinLogs(a.db)); err != nil {
@@ -54,12 +64,12 @@ func (a *App) HabitCreate(day *entity.Day, data *entity.Habit) (*entity.Habit, e
 	return a.db.Habits.Update(habit, database.HabitsPipeline(a.db)...)
 }
 
-func (a *App) HabitCreateFromSleepLog(sleepLog entity.SleepLog) error {
+func (a *App) HabitUpsertFromSleepLog(sleepLog entity.SleepLog) error {
 	if !sleepLog.IsMainSleep {
 		return nil
 	}
 
-	habitCategory, err := a.db.Habits.GetHabitCategory(entity.HabitCategoryFilter{Type: []entity.HabitType{entity.HabitTypeWakeUp}})
+	habitCategory, err := a.GetHabitCategoryByType(entity.HabitTypeWakeUp)
 	if err != nil {
 		return err
 	}
@@ -75,8 +85,8 @@ func (a *App) HabitCreateFromSleepLog(sleepLog entity.SleepLog) error {
 		CategoryID: habitCategory.ID,
 		Logs: []*entity.HabitLog{{
 			Success:     success,
-			IsAutomated: true,
-			Origin:      entity.Fitbit,
+			IsAutomated: sleepLog.Origin == entity.Manual,
+			Origin:      sleepLog.Origin,
 			Note:        fmt.Sprintf("Wake up time %s", sleepLog.EndTime.Format(entity.Timestamp)),
 		}},
 	}
@@ -85,12 +95,6 @@ func (a *App) HabitCreateFromSleepLog(sleepLog entity.SleepLog) error {
 		return err
 	}
 
-	a.Log.InfoP("Habit log created", log.Prop{
-		"Type":    habitCategory.Type.Str(),
-		"Success": strconv.FormatBool(success),
-		"Origin":  entity.Fitbit.Str(),
-		"date":    sleepLog.Date.Format(entity.HumanDate),
-	})
 	return nil
 }
 

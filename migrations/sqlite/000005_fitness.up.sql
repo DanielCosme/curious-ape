@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS fitness_logs (
     "date"              DATE not null,
     start_time          DATE not null,
     end_time            DATE not null,
+    "type"              TEXT not null default '',
     title               TEXT not null default '',
     origin              TEXT not null CHECK (length(origin) > 1),
     note                TEXT default '',

@@ -23,7 +23,7 @@ func ExecuteFitnessLogPipeline(fls []*entity.FitnessLog, fjs ...entity.FitnessLo
 	return nil
 }
 
-func FitnessLogsJoinDay(m *Models) entity.FitnessLogJoin {
+func FitnessLogsJoinDay(m *Repository) entity.FitnessLogJoin {
 	return func(fls []*entity.FitnessLog) error {
 		if len(fls) > 0 {
 			days, err := m.Days.Find(entity.DayFilter{IDs: FitnessToDayIDs(fls)})

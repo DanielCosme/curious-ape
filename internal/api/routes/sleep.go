@@ -4,34 +4,48 @@ import (
 	"github.com/danielcosme/curious-ape/internal/api/types"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/rest"
-	"github.com/go-chi/chi/v5"
 	"net/http"
-	"strconv"
 )
 
-func (h *Handler) SleepGetByDate(rw http.ResponseWriter, r *http.Request) {
+func (h *Handler) SleepGetForDate(rw http.ResponseWriter, r *http.Request) {
 	day := r.Context().Value("day").(*entity.Day)
-	sls, err := h.App.GetSleepLogsForDay(day)
+	sls, err := h.App.GetSleepLogs(entity.SleepLogFilter{DayID: []int{day.ID}})
 	JsonCheckError(rw, r, http.StatusOK, envelope{"sleep_logs": types.FromSleepLogToTransportSlice(sls)}, err)
+}
+
+func (h *Handler) SleepGet(rw http.ResponseWriter, r *http.Request) {
+	sleepLog := r.Context().Value("sleepLog").(*entity.SleepLog)
+	rest.JSON(rw, http.StatusOK, envelope{"sleep_logs": types.FromSleepLogToTransport(sleepLog)})
 }
 
 func (h *Handler) SleepGetAll(rw http.ResponseWriter, r *http.Request) {
-	sls, err := h.App.GetSleepLogs()
+	sls, err := h.App.GetSleepLogs(entity.SleepLogFilter{})
 	JsonCheckError(rw, r, http.StatusOK, envelope{"sleep_logs": types.FromSleepLogToTransportSlice(sls)}, err)
 }
 
-func (h *Handler) SleepDeleteByID(rw http.ResponseWriter, r *http.Request) {
-	var id int
-	var err error
-	if idStr := chi.URLParam(r, "id"); idStr != "" {
-		id, err = strconv.Atoi(idStr)
-		if err != nil {
-			rest.ErrInternalServer(rw)
-			return
-		}
+func (h *Handler) SleepDelete(rw http.ResponseWriter, r *http.Request) {
+	sleepLog := r.Context().Value("sleepLog").(*entity.SleepLog)
+	err := h.App.DeleteSleepByID(sleepLog.ID)
+	JsonCheckError(rw, r, http.StatusOK, envelopeSuccess(), err)
+}
+
+func (h *Handler) SleepUpdate(rw http.ResponseWriter, r *http.Request) {
+	sleepLog := r.Context().Value("sleepLog").(*entity.SleepLog)
+
+	var payload *types.SleepLogTransport
+	err := rest.ReadJSON(r, &payload)
+	if err != nil {
+		rest.ErrInternalServer(rw)
+		return
 	}
-	err = h.App.SleepLogDeleteByID(id)
-	JsonCheckError(rw, r, http.StatusOK, envelope{"success": "ok"}, err)
+	data, err := payload.ToSleepLog(sleepLog.Day)
+	if err != nil {
+		rest.ErrInternalServer(rw)
+		return
+	}
+
+	sleepLog, err = h.App.UpdateSleep(sleepLog, data)
+	JsonCheckError(rw, r, http.StatusOK, envelope{"sleep_logs": types.FromSleepLogToTransport(sleepLog)}, err)
 }
 
 func (h *Handler) SleepCreate(rw http.ResponseWriter, r *http.Request) {
@@ -49,6 +63,6 @@ func (h *Handler) SleepCreate(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sleepLog, err = h.App.SleepFromRestCreate(sleepLog)
+	sleepLog, err = h.App.CreateSleepFromApi(sleepLog)
 	JsonCheckError(rw, r, http.StatusCreated, envelope{"sleep_logs": types.FromSleepLogToTransport(sleepLog)}, err)
 }

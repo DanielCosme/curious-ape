@@ -77,11 +77,11 @@ func (h *Handler) HabitsGetAll(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	habits := []*types.HabitTransport{}
+	habitsTransport := []*types.HabitTransport{}
 	for _, habit := range hs {
-		habits = append(habits, types.FromHabitToTransport(habit))
+		habitsTransport = append(habitsTransport, types.FromHabitToTransport(habit))
 	}
 
-	rest.JSONStatusOk(rw, envelope{"habits": hs})
+	rest.JSONStatusOk(rw, envelope{"habits": habitsTransport})
 	return
 }

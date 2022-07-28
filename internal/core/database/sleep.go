@@ -25,13 +25,13 @@ func ExecuteSleepLogPipeline(ssl []*entity.SleepLog, hjs ...entity.SleepLogJoin)
 	return nil
 }
 
-func SleepLogsPipeline(m *Models) []entity.SleepLogJoin {
+func SleepLogsPipeline(m *Repository) []entity.SleepLogJoin {
 	return []entity.SleepLogJoin{
 		SleepLogsJoinDay(m),
 	}
 }
 
-func SleepLogsJoinDay(m *Models) entity.SleepLogJoin {
+func SleepLogsJoinDay(m *Repository) entity.SleepLogJoin {
 	return func(sls []*entity.SleepLog) error {
 		if len(sls) > 0 {
 			days, err := m.Days.Find(entity.DayFilter{IDs: SleepToDayIDs(sls)})

@@ -45,20 +45,31 @@ func ChiRoutes(a *application.App) http.Handler {
 	// Sleep
 	r.Route("/sleep", func(r chi.Router) {
 		r.Get("/", h.SleepGetAll)
-		r.Delete("/{id}", h.SleepDeleteByID)
 		r.Route("/date/{date}", func(r chi.Router) {
 			r.Use(middleware.SetDay(a))
-			r.Get("/", h.SleepGetByDate)
+			r.Get("/", h.SleepGetForDate)
 			r.Post("/", h.SleepCreate)
+		})
+		r.Route("/{id}", func(r chi.Router) {
+			r.Use(middleware.SetSleepLog(a))
+			r.Get("/", h.SleepGet)
+			r.Put("/", h.SleepUpdate)
+			r.Delete("/", h.SleepDelete)
 		})
 	})
 	// Fitness
 	r.Route("/fitness", func(r chi.Router) {
-		r.Get("/", h.FitnessGet)
+		r.Get("/", h.FitnessGetAll)
 		r.Route("/date/{date}", func(r chi.Router) {
 			r.Use(middleware.SetDay(a))
-			r.Get("/", h.FitnessGetByDate)
-			// r.Post("/", h.SleepCreate)
+			r.Get("/", h.FitnessGetForDate)
+			r.Post("/", h.FitnessCreate)
+		})
+		r.Route("/{id}", func(r chi.Router) {
+			r.Use(middleware.SetFitnessLog(a))
+			r.Get("/", h.FitnessGet)
+			r.Put("/", h.FitnessUpdate)
+			r.Delete("/", h.FitnessDelete)
 		})
 	})
 	// Sync
