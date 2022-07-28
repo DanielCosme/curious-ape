@@ -174,12 +174,13 @@ func (a *App) UpdateFitnessLog(fl, data *entity.FitnessLog) (*entity.FitnessLog,
 
 func (a *App) createFitnessLogs(fls []*entity.FitnessLog) error {
 	for _, fl := range fls {
-		if err := a.HabitUpsertFromFitnessLog(fl); err != nil {
-			return err
-		}
-
 		fl.Date = fl.Day.Date
 		if err := a.db.FitnessLogs.Create(fl); err != nil {
+			a.Log.Warningf("fitness log for %s could not be created: %s", fl.Day.Date.Format(entity.HumanDate), err.Error())
+			continue
+		}
+
+		if err := a.HabitUpsertFromFitnessLog(fl); err != nil {
 			return err
 		}
 

@@ -185,13 +185,23 @@ func toSleepLogFromFitbit(days []*entity.Day, sleepRecords []fitbit.Sleep) ([]*e
 
 func (a *App) createSleepLogs(logs []*entity.SleepLog) error {
 	for _, l := range logs {
+		op := "Created"
 		testerLog, err := a.db.SleepLogs.Get(entity.SleepLogFilter{DayID: []int{l.Day.ID}})
 		if err != nil && !errors.Is(err, database.ErrNotFound) {
 			return err
 		}
 		if testerLog != nil && testerLog.StartTime.Equal(l.StartTime) && testerLog.EndTime.Equal(l.EndTime) {
-			a.Log.Warningf("Sleep log for %s already exist, not going to be saved.", l.Date.Format(entity.HumanDate))
-			continue
+			// update
+			op = "Updated"
+			l.ID = testerLog.ID
+			if _, err := a.db.SleepLogs.Update(l); err != nil {
+				return fmt.Errorf("sleep log could not be updated: %w", err)
+			}
+		} else if err := a.db.SleepLogs.Create(l); err != nil {
+			if errors2.Is(err, database.ErrUniqueCheckFailed) {
+				a.Log.Error(fmt.Errorf("dayID and main sleep unique check failed for %s", l.Date.Format(entity.HumanDate)))
+			}
+			return err
 		}
 
 		// Habit Creation From Sleep Log
@@ -199,15 +209,7 @@ func (a *App) createSleepLogs(logs []*entity.SleepLog) error {
 			a.Log.Error(err)
 		}
 
-		// TODO implement upsert here?
-		if err := a.db.SleepLogs.Create(l); err != nil {
-			if errors2.Is(err, database.ErrUniqueCheckFailed) {
-				a.Log.Error(fmt.Errorf("dayID and main sleep unique check failed for %s", l.Date.Format(entity.HumanDate)))
-			}
-			return err
-		}
-
-		a.Log.InfoP("Created sleep log", log.Prop{
+		a.Log.InfoP(fmt.Sprintf("%s sleep log", op), log.Prop{
 			"provider": l.Origin.Str(),
 			"date":     l.Date.Format(entity.HumanDate),
 		})
