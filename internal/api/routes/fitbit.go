@@ -28,3 +28,8 @@ func (h *Handler) Oauth2Success(rw http.ResponseWriter, r *http.Request) {
 
 	rest.JSONStatusOk(rw, envelope{"message": "ok"})
 }
+
+func (h *Handler) AddToken(rw http.ResponseWriter, r *http.Request) {
+	msg, err := h.App.Oauth2AddToken(r.Form.Get("token"), chi.URLParam(r, "provider"))
+	JsonCheckError(rw, r, http.StatusCreated, envelope{"valid token for": msg}, err)
+}

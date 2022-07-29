@@ -121,3 +121,43 @@ func (a *App) oauth2GetConfigurationForProvider(provider entity.IntegrationProvi
 		Scopes:      config.Scopes,
 	}
 }
+
+func (a *App) Oauth2AddToken(token, provider string) (string, error) {
+	if token == "" {
+		return "", errors.New("token is empty")
+	}
+
+	switch entity.IntegrationProvider(provider) {
+	case entity.ProviderToggl:
+		o, err := a.db.Oauths.Get(entity.Oauth2Filter{Provider: []entity.IntegrationProvider{entity.ProviderToggl}})
+		if err != nil && !errors.Is(err, database.ErrNotFound) {
+			return "", err
+		}
+
+		if o == nil {
+			o := &entity.Oauth2{
+				Provider:    entity.ProviderToggl,
+				AccessToken: token,
+				Type:        "Bearer",
+			}
+			if err := a.db.Oauths.Create(o); err != nil {
+				return "", err
+			}
+		} else {
+			o.AccessToken = token
+			if _, err := a.db.Oauths.Update(o); err != nil {
+				return "", err
+			}
+		}
+		api := a.Sync.TogglClient(o.AccessToken)
+		me, err := api.Me.GetProfile()
+		if err != nil {
+			return "", err
+		}
+		return me.Fullname, nil
+	default:
+		return "", errors.New("invalid provider")
+	}
+
+	return "", nil
+}

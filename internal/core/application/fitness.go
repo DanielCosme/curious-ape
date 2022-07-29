@@ -37,7 +37,7 @@ func (a *App) SyncFitness() error {
 	googleApi := a.Sync.GoogleClient(client)
 
 	for _, d := range days {
-		// TODO this needs to account in the future for many types of fitness logs
+		// TODO this will break for multiple providers and types of fitness logs (steps, cycling, etc...)
 		if len(d.FitnessLogs) == 0 {
 			payload, err := googleApi.Fitness.GetFitnessSessions(dates.ToBeginningOfDay(d.Date), dates.ToEndOfDay(d.Date))
 			if err != nil {

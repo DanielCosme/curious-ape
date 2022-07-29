@@ -70,6 +70,7 @@ func (a *App) SyncSleep() error {
 	fitbitApi := a.Sync.FitbitClient(client)
 
 	for _, d := range days {
+		// TODO this will not work properly for more than one provider at a time.
 		if len(d.SleepLogs) == 0 {
 			// Try to sync if we don't have the sleep log
 			payload, err := fitbitApi.Sleep.GetByDate(d.Date)

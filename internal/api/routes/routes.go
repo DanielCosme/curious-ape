@@ -82,6 +82,7 @@ func ChiRoutes(a *application.App) http.Handler {
 	r.Route("/oauth2/{provider}", func(r chi.Router) {
 		r.Get("/connect", h.Oauth2Connect)
 		r.Get("/success", h.Oauth2Success)
+		r.Post("/addToken", h.AddToken)
 	})
 
 	r.NotFound(h.NotFound)
