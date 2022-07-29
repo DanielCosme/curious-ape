@@ -17,6 +17,10 @@ type Oauth2 struct {
 	RefreshToken string              `db:"refresh_token"`
 	Type         string              `db:"type"`
 	Expiration   time.Time           `db:"expiration"`
+	// toggl extra
+	ToogglWorkSpaceID    string `db:"toggl_workspace_id"`
+	ToogglOrganizationID string `db:"toggl_organization_id"`
+	ToogglProjectIDs     string `db:"toggl_project_ids"`
 }
 
 type Oauth2Config struct {

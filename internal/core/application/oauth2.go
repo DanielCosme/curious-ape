@@ -7,6 +7,7 @@ import (
 	"github.com/danielcosme/curious-ape/sdk/errors"
 	"golang.org/x/oauth2"
 	"net/http"
+	"strconv"
 )
 
 func (a *App) Oauth2ConnectProvider(provider string) (string, error) {
@@ -135,7 +136,7 @@ func (a *App) Oauth2AddToken(token, provider string) (string, error) {
 		}
 
 		if o == nil {
-			o := &entity.Oauth2{
+			o = &entity.Oauth2{
 				Provider:    entity.ProviderToggl,
 				AccessToken: token,
 				Type:        "Bearer",
@@ -154,6 +155,21 @@ func (a *App) Oauth2AddToken(token, provider string) (string, error) {
 		if err != nil {
 			return "", err
 		}
+
+		ws, err := api.Workspace.Get()
+		if err != nil {
+			a.Log.Error(err)
+		}
+		if len(ws) != 1 {
+			return "", errors.New("only one workspace is supported for toggl")
+		}
+		w := ws[0]
+		o.ToogglOrganizationID = strconv.Itoa(w.OrganizationID)
+		o.ToogglWorkSpaceID = strconv.Itoa(w.ID)
+		if _, err := a.db.Oauths.Update(o); err != nil {
+			return "", err
+		}
+
 		return me.Fullname, nil
 	default:
 		return "", errors.New("invalid provider")

@@ -49,6 +49,7 @@ func (c *Client) Call(method, path string, urlParams url.Values, payload interfa
 		return errors.New("response body is not valid json")
 	}
 
+	c.out.Write(body)
 	return json.Unmarshal(body, payload)
 }
 

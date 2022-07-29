@@ -5,5 +5,9 @@ CREATE TABLE IF NOT EXISTS oauths (
     access_token        TEXT not null UNIQUE,
     refresh_token       TEXT,
     type                TEXT,
-    expiration          DATE
+    expiration          DATE,
+
+    toggl_workspace_id      INTEGER default "",
+    toggl_organization_id   INTEGER default "",
+    toggl_project_ids       TEXT defatult ""
 )
