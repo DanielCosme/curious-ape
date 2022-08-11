@@ -46,7 +46,7 @@ func (c *Client) Call(method, path string, urlParams url.Values, payload any) er
 	}
 	if !json.Valid(body) {
 		c.out.Write(body)
-		return errors.New("response body is not valid json")
+		return errors.New("toggl response body is not valid json")
 	}
 
 	return json.Unmarshal(body, payload)
@@ -54,5 +54,5 @@ func (c *Client) Call(method, path string, urlParams url.Values, payload any) er
 
 func (c *Client) catchTogglErr(body []byte) error {
 	c.out.Write(body)
-	return nil
+	return errors.New("toggl api error")
 }

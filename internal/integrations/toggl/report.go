@@ -36,8 +36,8 @@ type TimeEntryTitle struct {
 
 func (s *ReportsService) GetDaySummaryForProjectIDs(day time.Time, projectIDs, workspaceID string) (*Summary, error) {
 	params := NewPrams(s.client.token, workspaceID)
-	params.Set("since", formatDate(day))
-	params.Set("until", formatDate(day))
+	params.Set("since", FormatDate(day))
+	params.Set("until", FormatDate(day))
 	params.Set("project_ids", projectIDs)
 	return s.summaryRequest(params)
 }
@@ -56,6 +56,6 @@ func (s *ReportsService) summaryRequest(params url.Values) (*Summary, error) {
 	return summary, err
 }
 
-func formatDate(time time.Time) string {
+func FormatDate(time time.Time) string {
 	return time.Format("2006-01-02")
 }

@@ -53,6 +53,7 @@ func (a *App) HabitCreate(day *entity.Day, data *entity.Habit) (*entity.Habit, e
 			"Success": strconv.FormatBool(dataLog.Success),
 			"Origin":  dataLog.Origin.Str(),
 			"date":    day.Date.Format(entity.HumanDate),
+			"details": dataLog.Note,
 		})
 	}
 

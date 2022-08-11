@@ -1,17 +1,22 @@
 package types
 
-import "github.com/danielcosme/curious-ape/internal/core/entity"
+import (
+	"github.com/danielcosme/curious-ape/internal/core/entity"
+	"time"
+)
 
 type DayTransport struct {
 	Date        string                 `json:"date"`
+	DeepWork    string                 `json:"deep_work"`
 	Habits      []*HabitTransport      `json:"habits,omitempty"`
 	SleepLogs   []*SleepLogTransport   `json:"sleep_logs,omitempty"`
-	FitnessLogs []*FitnessLogTransport `json:"fitnessLogs"`
+	FitnessLogs []*FitnessLogTransport `json:"fitnessLogs,omitempty"`
 }
 
 func DayToTransport(d *entity.Day) *DayTransport {
 	dt := &DayTransport{
-		Date: entity.FormatDate(d.Date),
+		Date:     entity.FormatDate(d.Date),
+		DeepWork: (time.Duration(d.DeepWorkMinutes) * time.Minute).String(),
 	}
 
 	if len(d.Habits) > 0 {
