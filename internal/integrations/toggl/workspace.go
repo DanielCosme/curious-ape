@@ -35,8 +35,8 @@ type Workspace struct {
 	LogoURL                     string      `json:"logo_url"`
 	IcalURL                     string      `json:"ical_url"`
 	IcalEnabled                 bool        `json:"ical_enabled"`
-	CsvUpload                   interface{} `json:"csv_upload"`
-	Subscription                interface{} `json:"subscription"`
+	CsvUpload                   bool        `json:"csv_upload"`
+	Subscription                bool        `json:"subscription"`
 }
 
 func (s *WorkspaceService) Get() ([]*Workspace, error) {

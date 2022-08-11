@@ -84,6 +84,10 @@ func ChiRoutes(a *application.App) http.Handler {
 		r.Get("/success", h.Oauth2Success)
 		r.Post("/addToken", h.AddToken)
 	})
+	r.Route("/providers/toggl", func(r chi.Router) {
+		r.Get("/projects", h.TogglGetProjects)
+		r.Post("/projects", h.TogglAssignProjectsToGoal)
+	})
 
 	r.NotFound(h.NotFound)
 	return r

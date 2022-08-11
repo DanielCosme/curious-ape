@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strconv"
 )
 
 const BaseURL = "https://api.track.toggl.com/"
@@ -36,20 +35,21 @@ func (c *Client) Call(method, path string, urlParams url.Values, payload interfa
 	if err != nil {
 		return err
 	}
+
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}
-
-	if strconv.Itoa(res.StatusCode)[:1] != "2" {
+	if res.StatusCode >= 400 {
 		return c.catchTogglErr(body)
+
 	}
 	if !json.Valid(body) {
 		c.out.Write(body)
 		return errors.New("response body is not valid json")
 	}
 
-	c.out.Write(body)
+	// c.out.Write(body)
 	return json.Unmarshal(body, payload)
 }
 

@@ -91,7 +91,7 @@ func New(out io.Writer, minLevel Level, timeFormat string) *Logger {
 	}
 }
 
-func (l *Logger) Trace(args ...interface{}) {
+func (l *Logger) Trace(args ...any) {
 	l.print(LevelTrace, args...)
 }
 
@@ -99,11 +99,11 @@ func (l *Logger) TraceP(message string, properties map[string]string) {
 	l.printP(LevelTrace, message, properties, nil)
 }
 
-func (l *Logger) Tracef(message string, args ...interface{}) {
+func (l *Logger) Tracef(message string, args ...any) {
 	l.printf(LevelTrace, message, args...)
 }
 
-func (l *Logger) Debug(args ...interface{}) {
+func (l *Logger) Debug(args ...any) {
 	l.print(LevelDebug, args...)
 }
 
@@ -111,11 +111,11 @@ func (l *Logger) DebugP(message string, properties map[string]string) {
 	l.printP(LevelDebug, message, properties, nil)
 }
 
-func (l *Logger) Debugf(message string, args ...interface{}) {
+func (l *Logger) Debugf(message string, args ...any) {
 	l.printf(LevelDebug, message, args...)
 }
 
-func (l *Logger) Info(args ...interface{}) {
+func (l *Logger) Info(args ...any) {
 	l.print(LevelInfo, args...)
 }
 
@@ -123,11 +123,11 @@ func (l *Logger) InfoP(message string, properties map[string]string) {
 	l.printP(LevelInfo, message, properties, nil)
 }
 
-func (l *Logger) Infof(message string, args ...interface{}) {
+func (l *Logger) Infof(message string, args ...any) {
 	l.printf(LevelInfo, message, args...)
 }
 
-func (l *Logger) Warning(args ...interface{}) {
+func (l *Logger) Warning(args ...any) {
 	l.print(LevelWarning, args...)
 }
 
@@ -135,7 +135,7 @@ func (l *Logger) WarningP(message string, properties map[string]string) {
 	l.printP(LevelWarning, message, properties, nil)
 }
 
-func (l *Logger) Warningf(message string, args ...interface{}) {
+func (l *Logger) Warningf(message string, args ...any) {
 	l.printf(LevelWarning, message, args...)
 }
 
@@ -157,11 +157,11 @@ func (l *Logger) FatalP(err error, properties map[string]string) {
 	os.Exit(1) // For entries at the FATAL level, we also terminate the application.
 }
 
-func (l *Logger) printf(level Level, message string, args ...interface{}) {
+func (l *Logger) printf(level Level, message string, args ...any) {
 	l.printP(level, fmt.Sprintf(message, args...), nil, nil)
 }
 
-func (l *Logger) print(level Level, args ...interface{}) {
+func (l *Logger) print(level Level, args ...any) {
 	l.printP(level, fmt.Sprint(args...), nil, nil)
 }
 

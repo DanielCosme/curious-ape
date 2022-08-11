@@ -123,7 +123,7 @@ func (a *App) oauth2GetConfigurationForProvider(provider entity.IntegrationProvi
 	}
 }
 
-func (a *App) Oauth2AddToken(token, provider string) (string, error) {
+func (a *App) Oauth2AddAPIToken(token, provider string) (string, error) {
 	if token == "" {
 		return "", errors.New("token is empty")
 	}
@@ -161,14 +161,19 @@ func (a *App) Oauth2AddToken(token, provider string) (string, error) {
 			a.Log.Error(err)
 		}
 		if len(ws) != 1 {
-			return "", errors.New("only one workspace is supported for toggl")
+			return "", errors.New("we only support one workspace for toggl")
 		}
+
 		w := ws[0]
 		o.ToogglOrganizationID = strconv.Itoa(w.OrganizationID)
 		o.ToogglWorkSpaceID = strconv.Itoa(w.ID)
 		if _, err := a.db.Oauths.Update(o); err != nil {
 			return "", err
 		}
+		api.Projects.GetAll(o.ToogglWorkSpaceID)
+		// TODO-get save project IDs here???
+		// Or use an endpoint for that??
+		// I think from api call to be able to control
 
 		return me.Fullname, nil
 	default:

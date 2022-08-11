@@ -4,5 +4,4 @@ type ReportsService struct {
 	client *Client
 }
 
-func (s *ReportsService) GetWorkSpaces() {
-}
+func (s *ReportsService) GetWorkSpaces() {}

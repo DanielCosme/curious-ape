@@ -44,11 +44,11 @@ func main() {
 			Logger: logger,
 		}),
 		Server: &http.Server{
-			Addr:         fmt.Sprintf(":%d", cfg.Server.Port),
-			IdleTimeout:  time.Minute,
-			ReadTimeout:  10 * time.Second,
-			WriteTimeout: 30 * time.Second,
-			ErrorLog:     log.New(logger, "", 0),
+                Addr:         fmt.Sprintf(":%d", cfg.Server.Port),
+                IdleTimeout:  time.Minute,
+                ReadTimeout:  10 * time.Second,
+                WriteTimeout: 30 * time.Second,
+                ErrorLog:     log.New(logger, "", 0),
 		},
 	}
 
