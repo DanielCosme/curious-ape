@@ -9,7 +9,7 @@ import (
 	"net/url"
 )
 
-const BaseURL = "https://api.track.toggl.com/"
+const BaseURL = "https://api.track.toggl.com"
 
 type Client struct {
 	*http.Client
@@ -17,7 +17,7 @@ type Client struct {
 	out   io.Writer
 }
 
-func (c *Client) Call(method, path string, urlParams url.Values, payload interface{}) error {
+func (c *Client) Call(method, path string, urlParams url.Values, payload any) error {
 	reqURL := BaseURL + path
 	if urlParams != nil {
 		reqURL = fmt.Sprintf("%s?%s", reqURL, urlParams.Encode())
@@ -49,7 +49,6 @@ func (c *Client) Call(method, path string, urlParams url.Values, payload interfa
 		return errors.New("response body is not valid json")
 	}
 
-	// c.out.Write(body)
 	return json.Unmarshal(body, payload)
 }
 

@@ -50,3 +50,5 @@ func New(opts *AppOptions) *App {
 	a.Log.InfoP("Application running", log.Prop{"environment": a.cfg.Env})
 	return a
 }
+
+type props map[string]string

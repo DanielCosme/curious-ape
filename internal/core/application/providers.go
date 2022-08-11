@@ -42,9 +42,12 @@ func (a *App) TogglAssignProjectsToGoal(ids string) error {
 		if err != nil {
 			return err
 		}
-		a.Log.Tracef("Project from toggl successfully linked, name: %s", p.Name)
+		a.Log.TraceP("Project from time tracking provider successfully linked", props{
+			"provider": entity.ProviderToggl,
+			"name":     p.Name,
+		})
 	}
-	a.Log.Tracef("All projects for the goal exist on Toggl")
+	a.Log.Trace("All projects for the goal exist on Toggl")
 
 	// Update the project IDs
 	o.ToogglProjectIDs = ids
