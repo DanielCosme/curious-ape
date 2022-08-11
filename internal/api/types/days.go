@@ -6,11 +6,18 @@ import (
 )
 
 type DayTransport struct {
-	Date        string                 `json:"date"`
-	DeepWork    string                 `json:"deep_work"`
-	Habits      []*HabitTransport      `json:"habits,omitempty"`
-	SleepLogs   []*SleepLogTransport   `json:"sleep_logs,omitempty"`
-	FitnessLogs []*FitnessLogTransport `json:"fitnessLogs,omitempty"`
+	Date            string                 `json:"date"`
+	DeepWork        string                 `json:"deep_work"`
+	DeepWorkMinutes int                    `json:"deep_work_minutes,omitempty"`
+	Habits          []*HabitTransport      `json:"habits,omitempty"`
+	SleepLogs       []*SleepLogTransport   `json:"sleep_logs,omitempty"`
+	FitnessLogs     []*FitnessLogTransport `json:"fitnessLogs,omitempty"`
+}
+
+func (dt *DayTransport) ToDay() *entity.Day {
+	return &entity.Day{
+		DeepWorkMinutes: dt.DeepWorkMinutes,
+	}
 }
 
 func DayToTransport(d *entity.Day) *DayTransport {

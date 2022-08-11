@@ -30,6 +30,11 @@ func ChiRoutes(a *application.App) http.Handler {
 		// Days
 		r.Route("/days", func(r chi.Router) {
 			r.Get("/", h.DaysGetAll)
+			r.Route("/date/{date}", func(r chi.Router) {
+				r.Use(middleware.SetDay(a))
+				r.Get("/", h.DayGetByDate)
+				r.Put("/", h.DayUpdate)
+			})
 		})
 		// Habits
 		r.Route("/habits", func(r chi.Router) {

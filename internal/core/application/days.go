@@ -30,9 +30,15 @@ func (a *App) DayGetByDate(date time.Time) (*entity.Day, error) {
 	}
 	if d == nil {
 		// if it does not exist, create new and return.
-		return a.DayCreate(&entity.Day{Date: date})
+		d, err = a.DayCreate(&entity.Day{Date: date})
+		if err != nil {
+			return nil, err
+		}
 	}
 
+	if err = database.ExecuteDaysPipeline([]*entity.Day{d}, database.DaysPipeline(a.db)...); err != nil {
+		return nil, err
+	}
 	return d, nil
 }
 
@@ -51,7 +57,9 @@ func (a *App) SyncDeepWorkByDateRange(start, end time.Time) error {
 		if err != nil {
 			return err
 		}
-		d.DeepWorkMinutes = int(toggl.ToDuration(summary.TotalGrand).Minutes())
+		if _, err := a.dayUpdate(d, workLogFromToggl(summary)); err != nil {
+			return nil
+		}
 
 		if err := a.createDeepWorkLog(d, entity.Toggl); err != nil {
 			return err
@@ -76,7 +84,9 @@ func (a *App) SyncDeepWorkLog(date time.Time) error {
 	if err != nil {
 		return err
 	}
-	d.DeepWorkMinutes = int(toggl.ToDuration(summary.TotalGrand).Minutes())
+	if _, err := a.dayUpdate(d, workLogFromToggl(summary)); err != nil {
+		return nil
+	}
 
 	return a.createDeepWorkLog(d, entity.Toggl)
 }
@@ -104,7 +114,9 @@ func (a *App) SyncDeepWork() error {
 		if err != nil {
 			return err
 		}
-		d.DeepWorkMinutes = int(toggl.ToDuration(summary.TotalGrand).Minutes())
+		if _, err := a.dayUpdate(d, workLogFromToggl(summary)); err != nil {
+			return nil
+		}
 
 		if err := a.createDeepWorkLog(d, entity.Toggl); err != nil {
 			return err
@@ -113,6 +125,12 @@ func (a *App) SyncDeepWork() error {
 	}
 
 	return nil
+}
+
+func workLogFromToggl(s *toggl.Summary) *entity.Day {
+	return &entity.Day{
+		DeepWorkMinutes: int(toggl.ToDuration(s.TotalGrand).Minutes()),
+	}
 }
 
 func togglSleep() {
@@ -129,7 +147,7 @@ func (a *App) HabitUpsertFromDeepWorkLog(d *entity.Day, origin entity.DataSource
 	var success bool
 	// If the deep work minutes are bigger than 5 hours
 	dur := time.Duration(d.DeepWorkMinutes) * time.Minute
-	if dur > (time.Hour * 5) {
+	if dur >= (time.Hour * 5) {
 		success = true
 	}
 
@@ -144,25 +162,39 @@ func (a *App) HabitUpsertFromDeepWorkLog(d *entity.Day, origin entity.DataSource
 		}},
 	}
 
-	habit, err = a.HabitCreate(d, habit)
-	if err != nil {
-		return err
-	}
-	return nil
+	_, err = a.HabitCreate(d, habit)
+	return err
 }
 
-func (a *App) createDeepWorkLog(d *entity.Day, origin entity.DataSource) error {
-	if _, err := a.db.Days.Update(d); err != nil {
-		return err
+func (a *App) DayUpdate(day, data *entity.Day) (*entity.Day, error) {
+	var err error
+	day, err = a.dayUpdate(day, data)
+	if err != nil {
+		return nil, err
 	}
 
-	if err := a.HabitUpsertFromDeepWorkLog(d, origin); err != nil {
+	// create deep work resource (in the future) and upsert habit
+	if err := a.createDeepWorkLog(day, entity.Manual); err != nil {
+		return nil, err
+	}
+
+	database.ExecuteDaysPipeline([]*entity.Day{day}, database.DaysJoinHabits(a.db))
+	return day, err
+}
+
+func (a *App) dayUpdate(day, data *entity.Day) (*entity.Day, error) {
+	day.DeepWorkMinutes = data.DeepWorkMinutes
+	return a.db.Days.Update(day, database.DaysPipeline(a.db)...)
+}
+
+func (a *App) createDeepWorkLog(day *entity.Day, origin entity.DataSource) error {
+	if err := a.HabitUpsertFromDeepWorkLog(day, origin); err != nil {
 		return err
 	}
 
 	a.Log.InfoP("updated deep work log", log.Prop{
 		"origin": origin.Str(),
-		"date":   d.Date.Format(entity.HumanDate),
+		"date":   day.Date.Format(entity.HumanDate),
 	})
 	return nil
 }
