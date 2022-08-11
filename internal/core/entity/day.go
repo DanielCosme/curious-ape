@@ -8,8 +8,9 @@ const Timestamp = "15:04:05"
 const Time = "15:04"
 
 type Day struct {
-	ID   int       `db:"id"`
-	Date time.Time `db:"date"`
+	ID              int       `db:"id"`
+	Date            time.Time `db:"date"`
+	DeepWorkMinutes int       `db:"deep_work_minutes"`
 	// generated
 	Habits      []*Habit
 	SleepLogs   []*SleepLog

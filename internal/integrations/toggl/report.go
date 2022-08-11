@@ -35,13 +35,19 @@ type TimeEntryTitle struct {
 }
 
 func (s *ReportsService) GetDaySummaryForProjectIDs(day time.Time, projectIDs, workspaceID string) (*Summary, error) {
-	params := url.Values{}
-	params.Set("user_agent", s.client.token) // day
-	params.Set("workspace_id", workspaceID)  // day
-	params.Set("since", formatDate(day))     // day
-	params.Set("until", formatDate(day))     // day
-	params.Set("project_ids", projectIDs)    // day
+	params := NewPrams(s.client.token, workspaceID)
+	params.Set("since", formatDate(day))
+	params.Set("until", formatDate(day))
+	params.Set("project_ids", projectIDs)
 	return s.summaryRequest(params)
+}
+
+// NewPrams returns mandatory params for the toggl api
+func NewPrams(userAgent, workspaceID string) url.Values {
+	params := url.Values{}
+	params.Set("user_agent", userAgent)
+	params.Set("workspace_id", workspaceID)
+	return params
 }
 
 func (s *ReportsService) summaryRequest(params url.Values) (*Summary, error) {

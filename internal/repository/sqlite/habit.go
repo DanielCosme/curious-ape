@@ -19,9 +19,24 @@ func (ds *HabitsDataSource) Create(h *entity.Habit) error {
 	if err != nil {
 		return catchErr(err)
 	}
-	id, _ := res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return err
+	}
 	h.ID = int(id)
 	return nil
+}
+func (ds *HabitsDataSource) Update(data *entity.Habit, joins ...entity.HabitJoin) (*entity.Habit, error) {
+	query := `
+		UPDATE 	habits
+		SET 	status = :status
+		WHERE 	id = :id
+	`
+	_, err := ds.DB.NamedExec(query, data)
+	if err != nil {
+		return nil, catchErr(err)
+	}
+	return ds.Get(entity.HabitFilter{ID: []int{data.ID}}, joins...)
 }
 
 func (ds *HabitsDataSource) Get(filter entity.HabitFilter, joins ...entity.HabitJoin) (*entity.Habit, error) {
@@ -41,19 +56,6 @@ func (ds *HabitsDataSource) Find(filter entity.HabitFilter, joins ...entity.Habi
 		return nil, catchErr(err)
 	}
 	return habits, catchErr(database.ExecuteHabitsPipeline(habits, joins...))
-}
-
-func (ds *HabitsDataSource) Update(data *entity.Habit, joins ...entity.HabitJoin) (*entity.Habit, error) {
-	query := `
-		UPDATE 	habits
-		SET 	status = :status
-		WHERE 	id = :id
-	`
-	_, err := ds.DB.NamedExec(query, data)
-	if err != nil {
-		return nil, catchErr(err)
-	}
-	return ds.Get(entity.HabitFilter{ID: []int{data.ID}}, joins...)
 }
 
 func (ds *HabitsDataSource) Delete(id int) error {

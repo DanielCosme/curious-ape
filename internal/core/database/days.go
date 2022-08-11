@@ -6,6 +6,7 @@ import (
 
 type Day interface {
 	Create(*entity.Day) error
+	Update(*entity.Day, ...entity.DayJoin) (*entity.Day, error)
 	Get(entity.DayFilter, ...entity.DayJoin) (*entity.Day, error)
 	Find(entity.DayFilter, ...entity.DayJoin) ([]*entity.Day, error)
 }

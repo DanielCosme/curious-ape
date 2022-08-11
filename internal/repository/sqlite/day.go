@@ -22,6 +22,19 @@ func (ds *DaysDataSource) Create(d *entity.Day) error {
 	return err
 }
 
+func (ds *DaysDataSource) Update(date *entity.Day, joins ...entity.DayJoin) (*entity.Day, error) {
+	query := `
+		UPDATE "days"
+		SET deep_work_minutes = :deep_work_minutes
+		WHERE id = :id
+    `
+	_, err := ds.DB.NamedExec(query, date)
+	if err != nil {
+		return nil, catchErr(err)
+	}
+	return ds.Get(entity.DayFilter{IDs: []int{date.ID}}, joins...)
+}
+
 func (ds *DaysDataSource) Get(filter entity.DayFilter, joins ...entity.DayJoin) (*entity.Day, error) {
 	day := new(entity.Day)
 	q, args := dayFilter(filter).generate()
