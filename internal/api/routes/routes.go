@@ -24,70 +24,78 @@ func ChiRoutes(a *application.App) http.Handler {
 	r.Use(middleware.RecoverPanic(a))
 	r.Use(rest.MiddlewareParseForm)
 
-	r.Get("/ping", h.Ping)
+	r.Route("/api", func(r chi.Router) {
+		r.Get("/ping", h.Ping)
 
-	// Days
-	r.Route("/days", func(r chi.Router) {
-		r.Get("/", h.DaysGetAll)
-	})
-	// Habits
-	r.Route("/habits", func(r chi.Router) {
-		r.Get("/", h.HabitsGetAll)
-		r.Get("/categories", h.HabitsGetCategories)
-		r.Route("/{habitID}", func(r chi.Router) {
-			r.Use(middleware.SetHabit(a))
-			r.Get("/", h.HabitGet)
-			r.Put("/", h.HabitUpdate)
-			r.Delete("/", h.HabitDelete)
+		// Days
+		r.Route("/days", func(r chi.Router) {
+			r.Get("/", h.DaysGetAll)
 		})
-		r.With(middleware.SetDay(a)).Post("/date/{date}", h.HabitCreate)
-	})
-	// Sleep
-	r.Route("/sleep", func(r chi.Router) {
-		r.Get("/", h.SleepGetAll)
-		r.Route("/date/{date}", func(r chi.Router) {
-			r.Use(middleware.SetDay(a))
-			r.Get("/", h.SleepGetForDate)
-			r.Post("/", h.SleepCreate)
+		// Habits
+		r.Route("/habits", func(r chi.Router) {
+			r.Get("/", h.HabitsGetAll)
+			r.Get("/categories", h.HabitsGetCategories)
+			r.Route("/{habitID}", func(r chi.Router) {
+				r.Use(middleware.SetHabit(a))
+				r.Get("/", h.HabitGet)
+				r.Put("/", h.HabitUpdate)
+				r.Delete("/", h.HabitDelete)
+			})
+			r.Route("/date/{date}", func(r chi.Router) {
+				r.Use(middleware.SetDay(a))
+				r.Get("/", h.HabitsGetByDay)
+				r.Post("/", h.HabitCreate)
+			})
 		})
-		r.Route("/{id}", func(r chi.Router) {
-			r.Use(middleware.SetSleepLog(a))
-			r.Get("/", h.SleepGet)
-			r.Put("/", h.SleepUpdate)
-			r.Delete("/", h.SleepDelete)
+		// Sleep
+		r.Route("/sleep", func(r chi.Router) {
+			r.Get("/", h.SleepGetAll)
+			r.Route("/date/{date}", func(r chi.Router) {
+				r.Use(middleware.SetDay(a))
+				r.Get("/", h.SleepGetForDate)
+				r.Post("/", h.SleepCreate)
+			})
+			r.Route("/{id}", func(r chi.Router) {
+				r.Use(middleware.SetSleepLog(a))
+				r.Get("/", h.SleepGet)
+				r.Put("/", h.SleepUpdate)
+				r.Delete("/", h.SleepDelete)
+			})
 		})
-	})
-	// Fitness
-	r.Route("/fitness", func(r chi.Router) {
-		r.Get("/", h.FitnessGetAll)
-		r.Route("/date/{date}", func(r chi.Router) {
-			r.Use(middleware.SetDay(a))
-			r.Get("/", h.FitnessGetForDate)
-			r.Post("/", h.FitnessCreate)
+		// Fitness
+		r.Route("/fitness", func(r chi.Router) {
+			r.Get("/", h.FitnessGetAll)
+			r.Route("/date/{date}", func(r chi.Router) {
+				r.Use(middleware.SetDay(a))
+				r.Get("/", h.FitnessGetForDate)
+				r.Post("/", h.FitnessCreate)
+			})
+			r.Route("/{id}", func(r chi.Router) {
+				r.Use(middleware.SetFitnessLog(a))
+				r.Get("/", h.FitnessGet)
+				r.Put("/", h.FitnessUpdate)
+				r.Delete("/", h.FitnessDelete)
+			})
 		})
-		r.Route("/{id}", func(r chi.Router) {
-			r.Use(middleware.SetFitnessLog(a))
-			r.Get("/", h.FitnessGet)
-			r.Put("/", h.FitnessUpdate)
-			r.Delete("/", h.FitnessDelete)
+		// Sync
+		r.Route("/sync/{resourceToSync}", func(r chi.Router) {
+			r.Post("/", h.Sync)
+			r.Post("/date/{start}", h.SyncByDate)
+			r.Post("/date/{startDate}/{endDate}", h.SyncByDateRange)
 		})
-	})
-	// Sync
-	r.Route("/sync/{resourceToSync}", func(r chi.Router) {
-		r.Post("/", h.Sync)
-		r.Post("/date/{start}", h.SyncByDate)
-		r.Post("/date/{startDate}/{endDate}", h.SyncByDateRange)
-	})
-	// Oauth2
-	r.Route("/oauth2/{provider}", func(r chi.Router) {
-		r.Get("/connect", h.Oauth2Connect)
-		r.Get("/success", h.Oauth2Success)
-		r.Post("/addToken", h.AddToken)
-	})
-	// Provider specific endpoints
-	r.Route("/providers/toggl", func(r chi.Router) {
-		r.Get("/projects", h.TogglGetProjects)
-		r.Post("/projects", h.TogglAssignProjectsToGoal)
+		// Oauth2
+		r.Route("/oauth2/{provider}", func(r chi.Router) {
+			r.Get("/connect", h.Oauth2Connect)
+			r.Get("/success", h.Oauth2Success)
+			r.Post("/addToken", h.AddToken)
+		})
+		// Provider specific endpoints
+		r.Route("/providers/toggl", func(r chi.Router) {
+			r.Get("/projects", h.TogglGetProjects)
+			r.Post("/projects", h.TogglAssignProjectsToGoal)
+		})
+
+		r.NotFound(h.NotFound)
 	})
 
 	r.NotFound(h.NotFound)

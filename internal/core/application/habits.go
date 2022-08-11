@@ -113,12 +113,16 @@ func (a *App) HabitDelete(habit *entity.Habit) error {
 	return a.db.Habits.Delete(habit.ID)
 }
 
-func (a *App) HabitsGetAll(from, to time.Time) ([]*entity.Habit, error) {
+func (a *App) HabitsGetAll() ([]*entity.Habit, error) {
 	return a.db.Habits.Find(entity.HabitFilter{}, database.HabitsPipeline(a.db)...)
 }
 
 func (a *App) HabitGetByID(id int) (*entity.Habit, error) {
 	return a.db.Habits.Get(entity.HabitFilter{ID: []int{id}}, database.HabitsPipeline(a.db)...)
+}
+
+func (a *App) HabitsGetByDay(d *entity.Day) ([]*entity.Habit, error) {
+	return a.db.Habits.Find(entity.HabitFilter{DayID: []int{d.ID}}, database.HabitsPipeline(a.db)...)
 }
 
 func (a *App) HabitsGetCategories() ([]*entity.HabitCategory, error) {

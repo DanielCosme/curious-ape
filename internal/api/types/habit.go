@@ -62,6 +62,14 @@ func FromHabitToTransport(h *entity.Habit) *HabitTransport {
 	return nil
 }
 
+func FromHabitToTransportSlice(hs []*entity.Habit) []*HabitTransport {
+	hts := []*HabitTransport{}
+	for _, h := range hs {
+		hts = append(hts, FromHabitToTransport(h))
+	}
+	return hts
+}
+
 func fromHabitLogToTransport(hl *entity.HabitLog) *HabitTransportLog {
 	return &HabitTransportLog{
 		Success:     hl.Success,

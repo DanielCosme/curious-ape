@@ -27,6 +27,8 @@ type Day struct {
 	// Location -> Where did I wake up && went to sleep this day?
 	// Tags should be dynamic and be able to be created by me ay any time.
 	// Habit Tags?
+
+	// Score System
 }
 
 func (d *Day) FormatDate() string {

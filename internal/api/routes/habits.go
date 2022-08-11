@@ -5,7 +5,6 @@ import (
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/rest"
 	"net/http"
-	"time"
 )
 
 func (h *Handler) HabitsGetCategories(rw http.ResponseWriter, r *http.Request) {
@@ -19,6 +18,12 @@ func (h *Handler) HabitsGetCategories(rw http.ResponseWriter, r *http.Request) {
 func (h *Handler) HabitGet(rw http.ResponseWriter, r *http.Request) {
 	habit := r.Context().Value("habit").(*entity.Habit)
 	rest.JSONStatusOk(rw, envelope{"habit": types.FromHabitToTransport(habit)})
+}
+
+func (h *Handler) HabitsGetByDay(rw http.ResponseWriter, r *http.Request) {
+	day := r.Context().Value("day").(*entity.Day)
+	habits, err := h.App.HabitsGetByDay(day)
+	JsonCheckError(rw, r, http.StatusOK, &envelope{"habits": types.FromHabitToTransportSlice(habits)}, err)
 }
 
 func (h *Handler) HabitCreate(rw http.ResponseWriter, r *http.Request) {
@@ -56,32 +61,6 @@ func (h *Handler) HabitDelete(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HabitsGetAll(rw http.ResponseWriter, r *http.Request) {
-	// should I send a filter here?
-
-	// I could have a day object
-	// Create with URL param  ?day=2022-01-02
-
-	// Get all
-	// Get all by day
-	// Get all from day to day
-	// day := r.Context().Value("day").(*entity.Day)
-	// entity.HabitFilter{
-	// 	ID:         nil,
-	// 	DayID:      []int{day.ID},
-	// 	CategoryID: nil,
-	// }
-
-	hs, err := h.App.HabitsGetAll(time.Now(), time.Now())
-	if err != nil {
-		rest.ErrNotFound(rw)
-		return
-	}
-
-	habitsTransport := []*types.HabitTransport{}
-	for _, habit := range hs {
-		habitsTransport = append(habitsTransport, types.FromHabitToTransport(habit))
-	}
-
-	rest.JSONStatusOk(rw, envelope{"habits": habitsTransport})
-	return
+	hs, err := h.App.HabitsGetAll()
+	JsonCheckError(rw, r, http.StatusOK, envelope{"habits": types.FromHabitToTransportSlice(hs)}, err)
 }
