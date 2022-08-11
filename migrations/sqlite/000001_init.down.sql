@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS "days";
+
+DROP TABLE IF EXISTS habits;
+DROP TABLE IF EXISTS habit_logs;
+DROP TABLE IF EXISTS habit_categories;
+
+DROP TABLE IF EXISTS oauths;
+
+DROP TABLE IF EXISTS sleep_logs;
+
+DROP TABLE IF EXISTS fitness_logs;
