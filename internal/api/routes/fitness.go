@@ -9,19 +9,19 @@ import (
 
 func (h *Handler) FitnessGetAll(rw http.ResponseWriter, r *http.Request) {
 	fls, err := h.App.GetFitnessLogs(entity.FitnessLogFilter{})
-	JsonCheckError(rw, r, http.StatusOK, envelope{"fitness_logs": types.FromFitnessLogToTransportSlice(fls)}, err)
+	JsonCheckError(rw, http.StatusOK, envelope{"fitness_logs": types.FromFitnessLogToTransportSlice(fls)}, err)
 }
 
 func (h *Handler) FitnessGetForDate(rw http.ResponseWriter, r *http.Request) {
 	day := r.Context().Value("day").(*entity.Day)
 	fls, err := h.App.GetFitnessLogs(entity.FitnessLogFilter{DayID: []int{day.ID}})
-	JsonCheckError(rw, r, http.StatusOK, envelope{"fitness_logs": types.FromFitnessLogToTransportSlice(fls)}, err)
+	JsonCheckError(rw, http.StatusOK, envelope{"fitness_logs": types.FromFitnessLogToTransportSlice(fls)}, err)
 }
 
 func (h *Handler) FitnessDelete(rw http.ResponseWriter, r *http.Request) {
 	fitnessLog := r.Context().Value("fitnessLog").(*entity.FitnessLog)
 	err := h.App.DeleteFitnessLog(fitnessLog)
-	JsonCheckError(rw, r, http.StatusOK, envelopeSuccess(), err)
+	JsonCheckError(rw, http.StatusOK, envelopeSuccess(), err)
 }
 
 func (h *Handler) FitnessGet(rw http.ResponseWriter, r *http.Request) {
@@ -44,7 +44,7 @@ func (h *Handler) FitnessCreate(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	fitnessLog, err = h.App.CreateFitnessLogFromApi(fitnessLog)
-	JsonCheckError(rw, r, http.StatusCreated, envelope{"fitness_logs": types.FromFitnessLogToTransport(fitnessLog)}, err)
+	JsonCheckError(rw, http.StatusCreated, envelope{"fitness_logs": types.FromFitnessLogToTransport(fitnessLog)}, err)
 }
 
 func (h *Handler) FitnessUpdate(rw http.ResponseWriter, r *http.Request) {
@@ -63,7 +63,7 @@ func (h *Handler) FitnessUpdate(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	fitnessLog, err = h.App.UpdateFitnessLog(fitnessLog, data)
-	JsonCheckError(rw, r, http.StatusOK, envelope{"fitness_logs": types.FromFitnessLogToTransport(fitnessLog)}, err)
+	JsonCheckError(rw, http.StatusOK, envelope{"fitness_logs": types.FromFitnessLogToTransport(fitnessLog)}, err)
 }
 
 func (h *Handler) ErrInternalServerError(rw http.ResponseWriter, err error) {

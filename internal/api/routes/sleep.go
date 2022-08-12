@@ -10,7 +10,7 @@ import (
 func (h *Handler) SleepGetForDate(rw http.ResponseWriter, r *http.Request) {
 	day := r.Context().Value("day").(*entity.Day)
 	sls, err := h.App.GetSleepLogs(entity.SleepLogFilter{DayID: []int{day.ID}})
-	JsonCheckError(rw, r, http.StatusOK, envelope{"sleep_logs": types.FromSleepLogToTransportSlice(sls)}, err)
+	JsonCheckError(rw, http.StatusOK, envelope{"sleep_logs": types.FromSleepLogToTransportSlice(sls)}, err)
 }
 
 func (h *Handler) SleepGet(rw http.ResponseWriter, r *http.Request) {
@@ -20,13 +20,13 @@ func (h *Handler) SleepGet(rw http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) SleepGetAll(rw http.ResponseWriter, r *http.Request) {
 	sls, err := h.App.GetSleepLogs(entity.SleepLogFilter{})
-	JsonCheckError(rw, r, http.StatusOK, envelope{"sleep_logs": types.FromSleepLogToTransportSlice(sls)}, err)
+	JsonCheckError(rw, http.StatusOK, envelope{"sleep_logs": types.FromSleepLogToTransportSlice(sls)}, err)
 }
 
 func (h *Handler) SleepDelete(rw http.ResponseWriter, r *http.Request) {
 	sleepLog := r.Context().Value("sleepLog").(*entity.SleepLog)
 	err := h.App.DeleteSleepByID(sleepLog.ID)
-	JsonCheckError(rw, r, http.StatusOK, envelopeSuccess(), err)
+	JsonCheckError(rw, http.StatusOK, envelopeSuccess(), err)
 }
 
 func (h *Handler) SleepUpdate(rw http.ResponseWriter, r *http.Request) {
@@ -45,7 +45,7 @@ func (h *Handler) SleepUpdate(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	sleepLog, err = h.App.UpdateSleep(sleepLog, data)
-	JsonCheckError(rw, r, http.StatusOK, envelope{"sleep_logs": types.FromSleepLogToTransport(sleepLog)}, err)
+	JsonCheckError(rw, http.StatusOK, envelope{"sleep_logs": types.FromSleepLogToTransport(sleepLog)}, err)
 }
 
 func (h *Handler) SleepCreate(rw http.ResponseWriter, r *http.Request) {
@@ -64,5 +64,5 @@ func (h *Handler) SleepCreate(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	sleepLog, err = h.App.CreateSleepFromApi(sleepLog)
-	JsonCheckError(rw, r, http.StatusCreated, envelope{"sleep_logs": types.FromSleepLogToTransport(sleepLog)}, err)
+	JsonCheckError(rw, http.StatusCreated, envelope{"sleep_logs": types.FromSleepLogToTransport(sleepLog)}, err)
 }

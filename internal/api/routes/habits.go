@@ -11,7 +11,7 @@ func (h *Handler) HabitsGetCategories(rw http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		categories, err := h.App.HabitsGetCategories()
-		JsonCheckError(rw, r, http.StatusOK, &envelope{"categories": categories}, err)
+		JsonCheckError(rw, http.StatusOK, &envelope{"categories": categories}, err)
 	}
 }
 
@@ -23,7 +23,7 @@ func (h *Handler) HabitGet(rw http.ResponseWriter, r *http.Request) {
 func (h *Handler) HabitsGetByDay(rw http.ResponseWriter, r *http.Request) {
 	day := r.Context().Value("day").(*entity.Day)
 	habits, err := h.App.HabitsGetByDay(day)
-	JsonCheckError(rw, r, http.StatusOK, &envelope{"habits": types.FromHabitToTransportSlice(habits)}, err)
+	JsonCheckError(rw, http.StatusOK, &envelope{"habits": types.FromHabitToTransportSlice(habits)}, err)
 }
 
 func (h *Handler) HabitCreate(rw http.ResponseWriter, r *http.Request) {
@@ -37,7 +37,7 @@ func (h *Handler) HabitCreate(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	newHabit, err := h.App.HabitCreate(day, data.ToHabit())
-	JsonCheckError(rw, r, http.StatusCreated, envelope{"habit": types.FromHabitToTransport(newHabit)}, err)
+	JsonCheckError(rw, http.StatusCreated, envelope{"habit": types.FromHabitToTransport(newHabit)}, err)
 }
 
 func (h *Handler) HabitUpdate(rw http.ResponseWriter, r *http.Request) {
@@ -51,16 +51,16 @@ func (h *Handler) HabitUpdate(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	habitUpdated, err := h.App.HabitFullUpdate(habit, data.ToHabit())
-	JsonCheckError(rw, r, http.StatusOK, envelope{"habit": types.FromHabitToTransport(habitUpdated)}, err)
+	JsonCheckError(rw, http.StatusOK, envelope{"habit": types.FromHabitToTransport(habitUpdated)}, err)
 }
 
 func (h *Handler) HabitDelete(rw http.ResponseWriter, r *http.Request) {
 	habit := r.Context().Value("habit").(*entity.Habit)
 	err := h.App.HabitDelete(habit)
-	JsonCheckError(rw, r, http.StatusOK, nil, err)
+	JsonCheckError(rw, http.StatusOK, nil, err)
 }
 
 func (h *Handler) HabitsGetAll(rw http.ResponseWriter, r *http.Request) {
 	hs, err := h.App.HabitsGetAll()
-	JsonCheckError(rw, r, http.StatusOK, envelope{"habits": types.FromHabitToTransportSlice(hs)}, err)
+	JsonCheckError(rw, http.StatusOK, envelope{"habits": types.FromHabitToTransportSlice(hs)}, err)
 }

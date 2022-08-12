@@ -37,5 +37,5 @@ func (h *Handler) DayUpdate(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	day, err = h.App.DayUpdate(day, data.ToDay())
-	JsonCheckError(rw, r, http.StatusOK, envelope{"day": types.DayToTransport(day)}, err)
+	JsonCheckError(rw, http.StatusOK, envelope{"day": types.DayToTransport(day)}, err)
 }

@@ -23,7 +23,7 @@ func (h *Handler) SyncByDate(rw http.ResponseWriter, r *http.Request) {
 		case "work":
 			err = h.App.SyncDeepWorkLog(startDate)
 		}
-		JsonCheckError(rw, r, http.StatusOK, envelope{"success": "ok"}, err)
+		JsonCheckError(rw, http.StatusOK, envelope{"success": "ok"}, err)
 		return
 	}
 
@@ -52,7 +52,7 @@ func (h *Handler) SyncByDateRange(rw http.ResponseWriter, r *http.Request) {
 			err = h.App.SyncDeepWorkByDateRange(startDate, endDate)
 
 		}
-		JsonCheckError(rw, r, http.StatusOK, envelope{"success": "ok"}, err)
+		JsonCheckError(rw, http.StatusOK, envelope{"success": "ok"}, err)
 		return
 	}
 
@@ -70,7 +70,7 @@ func (h *Handler) Sync(rw http.ResponseWriter, r *http.Request) {
 		case "work":
 			err = h.App.SyncDeepWork()
 		}
-		JsonCheckError(rw, r, http.StatusOK, envelope{"success": "ok"}, err)
+		JsonCheckError(rw, http.StatusOK, envelope{"success": "ok"}, err)
 		return
 	}
 

@@ -31,5 +31,5 @@ func (h *Handler) Oauth2Success(rw http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) AddToken(rw http.ResponseWriter, r *http.Request) {
 	msg, err := h.App.Oauth2AddAPIToken(r.Form.Get("token"), chi.URLParam(r, "provider"))
-	JsonCheckError(rw, r, http.StatusCreated, envelope{"valid token for": msg}, err)
+	JsonCheckError(rw, http.StatusCreated, envelope{"valid token for": msg}, err)
 }
