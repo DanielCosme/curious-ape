@@ -39,7 +39,7 @@ func (qb *sqlQueryBuilder) generate() (string, []interface{}) {
 			if idx > 0 {
 				q = fmt.Sprintf("%s AND", q)
 			}
-			q = fmt.Sprintf("%s %s IN (%s)", q, data.columnName, getArgs(data.values))
+			q = fmt.Sprintf("%s %s IN (%s)", q, data.columnName, getArgs(len(data.values)))
 			args = append(args, data.values...)
 		}
 	}
@@ -47,9 +47,9 @@ func (qb *sqlQueryBuilder) generate() (string, []interface{}) {
 	return q, args
 }
 
-func getArgs(args []interface{}) string {
+func getArgs(length int) string {
 	ss := []string{}
-	for i := 0; i < len(args); i++ {
+	for i := 0; i < length; i++ {
 		ss = append(ss, "?")
 	}
 	return strings.Join(ss, ",")

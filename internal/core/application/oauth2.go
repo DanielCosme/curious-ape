@@ -170,10 +170,6 @@ func (a *App) Oauth2AddAPIToken(token, provider string) (string, error) {
 		if _, err := a.db.Oauths.Update(o); err != nil {
 			return "", err
 		}
-		api.Projects.GetAll(o.ToogglWorkSpaceID)
-		// TODO-get save project IDs here???
-		// Or use an endpoint for that??
-		// I think from api call to be able to control
 
 		return me.Fullname, nil
 	default:
