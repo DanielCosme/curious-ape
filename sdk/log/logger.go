@@ -188,6 +188,7 @@ func (l *Logger) printP(level Level, message string, properties map[string]strin
 	for k := range properties {
 		keys = append(keys, k)
 	}
+	// TODO only sort when writing to a tty
 	if !sort.StringsAreSorted(keys) {
 		sort.Strings(keys)
 	}

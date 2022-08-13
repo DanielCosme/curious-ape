@@ -28,3 +28,14 @@ func MiddlewareParseForm(next http.Handler) http.Handler {
 		next.ServeHTTP(rw, r)
 	})
 }
+
+func AllowCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		// TODO implement trusted origins
+		// rw.Header().Add("Vary", "Origin")
+		// origin := r.Header.Get("Origin")
+
+		rw.Header().Set("Access-Control-Allow-Origin", "*")
+		next.ServeHTTP(rw, r)
+	})
+}

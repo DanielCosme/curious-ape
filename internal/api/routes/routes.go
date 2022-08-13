@@ -23,6 +23,7 @@ func ChiRoutes(a *application.App) http.Handler {
 	r.Use(middleware.Logger(a))
 	r.Use(middleware.RecoverPanic(a))
 	r.Use(rest.MiddlewareParseForm)
+	// r.Use(rest.AllowCORS) TODO allow when trusted origins is implemented
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/ping", h.Ping)

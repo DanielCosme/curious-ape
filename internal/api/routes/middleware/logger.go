@@ -36,8 +36,12 @@ func Logger(a *application.App) rest.HTTPMiddleware {
 				// from 200 to 400
 				a.Log.InfoP("", properties)
 			} else if status < 500 {
+				msg := "no details available"
 				// from 400 to 500
-				a.Log.WarningP(rwPlus.Err.Error(), properties)
+				if rwPlus.Err != nil {
+					msg = rwPlus.Err.Error()
+				}
+				a.Log.WarningP(msg, properties)
 			} else {
 				// 500 and above
 				a.Log.ErrorP(rwPlus.Err, properties)
