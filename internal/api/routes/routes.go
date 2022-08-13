@@ -82,7 +82,7 @@ func ChiRoutes(a *application.App) http.Handler {
 				r.Delete("/", h.FitnessDelete)
 			})
 		})
-		// Sync
+		// sync
 		r.Route("/sync/{resourceToSync}", func(r chi.Router) {
 			r.Post("/", h.Sync)
 			r.Post("/date/{start}", h.SyncByDate)

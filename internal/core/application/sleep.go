@@ -67,7 +67,7 @@ func (a *App) SyncSleep() error {
 	if err != nil {
 		return err
 	}
-	fitbitApi := a.Sync.FitbitClient(client)
+	fitbitApi := a.sync.FitbitClient(client)
 
 	for _, d := range days {
 		// TODO this will not work properly for more than one provider at a time.
@@ -99,7 +99,7 @@ func (a *App) SyncSleepByDateRange(start, end time.Time) error {
 	}
 
 	// Get sleep records from fitbit
-	fitbitPayload, err := a.Sync.FitbitClient(client).Sleep.GetByDateRange(start, end)
+	fitbitPayload, err := a.sync.FitbitClient(client).Sleep.GetByDateRange(start, end)
 	if err != nil {
 		return err
 	}
@@ -129,7 +129,7 @@ func (a *App) SyncFitbitSleepLog(date time.Time) error {
 	}
 
 	// Get sleep records from fitbit
-	fitbitPayload, err := a.Sync.FitbitClient(client).Sleep.GetByDate(date)
+	fitbitPayload, err := a.sync.FitbitClient(client).Sleep.GetByDate(date)
 	if err != nil {
 		return err
 	}

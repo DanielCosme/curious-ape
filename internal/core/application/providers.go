@@ -12,7 +12,7 @@ func (a *App) TogglGetProjects() ([]entity.Entity, error) {
 		return es, err
 	}
 
-	togglAPI := a.Sync.TogglClient(o.AccessToken)
+	togglAPI := a.sync.TogglClient(o.AccessToken)
 	ps, err := togglAPI.Projects.GetAll(o.ToogglWorkSpaceID)
 	if err != nil {
 		return es, err
@@ -34,7 +34,7 @@ func (a *App) TogglAssignProjectsToGoal(ids string) error {
 		return err
 	}
 
-	api := a.Sync.TogglClient(o.AccessToken)
+	api := a.sync.TogglClient(o.AccessToken)
 
 	projects := strings.Split(ids, ",")
 	for _, id := range projects {

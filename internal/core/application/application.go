@@ -14,7 +14,7 @@ type App struct {
 	db   *database.Repository
 	cfg  *Environment
 	Log  *log.Logger
-	Sync *integrations.Sync
+	sync *integrations.Sync
 }
 
 // Endpoints and application methods to sync manually
@@ -44,7 +44,7 @@ func New(opts *AppOptions) *App {
 		},
 		cfg:  opts.Config,
 		Log:  opts.Logger,
-		Sync: integrations.NewSync(opts.Logger),
+		sync: integrations.NewSync(opts.Logger),
 	}
 
 	a.Log.InfoP("Application running", log.Prop{"environment": a.cfg.Env})

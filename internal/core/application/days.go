@@ -96,7 +96,7 @@ func (a *App) TogglAPI() (*toggl.API, *entity.Oauth2, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	return a.Sync.TogglClient(o.AccessToken), o, nil
+	return a.sync.TogglClient(o.AccessToken), o, nil
 }
 
 func (a *App) SyncDeepWork() error {

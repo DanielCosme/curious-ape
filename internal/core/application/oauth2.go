@@ -150,7 +150,7 @@ func (a *App) Oauth2AddAPIToken(token, provider string) (string, error) {
 				return "", err
 			}
 		}
-		api := a.Sync.TogglClient(o.AccessToken)
+		api := a.sync.TogglClient(o.AccessToken)
 		me, err := api.Me.GetProfile()
 		if err != nil {
 			return "", err

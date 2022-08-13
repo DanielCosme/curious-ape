@@ -19,19 +19,34 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+type config struct {
+	Database struct {
+		DNS string `json:"dns"`
+	} `json:"database"`
+	Server struct {
+		Port     int `json:"port"`
+		FilePath string
+	} `json:"server"`
+	Integrations struct {
+		Fitbit *entity.Oauth2Config `json:"fitbit"`
+		Google *entity.Oauth2Config `json:"google"`
+	} `json:"integrations"`
+	Environment string `json:"environment"`
+}
+
 func main() {
 	// flags & configuration
 	cfg := new(config)
 	flag.StringVar(&cfg.Environment, "env", "", "Sets the running environment for the application")
 	flag.Parse()
+	setFilePath(cfg)
 	readConfiguration(cfg)
-
 	// logger initialization
 	logger := logape.New(os.Stdout, logape.LevelTrace, time.RFC822)
 	logape.DefaultLogger = logger
 
 	// SQL datasource initialization
-	db := sqlx.MustConnect(sqlite.DriverName, cfg.Database.DNS)
+	db := sqlx.MustConnect(sqlite.DriverName, cfg.Server.FilePath+"/"+cfg.Database.DNS)
 
 	api := &api.Transport{
 		App: application.New(&application.AppOptions{
@@ -44,11 +59,11 @@ func main() {
 			Logger: logger,
 		}),
 		Server: &http.Server{
-                Addr:         fmt.Sprintf(":%d", cfg.Server.Port),
-                IdleTimeout:  time.Minute,
-                ReadTimeout:  10 * time.Second,
-                WriteTimeout: 30 * time.Second,
-                ErrorLog:     log.New(logger, "", 0),
+			Addr:         fmt.Sprintf(":%d", cfg.Server.Port),
+			IdleTimeout:  time.Minute,
+			ReadTimeout:  10 * time.Second,
+			WriteTimeout: 30 * time.Second,
+			ErrorLog:     log.New(logger, "", 0),
 		},
 	}
 
@@ -57,40 +72,37 @@ func main() {
 	}
 }
 
-type config struct {
-	Database struct {
-		DNS string `json:"dns"`
-	} `json:"database"`
-	Server struct {
-		Port int `json:"port"`
-	} `json:"server"`
-	Integrations struct {
-		Fitbit *entity.Oauth2Config `json:"fitbit"`
-		Google *entity.Oauth2Config `json:"google"`
-	} `json:"integrations"`
-	Environment string `json:"environment"`
+func setFilePath(cfg *config) {
+	path := fmt.Sprintf("%s/.ape/server", os.Getenv("HOME"))
+	if err := os.MkdirAll(path, os.ModePerm); err != nil { // $HOME/.ape/server
+		logape.DefaultLogger.Fatal(err)
+	}
+
+	cfg.Server.FilePath = path
 }
 
 func readConfiguration(cfg *config) *config {
 	var err error
 	rawFile := []byte{}
+	filePath := cfg.Server.FilePath + "/"
 
 	switch cfg.Environment {
 	case "dev":
-		rawFile, err = os.ReadFile(".dev.env.json")
+		filePath = filePath + "dev.env.json"
 	case "prod":
-		rawFile, err = os.ReadFile(".env.json")
+		filePath = filePath + "prod.env.json"
 	default:
-		err = errors.NewFatal("no valid environment provided")
+		logape.DefaultLogger.Fatal(errors.NewFatal("no valid environment provided"))
 	}
-	panicIfErr(err)
+	rawFile, err = os.ReadFile(filePath)
+	exitIfErr(err)
 
 	err = json.Unmarshal(rawFile, cfg)
-	panicIfErr(err)
+	exitIfErr(err)
 	return cfg
 }
 
-func panicIfErr(err error) {
+func exitIfErr(err error) {
 	if err != nil {
 		logape.DefaultLogger.Fatal(err)
 	}
