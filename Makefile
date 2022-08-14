@@ -56,8 +56,8 @@ linker_flags = '-s -X main.buildTime=${current_time} -X main.version=${git_descr
 .PHONY: build/api/linux
 build/api/linux:
 	@echo 'Building cmd/api...'
-	@echo $current_time
-	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=~/ape ./cmd/httpd
+	@echo ${current_time}
+	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/ape ./cmd/httpd
 
 .PHONY: build/api/mac
 build/api/mac:
