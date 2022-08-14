@@ -125,8 +125,8 @@ func toFitnessLogFromGoogle(days []*entity.Day, gfls []google.Session) ([]*entit
 		if gfl, ok := mapGoogleFitnessLogByDate[day.FormatDate()]; ok {
 			millis, _ := strconv.Atoi(gfl.StartTimeMillis)
 			startTime := time.UnixMilli(int64(millis))
-			millis, _ = strconv.Atoi(gfl.StartTimeMillis)
-			endTime := time.UnixMilli(int64(millis))
+			millisEnd, _ := strconv.Atoi(gfl.EndTimeMillis)
+			endTime := time.UnixMilli(int64(millisEnd))
 
 			fitnessLog := &entity.FitnessLog{
 				DayID:     day.ID,

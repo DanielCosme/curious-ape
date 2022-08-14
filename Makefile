@@ -1,6 +1,9 @@
 # include .envrc
 DB_PATH=${HOME}/.ape/server/ape.db
 
+# Go migrate for slite3 support
+# go install -tags 'sqlite3' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+
 # ==================================================================================== #
 # HELPERS
 # ==================================================================================== #
