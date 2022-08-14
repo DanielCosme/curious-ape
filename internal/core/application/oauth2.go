@@ -175,6 +175,4 @@ func (a *App) Oauth2AddAPIToken(token, provider string) (string, error) {
 	default:
 		return "", errors.New("invalid provider")
 	}
-
-	return "", nil
 }
