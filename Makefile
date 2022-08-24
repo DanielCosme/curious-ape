@@ -115,6 +115,12 @@ production/deploy/api: build/api/linux
 		&& sudo systemctl restart ape \
 	'
 
+## to be run on the remote machine
+.PHONY: production/reload/api
+production/reload/api: build/api/linux
+	mv ./bin/ape ~/
+	sudo systemctl restart ape
+
 ## production/configure/ape.service: configure the production systemd ape.service file
 .PHONY: production/configure/ape.service
 production/configure/ape.service:

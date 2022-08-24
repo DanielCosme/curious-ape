@@ -9,7 +9,7 @@ type FitnessLogTransport struct {
 	Title     string                `json:"title"`
 	Type      entity.FitnessLogType `json:"type"`
 	Origin    entity.DataSource     `json:"origin"`
-	Date      string                `json:"date"`
+	Date      string                `json:"date,omitempty"`
 	StartTime string                `json:"start_time"`
 	EndTime   string                `json:"end_time"`
 	Note      string                `json:"note"`
