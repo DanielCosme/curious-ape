@@ -5,6 +5,7 @@ import (
 )
 
 type FitnessLogTransport struct {
+	ID        int                   `json:"id"`
 	Title     string                `json:"title"`
 	Type      entity.FitnessLogType `json:"type"`
 	Origin    entity.DataSource     `json:"origin"`
@@ -18,6 +19,7 @@ func FromFitnessLogToTransport(fl *entity.FitnessLog) *FitnessLogTransport {
 	var flt *FitnessLogTransport
 	if fl != nil {
 		flt = &FitnessLogTransport{
+			ID:        fl.ID,
 			Type:      fl.Type,
 			Title:     fl.Title,
 			Origin:    fl.Origin,

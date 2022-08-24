@@ -240,24 +240,19 @@ func (a *App) HabitUpsertFromFitnessLog(fl *entity.FitnessLog) error {
 		return err
 	}
 
-	var success bool
-	if fl.Type == entity.StrengthTraining {
-		success = true // TODO later this will be dynamic based on the type of activity and the value of some fields.
-
-		habit := &entity.Habit{
-			DayID:      fl.DayID,
-			CategoryID: habitCategory.ID,
-			Logs: []*entity.HabitLog{{
-				Success:     success,
-				IsAutomated: fl.Origin != entity.Manual,
-				Origin:      fl.Origin,
-				Note:        fmt.Sprintf("Fitness log of type %s", fl.Type),
-			}},
-		}
-		habit, err = a.HabitCreate(fl.Day, habit)
-		if err != nil {
-			return err
-		}
+	habit := &entity.Habit{
+		DayID:      fl.DayID,
+		CategoryID: habitCategory.ID,
+		Logs: []*entity.HabitLog{{
+			Success:     true,
+			IsAutomated: fl.Origin != entity.Manual,
+			Origin:      fl.Origin,
+			Note:        fmt.Sprintf("Fitness log of type %s", fl.Type),
+		}},
+	}
+	habit, err = a.HabitCreate(fl.Day, habit)
+	if err != nil {
+		return err
 	}
 
 	return nil
