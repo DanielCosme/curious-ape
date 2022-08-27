@@ -9,7 +9,7 @@ import (
 
 func (h *Handler) SleepGetForDate(rw http.ResponseWriter, r *http.Request) {
 	day := r.Context().Value("day").(*entity.Day)
-	sls, err := h.App.GetSleepLogs(entity.SleepLogFilter{DayID: []int{day.ID}})
+	sls, err := h.App.SleepLogsFind(entity.SleepLogFilter{DayID: []int{day.ID}})
 	JsonCheckError(rw, http.StatusOK, envelope{"sleep_logs": types.FromSleepLogToTransportSlice(sls)}, err)
 }
 
@@ -19,13 +19,13 @@ func (h *Handler) SleepGet(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) SleepGetAll(rw http.ResponseWriter, r *http.Request) {
-	sls, err := h.App.GetSleepLogs(entity.SleepLogFilter{})
+	sls, err := h.App.SleepLogsFind(entity.SleepLogFilter{})
 	JsonCheckError(rw, http.StatusOK, envelope{"sleep_logs": types.FromSleepLogToTransportSlice(sls)}, err)
 }
 
 func (h *Handler) SleepDelete(rw http.ResponseWriter, r *http.Request) {
 	sleepLog := r.Context().Value("sleepLog").(*entity.SleepLog)
-	err := h.App.DeleteSleepByID(sleepLog.ID)
+	err := h.App.SleepDeleteByID(sleepLog.ID)
 	JsonCheckError(rw, http.StatusOK, envelopeSuccess(), err)
 }
 
@@ -44,7 +44,7 @@ func (h *Handler) SleepUpdate(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sleepLog, err = h.App.UpdateSleep(sleepLog, data)
+	sleepLog, err = h.App.SleepUpdate(sleepLog, data)
 	JsonCheckError(rw, http.StatusOK, envelope{"sleep_logs": types.FromSleepLogToTransport(sleepLog)}, err)
 }
 
@@ -63,6 +63,6 @@ func (h *Handler) SleepCreate(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sleepLog, err = h.App.CreateSleepFromApi(sleepLog)
+	sleepLog, err = h.App.SleepCreateFromApi(sleepLog)
 	JsonCheckError(rw, http.StatusCreated, envelope{"sleep_logs": types.FromSleepLogToTransport(sleepLog)}, err)
 }

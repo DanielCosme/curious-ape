@@ -13,15 +13,15 @@ import (
 	"time"
 )
 
-func (a *App) GetFitnessLogs(filter entity.FitnessLogFilter) ([]*entity.FitnessLog, error) {
+func (a *App) FitnessFindLogs(filter entity.FitnessLogFilter) ([]*entity.FitnessLog, error) {
 	return a.db.FitnessLogs.Find(filter, database.FitnessLogsJoinDay(a.db))
 }
 
-func (a *App) GetFitnessLog(filter entity.FitnessLogFilter) (*entity.FitnessLog, error) {
+func (a *App) FitnessGetLog(filter entity.FitnessLogFilter) (*entity.FitnessLog, error) {
 	return a.db.FitnessLogs.Get(filter, database.FitnessLogsJoinDay(a.db))
 }
 
-func (a *App) DeleteFitnessLog(fl *entity.FitnessLog) error {
+func (a *App) FitnessDeleteLog(fl *entity.FitnessLog) error {
 	return a.db.FitnessLogs.Delete(fl.ID)
 }
 
@@ -162,7 +162,7 @@ func toFitnessLogFromGoogle(days []*entity.Day, gfls []google.Session) ([]*entit
 }
 
 func (a *App) createFailedHabitForDays(days []*entity.Day, category entity.HabitType, source entity.DataSource) {
-	habitCategory, err := a.GetHabitCategoryByType(category)
+	habitCategory, err := a.HabitCategoryGetByType(category)
 	if err != nil {
 		a.Log.Error(err)
 	}
@@ -185,7 +185,7 @@ func (a *App) createFailedHabitForDays(days []*entity.Day, category entity.Habit
 	}
 }
 
-func (a *App) CreateFitnessLogFromApi(fitnessLog *entity.FitnessLog) (*entity.FitnessLog, error) {
+func (a *App) FitnessCreateLogFromApi(fitnessLog *entity.FitnessLog) (*entity.FitnessLog, error) {
 	if fitnessLog.Raw == "" {
 		// TODO
 	}
@@ -235,7 +235,7 @@ func checkManualOrigin(o entity.DataSource) error {
 }
 
 func (a *App) HabitUpsertFromFitnessLog(fl *entity.FitnessLog) error {
-	habitCategory, err := a.GetHabitCategoryByType(entity.HabitTypeFitness)
+	habitCategory, err := a.HabitCategoryGetByType(entity.HabitTypeFitness)
 	if err != nil {
 		return err
 	}
@@ -258,6 +258,6 @@ func (a *App) HabitUpsertFromFitnessLog(fl *entity.FitnessLog) error {
 	return nil
 }
 
-func (a *App) GetHabitCategoryByType(t entity.HabitType) (*entity.HabitCategory, error) {
+func (a *App) HabitCategoryGetByType(t entity.HabitType) (*entity.HabitCategory, error) {
 	return a.db.Habits.GetHabitCategory(entity.HabitCategoryFilter{Type: []entity.HabitType{t}})
 }

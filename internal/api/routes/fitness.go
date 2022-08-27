@@ -8,19 +8,19 @@ import (
 )
 
 func (h *Handler) FitnessGetAll(rw http.ResponseWriter, r *http.Request) {
-	fls, err := h.App.GetFitnessLogs(entity.FitnessLogFilter{})
+	fls, err := h.App.FitnessFindLogs(entity.FitnessLogFilter{})
 	JsonCheckError(rw, http.StatusOK, envelope{"fitness_logs": types.FromFitnessLogToTransportSlice(fls)}, err)
 }
 
 func (h *Handler) FitnessGetForDate(rw http.ResponseWriter, r *http.Request) {
 	day := r.Context().Value("day").(*entity.Day)
-	fls, err := h.App.GetFitnessLogs(entity.FitnessLogFilter{DayID: []int{day.ID}})
+	fls, err := h.App.FitnessFindLogs(entity.FitnessLogFilter{DayID: []int{day.ID}})
 	JsonCheckError(rw, http.StatusOK, envelope{"fitness_logs": types.FromFitnessLogToTransportSlice(fls)}, err)
 }
 
 func (h *Handler) FitnessDelete(rw http.ResponseWriter, r *http.Request) {
 	fitnessLog := r.Context().Value("fitnessLog").(*entity.FitnessLog)
-	err := h.App.DeleteFitnessLog(fitnessLog)
+	err := h.App.FitnessDeleteLog(fitnessLog)
 	JsonCheckError(rw, http.StatusOK, envelopeSuccess(), err)
 }
 
@@ -43,7 +43,7 @@ func (h *Handler) FitnessCreate(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fitnessLog, err = h.App.CreateFitnessLogFromApi(fitnessLog)
+	fitnessLog, err = h.App.FitnessCreateLogFromApi(fitnessLog)
 	JsonCheckError(rw, http.StatusCreated, envelope{"fitness_logs": types.FromFitnessLogToTransport(fitnessLog)}, err)
 }
 

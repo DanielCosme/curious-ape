@@ -12,11 +12,11 @@ import (
 	"time"
 )
 
-func (a *App) DeleteSleepByID(id int) error {
+func (a *App) SleepDeleteByID(id int) error {
 	return a.db.SleepLogs.Delete(id)
 }
 
-func (a *App) UpdateSleep(sleepLog, data *entity.SleepLog) (*entity.SleepLog, error) {
+func (a *App) SleepUpdate(sleepLog, data *entity.SleepLog) (*entity.SleepLog, error) {
 	if err := checkManualOrigin(sleepLog.Origin); err != nil {
 		return nil, err
 	}
@@ -30,7 +30,7 @@ func (a *App) UpdateSleep(sleepLog, data *entity.SleepLog) (*entity.SleepLog, er
 	return a.db.SleepLogs.Update(data, database.SleepLogsJoinDay(a.db))
 }
 
-func (a *App) CreateSleepFromApi(sleepLog *entity.SleepLog) (*entity.SleepLog, error) {
+func (a *App) SleepCreateFromApi(sleepLog *entity.SleepLog) (*entity.SleepLog, error) {
 	if sleepLog.Raw == "" {
 		start := sleepLog.StartTime.AddDate(0, 0, -1)
 		sleepLog.MinutesInBed = sleepLog.EndTime.Sub(start)
@@ -50,11 +50,11 @@ func (a *App) CreateSleepFromApi(sleepLog *entity.SleepLog) (*entity.SleepLog, e
 	return a.db.SleepLogs.Get(entity.SleepLogFilter{ID: []int{sleepLog.ID}}, database.SleepLogsJoinDay(a.db))
 }
 
-func (a *App) GetSleepLog(f entity.SleepLogFilter) (*entity.SleepLog, error) {
+func (a *App) SleepLogGet(f entity.SleepLogFilter) (*entity.SleepLog, error) {
 	return a.db.SleepLogs.Get(f, database.SleepLogsJoinDay(a.db))
 }
 
-func (a *App) GetSleepLogs(f entity.SleepLogFilter) ([]*entity.SleepLog, error) {
+func (a *App) SleepLogsFind(f entity.SleepLogFilter) ([]*entity.SleepLog, error) {
 	return a.db.SleepLogs.Find(f, database.SleepLogsJoinDay(a.db))
 }
 

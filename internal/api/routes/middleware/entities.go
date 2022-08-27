@@ -41,7 +41,7 @@ func SetSleepLog(a *application.App) rest.HTTPMiddleware {
 				return
 			}
 
-			sl, err := a.GetSleepLog(entity.SleepLogFilter{ID: []int{id}})
+			sl, err := a.SleepLogGet(entity.SleepLogFilter{ID: []int{id}})
 			if err != nil {
 				rest.ErrNotFound(rw)
 				return
@@ -62,7 +62,7 @@ func SetFitnessLog(a *application.App) rest.HTTPMiddleware {
 				return
 			}
 
-			fl, err := a.GetFitnessLog(entity.FitnessLogFilter{ID: []int{id}})
+			fl, err := a.FitnessGetLog(entity.FitnessLogFilter{ID: []int{id}})
 			if err != nil {
 				rest.ErrNotFound(rw)
 				return

@@ -70,7 +70,7 @@ func (a *App) HabitUpsertFromSleepLog(sleepLog entity.SleepLog) error {
 		return nil
 	}
 
-	habitCategory, err := a.GetHabitCategoryByType(entity.HabitTypeWakeUp)
+	habitCategory, err := a.HabitCategoryGetByType(entity.HabitTypeWakeUp)
 	if err != nil {
 		return err
 	}

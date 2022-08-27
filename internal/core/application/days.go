@@ -139,7 +139,7 @@ func togglSleep() {
 }
 
 func (a *App) HabitUpsertFromDeepWorkLog(d *entity.Day, origin entity.DataSource) error {
-	habitCategory, err := a.GetHabitCategoryByType(entity.HabitTypeDeepWork)
+	habitCategory, err := a.HabitCategoryGetByType(entity.HabitTypeDeepWork)
 	if err != nil {
 		return err
 	}
