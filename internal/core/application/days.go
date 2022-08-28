@@ -5,8 +5,8 @@ import (
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/integrations/toggl"
-	"github.com/danielcosme/curious-ape/sdk/errors"
-	"github.com/danielcosme/curious-ape/sdk/log"
+	"github.com/danielcosme/go-sdk/errors"
+	"github.com/danielcosme/go-sdk/log"
 	"time"
 )
 

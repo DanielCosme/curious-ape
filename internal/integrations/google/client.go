@@ -2,8 +2,8 @@ package google
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/danielcosme/curious-ape/sdk/errors"
 	"io"
 	"net/http"
 	"net/url"

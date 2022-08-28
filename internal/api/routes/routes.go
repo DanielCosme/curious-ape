@@ -6,7 +6,7 @@ import (
 
 	"github.com/danielcosme/curious-ape/internal/api/routes/middleware"
 	"github.com/danielcosme/curious-ape/internal/core/application"
-	"github.com/danielcosme/curious-ape/rest"
+	"github.com/danielcosme/rest"
 )
 
 func ChiRoutes(a *application.App) http.Handler {

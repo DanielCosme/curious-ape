@@ -3,7 +3,7 @@ package routes
 import (
 	"github.com/danielcosme/curious-ape/internal/api/types"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
-	"github.com/danielcosme/curious-ape/rest"
+	"github.com/danielcosme/rest"
 	"net/http"
 )
 

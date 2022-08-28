@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/danielcosme/curious-ape/sdk/log"
+	"github.com/danielcosme/go-sdk/log"
 	"net/http"
 
 	"github.com/danielcosme/curious-ape/internal/core/application"

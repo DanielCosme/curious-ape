@@ -6,9 +6,9 @@ import (
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/integrations/google"
-	"github.com/danielcosme/curious-ape/sdk/dates"
-	"github.com/danielcosme/curious-ape/sdk/errors"
-	"github.com/danielcosme/curious-ape/sdk/log"
+	"github.com/danielcosme/go-sdk/dates"
+	"github.com/danielcosme/go-sdk/errors"
+	"github.com/danielcosme/go-sdk/log"
 	"strconv"
 	"time"
 )

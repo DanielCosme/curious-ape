@@ -5,7 +5,7 @@ import (
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/integrations"
 	"github.com/danielcosme/curious-ape/internal/repository/sqlite"
-	"github.com/danielcosme/curious-ape/sdk/log"
+	"github.com/danielcosme/go-sdk/log"
 
 	"github.com/jmoiron/sqlx"
 )

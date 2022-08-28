@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"github.com/danielcosme/curious-ape/rest"
+	"github.com/danielcosme/rest"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 )

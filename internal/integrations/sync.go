@@ -4,7 +4,7 @@ import (
 	"github.com/danielcosme/curious-ape/internal/integrations/fitbit"
 	"github.com/danielcosme/curious-ape/internal/integrations/google"
 	"github.com/danielcosme/curious-ape/internal/integrations/toggl"
-	"github.com/danielcosme/curious-ape/sdk/log"
+	"github.com/danielcosme/go-sdk/log"
 	"net/http"
 )
 

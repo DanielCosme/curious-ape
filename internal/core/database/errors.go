@@ -1,6 +1,6 @@
 package database
 
-import "github.com/danielcosme/curious-ape/sdk/errors"
+import "github.com/danielcosme/go-sdk/errors"
 
 var (
 	ErrNotFound          = errors.New("not found")

@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
-	"github.com/danielcosme/curious-ape/sdk/errors"
+	"github.com/danielcosme/go-sdk/errors"
 	"github.com/jmoiron/sqlx"
 	"strings"
 )

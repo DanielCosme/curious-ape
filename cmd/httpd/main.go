@@ -13,8 +13,8 @@ import (
 	"github.com/danielcosme/curious-ape/internal/core/application"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/repository/sqlite"
-	"github.com/danielcosme/curious-ape/sdk/errors"
-	logape "github.com/danielcosme/curious-ape/sdk/log"
+	"github.com/danielcosme/go-sdk/errors"
+	logape "github.com/danielcosme/go-sdk/log"
 
 	"github.com/jmoiron/sqlx"
 )

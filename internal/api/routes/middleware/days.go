@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/danielcosme/curious-ape/internal/core/application"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
-	"github.com/danielcosme/curious-ape/rest"
+	"github.com/danielcosme/rest"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 )

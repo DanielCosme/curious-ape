@@ -3,8 +3,8 @@ package middleware
 import (
 	"fmt"
 	"github.com/danielcosme/curious-ape/internal/core/application"
-	"github.com/danielcosme/curious-ape/rest"
-	"github.com/danielcosme/curious-ape/sdk/errors"
+	"github.com/danielcosme/go-sdk/errors"
+	"github.com/danielcosme/rest"
 	"net/http"
 )
 
