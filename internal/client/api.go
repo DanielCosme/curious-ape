@@ -12,7 +12,7 @@ type Credentials struct {
 }
 
 type ApeAPI struct {
-	C *Service
+	Habits *HabitsService
 }
 
 func Ping() error {

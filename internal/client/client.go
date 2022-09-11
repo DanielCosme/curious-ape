@@ -11,6 +11,10 @@ import (
 	"strconv"
 )
 
+var DefaultClient = &ApeAPI{
+	Habits: &HabitsService{C: DefaultService},
+}
+
 var DefaultService = &Service{
 	Client: http.DefaultClient,
 }
@@ -18,24 +22,23 @@ var DefaultService = &Service{
 type Service struct {
 	*http.Client
 	BaseURL  string
-	username string
-	password string
+	Username string
+	Password string
 }
 
-func NewService() *Service {
-	return &Service{Client: &http.Client{}}
+func NewClient(s *Service) *ApeAPI {
+	return &ApeAPI{
+		Habits: &HabitsService{C: s},
+	}
 }
 
-func (s *Service) Auth(username, password string) *Service {
-	s.username = username
-	s.password = password
-	return s
+func (s *Service) Configure(opts ...ServiceOpt) {
+	for _, o := range opts {
+		o(s)
+	}
 }
 
-func (s *Service) Host(host string) *Service {
-	s.BaseURL = host
-	return s
-}
+type ServiceOpt func(service *Service)
 
 func (s *Service) Call(method, path string, body, bind any, params url.Values) error {
 	reqURL := s.BaseURL + path
@@ -57,8 +60,8 @@ func (s *Service) Call(method, path string, body, bind any, params url.Values) e
 	if err != nil {
 		return err
 	}
-	if s.username != "" && s.password != "" {
-		req.SetBasicAuth(s.username, s.password)
+	if s.Username != "" && s.Password != "" {
+		req.SetBasicAuth(s.Username, s.Password)
 	}
 
 	req.Header.Set("accept", "application/json")

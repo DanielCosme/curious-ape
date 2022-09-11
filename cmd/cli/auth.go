@@ -18,6 +18,7 @@ var authCmd = &cobra.Command{
 }
 
 func login(cmd *cobra.Command, args []string) {
+	host, _ := cmd.Flags().GetString("host")
 	username, _ := cmd.Flags().GetString("username")
 	password, _ := cmd.Flags().GetString("password")
 	configPath, _ := cmd.Flags().GetString("config-dir-path")
@@ -28,7 +29,10 @@ func login(cmd *cobra.Command, args []string) {
 		Password: password,
 	}
 
-	client.DefaultService.Auth(credentials.Username, credentials.Password)
+	client.DefaultService.Configure(
+		clientCredentials(credentials.Username, credentials.Password),
+		clientHost(host),
+	)
 	err := client.Ping()
 	CheckErr(err)
 	SaveCredentials(configFilePath, credentials)
@@ -56,16 +60,33 @@ func loadCredentials(cmd *cobra.Command, args []string) error {
 	host, _ := cmd.Flags().GetString("host")
 	if strings.Contains(host, "localhost") {
 		// localhost environment has no password protection
+		client.DefaultService.Configure(clientHost(host))
 		return nil
 	}
 
 	configPath, _ := cmd.Flags().GetString("config-dir-path")
 	configFilePath := fmt.Sprintf("%s/credentials.json", configPath)
 	credentials := ReadCredentials(configFilePath)
-	client.DefaultService.Auth(credentials.Username, credentials.Password)
-	client.DefaultService.Host(host)
+
+	client.DefaultService.Configure(
+		clientHost(host),
+		clientCredentials(credentials.Username, credentials.Password),
+	)
 
 	return nil
+}
+
+func clientHost(host string) client.ServiceOpt {
+	return func(s *client.Service) {
+		s.BaseURL = host
+	}
+}
+
+func clientCredentials(username, password string) client.ServiceOpt {
+	return func(s *client.Service) {
+		s.Username = username
+		s.Password = password
+	}
 }
 
 func CheckErr(err error) {
