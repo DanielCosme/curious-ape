@@ -113,8 +113,33 @@ func (a *App) HabitDelete(habit *entity.Habit) error {
 	return a.db.Habits.Delete(habit.ID)
 }
 
-func (a *App) HabitsGetAll() ([]*entity.Habit, error) {
-	return a.db.Habits.Find(entity.HabitFilter{}, database.HabitsPipeline(a.db)...)
+func (a *App) HabitsGetAll(params map[string]string) ([]*entity.Habit, error) {
+	f := entity.HabitFilter{}
+
+	var err error
+	end, start := time.Time{}, time.Time{}
+	if len(params) > 0 {
+		if d, ok := params["startDate"]; ok {
+			start, err = entity.ParseDate(d)
+			if err != nil {
+				return nil, err
+			}
+		}
+		if d, ok := params["endDate"]; ok {
+			end, err = entity.ParseDate(d)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		days, err := a.daysGetByDateRange(start, end)
+		if err != nil {
+			return nil, err
+		}
+		f.DayID = database.DayToIDs(days)
+	}
+
+	return a.db.Habits.Find(f, database.HabitsPipeline(a.db)...)
 }
 
 func (a *App) HabitGetByID(id int) (*entity.Habit, error) {

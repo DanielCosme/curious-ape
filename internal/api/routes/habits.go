@@ -61,6 +61,10 @@ func (h *Handler) HabitDelete(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HabitsGetAll(rw http.ResponseWriter, r *http.Request) {
-	hs, err := h.App.HabitsGetAll()
+	params := map[string]string{
+		"startDate": r.URL.Query().Get("startDate"),
+		"endDate":   r.URL.Query().Get("endDate"),
+	}
+	hs, err := h.App.HabitsGetAll(params)
 	JsonCheckError(rw, http.StatusOK, envelope{"habits": types.FromHabitToTransportSlice(hs)}, err)
 }
