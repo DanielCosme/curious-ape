@@ -60,13 +60,20 @@ linker_flags = '-s -X main.buildTime=${current_time} -X main.version=${git_descr
 build/api/linux:
 	@echo 'Building cmd/api...'
 	@echo ${current_time}
-	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/ape ./cmd/httpd
+	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/aped ./cmd/httpd
+
+## build/cli: build the cmd/cli application
+.PHONY: build/cli/linux
+build/cli/linux:
+	@echo 'Building cmd/cli...'
+	@echo ${current_time}
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/ape ./cmd/cli
 
 .PHONY: build/api/mac
 build/api/mac:
 	@echo 'Building cmd/api...'
 	@echo $current_time
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/ape ./cmd/httpd
+	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/aped ./cmd/httpd
 
 # ==================================================================================== #
 # QUALITY CONTROL

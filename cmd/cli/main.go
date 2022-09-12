@@ -38,7 +38,7 @@ func init() {
 	rootCmd.PersistentFlags().String("config-dir-path", "/home/daniel/.ape/cli", "Configuration files location")
 
 	// habits
-	habitListCmd.Flags().StringP("by", "b", "day", "by which unit to list: day/week/month etc")
+	habitListCmd.Flags().StringP("by", "b", "month", "by which unit to list: day/week/month etc")
 	habitListCmd.Flags().StringP("from", "f", "current", "from which period: current, previous, next")
 	// auth
 	authCmd.Flags().StringP("username", "u", "", "Username")
