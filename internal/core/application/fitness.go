@@ -39,7 +39,7 @@ func (a *App) SyncFitness() error {
 	for _, d := range days {
 		// TODO this will break for multiple providers and types of fitness logs (steps, cycling, etc...)
 		if len(d.FitnessLogs) == 0 {
-			payload, err := googleApi.Fitness.GetFitnessSessions(dates.ToBeginningOfDay(d.Date), dates.ToEndOfDay(d.Date))
+			payload, err := googleApi.Fitness.GetFitnessSessions(dates.BeginningOfDay(d.Date), dates.EndOfDay(d.Date))
 			if err != nil {
 				return err
 			}
@@ -69,7 +69,7 @@ func (a *App) SyncFitnessByDateRAnge(start, end time.Time) error {
 	}
 
 	googleAPI := a.sync.GoogleClient(client)
-	gFitnessLogs, err := googleAPI.Fitness.GetFitnessSessions(dates.ToBeginningOfDay(start), dates.ToEndOfDay(end))
+	gFitnessLogs, err := googleAPI.Fitness.GetFitnessSessions(dates.BeginningOfDay(start), dates.EndOfDay(end))
 	if err != nil {
 		return err
 	}
@@ -95,7 +95,7 @@ func (a *App) SyncFitnessLog(date time.Time) error {
 		return err
 	}
 	googleAPI := a.sync.GoogleClient(client)
-	gFitnessLogs, err := googleAPI.Fitness.GetFitnessSessions(dates.ToBeginningOfDay(date), dates.ToEndOfDay(date))
+	gFitnessLogs, err := googleAPI.Fitness.GetFitnessSessions(dates.BeginningOfDay(date), dates.EndOfDay(date))
 	if err != nil {
 		return err
 	}

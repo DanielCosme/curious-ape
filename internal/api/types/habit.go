@@ -50,7 +50,7 @@ func FromHabitToTransport(h *entity.Habit) *HabitTransport {
 		}
 
 		if h.Day != nil {
-			ht.Date = dates.ToPtr(h.Day.Date)
+			ht.Date = dates.Ptr(h.Day.Date)
 		}
 
 		for _, l := range h.Logs {
