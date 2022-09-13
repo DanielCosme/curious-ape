@@ -10,7 +10,10 @@ const ISO8601 = "2006-01-02"
 var listAliases = []string{"ls", "l"}
 
 func main() {
-	habitCmd.AddCommand(habitListCmd)
+	habitCmd.AddCommand(
+		habitListCmd,
+		habitsAddCmd,
+	)
 
 	rootCmd.AddCommand(
 		authCmd,

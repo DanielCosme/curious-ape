@@ -69,6 +69,13 @@ build/cli/linux:
 	@echo ${current_time}
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/ape ./cmd/cli
 
+## install/cli: install the cmd/cli application
+.PHONY: install/cli/linux
+install/cli/linux: build/cli/linux
+	@echo 'Installing cmd/cli...'
+	rm ${GOBIN}/ape
+	mv ./bin/ape ${GOBIN}/ape
+
 .PHONY: build/api/mac
 build/api/mac:
 	@echo 'Building cmd/api...'

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/danielcosme/curious-ape/internal/api/types"
 	"github.com/danielcosme/curious-ape/internal/client"
@@ -8,9 +9,14 @@ import (
 	"github.com/danielcosme/go-sdk/colors"
 	"github.com/danielcosme/go-sdk/dates"
 	"github.com/spf13/cobra"
+	"os"
 	"sort"
 	"time"
 )
+
+const IDot = "\uF444" // 
+const SECTION_1_WIDTH = 40
+const SECTION_2_WIDTH = 18
 
 var habitCmd = &cobra.Command{
 	Use:               "habit <command> [flags]",
@@ -19,22 +25,101 @@ var habitCmd = &cobra.Command{
 	Aliases:           []string{"habits", "h"},
 	ArgAliases:        []string{},
 	PersistentPreRunE: loadCredentials,
-	// Run:               listHabits,
 }
 
 var habitListCmd = &cobra.Command{
-	Use:        "list",
-	Short:      "habit list",
-	Long:       `habit list`,
-	Aliases:    listAliases,
-	ArgAliases: []string{},
-	Run:        listHabits,
+	Use:     "list",
+	Short:   "habit list",
+	Long:    `habit list`,
+	Aliases: listAliases,
+	Run:     listHabits,
+}
+
+var habitsAddCmd = &cobra.Command{
+	Use:     "add",
+	Short:   "Add new habits",
+	Long:    "Create or update habits",
+	Aliases: []string{"a", "new", "create"},
+	Run:     addHabit,
+}
+
+func addHabit(cmd *cobra.Command, args []string) {
+	habit := &types.HabitTransport{
+		Origin:      "manual",
+		IsAutomated: false,
+	}
+	date := time.Now()
+	// Date -> ISO8 601 OR today, yesterday (This comes as a flag or an argument)
+	// 			It defaults to today (somehow)
+	scanner := bufio.NewScanner(os.Stdin)
+
+	// Category
+	cs, err := client.DefaultClient.Habits.Categories()
+	CheckErr(err)
+
+	mapCategories := map[string]*entity.HabitCategory{}
+	bang := ">>"
+	fmt.Printf("%s Habit category:\n", colors.Green(bang))
+	for _, c := range cs {
+		var letter string
+		switch c.Type {
+		case entity.HabitTypeWakeUp:
+			letter = "s"
+		case entity.HabitTypeFitness:
+			letter = "f"
+		case entity.HabitTypeDeepWork:
+			letter = "w"
+		case entity.HabitTypeFood:
+			letter = "e"
+		}
+		mapCategories[letter] = c
+		fmt.Printf("  %s (%s) %s\n", colors.Blue(bang), letter, c.Type.Str())
+	}
+	fmt.Printf("  %s Enter choice: ", colors.Yellow(bang))
+	scanner.Scan()
+	cat := mapCategories[scanner.Text()]
+	habit.CategoryID = cat.ID
+
+	// Success
+	fmt.Printf("%s Success or not: \n", colors.Green(bang))
+	fmt.Printf("  %s (y/n): ", colors.Yellow(bang))
+	scanner.Scan()
+	if scanner.Text() == "y" {
+		habit.Success = true
+	}
+
+	// Note
+	fmt.Printf("%s Note:\n", colors.Green(bang))
+	fmt.Printf("  %s ", colors.Yellow(bang))
+	scanner.Scan()
+	habit.Note = scanner.Text()
+	CheckErr(scanner.Err())
+
+	habit, err = client.DefaultClient.Habits.Create(date, habit)
+
+	fmt.Println()
+	fmt.Printf("%s Habit log created\n", colors.Purple(bang))
+	fmt.Printf("  %s Date: %s\n", colors.Cyan(bang), habit.Date.Format("Mon 02 Jan"))
+	fmt.Printf("  %s Status: %s\n", colors.Cyan(bang), habit.Status)
+	fmt.Printf("  %s Type: %s\n", colors.Cyan(bang), cat.Type.Str())
+	for idx, hl := range habit.Logs {
+		fmt.Printf("    %s Success: %v\n", colors.Yellow(bang), hl.Success)
+		fmt.Printf("    %s Origin: %v\n", colors.Yellow(bang), hl.Origin)
+		fmt.Printf("    %s Note: %v\n", colors.Yellow(bang), hl.Note)
+		fmt.Printf("    %s Is automated: %v\n", colors.Yellow(bang), hl.IsAutomated)
+		if idx != len(habit.Logs)-1 {
+			fmt.Println(colors.Yellow("------"))
+		}
+	}
+
+	CheckErr(err)
 }
 
 func listHabits(cmd *cobra.Command, args []string) {
 	by, _ := cmd.Flags().GetString("by")     // endDate -> 	day, week, month, year
 	from, _ := cmd.Flags().GetString("from") // startDate -> current, previous
 
+	// TODO make this work with the days endpoint instead of the habits one, selecting which aggregation we want.
 	hs, err := client.DefaultClient.Habits.List(period(by, from))
 	CheckErr(err)
 	if len(hs) == 0 {
@@ -85,10 +170,6 @@ func listHabits(cmd *cobra.Command, args []string) {
 		drawLine(dayLine(numberOfDay, weekDay, dot), habitsLine)
 	}
 }
-
-const IDot = "\uF444"
-const SECTION_1_WIDTH = 40
-const SECTION_2_WIDTH = 18
 
 func statusCheck(status entity.HabitStatus) string {
 	switch status {
