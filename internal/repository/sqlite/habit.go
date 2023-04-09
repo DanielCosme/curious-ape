@@ -12,9 +12,16 @@ type HabitsDataSource struct {
 
 func (ds *HabitsDataSource) Create(h *entity.Habit) error {
 	query := `
-		INSERT INTO habits (day_id, habit_category_id, status) 
-		VALUES (:day_id, :habit_category_id, :status)
-	`
+		INSERT INTO habits (
+			day_id,
+			habit_category_id,
+			status
+		) 
+		VALUES (
+			:day_id,
+			:habit_category_id,
+			:status
+		)`
 	res, err := ds.DB.NamedExec(query, h)
 	if err != nil {
 		return catchErr(err)
@@ -83,9 +90,20 @@ func (ds *HabitsDataSource) GetHabitCategory(filter entity.HabitCategoryFilter) 
 
 func (ds *HabitsDataSource) CreateHabitLog(hl *entity.HabitLog) error {
 	query := `
-		INSERT INTO habit_logs (habit_id, origin, is_automated, success, note) 
-		VALUES (:habit_id, :origin, :is_automated, :success, :note)
-	`
+		INSERT INTO habit_logs (
+			habit_id,
+			origin,
+			is_automated,
+			success,
+			note
+		) 
+		VALUES (
+			:habit_id,
+			:origin,
+			:is_automated,
+			:success,
+			:note
+		)`
 	res, err := ds.DB.NamedExec(query, hl)
 	if err != nil {
 		return catchErr(err)
@@ -98,7 +116,11 @@ func (ds *HabitsDataSource) CreateHabitLog(hl *entity.HabitLog) error {
 func (ds *HabitsDataSource) UpdateHabitLog(data *entity.HabitLog) (*entity.HabitLog, error) {
 	query := `
 		UPDATE habit_logs
-		SET success = :success, origin = :origin, is_automated = :is_automated, note = :note
+		SET 
+			success = :success,
+			origin = :origin,
+			is_automated = :is_automated,
+			note = :note
 		WHERE id = :id
 	`
 	_, err := ds.DB.NamedExec(query, data)

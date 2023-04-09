@@ -2,10 +2,11 @@ package sqlite
 
 import (
 	"fmt"
-	"github.com/danielcosme/curious-ape/internal/core/entity"
-	_ "github.com/mattn/go-sqlite3"
 	"strings"
 	"time"
+
+	"github.com/danielcosme/curious-ape/internal/core/entity"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 const DriverName = "sqlite3"
@@ -33,7 +34,7 @@ func (qb *sqlQueryBuilder) generate() (string, []interface{}) {
 	q := fmt.Sprintf("SELECT * FROM %s ", qb.TableName)
 
 	if len(qb.Data) > 0 {
-		q = q + "WHERE"
+		q += "WHERE"
 
 		for idx, data := range qb.Data {
 			if idx > 0 {

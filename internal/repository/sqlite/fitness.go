@@ -12,8 +12,28 @@ type FitnessLogDataSource struct {
 
 func (ds FitnessLogDataSource) Create(log *entity.FitnessLog) error {
 	q := `
-		INSERT INTO fitness_logs (day_id, date, type, start_time, end_time, title, origin, note, raw)	
-		values (:day_id, :date, :type, :start_time, :end_time, :title, :origin, :note, :raw) `
+		INSERT INTO fitness_logs (
+			day_id,
+			date,
+			type,
+			start_time,
+			end_time,
+			title,
+			origin,
+			note,
+			raw
+	)	
+		VALUES (
+			:day_id,
+			:date,
+			:type,
+			:start_time,
+			:end_time,
+			:title,
+			:origin,
+			:note,
+			:raw
+	)`
 	res, err := ds.DB.NamedExec(q, log)
 	if err != nil {
 		return catchErr(err)
@@ -26,8 +46,14 @@ func (ds FitnessLogDataSource) Create(log *entity.FitnessLog) error {
 func (ds FitnessLogDataSource) Update(log *entity.FitnessLog, join ...entity.FitnessLogJoin) (*entity.FitnessLog, error) {
 	q := `
 		UPDATE fitness_logs 
-		SET day_id = :day_id, date = :date, start_time = :start_time, end_time = :end_time, title = :title, 
-		    origin = :origin, note = :note, raw = :raw
+		SET 
+			day_id = :day_id,
+			date = :date,
+			start_time = :start_time,
+			end_time = :end_time,
+			title = :title, 
+			origin = :origin,
+			note = :note, raw = :raw
 		WHERE id = :id
 	`
 	_, err := ds.DB.NamedExec(q, log)

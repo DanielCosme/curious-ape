@@ -36,6 +36,10 @@ CREATE TABLE IF NOT EXISTS habits (
         CHECK(length(id) > 0 AND length(day_id) > 0 AND length(habit_category_id) > 0)
 );
 
+CREATE TABLE IF NOT EXISTS new (
+        id                   INTEGER primary key,
+)
+
 CREATE TABLE IF NOT EXISTS habit_logs (
         id                  INTEGER primary key,
         habit_id            INTEGER not null,
@@ -49,7 +53,6 @@ CREATE TABLE IF NOT EXISTS habit_logs (
         UNIQUE (habit_id, origin),
         CHECK(length(id) > 0 AND length(habit_id) > 0)
 );
-
 
 CREATE TABLE IF NOT EXISTS oauths (
         id                  INTEGER primary key,
@@ -103,5 +106,4 @@ CREATE TABLE IF NOT EXISTS fitness_logs (
         FOREIGN KEY (day_id) REFERENCES "days" (id) ON DELETE CASCADE,
         UNIQUE (day_id, start_time)
 );
-
 

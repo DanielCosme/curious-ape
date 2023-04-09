@@ -11,10 +11,26 @@ type Oauth2DataSource struct {
 
 func (ds *Oauth2DataSource) Create(o *entity.Oauth2) error {
 	q := `
-		INSERT INTO oauths (provider, access_token, refresh_token, expiration, type, toggl_workspace_id, 
-		                    toggl_organization_id, toggl_project_ids)	
-		values (:provider, :access_token, :refresh_token, :expiration, :type, :toggl_workspace_id, 
-							:toggl_organization_id, :toggl_project_ids) `
+		INSERT INTO oauths (
+			provider,
+			access_token,
+			refresh_token,
+			expiration,
+			type,
+			toggl_workspace_id, 
+			toggl_organization_id,
+			toggl_project_ids
+		)
+		values (
+			:provider,
+			:access_token,
+			:refresh_token,
+			:expiration,
+			:type,
+			:toggl_workspace_id,
+			:toggl_organization_id,
+			:toggl_project_ids
+		)`
 	res, err := ds.DB.NamedExec(q, o)
 	if err != nil {
 		return catchErr(err)
@@ -27,8 +43,14 @@ func (ds *Oauth2DataSource) Create(o *entity.Oauth2) error {
 func (ds *Oauth2DataSource) Update(o *entity.Oauth2) (*entity.Oauth2, error) {
 	q := `
 		UPDATE  oauths 
-		SET access_token = :access_token, refresh_token = :refresh_token, expiration = :expiration, type = :type, 
-		    toggl_workspace_id = :toggl_workspace_id, toggl_organization_id = :toggl_organization_id, toggl_project_ids = :toggl_project_ids
+		SET 
+			access_token = :access_token,
+			refresh_token = :refresh_token,
+			expiration = :expiration,
+			type = :type, 
+		    toggl_workspace_id = :toggl_workspace_id,
+			toggl_organization_id = :toggl_organization_id,
+			toggl_project_ids = :toggl_project_ids
 		WHERE id = :id
 	`
 	_, err := ds.DB.NamedExec(q, o)

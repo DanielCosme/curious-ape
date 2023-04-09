@@ -3,15 +3,16 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"os"
+	"sort"
+	"time"
+
 	"github.com/danielcosme/curious-ape/internal/api/types"
 	"github.com/danielcosme/curious-ape/internal/client"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/go-sdk/colors"
 	"github.com/danielcosme/go-sdk/dates"
 	"github.com/spf13/cobra"
-	"os"
-	"sort"
-	"time"
 )
 
 const IDot = "\uF444" // 
@@ -132,7 +133,7 @@ func listHabits(cmd *cobra.Command, args []string) {
 		mapHabitsByDay[*h.Date] = append(mapHabitsByDay[*h.Date], h)
 	}
 	keys := []time.Time{}
-	for d, _ := range mapHabitsByDay {
+	for d := range mapHabitsByDay {
 		keys = append(keys, d)
 	}
 	sort.Slice(keys, func(i, j int) bool {
