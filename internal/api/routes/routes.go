@@ -1,8 +1,9 @@
 package routes
 
 import (
-	"github.com/go-chi/chi/v5"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
 
 	"github.com/danielcosme/curious-ape/internal/api/routes/middleware"
 	"github.com/danielcosme/curious-ape/internal/core/application"
@@ -37,6 +38,11 @@ func ChiRoutes(a *application.App) http.Handler {
 				r.Put("/", h.DayUpdate)
 			})
 		})
+
+		r.Get("/tester", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("<p>Hello Dahiel<p>"))
+		})
+
 		// Habits
 		r.Route("/habits", func(r chi.Router) {
 			r.Get("/", h.HabitsGetAll)
