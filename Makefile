@@ -129,6 +129,16 @@ production/deploy/api: build/api/linux
 		&& sudo systemctl restart ape \
 	'
 
+.PHONY: production/deploy/api2
+production/deploy/api2: 
+	ssh -t daniel@${production_host_ip} '\
+		cd /home/daniel/repo/curious-ape \
+		&& git pull \
+		&& make build/api/linux \
+		&& mv ./bin/aped /home/daniel/ape \
+		&& sudo systemctl restart ape \
+	'
+
 ## to be run on the remote machine
 .PHONY: production/reload/api
 production/reload/api: build/api/linux

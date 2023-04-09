@@ -40,7 +40,7 @@ func ChiRoutes(a *application.App) http.Handler {
 		})
 
 		r.Get("/tester", func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("<p>Hello Dahiel<p>"))
+			w.Write([]byte("<p>Hello Daniel<p>"))
 		})
 
 		// Habits
