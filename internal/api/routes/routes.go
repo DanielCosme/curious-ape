@@ -39,10 +39,6 @@ func ChiRoutes(a *application.App) http.Handler {
 			})
 		})
 
-		r.Get("/tester", func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("<p>Hello Daniel<p>"))
-		})
-
 		// Habits
 		r.Route("/habits", func(r chi.Router) {
 			r.Get("/", h.HabitsGetAll)

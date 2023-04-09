@@ -42,8 +42,10 @@ github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGX
 github.com/cpuguy83/go-md2man/v2 v2.0.2/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/danielcosme/go-sdk v0.0.3 h1:0I19J7pDHdp3e/ohnnar9Ft4SB0DbzoSe8vcD3D3gP4=
 github.com/danielcosme/go-sdk v0.0.3/go.mod h1:C9GHmxmH1R+ew5zk7PZZzZKM0fiZ6GOYiBTED9+F2q8=
-github.com/danielcosme/rest v0.0.0-20220828230919-af2279abc3ee h1:XLmsh6W7M1gMhGEG6LGmh9696ybk4/Nv5hbQ7zQf2sI=
-github.com/danielcosme/rest v0.0.0-20220828230919-af2279abc3ee/go.mod h1:DHVl3ICz1BkwJFxTRUra9fco2aVgNex0bc3WQ3o4/gY=
+github.com/danielcosme/rest v0.0.0-20230409225617-ac75a364ea99 h1:Ijfti0e7hoZ5zCrXNkWAu+MA8IpdiIgSOcnllAv+xZA=
+github.com/danielcosme/rest v0.0.0-20230409225617-ac75a364ea99/go.mod h1:DHVl3ICz1BkwJFxTRUra9fco2aVgNex0bc3WQ3o4/gY=
+github.com/danielcosme/rest v0.0.0-20230409230404-a6cfcff97006 h1:OYrRtpvtQ9bS6k2g+QPyLWKshvDr49dhGWO7Dq7+T+0=
+github.com/danielcosme/rest v0.0.0-20230409230404-a6cfcff97006/go.mod h1:DHVl3ICz1BkwJFxTRUra9fco2aVgNex0bc3WQ3o4/gY=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.1-0.20191026205805-5f8ba28d4473/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
