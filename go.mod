@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/danielcosme/go-sdk v0.0.3
 	github.com/danielcosme/rest v0.0.0-20230409230404-a6cfcff97006
+	github.com/go-chi/chi v1.5.4
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/mattn/go-sqlite3 v1.14.9

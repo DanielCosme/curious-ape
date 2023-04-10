@@ -1,25 +1,24 @@
 package web
 
 import (
-	"fmt"
 	"net/http"
 
-	"github.com/danielcosme/curious-ape/internal/core/application"
-	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 )
 
-type Handler struct {
-	App *application.App
-}
-
-func ChiRoutes(a *application.App) http.Handler {
-	h := Handler{App: a}
+func ChiRoutes(h *Handler) http.Handler {
 	r := chi.NewRouter()
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "<p>Hello, World</p>")
-	})
+	// A good base middleware stack
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
 
+	fileServer := http.FileServer(http.Dir("./ui/static/"))
+	r.Handle("/static/", http.StripPrefix("/static/", fileServer))
+
+	r.Get("/", h.home)
 	r.Get("/habit/view", h.habitView)
 	r.Post("/habit/create", h.habitCreate)
 

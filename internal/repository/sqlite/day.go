@@ -2,11 +2,13 @@ package sqlite
 
 import (
 	"database/sql"
+	"strings"
+	"time"
+
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/go-sdk/errors"
 	"github.com/jmoiron/sqlx"
-	"strings"
 )
 
 type DaysDataSource struct {
@@ -14,6 +16,7 @@ type DaysDataSource struct {
 }
 
 func (ds *DaysDataSource) Create(d *entity.Day) error {
+	d.Date = sanitizeDate(d.Date)
 	query := `
 		INSERT INTO "days" ("date") 
 		VALUES (:date);
@@ -81,4 +84,8 @@ func dayFilter(f entity.DayFilter) *sqlQueryBuilder {
 	}
 
 	return b
+}
+
+func sanitizeDate(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC)
 }

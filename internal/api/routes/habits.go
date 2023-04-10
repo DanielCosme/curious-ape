@@ -1,10 +1,11 @@
 package routes
 
 import (
+	"net/http"
+
 	"github.com/danielcosme/curious-ape/internal/api/types"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/rest"
-	"net/http"
 )
 
 func (h *Handler) HabitsGetCategories(rw http.ResponseWriter, r *http.Request) {

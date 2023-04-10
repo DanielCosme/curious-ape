@@ -67,7 +67,7 @@ func intToInterface(ints []int) []interface{} {
 func dateToInterface(ds []time.Time) []interface{} {
 	iSlice := make([]interface{}, len(ds))
 	for i, v := range ds {
-		iSlice[i] = v
+		iSlice[i] = sanitizeDate(v)
 	}
 	return iSlice
 }

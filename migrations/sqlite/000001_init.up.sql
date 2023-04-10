@@ -1,27 +1,27 @@
 -- schema
 CREATE TABLE IF NOT EXISTS days (
-        id                  INTEGER primary key,
-        "date"              DATE not null UNIQUE,
-        deep_work_minutes   INTEGER NOT NULL DEFAULT 0 check ( length(deep_work_minutes) >= 0)
+        id                  INTEGER PRIMARY KEY,
+        "date"              DATE NOT NULL UNIQUE,
+        deep_work_minutes   INTEGER NOT NULL DEFAULT 0 CHECK ( LENGTH(deep_work_minutes) >= 0)
 );
 
 CREATE TABLE IF NOT EXISTS habit_categories (
-        id                  INTEGER primary key,
+        id                  INTEGER PRIMARY KEY,
 
-        name                TEXT not null                   check (length(name) > 0),
-        type                TEXT not null                   check (length(type) > 0),
-        code                TEXT not null default "default" check (length(code) > 0),
-        description         TEXT default "",
-        color               INTEGER default "#ffffff",
+        name                TEXT NOT NULL                   CHECK (LENGTH(name) > 0),
+        type                TEXT UNIQUE NOT NULL        CHECK (LENGTH(type) > 0),
+        code                TEXT UNIQUE NOT NULL DEFAULT "default" CHECK (LENGTH(code) > 0),
+        description         TEXT DEFAULT "",
+        color               INTEGER DEFAULT "#ffffff",
 
-        CHECK(length(id) > 0)
+        CHECK(LENGTH(id) > 0)
 );
 
-INSERT INTO habit_categories (name, type)
-VALUES  ("Eat healthy", "food"),
-        ("Wake up early", "wake_up"),
-        ("Workout", "fitness"),
-        ("Deep work", "deep_work");
+INSERT INTO habit_categories (name, type, code)
+VALUES  ("Eat healthy", "food", "food"),
+        ("Wake up early", "wake_up", "wake_up"),
+        ("Workout", "fitness", "fitness"),
+        ("Deep work", "deep_work", "deep_work");
 
 CREATE TABLE IF NOT EXISTS habits (
         id                  INTEGER primary key,
@@ -35,10 +35,6 @@ CREATE TABLE IF NOT EXISTS habits (
         UNIQUE (day_id, habit_category_id),
         CHECK(length(id) > 0 AND length(day_id) > 0 AND length(habit_category_id) > 0)
 );
-
-CREATE TABLE IF NOT EXISTS new (
-        id                   INTEGER primary key,
-)
 
 CREATE TABLE IF NOT EXISTS habit_logs (
         id                  INTEGER primary key,

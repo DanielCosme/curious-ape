@@ -41,6 +41,7 @@ func main() {
 	flag.Parse()
 	setFilePath(cfg)
 	readConfiguration(cfg)
+
 	// logger initialization
 	logger := logape.New(os.Stdout, logape.LevelTrace, time.RFC822)
 	logape.DefaultLogger = logger
@@ -48,7 +49,7 @@ func main() {
 	// SQL datasource initialization
 	db := sqlx.MustConnect(sqlite.DriverName, cfg.Server.FilePath+"/"+cfg.Database.DNS)
 
-	api := &web.WebClient{
+	web := &web.WebClient{
 		App: application.New(&application.AppOptions{
 			DB: db,
 			Config: &application.Environment{
@@ -67,7 +68,7 @@ func main() {
 		},
 	}
 
-	if err := api.ListenAndServe(); err != nil {
+	if err := web.ListenAndServe(); err != nil {
 		logger.Fatal(err)
 	}
 }

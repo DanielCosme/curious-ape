@@ -3,14 +3,15 @@ package application
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/integrations/google"
 	"github.com/danielcosme/go-sdk/dates"
 	"github.com/danielcosme/go-sdk/errors"
 	"github.com/danielcosme/go-sdk/log"
-	"strconv"
-	"time"
 )
 
 func (a *App) FitnessFindLogs(filter entity.FitnessLogFilter) ([]*entity.FitnessLog, error) {
@@ -209,7 +210,7 @@ func (a *App) createFitnessLogs(fls []*entity.FitnessLog) error {
 	for _, fl := range fls {
 		fl.Date = fl.Day.Date
 		if err := a.db.FitnessLogs.Create(fl); err != nil {
-			a.Log.Warningf("fitness log for %s could not be created: %s", fl.Day.Date.Format(entity.HumanDate), err.Error())
+			a.Log.Warningf("fitness log for %s could not be created: %s", fl.Day.Date.Format(entity.HumanDateWithTime), err.Error())
 			continue
 		}
 
@@ -219,7 +220,7 @@ func (a *App) createFitnessLogs(fls []*entity.FitnessLog) error {
 
 		a.Log.InfoP("Created fitness log", log.Prop{
 			"provider": fl.Origin.Str(),
-			"date":     fl.Day.Date.Format(entity.HumanDate),
+			"date":     fl.Day.Date.Format(entity.HumanDateWithTime),
 			"type":     fl.Type.Str(),
 		})
 	}

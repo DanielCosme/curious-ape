@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	errors2 "errors"
 	"fmt"
+	"time"
+
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/integrations/fitbit"
 	"github.com/danielcosme/go-sdk/errors"
 	"github.com/danielcosme/go-sdk/log"
-	"time"
 )
 
 func (a *App) SleepDeleteByID(id int) error {
@@ -200,7 +201,7 @@ func (a *App) createSleepLogs(logs []*entity.SleepLog) error {
 			}
 		} else if err := a.db.SleepLogs.Create(l); err != nil {
 			if errors2.Is(err, database.ErrUniqueCheckFailed) {
-				a.Log.Error(fmt.Errorf("dayID and main sleep unique check failed for %s", l.Date.Format(entity.HumanDate)))
+				a.Log.Error(fmt.Errorf("dayID and main sleep unique check failed for %s", l.Date.Format(entity.HumanDateWithTime)))
 			}
 			return err
 		}
@@ -212,7 +213,7 @@ func (a *App) createSleepLogs(logs []*entity.SleepLog) error {
 
 		a.Log.InfoP(fmt.Sprintf("%s sleep log", op), log.Prop{
 			"provider": l.Origin.Str(),
-			"date":     l.Date.Format(entity.HumanDate),
+			"date":     l.Date.Format(entity.HumanDateWithTime),
 		})
 	}
 

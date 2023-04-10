@@ -13,12 +13,19 @@ type WebClient struct {
 }
 
 func (wc *WebClient) ListenAndServe() error {
-	wc.Server.Handler = wc.Routes()
+	h := &Handler{App: wc.App}
+	tc, err := newTemplateCache()
+	if err != nil {
+		return err
+	}
+	h.templateCache = tc
+
+	wc.Server.Handler = wc.Routes(h)
 
 	wc.App.Log.InfoP("HTTP server listening", log.Prop{"addr": wc.Server.Addr})
 	return wc.Server.ListenAndServe()
 }
 
-func (wc *WebClient) Routes() http.Handler {
-	return ChiRoutes(wc.App)
+func (wc *WebClient) Routes(h *Handler) http.Handler {
+	return ChiRoutes(h)
 }

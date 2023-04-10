@@ -3,7 +3,9 @@ package entity
 import "time"
 
 const ISO8601 = "2006-01-02"
-const HumanDate = "Monday, 02 January 2006"
+const HumanDate = "02 Jan 2006 "
+const HumanDateWeekDay = "Monday, 02 Jan 2006"
+const HumanDateWithTime = "Monday, 02 Jan 2006 at 15:04"
 const Timestamp = "15:04:05"
 const Time = "15:04"
 
@@ -33,6 +35,10 @@ type Day struct {
 
 func (d *Day) FormatDate() string {
 	return d.Date.Format(ISO8601)
+}
+
+func (d *Day) FormatHuman() string {
+	return d.Date.Format(HumanDateWithTime)
 }
 
 type Tag struct{}

@@ -27,10 +27,10 @@ type HabitCategory struct {
 type HabitLog struct {
 	ID          int        `db:"id"`
 	HabitID     int        `db:"habit_id"`
+	Success     bool       `db:"success"`
 	Note        string     `db:"note"`
 	Origin      DataSource `db:"origin"`
 	IsAutomated bool       `db:"is_automated"`
-	Success     bool       `db:"success"`
 }
 
 type HabitType string

@@ -1,0 +1,25 @@
+{{define "title"}}Home{{end}}
+
+{{define "main"}}
+    <h2>Latest Habits</h2>
+    {{if .Habits}}
+         <table>
+            <tr>
+                <th>Status</th>
+                <th>Type</th>
+                <th>Date</th>
+                <th>ID</th>
+            </tr>
+            {{range .Habits}}
+            <tr>
+                <td><a href='/habit/view?id={{.ID}}'>{{.Status}}</a></td>
+                <td>{{.Category.Name}}</td>
+                <td>{{humanDate .Day.Date}}</td>
+                <td>#{{.ID}}</td>
+            </tr>
+            {{end}}
+        </table>
+    {{else}}
+    <p>There's nothing to see here yet!</p>
+    {{end}}
+{{end}}

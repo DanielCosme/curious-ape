@@ -2,12 +2,13 @@ package application
 
 import (
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/go-sdk/errors"
 	"github.com/danielcosme/go-sdk/log"
-	"strconv"
-	"time"
 )
 
 func (a *App) HabitCreate(day *entity.Day, data *entity.Habit) (*entity.Habit, error) {
@@ -52,7 +53,7 @@ func (a *App) HabitCreate(day *entity.Day, data *entity.Habit) (*entity.Habit, e
 			"Type":    habitCategory.Type.Str(),
 			"Success": strconv.FormatBool(dataLog.Success),
 			"Origin":  dataLog.Origin.Str(),
-			"date":    day.Date.Format(entity.HumanDate),
+			"date":    day.Date.Format(entity.HumanDateWithTime),
 			"details": dataLog.Note,
 		})
 	}

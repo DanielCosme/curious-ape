@@ -2,16 +2,16 @@ package application
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/integrations/toggl"
 	"github.com/danielcosme/go-sdk/errors"
 	"github.com/danielcosme/go-sdk/log"
-	"time"
 )
 
 func (a *App) DayCreate(d *entity.Day) (*entity.Day, error) {
-	d.Date = time.Date(d.Date.Year(), d.Date.Month(), d.Date.Day(), 0, 0, 0, 0, time.UTC)
 	if err := a.db.Days.Create(d); err != nil {
 		return nil, err
 	}
@@ -194,7 +194,7 @@ func (a *App) createDeepWorkLog(day *entity.Day, origin entity.DataSource) error
 
 	a.Log.InfoP("updated deep work log", log.Prop{
 		"origin": origin.Str(),
-		"date":   day.Date.Format(entity.HumanDate),
+		"date":   day.Date.Format(entity.HumanDateWithTime),
 	})
 	return nil
 }
