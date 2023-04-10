@@ -12,7 +12,7 @@
             </tr>
             {{range .Habits}}
             <tr>
-                <td><a href='/habit/view?id={{.ID}}'>{{.Status}}</a></td>
+                <td><a href='/habit/view/{{.ID}}'>{{.Status}}</a></td>
                 <td>{{.Category.Name}}</td>
                 <td>{{humanDate .Day.Date}}</td>
                 <td>#{{.ID}}</td>
