@@ -17,7 +17,7 @@ func ChiRoutes(h *Handler) http.Handler {
 	r.Use(midSecureHeaders)
 
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
-	r.Handle("/static/", http.StripPrefix("/static/", fileServer))
+	r.Handle("/static/*", http.StripPrefix("/static/", fileServer))
 
 	r.Get("/", h.home)
 

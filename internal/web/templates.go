@@ -19,6 +19,7 @@ type templateData struct {
 	CurrentYear int
 	Habit       *entity.Habit
 	Habits      []*entity.Habit
+	Form        any
 }
 
 func (h *Handler) newTemplateData(r *http.Request) *templateData {

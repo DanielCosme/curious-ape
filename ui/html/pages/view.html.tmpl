@@ -11,6 +11,9 @@
         <div class='metadata'>
             <p>Name: {{.Category.Name}}</p>
             <p>Type: {{.Category.Type}}</p>
+            {{range .Logs}}
+                <p>Note: {{.Note}}</p>
+            {{end}}
         </div>
     </div>
     {{end}}
