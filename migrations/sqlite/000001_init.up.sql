@@ -103,3 +103,10 @@ CREATE TABLE IF NOT EXISTS fitness_logs (
         UNIQUE (day_id, start_time)
 );
 
+CREATE TABLE IF NOT EXISTS sessions (
+    token CHAR(43) PRIMARY KEY,
+    data BLOB NOT NULL,
+    expiry TIMESTAMP(6) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS sessions_expiry_idx ON sessions (expiry);

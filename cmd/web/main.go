@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -9,12 +10,15 @@ import (
 	"os"
 	"time"
 
+	"github.com/alexedwards/scs/sqlite3store"
+	"github.com/alexedwards/scs/v2"
 	"github.com/danielcosme/curious-ape/internal/core/application"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/repository/sqlite"
 	"github.com/danielcosme/curious-ape/internal/web"
 	"github.com/danielcosme/go-sdk/errors"
 	logape "github.com/danielcosme/go-sdk/log"
+	_ "github.com/mattn/go-sqlite3"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -48,6 +52,14 @@ func main() {
 
 	// SQL datasource initialization
 	db := sqlx.MustConnect(sqlite.DriverName, cfg.Server.FilePath+"/"+cfg.Database.DNS)
+	dbOther, err := sql.Open(sqlite.DriverName, cfg.Server.FilePath+"/"+cfg.Database.DNS)
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	sessionManager := scs.New()
+	sessionManager.Store = sqlite3store.New(dbOther)
+	sessionManager.Lifetime = 12 * time.Hour
 
 	web := &web.WebClient{
 		App: application.New(&application.AppOptions{
@@ -57,13 +69,14 @@ func main() {
 				Fitbit: cfg.Integrations.Fitbit,
 				Google: cfg.Integrations.Google,
 			},
-			Logger: logger,
+			Logger:         logger,
+			SessionManager: sessionManager,
 		}),
 		Server: &http.Server{
 			Addr:         fmt.Sprintf(":%d", cfg.Server.Port),
 			IdleTimeout:  time.Minute,
-			ReadTimeout:  10 * time.Second,
-			WriteTimeout: 30 * time.Second,
+			ReadTimeout:  5 * time.Second,
+			WriteTimeout: 10 * time.Second,
 			ErrorLog:     log.New(logger, "", 0),
 		},
 	}

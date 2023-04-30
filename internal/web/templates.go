@@ -20,11 +20,13 @@ type templateData struct {
 	Habit       *entity.Habit
 	Habits      []*entity.Habit
 	Form        any
+	Flash       string
 }
 
 func (h *Handler) newTemplateData(r *http.Request) *templateData {
 	return &templateData{
 		CurrentYear: time.Now().Year(),
+		Flash:       h.App.Session.PopString(r.Context(), "flash"),
 	}
 }
 

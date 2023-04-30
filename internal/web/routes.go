@@ -19,10 +19,12 @@ func ChiRoutes(h *Handler) http.Handler {
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
 	r.Handle("/static/*", http.StripPrefix("/static/", fileServer))
 
-	r.Get("/", h.home)
+	r.With(h.App.Session.LoadAndSave).Get("/", h.home)
 
 	// Habits.
 	r.Route("/habit", func(r chi.Router) {
+		r.Use(h.App.Session.LoadAndSave)
+
 		r.With(h.midSetHabit).Get("/view/{id}", h.habitView)
 		r.Get("/create", h.habitCreateForm)
 		r.Post("/create", h.habitCreate)

@@ -79,7 +79,7 @@ func (h *Handler) habitCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	habit, err := h.App.HabitCreate(d, &entity.Habit{
-		CategoryID: 1,
+		CategoryID: 2,
 		Logs: []*entity.HabitLog{
 			{
 				Success: true,
@@ -92,7 +92,9 @@ func (h *Handler) habitCreate(w http.ResponseWriter, r *http.Request) {
 		h.serverError(w, err)
 		return
 	}
+	h.App.Session.Put(r.Context(), "flash", "Habit successfully created!")
 
 	data.Habit = habit
+	data.Flash = h.App.Session.PopString(r.Context(), "flash")
 	h.render(w, http.StatusCreated, "view.html.tmpl", data)
 }

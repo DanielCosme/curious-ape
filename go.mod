@@ -1,5 +1,4 @@
 module github.com/danielcosme/curious-ape
-
 go 1.20
 
 require (
@@ -14,6 +13,8 @@ require (
 )
 
 require (
+	github.com/alexedwards/scs/sqlite3store v0.0.0-20230327161757-10d4299e3b24 // indirect
+	github.com/alexedwards/scs/v2 v2.5.1 // indirect
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect

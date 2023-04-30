@@ -1,6 +1,7 @@
 package application
 
 import (
+	"github.com/alexedwards/scs/v2"
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/integrations"
@@ -11,10 +12,11 @@ import (
 )
 
 type App struct {
-	db   *database.Repository
-	cfg  *Environment
-	Log  *log.Logger
-	sync *integrations.Sync
+	db      *database.Repository
+	cfg     *Environment
+	Log     *log.Logger
+	sync    *integrations.Sync
+	Session *scs.SessionManager
 }
 
 // Endpoints and application methods to sync manually
@@ -22,9 +24,10 @@ type App struct {
 //		there is no need for authentication
 
 type AppOptions struct {
-	DB     *sqlx.DB
-	Logger *log.Logger
-	Config *Environment
+	DB             *sqlx.DB
+	Logger         *log.Logger
+	Config         *Environment
+	SessionManager *scs.SessionManager
 }
 
 type Environment struct {
@@ -42,9 +45,10 @@ func New(opts *AppOptions) *App {
 			SleepLogs:   &sqlite.SleepLogDataSource{DB: opts.DB},
 			FitnessLogs: &sqlite.FitnessLogDataSource{DB: opts.DB},
 		},
-		cfg:  opts.Config,
-		Log:  opts.Logger,
-		sync: integrations.NewSync(opts.Logger),
+		cfg:     opts.Config,
+		Log:     opts.Logger,
+		sync:    integrations.NewSync(opts.Logger),
+		Session: opts.SessionManager,
 	}
 
 	a.Log.InfoP("Application running", log.Prop{"environment": a.cfg.Env})
