@@ -1,6 +1,14 @@
 {{define "nav"}}
 <nav>
-    <a href='/'>Home</a>
-    <a href='/habit/create'>Create habit</a>
+    <div>
+        <a href='/'>Home</a>
+        <a href='/habit/create'>Create habit</a>
+    </div>
+    <div>
+        <a href="/login">Login</a>
+        <form action="/logout" method="POST">
+            <button>Logout</button>
+        </form>
+    </div>
 </nav>
 {{end}}

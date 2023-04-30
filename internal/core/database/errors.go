@@ -1,8 +1,14 @@
 package database
 
-import "github.com/danielcosme/go-sdk/errors"
+import (
+	"fmt"
+
+	"github.com/danielcosme/go-sdk/errors"
+)
 
 var (
-	ErrNotFound          = errors.New("not found")
-	ErrUniqueCheckFailed = errors.New("unique check failed")
+	ErrDatabase           = errors.New("database")
+	ErrNotFound           = fmt.Errorf("%w: not found", ErrDatabase)
+	ErrUniqueCheckFailed  = fmt.Errorf("%w: duplicate field", ErrDatabase)
+	ErrInvalidCredentials = fmt.Errorf("%w: invalid credentials", ErrDatabase)
 )

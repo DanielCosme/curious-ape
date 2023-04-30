@@ -1,0 +1,68 @@
+package web
+
+import (
+	"errors"
+	"net/http"
+
+	"github.com/danielcosme/curious-ape/internal/core/database"
+	"github.com/danielcosme/curious-ape/internal/validator"
+)
+
+type userLoginForm struct {
+	Email    string
+	Password string
+	validator.Validator
+}
+
+func (h *Handler) loginForm(w http.ResponseWriter, r *http.Request) {
+	data := h.newTemplateData(r)
+	data.Form = userLoginForm{}
+	h.render(w, http.StatusOK, "login.html.tmpl", data)
+}
+
+func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		h.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form := userLoginForm{
+		Email:    r.PostForm.Get("email"),
+		Password: r.PostForm.Get("password"),
+	}
+
+	if !form.Valid() {
+		data := h.newTemplateData(r)
+		data.Form = form
+		h.render(w, http.StatusUnprocessableEntity, "login.html.tmpl", data)
+		return
+	}
+
+	id, err := h.App.AuthenticateMe(form.Password)
+	if err != nil {
+		if errors.Is(err, database.ErrInvalidCredentials) {
+			form.AddNonFieldError("Email or password is incorrect")
+
+			data := h.newTemplateData(r)
+			data.Form = form
+			h.render(w, http.StatusUnprocessableEntity, "login.html.tmpl", data)
+		} else {
+			h.serverError(w, err)
+		}
+		return
+	}
+
+	err = h.App.Session.RenewToken(r.Context())
+	if err != nil {
+		h.serverError(w, err)
+		return
+	}
+
+	h.App.Session.Put(r.Context(), "authenticatedUserID", id)
+
+	http.Redirect(w, r, "/habit/create", http.StatusSeeOther)
+}
+
+func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
+}

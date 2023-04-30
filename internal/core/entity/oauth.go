@@ -8,6 +8,7 @@ const (
 	ProviderFitbit = "fitbit"
 	ProviderGoogle = "google"
 	ProviderToggl  = "toggl"
+	ProviderSelf   = "me"
 )
 
 type Oauth2 struct {
@@ -15,7 +16,7 @@ type Oauth2 struct {
 	Provider     IntegrationProvider `db:"provider"`
 	AccessToken  string              `db:"access_token"`
 	RefreshToken string              `db:"refresh_token"`
-	Type         string              `db:"type"`
+	TokenType    string              `db:"token_type"`
 	Expiration   time.Time           `db:"expiration"`
 	// toggl extra
 	ToogglWorkSpaceID    string `db:"toggl_workspace_id"`

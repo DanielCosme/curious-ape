@@ -16,7 +16,7 @@ func (ds *Oauth2DataSource) Create(o *entity.Oauth2) error {
 			access_token,
 			refresh_token,
 			expiration,
-			type,
+			token_type,
 			toggl_workspace_id, 
 			toggl_organization_id,
 			toggl_project_ids
@@ -26,7 +26,7 @@ func (ds *Oauth2DataSource) Create(o *entity.Oauth2) error {
 			:access_token,
 			:refresh_token,
 			:expiration,
-			:type,
+			:token_type,
 			:toggl_workspace_id,
 			:toggl_organization_id,
 			:toggl_project_ids
@@ -47,7 +47,7 @@ func (ds *Oauth2DataSource) Update(o *entity.Oauth2) (*entity.Oauth2, error) {
 			access_token = :access_token,
 			refresh_token = :refresh_token,
 			expiration = :expiration,
-			type = :type, 
+			token_type = :token_type, 
 		    toggl_workspace_id = :toggl_workspace_id,
 			toggl_organization_id = :toggl_organization_id,
 			toggl_project_ids = :toggl_project_ids

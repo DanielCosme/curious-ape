@@ -2,13 +2,56 @@ package application
 
 import (
 	"context"
+	"net/http"
+	"strconv"
+
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/go-sdk/errors"
+	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/oauth2"
-	"net/http"
-	"strconv"
 )
+
+func (a *App) AuthenticateMe(password string) (int, error) {
+	o, err := a.db.Oauths.Get(entity.Oauth2Filter{Provider: []entity.IntegrationProvider{entity.ProviderSelf}})
+	if err != nil {
+		return 0, err
+	}
+
+	if err = bcrypt.CompareHashAndPassword([]byte(o.AccessToken), []byte(password)); err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return 0, database.ErrInvalidCredentials
+		}
+		return 0, err
+	}
+
+	return o.ID, nil
+}
+
+func (a *App) SetPassword(password string) error {
+	if password == "" {
+		return errors.New("password cannot be empty")
+	}
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+	if err != nil {
+		return err
+	}
+
+	o, err := a.db.Oauths.Get(entity.Oauth2Filter{Provider: []entity.IntegrationProvider{entity.ProviderSelf}})
+	if err != nil && !errors.Is(err, database.ErrNotFound) {
+		return err
+	}
+	if o == nil {
+		return a.db.Oauths.Create(&entity.Oauth2{
+			Provider:    entity.ProviderSelf,
+			AccessToken: string(hash),
+		})
+	}
+
+	o.AccessToken = string(hash)
+	_, err = a.db.Oauths.Update(o)
+	return err
+}
 
 func (a *App) Oauth2ConnectProvider(provider string) (string, error) {
 	p := entity.IntegrationProvider(provider)
@@ -54,7 +97,7 @@ func (a *App) Oauth2Success(provider, code string) error {
 	o.AccessToken = t.AccessToken
 	o.RefreshToken = t.RefreshToken
 	o.Expiration = t.Expiry
-	o.Type = t.Type()
+	o.TokenType = t.Type()
 
 	_, err = a.db.Oauths.Update(o)
 	return err
@@ -72,7 +115,7 @@ func (a *App) Oauth2GetClient(provider entity.IntegrationProvider) (*http.Client
 		AccessToken:  o.AccessToken,
 		RefreshToken: o.RefreshToken,
 		Expiry:       o.Expiration,
-		TokenType:    o.Type,
+		TokenType:    o.TokenType,
 	}
 
 	switch provider {
@@ -85,7 +128,7 @@ func (a *App) Oauth2GetClient(provider entity.IntegrationProvider) (*http.Client
 				ID:           o.ID,
 				AccessToken:  newToken.AccessToken,
 				RefreshToken: newToken.RefreshToken,
-				Type:         newToken.TokenType,
+				TokenType:    newToken.TokenType,
 				Expiration:   newToken.Expiry,
 			})
 			token = newToken
@@ -139,7 +182,7 @@ func (a *App) Oauth2AddAPIToken(token, provider string) (string, error) {
 			o = &entity.Oauth2{
 				Provider:    entity.ProviderToggl,
 				AccessToken: token,
-				Type:        "Bearer",
+				TokenType:   "Bearer",
 			}
 			if err := a.db.Oauths.Create(o); err != nil {
 				return "", err

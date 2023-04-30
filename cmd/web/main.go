@@ -36,6 +36,7 @@ type config struct {
 		Google *entity.Oauth2Config `json:"google"`
 	} `json:"integrations"`
 	Environment string `json:"environment"`
+	Password    string `json:"password"`
 }
 
 func main() {
@@ -79,6 +80,10 @@ func main() {
 			WriteTimeout: 10 * time.Second,
 			ErrorLog:     log.New(logger, "", 0),
 		},
+	}
+
+	if err := web.App.SetPassword(cfg.Password); err != nil {
+		logger.Fatal(err)
 	}
 
 	if err := web.ListenAndServe(); err != nil {

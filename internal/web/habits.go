@@ -39,13 +39,6 @@ func (h *Handler) habitCreate(w http.ResponseWriter, r *http.Request) {
 		h.clientError(w, http.StatusBadRequest)
 		return
 	}
-	// Date picker on the fron-ent that results in a yyyy-mm-dd
-	// Radial buttons on the front-end that correspond to catefory IDs
-
-	// The rest of the inputs for the habit log
-	// - Success
-	// - Note (description)
-	// - Origin (automatically manual on the form)
 
 	expires, err := strconv.Atoi(r.PostForm.Get("expires"))
 	if err != nil {
@@ -59,10 +52,10 @@ func (h *Handler) habitCreate(w http.ResponseWriter, r *http.Request) {
 		Expires: expires,
 	}
 
-	form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
-	form.CheckField(validator.MaxChars(form.Title, 100), "title", "This field cannot be more than 100 characters long")
-	form.CheckField(validator.NotBlank(form.Content), "content", "This field cannot be blank")
-	form.CheckField(validator.PermittedInt(form.Expires, 1, 7, 365), "expires", "This field must equal 1, 7 or 365")
+	form.Check(validator.NotBlank(form.Title), "title", "This field cannot be blank")
+	form.Check(validator.MaxChars(form.Title, 100), "title", "This field cannot be more than 100 characters long")
+	form.Check(validator.NotBlank(form.Content), "content", "This field cannot be blank")
+	form.Check(validator.PermittedInt(form.Expires, 1, 7, 365), "expires", "This field must equal 1, 7 or 365")
 
 	data := h.newTemplateData(r)
 	if !form.Valid() {
