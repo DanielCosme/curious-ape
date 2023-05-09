@@ -9,6 +9,7 @@ import (
 
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/go-chi/chi"
+	"github.com/justinas/nosurf"
 )
 
 func midSecureHeaders(next http.Handler) http.Handler {
@@ -23,6 +24,19 @@ func midSecureHeaders(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+// Create a NoSurf middleware function which uses a customized CSRF cookie with
+// the Secure, Path and HttpOnly attributes set.
+func midNoSurf(next http.Handler) http.Handler {
+	csrfHandler := nosurf.New(next)
+	csrfHandler.SetBaseCookie(http.Cookie{
+		HttpOnly: true,
+		Path:     "/",
+		Secure:   true,
+	})
+
+	return csrfHandler
 }
 
 func (h *Handler) midRecoverPanic(next http.Handler) http.Handler {
@@ -57,6 +71,21 @@ func (h *Handler) midSetHabit(next http.Handler) http.Handler {
 		}
 
 		r = r.Clone(context.WithValue(r.Context(), "habit", habit))
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (h *Handler) RequireAuth(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !h.IsAuthenticated(r) {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+
+		// Set the "Cache-Control: no-store" header so that pages require
+		// authentication are not stored in the users browser cache (or
+		// other intermediary cache).
+		w.Header().Add("Cache-Control", "no-store")
 		next.ServeHTTP(w, r)
 	})
 }

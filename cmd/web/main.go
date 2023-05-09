@@ -61,6 +61,7 @@ func main() {
 	sessionManager := scs.New()
 	sessionManager.Store = sqlite3store.New(dbOther)
 	sessionManager.Lifetime = 12 * time.Hour
+	sessionManager.Cookie.SameSite = http.SameSiteStrictMode
 
 	web := &web.WebClient{
 		App: application.New(&application.AppOptions{

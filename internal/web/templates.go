@@ -9,24 +9,31 @@ import (
 	"time"
 
 	"github.com/danielcosme/curious-ape/internal/core/entity"
+	"github.com/justinas/nosurf"
 )
+
+// TODO: add constants/vars for template names.
 
 var functions = template.FuncMap{
 	"humanDate": humanDate,
 }
 
 type templateData struct {
-	CurrentYear int
-	Habit       *entity.Habit
-	Habits      []*entity.Habit
-	Form        any
-	Flash       string
+	CurrentYear     int
+	Habit           *entity.Habit
+	Habits          []*entity.Habit
+	Form            any
+	Flash           string
+	IsAuthenticated bool
+	CSRFToken       string
 }
 
 func (h *Handler) newTemplateData(r *http.Request) *templateData {
 	return &templateData{
-		CurrentYear: time.Now().Year(),
-		Flash:       h.App.Session.PopString(r.Context(), "flash"),
+		CurrentYear:     time.Now().Year(),
+		Flash:           h.App.Session.PopString(r.Context(), "flash"),
+		IsAuthenticated: h.IsAuthenticated(r),
+		CSRFToken:       nosurf.Token(r),
 	}
 }
 
