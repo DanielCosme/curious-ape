@@ -30,6 +30,7 @@ func ChiRoutes(h *Handler) http.Handler {
 	// Protected routes.
 	r.Route("/", func(r chi.Router) {
 		r.Use(h.App.Session.LoadAndSave)
+		r.Use(h.midAuthenticate)
 		r.Use(h.RequireAuth)
 
 		r.Get("/", h.home)

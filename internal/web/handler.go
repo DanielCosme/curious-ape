@@ -13,5 +13,9 @@ type Handler struct {
 }
 
 func (h *Handler) IsAuthenticated(r *http.Request) bool {
-	return h.App.Session.Exists(r.Context(), "authenticatedUserID")
+	isAuthenticated, ok := r.Context().Value(isAuthenticatedCtxKey).(bool)
+	if !ok {
+		return false
+	}
+	return isAuthenticated
 }

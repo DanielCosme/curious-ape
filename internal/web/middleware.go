@@ -20,7 +20,7 @@ func (h *Handler) midAuthenticate(next http.Handler) http.Handler {
 			return
 		}
 
-		exists, err := h.App.ValidID(id)
+		exists, err := h.App.Exists(id)
 		if err != nil {
 			h.serverError(w, err)
 			return

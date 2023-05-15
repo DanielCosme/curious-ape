@@ -39,7 +39,7 @@ func (h *Handler) loginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := h.App.Authenticate(form.Password)
+	id, err := h.App.Authenticate(form.Email, form.Password)
 	if err != nil {
 		if errors.Is(err, database.ErrInvalidCredentials) {
 			form.AddNonFieldError("Email or password is incorrect")

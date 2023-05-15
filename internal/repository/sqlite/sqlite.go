@@ -25,7 +25,7 @@ func newBuilder(tableName string) *sqlQueryBuilder {
 	return &sqlQueryBuilder{TableName: tableName, Data: []filterData{}}
 }
 
-func (qb *sqlQueryBuilder) AddFilter(columnName string, values ...any) {
+func (qb *sqlQueryBuilder) AddFilter(columnName string, values []any) {
 	qb.Data = append(qb.Data, filterData{columnName, values})
 }
 
@@ -45,6 +45,7 @@ func (qb *sqlQueryBuilder) generate() (string, []any) {
 		}
 	}
 
+	fmt.Println(q, args)
 	return q, args
 }
 

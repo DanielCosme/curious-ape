@@ -70,15 +70,19 @@ func userFilter(f entity.UserFilter) *sqlQueryBuilder {
 	b := newBuilder("users")
 
 	if f.ID > 0 {
-		b.AddFilter("id", f.ID)
+		b.AddFilter("id", []any{f.ID})
+	}
+
+	if f.Name != "" {
+		b.AddFilter("name", []any{f.Name})
 	}
 
 	if f.Role != "" {
-		b.AddFilter("role", f.Role)
+		b.AddFilter("role", []any{f.Role})
 	}
 
 	if f.Password != "" {
-		b.AddFilter("password", f.Password)
+		b.AddFilter("password", []any{f.Password})
 	}
 
 	return b

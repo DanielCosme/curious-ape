@@ -19,5 +19,6 @@ type User struct {
 type UserFilter struct {
 	ID       int
 	Role     Role
+	Name     string
 	Password string
 }

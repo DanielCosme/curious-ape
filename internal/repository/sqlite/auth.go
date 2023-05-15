@@ -87,7 +87,7 @@ func authFilter(f entity.AuthFilter) *sqlQueryBuilder {
 	b := newBuilder("auths")
 
 	if len(f.ID) > 0 {
-		b.AddFilter("id", f.ID)
+		b.AddFilter("id", intToAny(f.ID))
 	}
 
 	if len(f.Provider) > 0 {

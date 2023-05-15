@@ -38,12 +38,37 @@ func (a *App) SetPassword(name, password string, role entity.Role) error {
 	return err
 }
 
-func (a *App) Authenticate(passwordk string) (int, error) {
-	return 0, nil
+// Authenticate returns userID if succesfully authenticated.
+func (a *App) Authenticate(username, password string) (int, error) {
+	u, err := a.db.Users.Get(entity.UserFilter{Name: username})
+	if err != nil {
+		if errors.Is(err, database.ErrNotFound) {
+			return 0, database.ErrInvalidCredentials
+		}
+		return 0, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return 0, database.ErrInvalidCredentials
+		} else {
+			return 0, err
+		}
+	}
+
+	return u.ID, nil
 }
 
-func (a *App) ValidID(id int) (bool, error) {
-	return false, nil
+func (a *App) Exists(id int) (bool, error) {
+	_, err := a.db.Users.Get(entity.UserFilter{ID: id})
+	if err != nil {
+		if errors.Is(err, database.ErrNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }
 
 func (a *App) Oauth2ConnectProvider(provider string) (string, error) {

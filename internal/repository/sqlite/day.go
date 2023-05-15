@@ -76,7 +76,7 @@ func dayFilter(f entity.DayFilter) *sqlQueryBuilder {
 	b := newBuilder("days")
 
 	if len(f.IDs) > 0 {
-		b.AddFilter("id", f.IDs)
+		b.AddFilter("id", intToAny(f.IDs))
 	}
 
 	if len(f.Dates) > 0 {
