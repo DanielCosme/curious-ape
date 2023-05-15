@@ -33,7 +33,7 @@ func (h *Handler) habitCreateForm(w http.ResponseWriter, r *http.Request) {
 	h.render(w, http.StatusOK, "create.html.tmpl", data)
 }
 
-func (h *Handler) habitCreate(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) habitCreatePost(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		h.clientError(w, http.StatusBadRequest)

@@ -90,7 +90,16 @@ func main() {
 		},
 	}
 
+	// Set admin password.
 	if err := web.App.SetPassword(cfg.Admin.Name, cfg.Admin.Password, entity.AdminRole); err != nil {
+		logger.Fatal(err)
+	}
+	// Set user password.
+	if err := web.App.SetPassword(cfg.User.Name, cfg.User.Password, entity.UserRole); err != nil {
+		logger.Fatal(err)
+	}
+	// Set guest password.
+	if err := web.App.SetPassword(cfg.Guest.Name, cfg.Guest.Password, entity.GuestRole); err != nil {
 		logger.Fatal(err)
 	}
 

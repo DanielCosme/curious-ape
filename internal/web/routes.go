@@ -24,7 +24,7 @@ func ChiRoutes(h *Handler) http.Handler {
 		r.Use(midNoSurf)
 
 		r.Get("/", h.loginForm)
-		r.Post("/", h.login)
+		r.Post("/", h.loginPost)
 	})
 
 	// Protected routes.
@@ -38,7 +38,7 @@ func ChiRoutes(h *Handler) http.Handler {
 		// Habits.
 		r.With(h.midSetHabit).Get("/habit/view/{id}", h.habitView)
 		r.Get("/habit/create", h.habitCreateForm)
-		r.Post("/habit/create", h.habitCreate)
+		r.Post("/habit/create", h.habitCreatePost)
 	})
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) { h.notFound(w) })

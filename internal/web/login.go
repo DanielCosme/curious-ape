@@ -20,7 +20,7 @@ func (h *Handler) loginForm(w http.ResponseWriter, r *http.Request) {
 	h.render(w, http.StatusOK, "login.html.tmpl", data)
 }
 
-func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) loginPost(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		h.clientError(w, http.StatusBadRequest)
