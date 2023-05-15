@@ -44,3 +44,25 @@ func ChiRoutes(h *Handler) http.Handler {
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) { h.notFound(w) })
 	return r
 }
+
+/*
+--- Context syntax ---
+	- Set
+	ctx := r.Context()
+	ctx = context.WithValue(ctx, "foo", true)
+	r = r.WithContext(ctx)
+
+	- Retrieve
+	foo, ok := r.Context().Value("foo").(bool)
+	if !ok {
+		return errors.New("could not convert value to bool")
+	}
+*/
+
+// I could have admin, user and guest users??
+// Admin (root) --> Password set at the infrastructure level.
+
+// User (daniel-user) --> Password can be set and changed dynamically.
+
+// Guest (anyone else, maybe things that I would be willing to share publicly with friends, familly, etc...)
+//		--> Password can be changed by the admin, at leisure.

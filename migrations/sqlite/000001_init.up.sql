@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS habit_logs (
         CHECK(length(id) > 0 AND length(habit_id) > 0)
 );
 
-CREATE TABLE IF NOT EXISTS oauths (
+CREATE TABLE IF NOT EXISTS auths (
         id                  INTEGER primary key,
 
         provider            TEXT not null UNIQUE,
@@ -62,6 +62,15 @@ CREATE TABLE IF NOT EXISTS oauths (
         toggl_workspace_id      INTEGER default "",
         toggl_organization_id   INTEGER default "",
         toggl_project_ids       TEXT defatult ""
+);
+
+CREATE TABLE IF NOT EXISTS users (
+        id              INTEGER primary key,
+
+        name            TEXT not null UNIQUE,
+        password        TEXT not null UNIQUE,
+        role            TEXT CHECK (role IN ('admin', 'user', 'guest')) NOT NULL,
+        email           TEXT NOT NULL default ''
 );
 
 CREATE TABLE IF NOT EXISTS sleep_logs (

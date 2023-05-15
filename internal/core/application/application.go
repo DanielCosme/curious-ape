@@ -41,9 +41,10 @@ func New(opts *AppOptions) *App {
 		db: &database.Repository{
 			Habits:      &sqlite.HabitsDataSource{DB: opts.DB},
 			Days:        &sqlite.DaysDataSource{DB: opts.DB},
-			Oauths:      &sqlite.Oauth2DataSource{DB: opts.DB},
+			Auths:       &sqlite.AuthenticationDataSource{DB: opts.DB},
 			SleepLogs:   &sqlite.SleepLogDataSource{DB: opts.DB},
 			FitnessLogs: &sqlite.FitnessLogDataSource{DB: opts.DB},
+			Users:       &sqlite.UsersDataSource{DB: opts.DB},
 		},
 		cfg:     opts.Config,
 		Log:     opts.Logger,

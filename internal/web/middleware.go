@@ -12,6 +12,28 @@ import (
 	"github.com/justinas/nosurf"
 )
 
+func (h *Handler) midAuthenticate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		id := h.App.Session.GetInt(r.Context(), "authenticatedUserID")
+		if id == 0 {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		exists, err := h.App.ValidID(id)
+		if err != nil {
+			h.serverError(w, err)
+			return
+		}
+		if exists {
+			ctx := context.WithValue(r.Context(), isAuthenticatedCtxKey, true)
+			r = r.WithContext(ctx)
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func midSecureHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Security-Policy",

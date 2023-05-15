@@ -36,7 +36,14 @@ type config struct {
 		Google *entity.Oauth2Config `json:"google"`
 	} `json:"integrations"`
 	Environment string `json:"environment"`
-	Password    string `json:"password"`
+	Admin       user   `json:"admin"`
+	User        user   `json:"user"`
+	Guest       user   `json:"guest"`
+}
+
+type user struct {
+	Name     string `json:"name"`
+	Password string `json:"password"`
 }
 
 func main() {
@@ -83,7 +90,7 @@ func main() {
 		},
 	}
 
-	if err := web.App.SetPassword(cfg.Password); err != nil {
+	if err := web.App.SetPassword(cfg.Admin.Name, cfg.Admin.Password, entity.AdminRole); err != nil {
 		logger.Fatal(err)
 	}
 

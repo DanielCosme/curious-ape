@@ -11,7 +11,7 @@ const (
 	ProviderSelf   = "me"
 )
 
-type Oauth2 struct {
+type Auth struct {
 	ID           int                 `db:"id"`
 	Provider     IntegrationProvider `db:"provider"`
 	AccessToken  string              `db:"access_token"`
@@ -33,7 +33,7 @@ type Oauth2Config struct {
 	Scopes       []string `json:"scopes"`
 }
 
-type Oauth2Filter struct {
+type AuthFilter struct {
 	ID       []int
 	Provider []IntegrationProvider
 }

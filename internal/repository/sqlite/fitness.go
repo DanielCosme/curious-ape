@@ -90,15 +90,15 @@ func fitnessLogFilter(f entity.FitnessLogFilter) *sqlQueryBuilder {
 	b := newBuilder("fitness_logs")
 
 	if len(f.ID) > 0 {
-		b.AddFilter("id", intToInterface(f.ID))
+		b.AddFilter("id", intToAny(f.ID))
 	}
 
 	if len(f.DayID) > 0 {
-		b.AddFilter("day_id", intToInterface(f.DayID))
+		b.AddFilter("day_id", intToAny(f.DayID))
 	}
 
 	if len(f.Date) > 0 {
-		b.AddFilter("date", dateToInterface(f.Date))
+		b.AddFilter("date", dateToAny(f.Date))
 	}
 
 	return b

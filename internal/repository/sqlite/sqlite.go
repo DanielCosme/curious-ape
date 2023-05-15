@@ -25,11 +25,11 @@ func newBuilder(tableName string) *sqlQueryBuilder {
 	return &sqlQueryBuilder{TableName: tableName, Data: []filterData{}}
 }
 
-func (qb *sqlQueryBuilder) AddFilter(columnName string, values []interface{}) {
+func (qb *sqlQueryBuilder) AddFilter(columnName string, values ...any) {
 	qb.Data = append(qb.Data, filterData{columnName, values})
 }
 
-func (qb *sqlQueryBuilder) generate() (string, []interface{}) {
+func (qb *sqlQueryBuilder) generate() (string, []any) {
 	var args []interface{}
 	q := fmt.Sprintf("SELECT * FROM %s ", qb.TableName)
 
@@ -56,24 +56,24 @@ func getArgs(length int) string {
 	return strings.Join(ss, ",")
 }
 
-func intToInterface(ints []int) []interface{} {
-	iSlice := make([]interface{}, len(ints))
+func intToAny(ints []int) []any {
+	iSlice := make([]any, len(ints))
 	for i, v := range ints {
 		iSlice[i] = v
 	}
 	return iSlice
 }
 
-func dateToInterface(ds []time.Time) []interface{} {
-	iSlice := make([]interface{}, len(ds))
+func dateToAny(ds []time.Time) []any {
+	iSlice := make([]any, len(ds))
 	for i, v := range ds {
 		iSlice[i] = sanitizeDate(v)
 	}
 	return iSlice
 }
 
-func habitTypeToInterface(hts []entity.HabitType) []interface{} {
-	iSlice := make([]interface{}, len(hts))
+func habitTypeAny(hts []entity.HabitType) []any {
+	iSlice := make([]any, len(hts))
 	for i, v := range hts {
 		iSlice[i] = v
 	}

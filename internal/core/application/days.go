@@ -91,8 +91,8 @@ func (a *App) SyncDeepWorkLog(date time.Time) error {
 	return a.createDeepWorkLog(d, entity.Toggl)
 }
 
-func (a *App) TogglAPI() (*toggl.API, *entity.Oauth2, error) {
-	o, err := a.db.Oauths.Get(entity.Oauth2Filter{Provider: []entity.IntegrationProvider{entity.ProviderToggl}})
+func (a *App) TogglAPI() (*toggl.API, *entity.Auth, error) {
+	o, err := a.db.Auths.Get(entity.AuthFilter{Provider: []entity.IntegrationProvider{entity.ProviderToggl}})
 	if err != nil {
 		return nil, nil, err
 	}
