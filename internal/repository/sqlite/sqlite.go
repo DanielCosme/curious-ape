@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/danielcosme/curious-ape/internal/core/entity"
+	"github.com/danielcosme/go-sdk/log"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -45,7 +46,7 @@ func (qb *sqlQueryBuilder) generate() (string, []any) {
 		}
 	}
 
-	fmt.Println(q, args)
+	log.DefaultLogger.Trace(q, " ", args)
 	return q, args
 }
 

@@ -200,7 +200,6 @@ func (a *App) createDeepWorkLog(day *entity.Day, origin entity.DataSource) error
 }
 
 func (a *App) daysGetByDateRange(start, end time.Time) ([]*entity.Day, error) {
-	days := []*entity.Day{}
 	// TODO clamp start and end dates.
 	// TODO OR return error if the dates are off
 	if start.IsZero() || end.IsZero() {
@@ -210,13 +209,9 @@ func (a *App) daysGetByDateRange(start, end time.Time) ([]*entity.Day, error) {
 		return nil, errors.New("start date must be before end")
 	}
 
-	for _, date := range datesRange(start, end) {
-		d, err := a.DayGetByDate(date)
-		if err != nil {
-			return nil, err
-		}
-
-		days = append(days, d)
+	days, err := a.db.Days.Find(entity.DayFilter{Dates: datesRange(start, end)})
+	if err != nil {
+		return nil, err
 	}
 
 	return days, nil
