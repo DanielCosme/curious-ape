@@ -3,6 +3,7 @@ package web
 import (
 	"net/http"
 
+	"github.com/danielcosme/curious-ape/ui"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
@@ -16,8 +17,8 @@ func ChiRoutes(h *Handler) http.Handler {
 	r.Use(middleware.Logger)
 	r.Use(midSecureHeaders)
 
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
-	r.Handle("/static/*", http.StripPrefix("/static/", fileServer))
+	fileServer := http.FileServer(http.FS(ui.Files))
+	r.Handle("/static/*", fileServer)
 
 	r.Route("/login", func(r chi.Router) {
 		r.Use(h.App.Session.LoadAndSave)
