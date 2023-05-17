@@ -67,6 +67,10 @@ func FormatDate(t time.Time) string {
 	return t.Format(ISO8601)
 }
 
+func FormateDateHuman(t time.Time) string {
+	return t.Format(HumanDate)
+}
+
 func NormalizeDate(t time.Time, loc *time.Location) time.Time {
 	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, loc)
 }

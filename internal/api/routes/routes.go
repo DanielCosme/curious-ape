@@ -33,7 +33,6 @@ func ChiRoutes(a *application.App) http.Handler {
 		r.Route("/days", func(r chi.Router) {
 			r.Get("/", h.DaysGetAll)
 			r.Route("/date/{date}", func(r chi.Router) {
-				r.Use(middleware.SetDay(a))
 				r.Get("/", h.DayGetByDate)
 				r.Put("/", h.DayUpdate)
 			})
@@ -50,7 +49,6 @@ func ChiRoutes(a *application.App) http.Handler {
 				r.Delete("/", h.HabitDelete)
 			})
 			r.Route("/date/{date}", func(r chi.Router) {
-				r.Use(middleware.SetDay(a))
 				r.Get("/", h.HabitsGetByDay)
 				r.Post("/", h.HabitCreate)
 			})
@@ -59,7 +57,6 @@ func ChiRoutes(a *application.App) http.Handler {
 		r.Route("/sleep", func(r chi.Router) {
 			r.Get("/", h.SleepGetAll)
 			r.Route("/date/{date}", func(r chi.Router) {
-				r.Use(middleware.SetDay(a))
 				r.Get("/", h.SleepGetForDate)
 				r.Post("/", h.SleepCreate)
 			})
@@ -74,7 +71,6 @@ func ChiRoutes(a *application.App) http.Handler {
 		r.Route("/fitness", func(r chi.Router) {
 			r.Get("/", h.FitnessGetAll)
 			r.Route("/date/{date}", func(r chi.Router) {
-				r.Use(middleware.SetDay(a))
 				r.Get("/", h.FitnessGetForDate)
 				r.Post("/", h.FitnessCreate)
 			})

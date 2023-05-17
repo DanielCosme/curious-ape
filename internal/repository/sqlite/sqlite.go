@@ -69,7 +69,7 @@ func intToAny(ints []int) []any {
 func dateToAny(ds []time.Time) []any {
 	iSlice := make([]any, len(ds))
 	for i, v := range ds {
-		iSlice[i] = sanitizeDate(v)
+		iSlice[i] = normalizeDate(v)
 	}
 	return iSlice
 }
@@ -77,6 +77,14 @@ func dateToAny(ds []time.Time) []any {
 func habitTypeAny(hts []entity.HabitType) []any {
 	iSlice := make([]any, len(hts))
 	for i, v := range hts {
+		iSlice[i] = v
+	}
+	return iSlice
+}
+
+func stringToAny(ints []string) []any {
+	iSlice := make([]any, len(ints))
+	for i, v := range ints {
 		iSlice[i] = v
 	}
 	return iSlice

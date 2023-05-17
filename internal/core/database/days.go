@@ -1,6 +1,9 @@
 package database
 
 import (
+	"errors"
+	"time"
+
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 )
 
@@ -110,4 +113,32 @@ func DayToMapByISODate(days []*entity.Day) map[string]*entity.Day {
 		mapDays[entity.FormatDate(d.Date)] = d
 	}
 	return mapDays
+}
+
+func DayGetByID(db *Repository, id int) (*entity.Day, error) {
+	return db.Days.Get(entity.DayFilter{IDs: []int{id}})
+}
+
+func DayCreate(db *Repository, d *entity.Day) (*entity.Day, error) {
+	if err := db.Days.Create(d); err != nil {
+		return nil, err
+	}
+
+	return db.Days.Get(entity.DayFilter{IDs: []int{d.ID}})
+}
+
+func DayGetOrCreate(db *Repository, date time.Time) (*entity.Day, error) {
+	d, err := db.Days.Get(entity.DayFilter{Dates: []time.Time{date}})
+	if err != nil && !errors.Is(err, ErrNotFound) {
+		return nil, err
+	}
+	if d == nil {
+		// if it does not exist, create new and return.
+		d, err = DayCreate(db, &entity.Day{Date: date})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return d, nil
 }

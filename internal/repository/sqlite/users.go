@@ -27,12 +27,8 @@ func (ds *UsersDataSource) Create(u *entity.User) error {
 			:email
 		)`
 	res, err := ds.DB.NamedExec(q, u)
-	if err != nil {
-		return catchErr(err)
-	}
-	id, _ := res.LastInsertId()
-	u.ID = int(id)
-	return nil
+	u.ID = lastInsertID(res)
+	return err
 }
 
 func (ds *UsersDataSource) Update(u *entity.User) (*entity.User, error) {

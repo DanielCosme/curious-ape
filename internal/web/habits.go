@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/danielcosme/curious-ape/internal/core/application"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/validator"
 )
@@ -65,22 +66,15 @@ func (h *Handler) habitCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	d, err := h.App.DayGetByDate(time.Now())
-	if err != nil {
-		h.serverError(w, err)
-		return
+	parms := &application.NewHabitParams{
+		Date:         time.Now(),
+		CategoryCode: entity.HabitTypeFood.Str(),
+		Success:      true,
+		Origin:       entity.Manual,
+		Note:         fmt.Sprintf("title: %s\n content: %s\n expires: %d\n", form.Title, form.Content, expires),
+		IsAutomated:  false,
 	}
-
-	habit, err := h.App.HabitCreate(d, &entity.Habit{
-		CategoryID: 2,
-		Logs: []*entity.HabitLog{
-			{
-				Success: true,
-				Origin:  entity.Manual,
-				Note:    fmt.Sprintf("title: %s\n content: %s\n expires: %d\n", form.Title, form.Content, expires),
-			},
-		},
-	})
+	habit, err := h.App.HabitCreate(parms)
 	if err != nil {
 		h.serverError(w, err)
 		return

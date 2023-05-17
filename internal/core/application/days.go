@@ -11,35 +11,8 @@ import (
 	"github.com/danielcosme/go-sdk/log"
 )
 
-func (a *App) DayCreate(d *entity.Day) (*entity.Day, error) {
-	if err := a.db.Days.Create(d); err != nil {
-		return nil, err
-	}
-
-	return a.DayGetByDate(d.Date)
-}
-
 func (a *App) DaysGetAll() ([]*entity.Day, error) {
 	return a.db.Days.Find(entity.DayFilter{}, database.DaysPipeline(a.db)...)
-}
-
-func (a *App) DayGetByDate(date time.Time) (*entity.Day, error) {
-	d, err := a.db.Days.Get(entity.DayFilter{Dates: []time.Time{date}})
-	if err != nil && !errors.Is(err, database.ErrNotFound) {
-		return nil, err
-	}
-	if d == nil {
-		// if it does not exist, create new and return.
-		d, err = a.DayCreate(&entity.Day{Date: date})
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if err = database.ExecuteDaysPipeline([]*entity.Day{d}, database.DaysPipeline(a.db)...); err != nil {
-		return nil, err
-	}
-	return d, nil
 }
 
 func (a *App) SyncDeepWorkByDateRange(start, end time.Time) error {
@@ -75,7 +48,7 @@ func (a *App) SyncDeepWorkLog(date time.Time) error {
 	if err != nil {
 		return err
 	}
-	d, err := a.DayGetByDate(date)
+	d, err := database.DayGetOrCreate(a.db, date)
 	if err != nil {
 		return err
 	}
@@ -151,18 +124,14 @@ func (a *App) HabitUpsertFromDeepWorkLog(d *entity.Day, origin entity.DataSource
 		success = true
 	}
 
-	habit := &entity.Habit{
-		DayID:      d.ID,
-		CategoryID: habitCategory.ID,
-		Logs: []*entity.HabitLog{{
-			Success:     success,
-			IsAutomated: origin != entity.Manual,
-			Origin:      origin,
-			Note:        fmt.Sprintf("Deep work duration: %s", dur.String()),
-		}},
-	}
-
-	_, err = a.HabitCreate(d, habit)
+	_, err = a.HabitCreate(&NewHabitParams{
+		Date:         d.Date,
+		CategoryCode: habitCategory.Code,
+		Success:      success,
+		Origin:       origin,
+		Note:         fmt.Sprintf("Deep work duration: %s", dur.String()),
+		IsAutomated:  false,
+	})
 	return err
 }
 

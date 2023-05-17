@@ -1,6 +1,8 @@
 package sqlite
 
 import (
+	"database/sql"
+
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/jmoiron/sqlx"
@@ -23,16 +25,10 @@ func (ds *HabitsDataSource) Create(h *entity.Habit) error {
 			:status
 		)`
 	res, err := ds.DB.NamedExec(query, h)
-	if err != nil {
-		return catchErr(err)
-	}
-	id, err := res.LastInsertId()
-	if err != nil {
-		return err
-	}
-	h.ID = int(id)
-	return nil
+	h.ID = lastInsertID(res)
+	return catchErr(err)
 }
+
 func (ds *HabitsDataSource) Update(data *entity.Habit, joins ...entity.HabitJoin) (*entity.Habit, error) {
 	query := `
 		UPDATE 	habits
@@ -182,6 +178,10 @@ func habitCategoryFilter(f entity.HabitCategoryFilter) *sqlQueryBuilder {
 		b.Data = append(b.Data, filterData{columnName: "type", values: habitTypeAny(f.Type)})
 	}
 
+	if len(f.Code) > 0 {
+		b.Data = append(b.Data, filterData{columnName: "code", values: stringToAny(f.Code)})
+	}
+
 	return b
 }
 
@@ -205,4 +205,10 @@ func habitLogFilter(f entity.HabitLogFilter) *sqlQueryBuilder {
 	}
 
 	return b
+}
+
+func lastInsertID(res sql.Result) int {
+	// TODO: Add unit test to ensure that the current SQL driver supports LastInsertID
+	id, _ := res.LastInsertId()
+	return int(id)
 }

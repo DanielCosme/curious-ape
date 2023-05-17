@@ -118,7 +118,7 @@ func (a *App) SyncSleepByDateRange(start, end time.Time) error {
 }
 
 func (a *App) SyncFitbitSleepLog(date time.Time) error {
-	day, err := a.DayGetByDate(date)
+	day, err := database.DayGetOrCreate(a.db, date)
 	if err != nil {
 		return err
 	}

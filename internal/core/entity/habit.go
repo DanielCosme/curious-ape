@@ -15,6 +15,10 @@ type Habit struct {
 	Logs     []*HabitLog
 }
 
+func (h *Habit) CalculateHabitStatus() {
+
+}
+
 type HabitCategory struct {
 	ID          int       `db:"id"`
 	Name        string    `db:"name"`
@@ -72,6 +76,7 @@ type HabitFilter struct {
 type HabitCategoryFilter struct {
 	ID   []int
 	Type []HabitType
+	Code []string
 }
 
 type HabitLogFilter struct {
