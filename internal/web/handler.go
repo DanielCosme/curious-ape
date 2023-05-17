@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 
@@ -18,4 +19,8 @@ func (h *Handler) IsAuthenticated(r *http.Request) bool {
 		return false
 	}
 	return isAuthenticated
+}
+
+func ping(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "OK")
 }
