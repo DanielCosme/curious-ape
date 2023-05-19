@@ -12,6 +12,7 @@ import (
 	"github.com/danielcosme/curious-ape/internal/api"
 	"github.com/danielcosme/curious-ape/internal/core/application"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
+	"github.com/danielcosme/curious-ape/internal/repository"
 	"github.com/danielcosme/curious-ape/internal/repository/sqlite"
 	"github.com/danielcosme/go-sdk/errors"
 	logape "github.com/danielcosme/go-sdk/log"
@@ -50,7 +51,7 @@ func main() {
 
 	api := &api.Transport{
 		App: application.New(&application.AppOptions{
-			DB: db,
+			Repository: repository.NewSqliteRepository(db),
 			Config: &application.Environment{
 				Env:    cfg.Environment,
 				Fitbit: cfg.Integrations.Fitbit,

@@ -5,10 +5,7 @@ import (
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/integrations"
-	"github.com/danielcosme/curious-ape/internal/repository/sqlite"
 	"github.com/danielcosme/go-sdk/log"
-
-	"github.com/jmoiron/sqlx"
 )
 
 type App struct {
@@ -24,9 +21,9 @@ type App struct {
 //		there is no need for authentication
 
 type AppOptions struct {
-	DB             *sqlx.DB
 	Logger         *log.Logger
 	Config         *Environment
+	Repository     *database.Repository
 	SessionManager *scs.SessionManager
 }
 
@@ -38,14 +35,7 @@ type Environment struct {
 
 func New(opts *AppOptions) *App {
 	a := &App{
-		db: &database.Repository{
-			Habits:      &sqlite.HabitsDataSource{DB: opts.DB},
-			Days:        &sqlite.DaysDataSource{DB: opts.DB},
-			Auths:       &sqlite.AuthenticationDataSource{DB: opts.DB},
-			SleepLogs:   &sqlite.SleepLogDataSource{DB: opts.DB},
-			FitnessLogs: &sqlite.FitnessLogDataSource{DB: opts.DB},
-			Users:       &sqlite.UsersDataSource{DB: opts.DB},
-		},
+		db:      opts.Repository,
 		cfg:     opts.Config,
 		Log:     opts.Logger,
 		sync:    integrations.NewSync(opts.Logger),

@@ -14,6 +14,7 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/danielcosme/curious-ape/internal/core/application"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
+	"github.com/danielcosme/curious-ape/internal/repository"
 	"github.com/danielcosme/curious-ape/internal/repository/sqlite"
 	"github.com/danielcosme/curious-ape/internal/web"
 	"github.com/danielcosme/go-sdk/errors"
@@ -55,7 +56,7 @@ func main() {
 	readConfiguration(cfg)
 
 	// logger initialization
-	logger := logape.New(os.Stdout, logape.LevelTrace, time.RFC822)
+	logger := logape.New(os.Stdout, logape.LevelDebug, time.RFC822)
 	logape.DefaultLogger = logger
 
 	// SQL datasource initialization
@@ -72,7 +73,7 @@ func main() {
 
 	web := &web.WebClient{
 		App: application.New(&application.AppOptions{
-			DB: db,
+			Repository: repository.NewSqliteRepository(db),
 			Config: &application.Environment{
 				Env:    cfg.Environment,
 				Fitbit: cfg.Integrations.Fitbit,

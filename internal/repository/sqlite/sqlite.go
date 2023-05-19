@@ -2,11 +2,14 @@ package sqlite
 
 import (
 	"fmt"
+	"os"
 	"strings"
+	"testing"
 	"time"
 
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/go-sdk/log"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -88,4 +91,27 @@ func stringToAny(ints []string) []any {
 		iSlice[i] = v
 	}
 	return iSlice
+}
+
+func NewTestSqliteDB(t *testing.T) *sqlx.DB {
+	t.Helper()
+
+	db := sqlx.MustConnect(DriverName, ":memory:")
+	if err := db.Ping(); err != nil {
+		t.Fatal(err)
+	}
+
+	script, err := os.ReadFile("../../../migrations/sqlite/000001_init.up.sql")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = db.Exec(string(script))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Cleanup(func() {
+		db.Close()
+	})
+	return db
 }
