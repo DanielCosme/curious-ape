@@ -28,7 +28,7 @@ func (p *NewHabitParams) ToLog() *entity.HabitLog {
 	}
 }
 
-func (a *App) HabitCreate(data *NewHabitParams) (*entity.Habit, error) {
+func (a *App) HabitUpsert(data *NewHabitParams) (*entity.Habit, error) {
 	habit, err := db.GetOrCreateHabit(a.db, data.Date, data.CategoryCode, db.HabitsPipeline(a.db)...)
 	if err != nil {
 		return nil, err
@@ -45,16 +45,13 @@ func (a *App) HabitCreate(data *NewHabitParams) (*entity.Habit, error) {
 		"Type":    habit.Category.Type.Str(),
 		"Success": strconv.FormatBool(hl.Success),
 		"Origin":  hl.Origin.Str(),
-		"details": hl.Note,
-		"date":    entity.FormatDate(data.Date),
+		"Details": hl.Note,
+		"Date":    entity.FormatDate(data.Date),
 	})
 
-	if err := db.ExecuteHabitsPipeline([]*entity.Habit{habit}, db.HabitsJoinLogs(a.db)); err != nil {
-		return nil, err
-	}
-
 	oldStatus := habit.Status
-	habit.CalculateHabitStatus()
+	habit.Logs = append(habit.Logs, hl)
+	habit.Status = entity.CalculateHabitStatus(habit.Logs)
 	if oldStatus != habit.Status {
 		return a.db.Habits.Update(habit, db.HabitsPipeline(a.db)...)
 	}
@@ -73,7 +70,7 @@ func (a *App) HabitUpsertFromSleepLog(sleepLog entity.SleepLog) error {
 		success = true
 	}
 
-	_, err := a.HabitCreate(&NewHabitParams{
+	_, err := a.HabitUpsert(&NewHabitParams{
 		Date:         sleepLog.Date,
 		CategoryCode: entity.HabitTypeWakeUp.Str(),
 		Success:      success,

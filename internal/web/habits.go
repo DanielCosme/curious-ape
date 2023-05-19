@@ -74,7 +74,7 @@ func (h *Handler) habitCreatePost(w http.ResponseWriter, r *http.Request) {
 		Note:         fmt.Sprintf("title: %s\n content: %s\n expires: %d\n", form.Title, form.Content, expires),
 		IsAutomated:  false,
 	}
-	habit, err := h.App.HabitCreate(parms)
+	habit, err := h.App.HabitUpsert(parms)
 	if err != nil {
 		h.serverError(w, err)
 		return

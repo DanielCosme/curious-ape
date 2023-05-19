@@ -169,7 +169,7 @@ func (a *App) createFailedHabitForDays(days []*entity.Day, category entity.Habit
 	}
 
 	for _, day := range days {
-		_, err = a.HabitCreate(&NewHabitParams{
+		_, err = a.HabitUpsert(&NewHabitParams{
 			Date:         day.Date,
 			CategoryCode: habitCategory.Code,
 			Success:      false,
@@ -238,7 +238,7 @@ func (a *App) HabitUpsertFromFitnessLog(fl *entity.FitnessLog) error {
 		return err
 	}
 
-	_, err = a.HabitCreate(&NewHabitParams{
+	_, err = a.HabitUpsert(&NewHabitParams{
 		Date:         fl.Date,
 		CategoryCode: habitCategory.Code,
 		Success:      true,

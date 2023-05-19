@@ -15,8 +15,28 @@ type Habit struct {
 	Logs     []*HabitLog
 }
 
-func (h *Habit) CalculateHabitStatus() {
+func CalculateHabitStatus(logs []*HabitLog) HabitStatus {
+	status := HabitStatusNoInfo
+	var override bool
+	for _, log := range logs {
+		if !log.IsAutomated {
+			if log.Success {
+				return HabitStatusDone
+			}
+			status = HabitStatusNotDone
+			override = true
+			continue
+		}
 
+		if !override {
+			if log.Success {
+				status = HabitStatusDone
+			} else if status != HabitStatusDone {
+				status = HabitStatusNotDone
+			}
+		}
+	}
+	return status
 }
 
 type HabitCategory struct {

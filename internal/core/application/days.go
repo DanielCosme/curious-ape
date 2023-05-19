@@ -124,7 +124,7 @@ func (a *App) HabitUpsertFromDeepWorkLog(d *entity.Day, origin entity.DataSource
 		success = true
 	}
 
-	_, err = a.HabitCreate(&NewHabitParams{
+	_, err = a.HabitUpsert(&NewHabitParams{
 		Date:         d.Date,
 		CategoryCode: habitCategory.Code,
 		Success:      success,

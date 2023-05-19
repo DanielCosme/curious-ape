@@ -37,7 +37,7 @@ func (h *Handler) HabitCreate(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newHabit, err := h.App.HabitCreate(nil)
+	newHabit, err := h.App.HabitUpsert(nil)
 	JsonCheckError(rw, http.StatusCreated, envelope{"habit": types.FromHabitToTransport(newHabit)}, err)
 }
 
