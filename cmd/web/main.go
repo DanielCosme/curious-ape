@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -61,13 +60,9 @@ func main() {
 
 	// SQL datasource initialization
 	db := sqlx.MustConnect(sqlite.DriverName, cfg.Server.FilePath+"/"+cfg.Database.DNS)
-	dbOther, err := sql.Open(sqlite.DriverName, cfg.Server.FilePath+"/"+cfg.Database.DNS)
-	if err != nil {
-		logger.Fatal(err)
-	}
 
 	sessionManager := scs.New()
-	sessionManager.Store = sqlite3store.New(dbOther)
+	sessionManager.Store = sqlite3store.New(db.DB)
 	sessionManager.Lifetime = 12 * time.Hour
 	sessionManager.Cookie.SameSite = http.SameSiteStrictMode
 

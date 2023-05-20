@@ -17,12 +17,6 @@ CREATE TABLE IF NOT EXISTS habit_categories (
         CHECK(LENGTH(id) > 0)
 );
 
-INSERT INTO habit_categories (name, type, code)
-VALUES  ("Eat healthy", "food", "food"),
-        ("Wake up early", "wake_up", "wake_up"),
-        ("Workout", "fitness", "fitness"),
-        ("Deep work", "deep_work", "deep_work");
-
 CREATE TABLE IF NOT EXISTS habits (
         id                  INTEGER primary key,
         day_id              INTEGER not null,

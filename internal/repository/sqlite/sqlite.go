@@ -2,13 +2,17 @@ package sqlite
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/go-sdk/log"
+
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/sqlite"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -101,12 +105,16 @@ func NewTestSqliteDB(t *testing.T) *sqlx.DB {
 		t.Fatal(err)
 	}
 
-	script, err := os.ReadFile("../../../migrations/sqlite/000001_init.up.sql")
+	migrationDriver, err := sqlite.WithInstance(db.DB, &sqlite.Config{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = db.Exec(string(script))
+
+	migrator, err := migrate.NewWithDatabaseInstance("file://../../../migrations/sqlite/", "sqlite3", migrationDriver)
 	if err != nil {
+		t.Fatal(err)
+	}
+	if err := migrator.Up(); err != nil {
 		t.Fatal(err)
 	}
 
