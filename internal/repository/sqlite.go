@@ -8,7 +8,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func NewSqliteRepository(db *sqlx.DB) *database.Repository {
+func NewSqlite(db *sqlx.DB) *database.Repository {
 	return &database.Repository{
 		Habits:      &sqlite.HabitsDataSource{DB: db},
 		Days:        &sqlite.DaysDataSource{DB: db},
@@ -22,5 +22,5 @@ func NewSqliteRepository(db *sqlx.DB) *database.Repository {
 func NewTestSqliteRepository(t *testing.T) *database.Repository {
 	t.Helper()
 	db := sqlite.NewTestSqliteDB(t)
-	return NewSqliteRepository(db)
+	return NewSqlite(db)
 }

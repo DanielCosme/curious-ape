@@ -51,7 +51,7 @@ func main() {
 
 	api := &api.Transport{
 		App: application.New(&application.AppOptions{
-			Repository: repository.NewSqliteRepository(db),
+			Repository: repository.NewSqlite(db),
 			Config: &application.Environment{
 				Env:    cfg.Environment,
 				Fitbit: cfg.Integrations.Fitbit,
