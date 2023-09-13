@@ -20,5 +20,5 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 
 	data := h.newTemplateData(r)
 	data.Habits = habits
-	h.render(w, http.StatusOK, "home.html.tmpl", data)
+	h.render(w, http.StatusOK, "home.gohtml", data)
 }

@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/alexedwards/scs/sqlite3store"
-	"github.com/alexedwards/scs/v2"
 	"github.com/danielcosme/curious-ape/internal/core/application"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/repository"
@@ -20,6 +19,7 @@ import (
 	logape "github.com/danielcosme/go-sdk/log"
 	_ "github.com/mattn/go-sqlite3"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/jmoiron/sqlx"
 )
 

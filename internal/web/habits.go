@@ -23,7 +23,7 @@ func (h *Handler) habitView(w http.ResponseWriter, r *http.Request) {
 
 	data := h.newTemplateData(r)
 	data.Habit = habit
-	h.render(w, http.StatusOK, "view.html.tmpl", data)
+	h.render(w, http.StatusOK, "view.gohtml", data)
 }
 
 func (h *Handler) habitCreateForm(w http.ResponseWriter, r *http.Request) {
@@ -31,7 +31,7 @@ func (h *Handler) habitCreateForm(w http.ResponseWriter, r *http.Request) {
 	data.Form = habitCreateForm{
 		Expires: 1, // Default value.
 	}
-	h.render(w, http.StatusOK, "create.html.tmpl", data)
+	h.render(w, http.StatusOK, "create.gohtml", data)
 }
 
 func (h *Handler) habitCreatePost(w http.ResponseWriter, r *http.Request) {
@@ -62,7 +62,7 @@ func (h *Handler) habitCreatePost(w http.ResponseWriter, r *http.Request) {
 	if !form.Valid() {
 		data.Form = form
 		// 422 - unprocessable entity represents a validation error.
-		h.render(w, http.StatusUnprocessableEntity, "create.html.tmpl", data)
+		h.render(w, http.StatusUnprocessableEntity, "create.gohtml", data)
 		return
 	}
 
@@ -83,5 +83,5 @@ func (h *Handler) habitCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	data.Habit = habit
 	data.Flash = h.App.Session.PopString(r.Context(), "flash")
-	h.render(w, http.StatusCreated, "view.html.tmpl", data)
+	h.render(w, http.StatusCreated, "view.gohtml", data)
 }

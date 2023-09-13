@@ -42,7 +42,7 @@ func (h *Handler) newTemplateData(r *http.Request) *templateData {
 func newTemplateCache() (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 
-	pages, err := fs.Glob(ui.Files, "html/pages/*.tmpl")
+	pages, err := fs.Glob(ui.Files, "html/pages/*.gohtml")
 	if err != nil {
 		return nil, err
 	}
@@ -51,8 +51,8 @@ func newTemplateCache() (map[string]*template.Template, error) {
 		name := filepath.Base(page)
 
 		patterns := []string{
-			"html/base.html.tmpl",
-			"html/partials/*tmpl",
+			"html/base.gohtml",
+			"html/partials/*gohtml",
 			page,
 		}
 

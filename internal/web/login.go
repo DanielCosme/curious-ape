@@ -17,7 +17,7 @@ type userLoginForm struct {
 func (h *Handler) loginForm(w http.ResponseWriter, r *http.Request) {
 	data := h.newTemplateData(r)
 	data.Form = userLoginForm{}
-	h.render(w, http.StatusOK, "login.html.tmpl", data)
+	h.render(w, http.StatusOK, "login.gohtml", data)
 }
 
 func (h *Handler) loginPost(w http.ResponseWriter, r *http.Request) {
@@ -35,7 +35,7 @@ func (h *Handler) loginPost(w http.ResponseWriter, r *http.Request) {
 	if !form.Valid() {
 		data := h.newTemplateData(r)
 		data.Form = form
-		h.render(w, http.StatusUnprocessableEntity, "login.html.tmpl", data)
+		h.render(w, http.StatusUnprocessableEntity, "login.gohtml", data)
 		return
 	}
 
@@ -46,7 +46,7 @@ func (h *Handler) loginPost(w http.ResponseWriter, r *http.Request) {
 
 			data := h.newTemplateData(r)
 			data.Form = form
-			h.render(w, http.StatusUnprocessableEntity, "login.html.tmpl", data)
+			h.render(w, http.StatusUnprocessableEntity, "login.gohtml", data)
 		} else {
 			h.serverError(w, err)
 		}

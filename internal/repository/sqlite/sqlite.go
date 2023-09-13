@@ -27,6 +27,7 @@ type sqlQueryBuilder struct {
 type filterData struct {
 	columnName string
 	values     []interface{}
+	/**/
 }
 
 func newBuilder(tableName string) *sqlQueryBuilder {
@@ -118,8 +119,6 @@ func NewTestSqliteDB(t *testing.T) *sqlx.DB {
 		t.Fatal(err)
 	}
 
-	t.Cleanup(func() {
-		db.Close()
-	})
+	t.Cleanup(func() { db.Close() })
 	return db
 }
