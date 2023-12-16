@@ -24,3 +24,6 @@ tmp/
 
 # IDE
 .idea
+
+# MacOS
+.DS_Store
