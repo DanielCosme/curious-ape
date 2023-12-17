@@ -1,6 +1,6 @@
 module github.com/danielcosme/curious-ape
 
-go 1.20
+go 1.21.5
 
 require (
 	github.com/alexedwards/scs/sqlite3store v0.0.0-20230327161757-10d4299e3b24
