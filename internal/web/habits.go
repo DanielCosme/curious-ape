@@ -1,7 +1,6 @@
 package web
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -133,7 +132,6 @@ func (h *Handler) newHabitLogPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("One")
 	td := h.newTemplateData(r)
 	td.Day = &formatDays([]*entity.Day{day})[0]
 	h.renderPartial(w, http.StatusOK, "day_row.gohtml", td)
