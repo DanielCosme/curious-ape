@@ -1,6 +1,9 @@
 package web
 
 import (
+	"context"
+	"github.com/a-h/templ"
+	habitView "github.com/danielcosme/curious-ape/views/habit"
 	"net/http"
 	"strconv"
 	"time"
@@ -18,6 +21,21 @@ type newHabitForm struct {
 	Note         string
 	IsAutomated  bool
 	validator.Validator
+}
+
+func (h *Handler) templTest(w http.ResponseWriter, _ *http.Request) {
+	ds, err := h.App.DaysMonth()
+	if err != nil {
+		panic(err)
+	}
+	err = renderTempl(context.Background(), w, habitView.Show(ds[len(ds)-1].Habits[0]))
+	if err != nil {
+		h.serverError(w, err)
+	}
+}
+
+func renderTempl(ctx context.Context, w http.ResponseWriter, component templ.Component) error {
+	return component.Render(ctx, w)
 }
 
 func (h *Handler) habit(w http.ResponseWriter, r *http.Request) {

@@ -120,7 +120,7 @@ func listHabits(cmd *cobra.Command, args []string) {
 	by, _ := cmd.Flags().GetString("by")     // endDate -> 	day, week, month, year
 	from, _ := cmd.Flags().GetString("from") // startDate -> current, previous
 
-	// TODO make this work with the days endpoint instead of the habits one, selecting which aggregation we want.
+	// TODO make this work with the days endpoint instead of the habit one, selecting which aggregation we want.
 	hs, err := client.DefaultClient.Habits.List(period(by, from))
 	CheckErr(err)
 	if len(hs) == 0 {

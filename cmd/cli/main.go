@@ -40,7 +40,7 @@ func init() {
 	rootCmd.PersistentFlags().StringP("host", "e", "https://ape.danicos.me/api", "Server host:port combination")
 	rootCmd.PersistentFlags().String("config-dir-path", "/home/daniel/.ape/cli", "Configuration files location")
 
-	// habits
+	// habit
 	habitListCmd.Flags().StringP("by", "b", "month", "by which unit to list: day/week/month etc")
 	habitListCmd.Flags().StringP("from", "f", "current", "from which period: current, previous, next")
 	// auth
@@ -62,13 +62,13 @@ func init() {
 // 		Fitness
 
 // What commands to I want
-// ape habits ls --by=month/week/day
+// ape habit ls --by=month/week/day
 
 // ape logs sleep/fitness/work ls --by=month/week/day
 
 // ape days ls --by=month/week/day
 
-// ape ls habits/days/
+// ape ls habit/days/
 
 // root command will default to listing the help.
 

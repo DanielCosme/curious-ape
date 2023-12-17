@@ -14,12 +14,12 @@ func ChiRoutes(a *application.App) http.Handler {
 	h := Handler{App: a}
 	r := chi.NewRouter()
 
-	//  GET 	/habits 				-> get all habits
-	//  GET 	/habits/{id}			-> get habit by ID
-	//	GET 	/habits/date/{date} 	-> get all habits for day
-	//  PUT 	/habits/{id} 			-> update habit by ID
-	//  DELETE 	/habits/{id} 			-> delete habit by ID
-	//  POST 	/habits/date/{date} 	-> create habit for date
+	//  GET 	/habit 				-> get all habit
+	//  GET 	/habit/{id}			-> get habit by ID
+	//	GET 	/habit/date/{date} 	-> get all habit for day
+	//  PUT 	/habit/{id} 			-> update habit by ID
+	//  DELETE 	/habit/{id} 			-> delete habit by ID
+	//  POST 	/habit/date/{date} 	-> create habit for date
 
 	r.Use(middleware.Logger(a))
 	r.Use(middleware.RecoverPanic(a))

@@ -42,6 +42,8 @@ func ChiRoutes(h *Handler) http.Handler {
 		r.Get("/habit/new", h.newHabitForm)
 		r.Post("/habit/new", h.newHabitPost)
 		r.Post("/habit/log", h.newHabitLogPost)
+
+		r.Get("/templ", h.templTest)
 	})
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) { h.notFound(w) })

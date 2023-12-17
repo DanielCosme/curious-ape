@@ -23,11 +23,15 @@ confirm:
 # DEVELOPMENT
 # ==================================================================================== #
 
-## run/api: run the cmd/api application
-.PHONY: run/api
-run/api:
-	@echo ${DB}
-	go run ./cmd/httpd -env dev
+## gen-templ: generate user interface templates
+.PHONY: gen-templ
+gen-templ:
+	templ generate
+
+## run: run the application
+.PHONY: run
+run: gen-templ
+	go run ./cmd/web -env dev
 
 ## db/psql: connect to the database using psql
 # 	.PHONY: db/psql
