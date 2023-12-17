@@ -61,7 +61,7 @@ func (h *Handler) loginPost(w http.ResponseWriter, r *http.Request) {
 
 	h.App.Session.Put(r.Context(), "authenticatedUserID", id)
 
-	http.Redirect(w, r, "/habit/create", http.StatusSeeOther)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {

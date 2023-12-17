@@ -1,21 +1,20 @@
 {{define "nav"}}
 <nav>
-        {{if .IsAuthenticated }}
-        <div>
-            <a href='/'>Home</a>
-            <a href='/habit/create'>Create habit</a>
-        </div>
-        {{end}}
+    {{if .IsAuthenticated }}
     <div>
-        {{if .IsAuthenticated}}
-            <form action="/logout" method="POST">
-                <!-- Include the CSRF token -->
-                <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
-                <button>Logout</button>
-            </form>
-        {{else}}
-            <a href="/login">Login</a>
-        {{end}}
+        <a href='/'>Home</a>
+    </div>
+    {{end}}
+    <div>
+    {{if .IsAuthenticated}}
+        <form action="/logout" method="POST">
+            <!-- Include the CSRF token -->
+            <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
+            <button>Logout</button>
+        </form>
+    {{else}}
+        <a href="/login">Login</a>
+    {{end}}
     </div>
 </nav>
 {{end}}

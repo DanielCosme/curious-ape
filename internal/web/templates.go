@@ -14,16 +14,17 @@ import (
 	"github.com/justinas/nosurf"
 )
 
-// TODO: add constants/vars for template names.
-
 var functions = template.FuncMap{
 	"humanDate": humanDate,
+	"dateOnly":  dateOnly,
 }
 
 type templateData struct {
 	CurrentYear     int
 	Habit           *entity.Habit
 	Habits          []*entity.Habit
+	Days            []dayContainer
+	Day             *dayContainer
 	Form            any
 	Flash           string
 	IsAuthenticated bool
@@ -67,11 +68,32 @@ func newTemplateCache() (map[string]*template.Template, error) {
 	return cache, nil
 }
 
+func newTemplatePartialCache() (map[string]*template.Template, error) {
+	cache := map[string]*template.Template{}
+	pages, err := fs.Glob(ui.Files, "html/partials/*.gohtml")
+	if err != nil {
+		return nil, err
+	}
+	for _, page := range pages {
+		name := filepath.Base(page)
+		patterns := []string{
+			"html/base.gohtml",
+			"html/partials/*gohtml",
+			page,
+		}
+		ts, err := template.New(name).Funcs(functions).ParseFS(ui.Files, patterns...)
+		if err != nil {
+			return nil, err
+		}
+		cache[name] = ts
+	}
+	return cache, nil
+}
+
 func (h *Handler) render(w http.ResponseWriter, status int, page string, data *templateData) {
 	ts, ok := h.templateCache[page]
 	if !ok {
-		err := fmt.Errorf("the template %s does not exist", page)
-		h.serverError(w, err)
+		h.serverError(w, fmt.Errorf("the template %s does not exist", page))
 		return
 	}
 
@@ -82,10 +104,34 @@ func (h *Handler) render(w http.ResponseWriter, status int, page string, data *t
 		return
 	}
 
+	if _, err := buf.WriteTo(w); err != nil {
+		panic(err)
+	}
 	w.WriteHeader(status)
-	buf.WriteTo(w)
+}
+
+func (h *Handler) renderPartial(w http.ResponseWriter, status int, page string, data *templateData) {
+	ts, ok := h.partialTemplateCache[page]
+	if !ok {
+		http.Error(w, fmt.Sprintf("the template %s does not exist", page), http.StatusInternalServerError)
+		return
+	}
+	buf := new(bytes.Buffer)
+	err := ts.Execute(buf, data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if _, err := buf.WriteTo(w); err != nil {
+		panic(err)
+	}
+	w.WriteHeader(status)
 }
 
 func humanDate(t time.Time) string {
 	return t.Format(entity.HumanDate)
+}
+
+func dateOnly(t time.Time) string {
+	return t.Format(time.DateOnly)
 }

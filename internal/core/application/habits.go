@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	db "github.com/danielcosme/curious-ape/internal/core/database"
+	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/go-sdk/log"
 )
@@ -28,16 +28,19 @@ func (p *NewHabitParams) ToLog() *entity.HabitLog {
 	}
 }
 
-func (a *App) HabitUpsert(data *NewHabitParams) (*entity.Habit, error) {
-	habit, err := db.GetOrCreateHabit(a.db, data.Date, data.CategoryCode, db.HabitsPipeline(a.db)...)
+func (a *App) HabitUpsert(params *NewHabitParams) (*entity.Habit, error) {
+	habit, err := database.GetOrCreateHabit(a.db, params.Date, params.CategoryCode)
 	if err != nil {
 		return nil, err
 	}
 
-	hl := data.ToLog()
+	hl := params.ToLog()
 	hl.HabitID = habit.ID
-	operation, err := db.UpsertHabitLog(a.db, hl)
+	operation, err := database.UpsertHabitLog(a.db, hl)
 	if err != nil {
+		return nil, err
+	}
+	if err := database.ExecuteHabitsPipeline([]*entity.Habit{habit}, database.HabitsPipeline(a.db)...); err != nil {
 		return nil, err
 	}
 
@@ -46,16 +49,20 @@ func (a *App) HabitUpsert(data *NewHabitParams) (*entity.Habit, error) {
 		"Success": strconv.FormatBool(hl.Success),
 		"Origin":  hl.Origin.Str(),
 		"Details": hl.Note,
-		"Date":    entity.FormatDate(data.Date),
+		"Date":    entity.FormatDate(params.Date),
 	})
 
 	oldStatus := habit.Status
-	habit.Logs = append(habit.Logs, hl)
 	habit.Status = entity.CalculateHabitStatus(habit.Logs)
 	if oldStatus != habit.Status {
-		return a.db.Habits.Update(habit, db.HabitsPipeline(a.db)...)
+		a.Log.InfoP("habit status changed", log.Prop{
+			"From": string(oldStatus),
+			"To":   string(habit.Status),
+			"Date": entity.FormatDate(params.Date),
+			"Type": habit.Category.Type.Str(),
+		})
+		return a.db.Habits.Update(habit, database.HabitsPipeline(a.db)...)
 	}
-
 	return habit, nil
 }
 
@@ -92,7 +99,7 @@ func toWakeUpTime(t time.Time) time.Time {
 
 func (a *App) HabitFullUpdate(habit, data *entity.Habit) (*entity.Habit, error) {
 	data.ID = habit.ID
-	return a.db.Habits.Update(data, db.HabitsPipeline(a.db)...)
+	return a.db.Habits.Update(data, database.HabitsPipeline(a.db)...)
 }
 
 func (a *App) HabitDelete(habit *entity.Habit) error {
@@ -122,18 +129,18 @@ func (a *App) HabitsGetAll(params map[string]string) ([]*entity.Habit, error) {
 		if err != nil {
 			return nil, err
 		}
-		f.DayID = db.DayToIDs(days)
+		f.DayID = database.DayToIDs(days)
 	}
 
-	return a.db.Habits.Find(f, db.HabitsPipeline(a.db)...)
+	return a.db.Habits.Find(f, database.HabitsPipeline(a.db)...)
 }
 
 func (a *App) HabitGetByID(id int) (*entity.Habit, error) {
-	return a.db.Habits.Get(entity.HabitFilter{ID: []int{id}}, db.HabitsPipeline(a.db)...)
+	return a.db.Habits.Get(entity.HabitFilter{ID: []int{id}}, database.HabitsPipeline(a.db)...)
 }
 
 func (a *App) HabitsGetByDay(d *entity.Day) ([]*entity.Habit, error) {
-	return a.db.Habits.Find(entity.HabitFilter{DayID: []int{d.ID}}, db.HabitsPipeline(a.db)...)
+	return a.db.Habits.Find(entity.HabitFilter{DayID: []int{d.ID}}, database.HabitsPipeline(a.db)...)
 }
 
 func (a *App) HabitsGetCategories() ([]*entity.HabitCategory, error) {

@@ -9,8 +9,9 @@ import (
 )
 
 type Handler struct {
-	App           *application.App
-	templateCache map[string]*template.Template
+	App                  *application.App
+	templateCache        map[string]*template.Template
+	partialTemplateCache map[string]*template.Template
 }
 
 func (h *Handler) IsAuthenticated(r *http.Request) bool {

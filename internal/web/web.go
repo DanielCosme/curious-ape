@@ -18,7 +18,12 @@ func (wc *WebClient) ListenAndServe() error {
 	if err != nil {
 		return err
 	}
+	tpc, err := newTemplatePartialCache()
+	if err != nil {
+		return err
+	}
 	h.templateCache = tc
+	h.partialTemplateCache = tpc
 
 	wc.Server.Handler = wc.Routes(h)
 

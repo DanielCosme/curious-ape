@@ -38,9 +38,10 @@ func ChiRoutes(h *Handler) http.Handler {
 		r.Post("/logout", h.logout)
 
 		// Habits.
-		r.With(h.midSetHabit).Get("/habit/view/{id}", h.habitView)
-		r.Get("/habit/create", h.habitCreateForm)
-		r.Post("/habit/create", h.habitCreatePost)
+		r.With(h.midSetHabit).Get("/habit/view/{id}", h.habit)
+		r.Get("/habit/new", h.newHabitForm)
+		r.Post("/habit/new", h.newHabitPost)
+		r.Post("/habit/log", h.newHabitLogPost)
 	})
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) { h.notFound(w) })

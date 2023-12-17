@@ -15,6 +15,10 @@ func (a *App) DaysGetAll() ([]*entity.Day, error) {
 	return a.db.Days.Find(entity.DayFilter{}, database.DaysPipeline(a.db)...)
 }
 
+func (a *App) DayGetByID(id int) (*entity.Day, error) {
+	return a.db.Days.Get(entity.DayFilter{IDs: []int{id}}, database.DaysJoinHabits(a.db))
+}
+
 func (a *App) SyncDeepWorkByDateRange(start, end time.Time) error {
 	togglAPI, o, err := a.TogglAPI()
 	if err != nil {
@@ -141,14 +145,11 @@ func (a *App) DayUpdate(day, data *entity.Day) (*entity.Day, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	// create deep work resource (in the future) and upsert habit
 	if err := a.createDeepWorkLog(day, entity.Manual); err != nil {
 		return nil, err
 	}
-
-	database.ExecuteDaysPipeline([]*entity.Day{day}, database.DaysJoinHabits(a.db))
-	return day, err
+	return day, database.ExecuteDaysPipeline([]*entity.Day{day}, database.DaysJoinHabits(a.db))
 }
 
 func (a *App) dayUpdate(day, data *entity.Day) (*entity.Day, error) {
@@ -169,21 +170,43 @@ func (a *App) createDeepWorkLog(day *entity.Day, origin entity.DataSource) error
 }
 
 func (a *App) daysGetByDateRange(start, end time.Time) ([]*entity.Day, error) {
-	// TODO clamp start and end dates.
-	// TODO OR return error if the dates are off
 	if start.IsZero() || end.IsZero() {
 		return nil, errors.New("invalid dates")
 	}
 	if start.After(end) {
 		return nil, errors.New("start date must be before end")
 	}
+	return a.db.Days.Find(entity.DayFilter{Dates: datesRange(start, end)})
+}
 
-	days, err := a.db.Days.Find(entity.DayFilter{Dates: datesRange(start, end)})
-	if err != nil {
+func (a *App) DaysMonth() ([]*entity.Day, error) {
+	var res []*entity.Day
+	var err error
+	var d *entity.Day
+
+	today := time.Now()
+	first := time.Date(today.Year(), today.Month(), 1, 0, 0, 0, 0, today.Location())
+	d, err = a.db.Days.Get(entity.DayFilter{Dates: []time.Time{today}})
+	if err != nil && !errors.Is(err, database.ErrNotFound) {
 		return nil, err
 	}
+	if d != nil {
+		var e error
+		res, e = a.daysGetByDateRange(first, today)
+		if e != nil {
+			return nil, err
+		}
+		return res, database.ExecuteDaysPipeline(res, database.DaysPipeline(a.db)...)
+	}
 
-	return days, nil
+	for _, dt := range datesRange(first, today) {
+		d, err = database.DayGetOrCreate(a.db, dt)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, d)
+	}
+	return res, database.ExecuteDaysPipeline(res, database.DaysJoinHabits(a.db))
 }
 
 func datesRange(start, end time.Time) []time.Time {

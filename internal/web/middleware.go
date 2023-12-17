@@ -81,7 +81,6 @@ func (h *Handler) midSetHabit(next http.Handler) http.Handler {
 			h.notFound(w)
 			return
 		}
-
 		habit, err := h.App.HabitGetByID(id)
 		if err != nil {
 			if errors.Is(err, database.ErrNotFound) {
@@ -91,7 +90,6 @@ func (h *Handler) midSetHabit(next http.Handler) http.Handler {
 			}
 			return
 		}
-
 		r = r.Clone(context.WithValue(r.Context(), "habit", habit))
 		next.ServeHTTP(w, r)
 	})

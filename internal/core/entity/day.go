@@ -3,7 +3,7 @@ package entity
 import "time"
 
 const ISO8601 = "2006-01-02"
-const HumanDate = "02 Jan 2006 "
+const HumanDate = "02 Mon, Jan"
 const HumanDateWeekDay = "Monday, 02 Jan 2006"
 const HumanDateWithTime = "Monday, 02 Jan 2006 at 15:04"
 const Timestamp = "15:04:05"
@@ -65,10 +65,6 @@ func ParseTime(t string) (time.Time, error) {
 
 func FormatDate(t time.Time) string {
 	return t.Format(ISO8601)
-}
-
-func FormateDateHuman(t time.Time) string {
-	return t.Format(HumanDate)
 }
 
 func NormalizeDate(t time.Time, loc *time.Location) time.Time {

@@ -22,7 +22,7 @@ func (a *App) SleepUpdate(sleepLog, data *entity.SleepLog) (*entity.SleepLog, er
 		return nil, err
 	}
 
-	// Habit Upsert From Sleep Log
+	// Habit Upsert From Fitness Log
 	if err := a.HabitUpsertFromSleepLog(*data); err != nil {
 		a.Log.Error(err)
 	}
@@ -206,7 +206,7 @@ func (a *App) createSleepLogs(logs []*entity.SleepLog) error {
 			return err
 		}
 
-		// Habit Creation From Sleep Log
+		// Habit Creation From Fitness Log
 		if err := a.HabitUpsertFromSleepLog(*l); err != nil {
 			a.Log.Error(err)
 		}

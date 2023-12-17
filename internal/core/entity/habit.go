@@ -71,14 +71,6 @@ func (ht HabitType) Str() string {
 	return string(ht)
 }
 
-func IsValidHabitCategoryType(habitType HabitType) bool {
-	switch habitType {
-	case HabitTypeFood, HabitTypeCustom, HabitTypeFitness, HabitTypeWakeUp, HabitTypeDeepWork:
-		return true
-	}
-	return false
-}
-
 type HabitStatus string
 
 const (

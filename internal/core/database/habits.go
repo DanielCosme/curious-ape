@@ -30,7 +30,6 @@ func ExecuteHabitsPipeline(hs []*entity.Habit, hjs ...entity.HabitJoin) error {
 	if !(len(hs) > 0) {
 		return nil
 	}
-
 	for _, hj := range hjs {
 		if err := hj(hs); err != nil {
 			return err

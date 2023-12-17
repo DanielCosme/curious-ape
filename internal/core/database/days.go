@@ -115,10 +115,6 @@ func DayToMapByISODate(days []*entity.Day) map[string]*entity.Day {
 	return mapDays
 }
 
-func DayGetByID(db *Repository, id int) (*entity.Day, error) {
-	return db.Days.Get(entity.DayFilter{IDs: []int{id}})
-}
-
 func DayCreate(db *Repository, d *entity.Day) (*entity.Day, error) {
 	if err := db.Days.Create(d); err != nil {
 		return nil, err
