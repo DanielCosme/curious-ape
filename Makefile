@@ -69,6 +69,13 @@ build/cli/linux:
 	@echo ${current_time}
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/ape ./cmd/cli
 
+## build/web: build the cmd/web application
+.PHONY: build/web/linux
+build/web/linux:
+	@echo 'Building cmd/web...'
+	@echo ${current_time}
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/ape ./cmd/web
+
 ## install/cli: install the cmd/cli application
 .PHONY: install/cli/linux
 install/cli/linux: build/cli/linux
