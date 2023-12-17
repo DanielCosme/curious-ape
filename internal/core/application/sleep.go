@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	errors2 "errors"
 	"fmt"
+	"time"
+
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/integrations/fitbit"
 	"github.com/danielcosme/go-sdk/errors"
 	"github.com/danielcosme/go-sdk/log"
-	"time"
 )
 
 func (a *App) SleepDeleteByID(id int) error {
@@ -21,7 +22,7 @@ func (a *App) SleepUpdate(sleepLog, data *entity.SleepLog) (*entity.SleepLog, er
 		return nil, err
 	}
 
-	// Habit Upsert From Sleep Log
+	// Habit Upsert From Fitness Log
 	if err := a.HabitUpsertFromSleepLog(*data); err != nil {
 		a.Log.Error(err)
 	}
@@ -117,7 +118,7 @@ func (a *App) SyncSleepByDateRange(start, end time.Time) error {
 }
 
 func (a *App) SyncFitbitSleepLog(date time.Time) error {
-	day, err := a.DayGetByDate(date)
+	day, err := database.DayGetOrCreate(a.db, date)
 	if err != nil {
 		return err
 	}
@@ -200,19 +201,19 @@ func (a *App) createSleepLogs(logs []*entity.SleepLog) error {
 			}
 		} else if err := a.db.SleepLogs.Create(l); err != nil {
 			if errors2.Is(err, database.ErrUniqueCheckFailed) {
-				a.Log.Error(fmt.Errorf("dayID and main sleep unique check failed for %s", l.Date.Format(entity.HumanDate)))
+				a.Log.Error(fmt.Errorf("dayID and main sleep unique check failed for %s", l.Date.Format(entity.HumanDateWithTime)))
 			}
 			return err
 		}
 
-		// Habit Creation From Sleep Log
+		// Habit Creation From Fitness Log
 		if err := a.HabitUpsertFromSleepLog(*l); err != nil {
 			a.Log.Error(err)
 		}
 
 		a.Log.InfoP(fmt.Sprintf("%s sleep log", op), log.Prop{
 			"provider": l.Origin.Str(),
-			"date":     l.Date.Format(entity.HumanDate),
+			"date":     l.Date.Format(entity.HumanDateWithTime),
 		})
 	}
 

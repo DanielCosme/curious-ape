@@ -1,0 +1,96 @@
+{{define "title"}}Home{{end}}
+
+{{define "main"}}
+<h2>Days</h2>
+{{if .Days}}
+ <table class="u-full-width">
+     <thead>
+         <tr>
+             <th>Date</th>
+             <th>Wake Up</th>
+             <th>Fitness</th>
+             <th>Work</th>
+             <th>Eat</th>
+         </tr>
+     </thead>
+     <tbody>
+     {{range .Days}}
+     {{- /*gotype: github.com/danielcosme/curious-ape/internal/web.dayContainer*/ -}}
+         <tr>
+             <td>{{humanDate .Date}}</td>
+             <td>
+                 {{if eq .Wake.Status "not-done" }}
+                 <span>X</span>
+                 {{else if eq .Wake.Status "done"}}
+                 <span>O</span>
+                 {{else}}
+                 <span>_</span>
+                 {{end}}
+                 <a href="#"
+                    hx-post="/habit/log?success=true&category=wake_up&date={{dateOnly .Date}}"
+                    hx-swap="outerHTML"
+                    hx-target="closest tr">Y</a>
+                 <a href="#"
+                    hx-post="/habit/log?success=false&category=wake_up&date={{dateOnly .Date}}"
+                    hx-swap="outerHTML"
+                    hx-target="closest tr">N</a>
+             </td>
+             <td>
+                 {{if eq .Fitness.Status "not-done" }}
+                     <span>X</span>
+                 {{else if eq .Fitness.Status "done"}}
+                     <span>O</span>
+                 {{else}}
+                     <span>_</span>
+                 {{end}}
+                 <a href="#"
+                    hx-post="/habit/log?success=true&category=fitness&date={{dateOnly .Date}}"
+                    hx-swap="outerHTML"
+                    hx-target="closest tr">Y</a>
+                 <a href="#"
+                    hx-post="/habit/log?success=false&category=fitness&date={{dateOnly .Date}}"
+                    hx-swap="outerHTML"
+                    hx-target="closest tr">N</a>
+             </td>
+             <td>
+                 {{if eq .Work.Status "not-done" }}
+                     <span>X</span>
+                 {{else if eq .Work.Status "done"}}
+                     <span>O</span>
+                 {{else}}
+                     <span>_</span>
+                 {{end}}
+                 <a href="#"
+                    hx-post="/habit/log?success=true&category=deep_work&date={{dateOnly .Date}}"
+                    hx-swap="outerHTML"
+                    hx-target="closest tr">Y</a>
+                 <a href="#"
+                    hx-post="/habit/log?success=false&category=deep_work&date={{dateOnly .Date}}"
+                    hx-swap="outerHTML"
+                    hx-target="closest tr">N</a>
+             </td>
+             <td>
+                 {{if eq .Eat.Status "not-done" }}
+                     <span>X</span>
+                 {{else if eq .Eat.Status "done"}}
+                     <span>O</span>
+                 {{else}}
+                     <span>_</span>
+                 {{end}}
+                 <a href="#"
+                    hx-post="/habit/log?success=true&category=food&date={{dateOnly .Date}}"
+                    hx-swap="outerHTML"
+                    hx-target="closest tr">Y</a>
+                 <a href="#"
+                    hx-post="/habit/log?success=false&category=food&date={{dateOnly .Date}}"
+                    hx-swap="outerHTML"
+                    hx-target="closest tr">N</a>
+             </td>
+         </tr>
+     {{end}}
+     </tbody>
+</table>
+{{else}}
+<p>There's nothing to see here yet!</p>
+{{end}}
+{{end}}

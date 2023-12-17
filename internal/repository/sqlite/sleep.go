@@ -105,11 +105,11 @@ func sleepLogFilter(f entity.SleepLogFilter) *sqlQueryBuilder {
 	b := newBuilder("sleep_logs")
 
 	if len(f.ID) > 0 {
-		b.AddFilter("id", intToInterface(f.ID))
+		b.AddFilter("id", intToAny(f.ID))
 	}
 
 	if len(f.DayID) > 0 {
-		b.AddFilter("day_id", intToInterface(f.DayID))
+		b.AddFilter("day_id", intToAny(f.DayID))
 	}
 
 	return b

@@ -2,22 +2,83 @@ package application
 
 import (
 	"context"
+	"net/http"
+	"strconv"
+
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/go-sdk/errors"
+	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/oauth2"
-	"net/http"
-	"strconv"
 )
+
+func (a *App) SetPassword(name, password string, role entity.Role) error {
+	if password == "" {
+		return errors.New("password cannot be empty")
+	}
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+	if err != nil {
+		return err
+	}
+
+	u, err := a.db.Users.Get(entity.UserFilter{Role: role})
+	if err != nil && !errors.Is(err, database.ErrNotFound) {
+		return err
+	}
+	if u == nil {
+		return a.db.Users.Create(&entity.User{
+			Name:     name,
+			Password: string(hash),
+			Role:     role,
+		})
+	}
+
+	u.Password = string(hash)
+	_, err = a.db.Users.Update(u)
+	return err
+}
+
+// Authenticate returns userID if succesfully authenticated.
+func (a *App) Authenticate(username, password string) (int, error) {
+	u, err := a.db.Users.Get(entity.UserFilter{Name: username})
+	if err != nil {
+		if errors.Is(err, database.ErrNotFound) {
+			return 0, database.ErrInvalidCredentials
+		}
+		return 0, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return 0, database.ErrInvalidCredentials
+		} else {
+			return 0, err
+		}
+	}
+
+	return u.ID, nil
+}
+
+func (a *App) Exists(id int) (bool, error) {
+	_, err := a.db.Users.Get(entity.UserFilter{ID: id})
+	if err != nil {
+		if errors.Is(err, database.ErrNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
+}
 
 func (a *App) Oauth2ConnectProvider(provider string) (string, error) {
 	p := entity.IntegrationProvider(provider)
-	o, err := a.db.Oauths.Get(entity.Oauth2Filter{Provider: []entity.IntegrationProvider{p}})
+	o, err := a.db.Auths.Get(entity.AuthFilter{Provider: []entity.IntegrationProvider{p}})
 	if err != nil && !errors.Is(err, database.ErrNotFound) {
 		return "", err
 	}
 	if o == nil {
-		if err = a.db.Oauths.Create(&entity.Oauth2{Provider: p}); err != nil {
+		if err = a.db.Auths.Create(&entity.Auth{Provider: p}); err != nil {
 			return "", err
 		}
 	}
@@ -46,7 +107,7 @@ func (a *App) Oauth2Success(provider, code string) error {
 		return err
 	}
 
-	o, err := a.db.Oauths.Get(entity.Oauth2Filter{Provider: []entity.IntegrationProvider{p}})
+	o, err := a.db.Auths.Get(entity.AuthFilter{Provider: []entity.IntegrationProvider{p}})
 	if err != nil {
 		return err
 	}
@@ -54,16 +115,16 @@ func (a *App) Oauth2Success(provider, code string) error {
 	o.AccessToken = t.AccessToken
 	o.RefreshToken = t.RefreshToken
 	o.Expiration = t.Expiry
-	o.Type = t.Type()
+	o.TokenType = t.Type()
 
-	_, err = a.db.Oauths.Update(o)
+	_, err = a.db.Auths.Update(o)
 	return err
 }
 
 func (a *App) Oauth2GetClient(provider entity.IntegrationProvider) (*http.Client, error) {
 	config := a.oauth2GetConfigurationForProvider(provider)
 
-	o, err := a.db.Oauths.Get(entity.Oauth2Filter{Provider: []entity.IntegrationProvider{provider}})
+	o, err := a.db.Auths.Get(entity.AuthFilter{Provider: []entity.IntegrationProvider{provider}})
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +133,7 @@ func (a *App) Oauth2GetClient(provider entity.IntegrationProvider) (*http.Client
 		AccessToken:  o.AccessToken,
 		RefreshToken: o.RefreshToken,
 		Expiry:       o.Expiration,
-		TokenType:    o.Type,
+		TokenType:    o.TokenType,
 	}
 
 	switch provider {
@@ -81,11 +142,11 @@ func (a *App) Oauth2GetClient(provider entity.IntegrationProvider) (*http.Client
 		// Check if token is still valid, if not refresh it
 		if newToken.AccessToken != token.AccessToken {
 			// If token was refreshed we persist the new token info
-			_, err = a.db.Oauths.Update(&entity.Oauth2{
+			_, err = a.db.Auths.Update(&entity.Auth{
 				ID:           o.ID,
 				AccessToken:  newToken.AccessToken,
 				RefreshToken: newToken.RefreshToken,
-				Type:         newToken.TokenType,
+				TokenType:    newToken.TokenType,
 				Expiration:   newToken.Expiry,
 			})
 			token = newToken
@@ -130,23 +191,23 @@ func (a *App) Oauth2AddAPIToken(token, provider string) (string, error) {
 
 	switch entity.IntegrationProvider(provider) {
 	case entity.ProviderToggl:
-		o, err := a.db.Oauths.Get(entity.Oauth2Filter{Provider: []entity.IntegrationProvider{entity.ProviderToggl}})
+		o, err := a.db.Auths.Get(entity.AuthFilter{Provider: []entity.IntegrationProvider{entity.ProviderToggl}})
 		if err != nil && !errors.Is(err, database.ErrNotFound) {
 			return "", err
 		}
 
 		if o == nil {
-			o = &entity.Oauth2{
+			o = &entity.Auth{
 				Provider:    entity.ProviderToggl,
 				AccessToken: token,
-				Type:        "Bearer",
+				TokenType:   "Bearer",
 			}
-			if err := a.db.Oauths.Create(o); err != nil {
+			if err := a.db.Auths.Create(o); err != nil {
 				return "", err
 			}
 		} else {
 			o.AccessToken = token
-			if _, err := a.db.Oauths.Update(o); err != nil {
+			if _, err := a.db.Auths.Update(o); err != nil {
 				return "", err
 			}
 		}
@@ -167,7 +228,7 @@ func (a *App) Oauth2AddAPIToken(token, provider string) (string, error) {
 		w := ws[0]
 		o.ToogglOrganizationID = strconv.Itoa(w.OrganizationID)
 		o.ToogglWorkSpaceID = strconv.Itoa(w.ID)
-		if _, err := a.db.Oauths.Update(o); err != nil {
+		if _, err := a.db.Auths.Update(o); err != nil {
 			return "", err
 		}
 

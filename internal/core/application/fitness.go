@@ -3,14 +3,15 @@ package application
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/integrations/google"
 	"github.com/danielcosme/go-sdk/dates"
 	"github.com/danielcosme/go-sdk/errors"
 	"github.com/danielcosme/go-sdk/log"
-	"strconv"
-	"time"
 )
 
 func (a *App) FitnessFindLogs(filter entity.FitnessLogFilter) ([]*entity.FitnessLog, error) {
@@ -85,7 +86,7 @@ func (a *App) SyncFitnessByDateRAnge(start, end time.Time) error {
 }
 
 func (a *App) SyncFitnessLog(date time.Time) error {
-	day, err := a.DayGetByDate(date)
+	day, err := database.DayGetOrCreate(a.db, date)
 	if err != nil {
 		return err
 	}
@@ -168,17 +169,14 @@ func (a *App) createFailedHabitForDays(days []*entity.Day, category entity.Habit
 	}
 
 	for _, day := range days {
-		habit := &entity.Habit{
-			DayID:      day.ID,
-			CategoryID: habitCategory.ID,
-			Logs: []*entity.HabitLog{{
-				Success:     false,
-				IsAutomated: source != entity.Manual,
-				Origin:      source,
-				Note:        fmt.Sprintf("From missing log on data source"),
-			}},
-		}
-		habit, err = a.HabitCreate(day, habit)
+		_, err = a.HabitUpsert(&NewHabitParams{
+			Date:         day.Date,
+			CategoryCode: habitCategory.Code,
+			Success:      false,
+			IsAutomated:  source != entity.Manual,
+			Origin:       source,
+			Note:         fmt.Sprintf("From missing log on data source"),
+		})
 		if err != nil {
 			a.Log.Error(err)
 		}
@@ -209,7 +207,7 @@ func (a *App) createFitnessLogs(fls []*entity.FitnessLog) error {
 	for _, fl := range fls {
 		fl.Date = fl.Day.Date
 		if err := a.db.FitnessLogs.Create(fl); err != nil {
-			a.Log.Warningf("fitness log for %s could not be created: %s", fl.Day.Date.Format(entity.HumanDate), err.Error())
+			a.Log.Warningf("fitness log for %s could not be created: %s", fl.Day.Date.Format(entity.HumanDateWithTime), err.Error())
 			continue
 		}
 
@@ -219,7 +217,7 @@ func (a *App) createFitnessLogs(fls []*entity.FitnessLog) error {
 
 		a.Log.InfoP("Created fitness log", log.Prop{
 			"provider": fl.Origin.Str(),
-			"date":     fl.Day.Date.Format(entity.HumanDate),
+			"date":     fl.Day.Date.Format(entity.HumanDateWithTime),
 			"type":     fl.Type.Str(),
 		})
 	}
@@ -240,17 +238,14 @@ func (a *App) HabitUpsertFromFitnessLog(fl *entity.FitnessLog) error {
 		return err
 	}
 
-	habit := &entity.Habit{
-		DayID:      fl.DayID,
-		CategoryID: habitCategory.ID,
-		Logs: []*entity.HabitLog{{
-			Success:     true,
-			IsAutomated: fl.Origin != entity.Manual,
-			Origin:      fl.Origin,
-			Note:        fmt.Sprintf("Fitness log of type %s", fl.Type),
-		}},
-	}
-	habit, err = a.HabitCreate(fl.Day, habit)
+	_, err = a.HabitUpsert(&NewHabitParams{
+		Date:         fl.Date,
+		CategoryCode: habitCategory.Code,
+		Success:      true,
+		IsAutomated:  fl.Origin != entity.Manual,
+		Origin:       fl.Origin,
+		Note:         fmt.Sprintf("Fitness log of type %s", fl.Type),
+	})
 	if err != nil {
 		return err
 	}

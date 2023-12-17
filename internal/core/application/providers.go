@@ -1,13 +1,14 @@
 package application
 
 import (
-	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"strings"
+
+	"github.com/danielcosme/curious-ape/internal/core/entity"
 )
 
 func (a *App) TogglGetProjects() ([]entity.Entity, error) {
 	var es []entity.Entity
-	o, err := a.db.Oauths.Get(entity.Oauth2Filter{Provider: []entity.IntegrationProvider{entity.ProviderToggl}})
+	o, err := a.db.Auths.Get(entity.AuthFilter{Provider: []entity.IntegrationProvider{entity.ProviderToggl}})
 	if err != nil {
 		return es, err
 	}
@@ -29,7 +30,7 @@ func (a *App) TogglGetProjects() ([]entity.Entity, error) {
 
 // TogglAssignProjectsToGoal . Projects as (string) id, id, id
 func (a *App) TogglAssignProjectsToGoal(ids string) error {
-	o, err := a.db.Oauths.Get(entity.Oauth2Filter{Provider: []entity.IntegrationProvider{entity.ProviderToggl}})
+	o, err := a.db.Auths.Get(entity.AuthFilter{Provider: []entity.IntegrationProvider{entity.ProviderToggl}})
 	if err != nil {
 		return err
 	}
@@ -51,6 +52,6 @@ func (a *App) TogglAssignProjectsToGoal(ids string) error {
 
 	// Update the project IDs
 	o.ToogglProjectIDs = ids
-	_, err = a.db.Oauths.Update(o)
+	_, err = a.db.Auths.Update(o)
 	return err
 }

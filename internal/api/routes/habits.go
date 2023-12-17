@@ -1,10 +1,11 @@
 package routes
 
 import (
+	"net/http"
+
 	"github.com/danielcosme/curious-ape/internal/api/types"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/rest"
-	"net/http"
 )
 
 func (h *Handler) HabitsGetCategories(rw http.ResponseWriter, r *http.Request) {
@@ -27,7 +28,7 @@ func (h *Handler) HabitsGetByDay(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HabitCreate(rw http.ResponseWriter, r *http.Request) {
-	day := r.Context().Value("day").(*entity.Day)
+	// day := r.Context().Value("day").(*entity.Day)
 
 	var data *types.HabitTransport
 	err := rest.ReadJSON(r, &data)
@@ -36,7 +37,7 @@ func (h *Handler) HabitCreate(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newHabit, err := h.App.HabitCreate(day, data.ToHabit())
+	newHabit, err := h.App.HabitUpsert(nil)
 	JsonCheckError(rw, http.StatusCreated, envelope{"habit": types.FromHabitToTransport(newHabit)}, err)
 }
 

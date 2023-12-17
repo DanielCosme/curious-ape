@@ -1,6 +1,12 @@
 package database
 
-import "github.com/danielcosme/curious-ape/internal/core/entity"
+import (
+	"errors"
+	"strings"
+	"time"
+
+	"github.com/danielcosme/curious-ape/internal/core/entity"
+)
 
 type Habit interface {
 	// habit
@@ -24,7 +30,6 @@ func ExecuteHabitsPipeline(hs []*entity.Habit, hjs ...entity.HabitJoin) error {
 	if !(len(hs) > 0) {
 		return nil
 	}
-
 	for _, hj := range hjs {
 		if err := hj(hs); err != nil {
 			return err
@@ -138,4 +143,62 @@ func HabitToIDs(hs []*entity.Habit) []int {
 		}
 	}
 	return IDs
+}
+
+func GetOrCreateHabit(db *Repository, date time.Time, categoryCode string, joins ...entity.HabitJoin) (*entity.Habit, error) {
+	// Make sure the category exists.
+	category, err := db.Habits.GetHabitCategory(entity.HabitCategoryFilter{Code: []string{strings.ToLower(categoryCode)}})
+	if err != nil {
+		return nil, err
+	}
+
+	day, err := DayGetOrCreate(db, date)
+	if err != nil {
+		return nil, err
+	}
+
+	// First check if the habit already exists.
+	h, err := db.Habits.Get(entity.HabitFilter{DayID: []int{day.ID}, CategoryID: []int{category.ID}}, joins...)
+	if err != nil && !errors.Is(err, ErrNotFound) {
+		return nil, err
+	}
+
+	// If it does not exist we create it.
+	if h == nil {
+		h = &entity.Habit{
+			DayID:      day.ID,
+			CategoryID: category.ID,
+			Status:     entity.HabitStatusNoInfo,
+		}
+		if err := db.Habits.Create(h); err != nil {
+			return nil, err
+		}
+
+		h.Day = day
+		h.Category = category
+	}
+
+	return h, nil
+}
+
+func UpsertHabitLog(db *Repository, data *entity.HabitLog) (string, error) {
+	if data.HabitID == 0 {
+		return "", errors.New("habit ID cannot be 0")
+	}
+
+	hl, err := db.Habits.GetHabitLog(entity.HabitLogFilter{Origin: []entity.DataSource{data.Origin}, HabitID: []int{data.HabitID}})
+	if err != nil && !errors.Is(err, ErrNotFound) {
+		return "", err
+	}
+	// If it does not exist create it
+	if hl == nil {
+		return "created", db.Habits.CreateHabitLog(data)
+	}
+
+	hl.Origin = data.Origin
+	hl.Note = data.Note
+	hl.Success = data.Success
+	hl.IsAutomated = data.IsAutomated
+	_, err = db.Habits.UpdateHabitLog(hl)
+	return "update", err
 }

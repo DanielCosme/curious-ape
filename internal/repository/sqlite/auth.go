@@ -5,18 +5,18 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type Oauth2DataSource struct {
+type AuthenticationDataSource struct {
 	DB *sqlx.DB
 }
 
-func (ds *Oauth2DataSource) Create(o *entity.Oauth2) error {
+func (ds *AuthenticationDataSource) Create(o *entity.Auth) error {
 	q := `
-		INSERT INTO oauths (
+		INSERT INTO auths (
 			provider,
 			access_token,
 			refresh_token,
 			expiration,
-			type,
+			token_type,
 			toggl_workspace_id, 
 			toggl_organization_id,
 			toggl_project_ids
@@ -26,7 +26,7 @@ func (ds *Oauth2DataSource) Create(o *entity.Oauth2) error {
 			:access_token,
 			:refresh_token,
 			:expiration,
-			:type,
+			:token_type,
 			:toggl_workspace_id,
 			:toggl_organization_id,
 			:toggl_project_ids
@@ -40,14 +40,14 @@ func (ds *Oauth2DataSource) Create(o *entity.Oauth2) error {
 	return nil
 }
 
-func (ds *Oauth2DataSource) Update(o *entity.Oauth2) (*entity.Oauth2, error) {
+func (ds *AuthenticationDataSource) Update(o *entity.Auth) (*entity.Auth, error) {
 	q := `
-		UPDATE  oauths 
+		UPDATE  auths 
 		SET 
 			access_token = :access_token,
 			refresh_token = :refresh_token,
 			expiration = :expiration,
-			type = :type, 
+			token_type = :token_type, 
 		    toggl_workspace_id = :toggl_workspace_id,
 			toggl_organization_id = :toggl_organization_id,
 			toggl_project_ids = :toggl_project_ids
@@ -57,37 +57,37 @@ func (ds *Oauth2DataSource) Update(o *entity.Oauth2) (*entity.Oauth2, error) {
 	if err != nil {
 		return nil, catchErr(err)
 	}
-	return ds.Get(entity.Oauth2Filter{ID: []int{o.ID}})
+	return ds.Get(entity.AuthFilter{ID: []int{o.ID}})
 }
 
-func (ds *Oauth2DataSource) Get(filter entity.Oauth2Filter) (*entity.Oauth2, error) {
-	o := new(entity.Oauth2)
-	query, args := oauthFilter(filter).generate()
+func (ds *AuthenticationDataSource) Get(filter entity.AuthFilter) (*entity.Auth, error) {
+	o := new(entity.Auth)
+	query, args := authFilter(filter).generate()
 	if err := ds.DB.Get(o, query, args...); err != nil {
 		return nil, catchErr(err)
 	}
 	return o, nil
 }
 
-func (ds *Oauth2DataSource) Find(filter entity.Oauth2Filter) ([]*entity.Oauth2, error) {
-	oauths := []*entity.Oauth2{}
-	query, args := oauthFilter(filter).generate()
-	if err := ds.DB.Select(oauths, query, args...); err != nil {
+func (ds *AuthenticationDataSource) Find(filter entity.AuthFilter) ([]*entity.Auth, error) {
+	auths := []*entity.Auth{}
+	query, args := authFilter(filter).generate()
+	if err := ds.DB.Select(auths, query, args...); err != nil {
 		return nil, catchErr(err)
 	}
-	return oauths, nil
+	return auths, nil
 }
 
-func (ds *Oauth2DataSource) Delete(id int) error {
-	_, err := ds.DB.Exec("DELETE FROM oauths WHERE id = ?", id)
+func (ds *AuthenticationDataSource) Delete(id int) error {
+	_, err := ds.DB.Exec("DELETE FROM auths WHERE id = ?", id)
 	return catchErr(err)
 }
 
-func oauthFilter(f entity.Oauth2Filter) *sqlQueryBuilder {
-	b := newBuilder("oauths")
+func authFilter(f entity.AuthFilter) *sqlQueryBuilder {
+	b := newBuilder("auths")
 
 	if len(f.ID) > 0 {
-		b.AddFilter("id", intToInterface(f.ID))
+		b.AddFilter("id", intToAny(f.ID))
 	}
 
 	if len(f.Provider) > 0 {

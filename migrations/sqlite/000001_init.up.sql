@@ -1,27 +1,21 @@
 -- schema
 CREATE TABLE IF NOT EXISTS days (
-        id                  INTEGER primary key,
-        "date"              DATE not null UNIQUE,
-        deep_work_minutes   INTEGER NOT NULL DEFAULT 0 check ( length(deep_work_minutes) >= 0)
+        id                  INTEGER PRIMARY KEY,
+        "date"              DATE NOT NULL UNIQUE,
+        deep_work_minutes   INTEGER NOT NULL DEFAULT 0 CHECK ( LENGTH(deep_work_minutes) >= 0)
 );
 
 CREATE TABLE IF NOT EXISTS habit_categories (
-        id                  INTEGER primary key,
+        id                  INTEGER PRIMARY KEY,
 
-        name                TEXT not null                   check (length(name) > 0),
-        type                TEXT not null                   check (length(type) > 0),
-        code                TEXT not null default "default" check (length(code) > 0),
-        description         TEXT default "",
-        color               INTEGER default "#ffffff",
+        name                TEXT NOT NULL                   CHECK (LENGTH(name) > 0),
+        type                TEXT UNIQUE NOT NULL        CHECK (LENGTH(type) > 0),
+        code                TEXT UNIQUE NOT NULL DEFAULT "default" CHECK (LENGTH(code) > 0),
+        description         TEXT DEFAULT "",
+        color               INTEGER DEFAULT "#ffffff",
 
-        CHECK(length(id) > 0)
+        CHECK(LENGTH(id) > 0)
 );
-
-INSERT INTO habit_categories (name, type)
-VALUES  ("Eat healthy", "food"),
-        ("Wake up early", "wake_up"),
-        ("Workout", "fitness"),
-        ("Deep work", "deep_work");
 
 CREATE TABLE IF NOT EXISTS habits (
         id                  INTEGER primary key,
@@ -35,10 +29,6 @@ CREATE TABLE IF NOT EXISTS habits (
         UNIQUE (day_id, habit_category_id),
         CHECK(length(id) > 0 AND length(day_id) > 0 AND length(habit_category_id) > 0)
 );
-
-CREATE TABLE IF NOT EXISTS new (
-        id                   INTEGER primary key,
-)
 
 CREATE TABLE IF NOT EXISTS habit_logs (
         id                  INTEGER primary key,
@@ -54,18 +44,27 @@ CREATE TABLE IF NOT EXISTS habit_logs (
         CHECK(length(id) > 0 AND length(habit_id) > 0)
 );
 
-CREATE TABLE IF NOT EXISTS oauths (
+CREATE TABLE IF NOT EXISTS auths (
         id                  INTEGER primary key,
 
         provider            TEXT not null UNIQUE,
         access_token        TEXT not null UNIQUE,
         refresh_token       TEXT,
-        type                TEXT,
+        token_type          TEXT,
         expiration          DATE,
 
         toggl_workspace_id      INTEGER default "",
         toggl_organization_id   INTEGER default "",
         toggl_project_ids       TEXT defatult ""
+);
+
+CREATE TABLE IF NOT EXISTS users (
+        id              INTEGER primary key,
+
+        name            TEXT not null UNIQUE,
+        password        TEXT not null UNIQUE,
+        role            TEXT CHECK (role IN ('admin', 'user', 'guest')) NOT NULL,
+        email           TEXT NOT NULL default ''
 );
 
 CREATE TABLE IF NOT EXISTS sleep_logs (
@@ -107,3 +106,10 @@ CREATE TABLE IF NOT EXISTS fitness_logs (
         UNIQUE (day_id, start_time)
 );
 
+CREATE TABLE IF NOT EXISTS sessions (
+    token CHAR(43) PRIMARY KEY,
+    data BLOB NOT NULL,
+    expiry TIMESTAMP(6) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS sessions_expiry_idx ON sessions (expiry);

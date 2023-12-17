@@ -1,6 +1,8 @@
 package sqlite
 
 import (
+	"database/sql"
+
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/jmoiron/sqlx"
@@ -23,16 +25,10 @@ func (ds *HabitsDataSource) Create(h *entity.Habit) error {
 			:status
 		)`
 	res, err := ds.DB.NamedExec(query, h)
-	if err != nil {
-		return catchErr(err)
-	}
-	id, err := res.LastInsertId()
-	if err != nil {
-		return err
-	}
-	h.ID = int(id)
-	return nil
+	h.ID = lastInsertID(res)
+	return catchErr(err)
 }
+
 func (ds *HabitsDataSource) Update(data *entity.Habit, joins ...entity.HabitJoin) (*entity.Habit, error) {
 	query := `
 		UPDATE 	habits
@@ -157,15 +153,15 @@ func habitFilter(f entity.HabitFilter) *sqlQueryBuilder {
 	b := newBuilder("habits")
 
 	if len(f.ID) > 0 {
-		b.AddFilter("id", intToInterface(f.ID))
+		b.AddFilter("id", intToAny(f.ID))
 	}
 
 	if len(f.DayID) > 0 {
-		b.AddFilter("day_id", intToInterface(f.DayID))
+		b.AddFilter("day_id", intToAny(f.DayID))
 	}
 
 	if len(f.CategoryID) > 0 {
-		b.AddFilter("habit_category_id", intToInterface(f.CategoryID))
+		b.AddFilter("habit_category_id", intToAny(f.CategoryID))
 	}
 
 	return b
@@ -175,11 +171,15 @@ func habitCategoryFilter(f entity.HabitCategoryFilter) *sqlQueryBuilder {
 	b := newBuilder("habit_categories")
 
 	if len(f.ID) > 0 {
-		b.Data = append(b.Data, filterData{columnName: "id", values: intToInterface(f.ID)})
+		b.Data = append(b.Data, filterData{columnName: "id", values: intToAny(f.ID)})
 	}
 
 	if len(f.Type) > 0 {
-		b.Data = append(b.Data, filterData{columnName: "type", values: habitTypeToInterface(f.Type)})
+		b.Data = append(b.Data, filterData{columnName: "type", values: habitTypeAny(f.Type)})
+	}
+
+	if len(f.Code) > 0 {
+		b.Data = append(b.Data, filterData{columnName: "code", values: stringToAny(f.Code)})
 	}
 
 	return b
@@ -189,11 +189,11 @@ func habitLogFilter(f entity.HabitLogFilter) *sqlQueryBuilder {
 	b := newBuilder("habit_logs")
 
 	if len(f.ID) > 0 {
-		b.AddFilter("id", intToInterface(f.ID))
+		b.AddFilter("id", intToAny(f.ID))
 	}
 
 	if len(f.HabitID) > 0 {
-		b.AddFilter("habit_id", intToInterface(f.HabitID))
+		b.AddFilter("habit_id", intToAny(f.HabitID))
 	}
 
 	if len(f.Origin) > 0 {
@@ -205,4 +205,10 @@ func habitLogFilter(f entity.HabitLogFilter) *sqlQueryBuilder {
 	}
 
 	return b
+}
+
+func lastInsertID(res sql.Result) int {
+	// TODO: Add unit test to ensure that the current SQL driver supports LastInsertID
+	id, _ := res.LastInsertId()
+	return int(id)
 }

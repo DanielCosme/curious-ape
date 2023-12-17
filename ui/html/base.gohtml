@@ -1,0 +1,29 @@
+{{define "base"}}
+<!doctype html>
+<html lang='en'>
+    <head>
+        <meta charset='utf-8'>
+        <title>{{template "title" .}} - Curious Ape</title>
+        <link rel="stylesheet" href="/static/css/normalize.css" type="text/css">
+        <link rel="stylesheet" href="/static/css/skeleton.css" type="text/css">
+        <link rel='shortcut icon' href='/static/img/favicon.png' type='image/x-icon'>
+        <script src="/static/js/htmx.js"></script>
+    </head>
+    <body hx-boost="true" class="container">
+        <header>
+            <h1><a href='/'>Curious Ape</a></h1>
+        </header>
+        {{template "nav" .}}
+        <main class="u-full-width">
+            {{with .Flash}}
+                <div class='flash'>{{.}}</div>
+            {{end}}
+            {{template "main" .}}
+        </main>
+        <footer>
+            <!-- Update the footer to include the current year -->
+            Powered by <a href='https://golang.org/'>Go</a> in {{.CurrentYear}}
+        </footer>
+    </body>
+</html>
+{{end}}

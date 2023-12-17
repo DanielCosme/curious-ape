@@ -2,11 +2,13 @@ package sqlite
 
 import (
 	"database/sql"
+	"strings"
+	"time"
+
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/go-sdk/errors"
 	"github.com/jmoiron/sqlx"
-	"strings"
 )
 
 type DaysDataSource struct {
@@ -14,12 +16,14 @@ type DaysDataSource struct {
 }
 
 func (ds *DaysDataSource) Create(d *entity.Day) error {
+	d.Date = normalizeDate(d.Date)
 	query := `
 		INSERT INTO "days" ("date") 
 		VALUES (:date);
 	`
-	_, err := ds.DB.NamedExec(query, d)
-	return err
+	res, err := ds.DB.NamedExec(query, d)
+	d.ID = lastInsertID(res)
+	return catchErr(err)
 }
 
 func (ds *DaysDataSource) Update(date *entity.Day, joins ...entity.DayJoin) (*entity.Day, error) {
@@ -48,7 +52,7 @@ func (ds *DaysDataSource) Find(filter entity.DayFilter, joins ...entity.DayJoin)
 	days := []*entity.Day{}
 	q, args := dayFilter(filter).generate()
 	if err := ds.DB.Select(&days, q, args...); err != nil {
-		return nil, err
+		return nil, catchErr(err)
 	}
 	return days, database.ExecuteDaysPipeline(days, joins...)
 }
@@ -73,12 +77,16 @@ func dayFilter(f entity.DayFilter) *sqlQueryBuilder {
 	b := newBuilder("days")
 
 	if len(f.IDs) > 0 {
-		b.AddFilter("id", intToInterface(f.IDs))
+		b.AddFilter("id", intToAny(f.IDs))
 	}
 
 	if len(f.Dates) > 0 {
-		b.AddFilter("date", dateToInterface(f.Dates))
+		b.AddFilter("date", dateToAny(f.Dates))
 	}
 
 	return b
+}
+
+func normalizeDate(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC)
 }

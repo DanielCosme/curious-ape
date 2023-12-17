@@ -15,6 +15,30 @@ type Habit struct {
 	Logs     []*HabitLog
 }
 
+func CalculateHabitStatus(logs []*HabitLog) HabitStatus {
+	status := HabitStatusNoInfo
+	var override bool
+	for _, log := range logs {
+		if !log.IsAutomated {
+			if log.Success {
+				return HabitStatusDone
+			}
+			status = HabitStatusNotDone
+			override = true
+			continue
+		}
+
+		if !override {
+			if log.Success {
+				status = HabitStatusDone
+			} else if status != HabitStatusDone {
+				status = HabitStatusNotDone
+			}
+		}
+	}
+	return status
+}
+
 type HabitCategory struct {
 	ID          int       `db:"id"`
 	Name        string    `db:"name"`
@@ -27,10 +51,10 @@ type HabitCategory struct {
 type HabitLog struct {
 	ID          int        `db:"id"`
 	HabitID     int        `db:"habit_id"`
+	Success     bool       `db:"success"`
 	Note        string     `db:"note"`
 	Origin      DataSource `db:"origin"`
 	IsAutomated bool       `db:"is_automated"`
-	Success     bool       `db:"success"`
 }
 
 type HabitType string
@@ -45,14 +69,6 @@ const (
 
 func (ht HabitType) Str() string {
 	return string(ht)
-}
-
-func IsValidHabitCategoryType(habitType HabitType) bool {
-	switch habitType {
-	case HabitTypeFood, HabitTypeCustom, HabitTypeFitness, HabitTypeWakeUp, HabitTypeDeepWork:
-		return true
-	}
-	return false
 }
 
 type HabitStatus string
@@ -72,6 +88,7 @@ type HabitFilter struct {
 type HabitCategoryFilter struct {
 	ID   []int
 	Type []HabitType
+	Code []string
 }
 
 type HabitLogFilter struct {

@@ -2,77 +2,73 @@ package application
 
 import (
 	"fmt"
-	"github.com/danielcosme/curious-ape/internal/core/database"
-	"github.com/danielcosme/curious-ape/internal/core/entity"
-	"github.com/danielcosme/go-sdk/errors"
-	"github.com/danielcosme/go-sdk/log"
 	"strconv"
 	"time"
+
+	"github.com/danielcosme/curious-ape/internal/core/database"
+	"github.com/danielcosme/curious-ape/internal/core/entity"
+	"github.com/danielcosme/go-sdk/log"
 )
 
-func (a *App) HabitCreate(day *entity.Day, data *entity.Habit) (*entity.Habit, error) {
-	habitCategory, err := a.db.Habits.GetHabitCategory(entity.HabitCategoryFilter{ID: []int{data.CategoryID}})
+type NewHabitParams struct {
+	Date         time.Time
+	CategoryCode string
+	Success      bool
+	Origin       entity.DataSource
+	Note         string
+	IsAutomated  bool
+}
+
+func (p *NewHabitParams) ToLog() *entity.HabitLog {
+	return &entity.HabitLog{
+		Success:     p.Success,
+		Note:        p.Note,
+		Origin:      p.Origin,
+		IsAutomated: p.IsAutomated,
+	}
+}
+
+func (a *App) HabitUpsert(params *NewHabitParams) (*entity.Habit, error) {
+	habit, err := database.GetOrCreateHabit(a.db, params.Date, params.CategoryCode)
 	if err != nil {
 		return nil, err
 	}
 
-	habit, err := a.getOrCreateHabit(day.ID, habitCategory.ID)
+	hl := params.ToLog()
+	hl.HabitID = habit.ID
+	operation, err := database.UpsertHabitLog(a.db, hl)
 	if err != nil {
 		return nil, err
 	}
+	if err := database.ExecuteHabitsPipeline([]*entity.Habit{habit}, database.HabitsPipeline(a.db)...); err != nil {
+		return nil, err
+	}
 
-	// TODO hardcode origins for habit logs and create a validator for it?
-	// Create the habit log
-	for _, dataLog := range data.Logs {
-		hl, err := a.db.Habits.GetHabitLog(entity.HabitLogFilter{Origin: []entity.DataSource{dataLog.Origin}, HabitID: []int{habit.ID}})
-		if err != nil && !errors.Is(err, database.ErrNotFound) {
-			return nil, err
-		}
+	a.Log.InfoP(fmt.Sprintf("habit log succesfully %s", operation), log.Prop{
+		"Type":    habit.Category.Type.Str(),
+		"Success": strconv.FormatBool(hl.Success),
+		"Origin":  hl.Origin.Str(),
+		"Details": hl.Note,
+		"Date":    entity.FormatDate(params.Date),
+	})
 
-		// if it does not exist create it
-		var op string
-		if hl == nil {
-			dataLog.HabitID = habit.ID
-			err = a.db.Habits.CreateHabitLog(dataLog)
-			op = "created"
-		} else {
-			// if it exists update it
-			hl.Origin = dataLog.Origin
-			hl.Note = dataLog.Note
-			hl.Success = dataLog.Success
-			hl.IsAutomated = dataLog.IsAutomated
-			_, err = a.db.Habits.UpdateHabitLog(hl)
-			op = "updated"
-		}
-		if err != nil {
-			return nil, err
-		}
-
-		a.Log.InfoP(fmt.Sprintf("habit log succesfully %s", op), log.Prop{
-			"Type":    habitCategory.Type.Str(),
-			"Success": strconv.FormatBool(dataLog.Success),
-			"Origin":  dataLog.Origin.Str(),
-			"date":    day.Date.Format(entity.HumanDate),
-			"details": dataLog.Note,
+	oldStatus := habit.Status
+	habit.Status = entity.CalculateHabitStatus(habit.Logs)
+	if oldStatus != habit.Status {
+		a.Log.InfoP("habit status changed", log.Prop{
+			"From": string(oldStatus),
+			"To":   string(habit.Status),
+			"Date": entity.FormatDate(params.Date),
+			"Type": habit.Category.Type.Str(),
 		})
+		return a.db.Habits.Update(habit, database.HabitsPipeline(a.db)...)
 	}
-
-	if err := database.ExecuteHabitsPipeline([]*entity.Habit{habit}, database.HabitsJoinLogs(a.db)); err != nil {
-		return nil, err
-	}
-	habit.Status = calculateHabitStatusFromLogs(habit.Logs)
-
-	return a.db.Habits.Update(habit, database.HabitsPipeline(a.db)...)
+	return habit, nil
 }
 
 func (a *App) HabitUpsertFromSleepLog(sleepLog entity.SleepLog) error {
 	if !sleepLog.IsMainSleep {
 		return nil
-	}
-
-	habitCategory, err := a.HabitCategoryGetByType(entity.HabitTypeWakeUp)
-	if err != nil {
-		return err
 	}
 
 	var success bool
@@ -81,17 +77,14 @@ func (a *App) HabitUpsertFromSleepLog(sleepLog entity.SleepLog) error {
 		success = true
 	}
 
-	habit := &entity.Habit{
-		DayID:      sleepLog.DayID,
-		CategoryID: habitCategory.ID,
-		Logs: []*entity.HabitLog{{
-			Success:     success,
-			IsAutomated: sleepLog.Origin != entity.Manual,
-			Origin:      sleepLog.Origin,
-			Note:        fmt.Sprintf("Wake up time %s", sleepLog.EndTime.Format(entity.Timestamp)),
-		}},
-	}
-	habit, err = a.HabitCreate(sleepLog.Day, habit)
+	_, err := a.HabitUpsert(&NewHabitParams{
+		Date:         sleepLog.Date,
+		CategoryCode: entity.HabitTypeWakeUp.Str(),
+		Success:      success,
+		Origin:       sleepLog.Origin,
+		Note:         fmt.Sprintf("Wake up time %s", sleepLog.EndTime.Format(entity.Timestamp)),
+		IsAutomated:  false,
+	})
 	if err != nil {
 		return err
 	}
@@ -152,46 +145,4 @@ func (a *App) HabitsGetByDay(d *entity.Day) ([]*entity.Habit, error) {
 
 func (a *App) HabitsGetCategories() ([]*entity.HabitCategory, error) {
 	return a.db.Habits.FindHabitCategories(entity.HabitCategoryFilter{})
-}
-
-func (a *App) getOrCreateHabit(dayID, categoryID int) (*entity.Habit, error) {
-	// First check that the habit already exists
-	h, err := a.db.Habits.Get(entity.HabitFilter{DayID: []int{dayID}, CategoryID: []int{categoryID}})
-	if err != nil && !errors.Is(err, database.ErrNotFound) {
-		return nil, err
-	}
-	if h == nil {
-		// If it does not exist we create it
-		h = &entity.Habit{
-			DayID:      dayID,
-			CategoryID: categoryID,
-			Status:     entity.HabitStatusNoInfo,
-		}
-		err = a.db.Habits.Create(h)
-	}
-	return h, err
-}
-
-func calculateHabitStatusFromLogs(logs []*entity.HabitLog) entity.HabitStatus {
-	status := entity.HabitStatusNoInfo
-	for _, log := range logs {
-		if !log.IsAutomated {
-			if log.Success {
-				return entity.HabitStatusDone
-			}
-			status = entity.HabitStatusNotDone
-		}
-	}
-	if status == entity.HabitStatusNoInfo {
-		for _, log := range logs {
-			if log.IsAutomated {
-				if log.Success {
-					return entity.HabitStatusDone
-				}
-				status = entity.HabitStatusNotDone
-			}
-		}
-	}
-
-	return status
 }
