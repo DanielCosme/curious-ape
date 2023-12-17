@@ -14,7 +14,7 @@ import (
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/repository"
 	"github.com/danielcosme/curious-ape/internal/repository/sqlite"
-	"github.com/danielcosme/curious-ape/internal/web"
+	"github.com/danielcosme/curious-ape/internal/transport"
 	"github.com/danielcosme/go-sdk/errors"
 	logape "github.com/danielcosme/go-sdk/log"
 	_ "github.com/mattn/go-sqlite3"
@@ -66,7 +66,7 @@ func main() {
 	sessionManager.Lifetime = 12 * time.Hour
 	sessionManager.Cookie.SameSite = http.SameSiteStrictMode
 
-	web := &web.WebClient{
+	web := &transport.WebClient{
 		App: application.New(&application.AppOptions{
 			Repository: repository.NewSqlite(db),
 			Config: &application.Environment{

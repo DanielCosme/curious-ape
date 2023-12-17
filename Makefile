@@ -23,11 +23,10 @@ confirm:
 # DEVELOPMENT
 # ==================================================================================== #
 
-## run/api: run the cmd/api application
-.PHONY: run/api
-run/api:
-	@echo ${DB}
-	go run ./cmd/httpd -env dev
+## run: runs the application
+.PHONY: run
+run:
+	@go run ./cmd/web -env dev
 
 ## db/psql: connect to the database using psql
 # 	.PHONY: db/psql
