@@ -36,7 +36,7 @@ func (ds FitnessLogDataSource) Create(log *entity.FitnessLog) error {
 	)`
 	res, err := ds.DB.NamedExec(q, log)
 	if err != nil {
-		return catchErr(err)
+		return catchErr("create fitness log", err)
 	}
 	id, _ := res.LastInsertId()
 	log.ID = int(id)
@@ -58,7 +58,7 @@ func (ds FitnessLogDataSource) Update(log *entity.FitnessLog, join ...entity.Fit
 	`
 	_, err := ds.DB.NamedExec(q, log)
 	if err != nil {
-		return nil, catchErr(err)
+		return nil, catchErr("update fitness log", err)
 	}
 	return ds.Get(entity.FitnessLogFilter{ID: []int{log.ID}})
 }
@@ -67,23 +67,23 @@ func (ds FitnessLogDataSource) Get(filter entity.FitnessLogFilter, joins ...enti
 	fl := &entity.FitnessLog{}
 	query, args := fitnessLogFilter(filter).generate()
 	if err := ds.DB.Get(fl, query, args...); err != nil {
-		return nil, catchErr(err)
+		return nil, catchErr("get fitness log", err)
 	}
-	return fl, catchErr(database.ExecuteFitnessLogPipeline([]*entity.FitnessLog{fl}, joins...))
+	return fl, catchErr("get fitness log", database.ExecuteFitnessLogPipeline([]*entity.FitnessLog{fl}, joins...))
 }
 
 func (ds FitnessLogDataSource) Find(filter entity.FitnessLogFilter, joins ...entity.FitnessLogJoin) ([]*entity.FitnessLog, error) {
 	fls := []*entity.FitnessLog{}
 	query, args := fitnessLogFilter(filter).generate()
 	if err := ds.DB.Select(&fls, query, args...); err != nil {
-		return nil, catchErr(err)
+		return nil, catchErr("find fitness log", err)
 	}
-	return fls, catchErr(database.ExecuteFitnessLogPipeline(fls, joins...))
+	return fls, catchErr("find fitness log", database.ExecuteFitnessLogPipeline(fls, joins...))
 }
 
 func (ds FitnessLogDataSource) Delete(id int) error {
 	_, err := ds.DB.Exec("DELETE FROM fitness_logs WHERE id = ?", id)
-	return catchErr(err)
+	return catchErr("delete fitness log", err)
 }
 
 func fitnessLogFilter(f entity.FitnessLogFilter) *sqlQueryBuilder {

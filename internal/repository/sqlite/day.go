@@ -2,6 +2,8 @@ package sqlite
 
 import (
 	"database/sql"
+	"fmt"
+	logape "github.com/danielcosme/go-sdk/log"
 	"strings"
 	"time"
 
@@ -23,7 +25,7 @@ func (ds *DaysDataSource) Create(d *entity.Day) error {
 	`
 	res, err := ds.DB.NamedExec(query, d)
 	d.ID = lastInsertID(res)
-	return catchErr(err)
+	return catchErr("create day", err)
 }
 
 func (ds *DaysDataSource) Update(date *entity.Day, joins ...entity.DayJoin) (*entity.Day, error) {
@@ -34,7 +36,7 @@ func (ds *DaysDataSource) Update(date *entity.Day, joins ...entity.DayJoin) (*en
     `
 	_, err := ds.DB.NamedExec(query, date)
 	if err != nil {
-		return nil, catchErr(err)
+		return nil, catchErr("update day", err)
 	}
 	return ds.Get(entity.DayFilter{IDs: []int{date.ID}}, joins...)
 }
@@ -43,7 +45,7 @@ func (ds *DaysDataSource) Get(filter entity.DayFilter, joins ...entity.DayJoin) 
 	day := new(entity.Day)
 	q, args := dayFilter(filter).generate()
 	if err := ds.DB.Get(day, q, args...); err != nil {
-		return nil, catchErr(err)
+		return nil, catchErr("get day", err)
 	}
 	return day, database.ExecuteDaysPipeline([]*entity.Day{day}, joins...)
 }
@@ -52,22 +54,23 @@ func (ds *DaysDataSource) Find(filter entity.DayFilter, joins ...entity.DayJoin)
 	days := []*entity.Day{}
 	q, args := dayFilter(filter).generate()
 	if err := ds.DB.Select(&days, q, args...); err != nil {
-		return nil, catchErr(err)
+		return nil, catchErr("find days", err)
 	}
 	return days, database.ExecuteDaysPipeline(days, joins...)
 }
 
-func catchErr(err error) error {
+func catchErr(msg string, err error) error {
 	if err == nil {
 		return nil
 	}
 
+	logape.DefaultLogger.Debug(err)
 	switch err.Error() {
 	case sql.ErrNoRows.Error():
-		return database.ErrNotFound
+		return fmt.Errorf("%w %s", database.ErrNotFound, msg)
 	default:
 		if strings.Contains(err.Error(), "UNIQUE constraint failed:") {
-			return database.ErrUniqueCheckFailed
+			return fmt.Errorf("%w %s", database.ErrUniqueCheckFailed, msg)
 		}
 		return errors.NewFatal(err.Error())
 	}

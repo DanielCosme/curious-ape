@@ -33,7 +33,7 @@ func (ds *AuthenticationDataSource) Create(o *entity.Auth) error {
 		)`
 	res, err := ds.DB.NamedExec(q, o)
 	if err != nil {
-		return catchErr(err)
+		return catchErr("create oauth", err)
 	}
 	id, _ := res.LastInsertId()
 	o.ID = int(id)
@@ -55,7 +55,7 @@ func (ds *AuthenticationDataSource) Update(o *entity.Auth) (*entity.Auth, error)
 	`
 	_, err := ds.DB.NamedExec(q, o)
 	if err != nil {
-		return nil, catchErr(err)
+		return nil, catchErr("update oauth", err)
 	}
 	return ds.Get(entity.AuthFilter{ID: []int{o.ID}})
 }
@@ -64,7 +64,7 @@ func (ds *AuthenticationDataSource) Get(filter entity.AuthFilter) (*entity.Auth,
 	o := new(entity.Auth)
 	query, args := authFilter(filter).generate()
 	if err := ds.DB.Get(o, query, args...); err != nil {
-		return nil, catchErr(err)
+		return nil, catchErr("get oauth", err)
 	}
 	return o, nil
 }
@@ -73,14 +73,14 @@ func (ds *AuthenticationDataSource) Find(filter entity.AuthFilter) ([]*entity.Au
 	auths := []*entity.Auth{}
 	query, args := authFilter(filter).generate()
 	if err := ds.DB.Select(auths, query, args...); err != nil {
-		return nil, catchErr(err)
+		return nil, catchErr("find auth", err)
 	}
 	return auths, nil
 }
 
 func (ds *AuthenticationDataSource) Delete(id int) error {
 	_, err := ds.DB.Exec("DELETE FROM auths WHERE id = ?", id)
-	return catchErr(err)
+	return catchErr("delete oauth", err)
 }
 
 func authFilter(f entity.AuthFilter) *sqlQueryBuilder {

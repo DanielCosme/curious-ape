@@ -28,7 +28,7 @@ func (ds *UsersDataSource) Create(u *entity.User) error {
 		)`
 	res, err := ds.DB.NamedExec(q, u)
 	u.ID = lastInsertID(res)
-	return err
+	return catchErr("create user", err)
 }
 
 func (ds *UsersDataSource) Update(u *entity.User) (*entity.User, error) {
@@ -43,7 +43,7 @@ func (ds *UsersDataSource) Update(u *entity.User) (*entity.User, error) {
 	`
 	_, err := ds.DB.NamedExec(q, u)
 	if err != nil {
-		return nil, catchErr(err)
+		return nil, catchErr("update user", err)
 	}
 	return ds.Get(entity.UserFilter{ID: u.ID})
 }
@@ -52,14 +52,14 @@ func (ds *UsersDataSource) Get(filter entity.UserFilter) (*entity.User, error) {
 	u := new(entity.User)
 	query, args := userFilter(filter).generate()
 	if err := ds.DB.Get(u, query, args...); err != nil {
-		return nil, catchErr(err)
+		return nil, catchErr("get user", err)
 	}
 	return u, nil
 }
 
 func (ds *UsersDataSource) Delete(id int) error {
 	_, err := ds.DB.Exec("DELETE FROM users WHERE id = ?", id)
-	return catchErr(err)
+	return catchErr("delete user", err)
 }
 
 func userFilter(f entity.UserFilter) *sqlQueryBuilder {

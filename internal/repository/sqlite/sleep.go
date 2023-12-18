@@ -46,7 +46,7 @@ func (ds SleepLogDataSource) Create(log *entity.SleepLog) error {
 		)`
 	res, err := ds.DB.NamedExec(q, log)
 	if err != nil {
-		return catchErr(err)
+		return catchErr("create sleep log", err)
 	}
 	id, _ := res.LastInsertId()
 	log.ID = int(id)
@@ -73,7 +73,7 @@ func (ds SleepLogDataSource) Update(log *entity.SleepLog, joins ...entity.SleepL
 	`
 	_, err := ds.DB.NamedExec(q, log)
 	if err != nil {
-		return nil, catchErr(err)
+		return nil, catchErr("update sleep log", err)
 	}
 	return ds.Get(entity.SleepLogFilter{ID: []int{log.ID}}, joins...)
 }
@@ -82,23 +82,23 @@ func (ds SleepLogDataSource) Get(filter entity.SleepLogFilter, joins ...entity.S
 	sl := &entity.SleepLog{}
 	query, args := sleepLogFilter(filter).generate()
 	if err := ds.DB.Get(sl, query, args...); err != nil {
-		return nil, catchErr(err)
+		return nil, catchErr("get sleep log", err)
 	}
-	return sl, catchErr(database.ExecuteSleepLogPipeline([]*entity.SleepLog{sl}, joins...))
+	return sl, catchErr("get sleep log", database.ExecuteSleepLogPipeline([]*entity.SleepLog{sl}, joins...))
 }
 
 func (ds SleepLogDataSource) Find(filter entity.SleepLogFilter, joins ...entity.SleepLogJoin) ([]*entity.SleepLog, error) {
 	sls := []*entity.SleepLog{}
 	query, args := sleepLogFilter(filter).generate()
 	if err := ds.DB.Select(&sls, query, args...); err != nil {
-		return nil, catchErr(err)
+		return nil, catchErr("find sleep logs", err)
 	}
-	return sls, catchErr(database.ExecuteSleepLogPipeline(sls, joins...))
+	return sls, catchErr("find sleep logs", database.ExecuteSleepLogPipeline(sls, joins...))
 }
 
 func (ds SleepLogDataSource) Delete(id int) error {
 	_, err := ds.DB.Exec("DELETE FROM sleep_logs WHERE id = ?", id)
-	return catchErr(err)
+	return catchErr("delete sleep log", err)
 }
 
 func sleepLogFilter(f entity.SleepLogFilter) *sqlQueryBuilder {

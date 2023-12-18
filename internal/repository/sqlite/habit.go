@@ -26,7 +26,7 @@ func (ds *HabitsDataSource) Create(h *entity.Habit) error {
 		)`
 	res, err := ds.DB.NamedExec(query, h)
 	h.ID = lastInsertID(res)
-	return catchErr(err)
+	return catchErr("create habit", err)
 }
 
 func (ds *HabitsDataSource) Update(data *entity.Habit, joins ...entity.HabitJoin) (*entity.Habit, error) {
@@ -37,7 +37,7 @@ func (ds *HabitsDataSource) Update(data *entity.Habit, joins ...entity.HabitJoin
 	`
 	_, err := ds.DB.NamedExec(query, data)
 	if err != nil {
-		return nil, catchErr(err)
+		return nil, catchErr("update habit", err)
 	}
 	return ds.Get(entity.HabitFilter{ID: []int{data.ID}}, joins...)
 }
@@ -46,31 +46,31 @@ func (ds *HabitsDataSource) Get(filter entity.HabitFilter, joins ...entity.Habit
 	habit := new(entity.Habit)
 	query, args := habitFilter(filter).generate()
 	if err := ds.DB.Get(habit, query, args...); err != nil {
-		return nil, catchErr(err)
+		return nil, catchErr("get habit", err)
 	}
 
-	return habit, catchErr(database.ExecuteHabitsPipeline([]*entity.Habit{habit}, joins...))
+	return habit, catchErr("get habit", database.ExecuteHabitsPipeline([]*entity.Habit{habit}, joins...))
 }
 
 func (ds *HabitsDataSource) Find(filter entity.HabitFilter, joins ...entity.HabitJoin) ([]*entity.Habit, error) {
 	habits := []*entity.Habit{}
 	query, args := habitFilter(filter).generate()
 	if err := ds.DB.Select(&habits, query, args...); err != nil {
-		return nil, catchErr(err)
+		return nil, catchErr("find habits", err)
 	}
-	return habits, catchErr(database.ExecuteHabitsPipeline(habits, joins...))
+	return habits, catchErr("find habits", database.ExecuteHabitsPipeline(habits, joins...))
 }
 
 func (ds *HabitsDataSource) Delete(id int) error {
 	_, err := ds.DB.Exec(`DELETE FROM habits WHERE id = ?`, id)
-	return catchErr(err)
+	return catchErr("delete habit", err)
 }
 
 func (ds *HabitsDataSource) FindHabitCategories(filter entity.HabitCategoryFilter) ([]*entity.HabitCategory, error) {
 	cs := []*entity.HabitCategory{}
 	query, args := habitCategoryFilter(filter).generate()
 	if err := ds.DB.Select(&cs, query, args...); err != nil {
-		return nil, catchErr(err)
+		return nil, catchErr("find habit categories", err)
 	}
 	return cs, nil
 }
@@ -79,7 +79,7 @@ func (ds *HabitsDataSource) GetHabitCategory(filter entity.HabitCategoryFilter) 
 	hc := new(entity.HabitCategory)
 	query, args := habitCategoryFilter(filter).generate()
 	if err := ds.DB.Get(hc, query, args...); err != nil {
-		return nil, catchErr(err)
+		return nil, catchErr("get habit category", err)
 	}
 	return hc, nil
 }
@@ -102,7 +102,7 @@ func (ds *HabitsDataSource) CreateHabitLog(hl *entity.HabitLog) error {
 		)`
 	res, err := ds.DB.NamedExec(query, hl)
 	if err != nil {
-		return catchErr(err)
+		return catchErr("create habit log", err)
 	}
 	id, _ := res.LastInsertId()
 	hl.ID = int(id)
@@ -121,7 +121,7 @@ func (ds *HabitsDataSource) UpdateHabitLog(data *entity.HabitLog) (*entity.Habit
 	`
 	_, err := ds.DB.NamedExec(query, data)
 	if err != nil {
-		return nil, catchErr(err)
+		return nil, catchErr("update habit log", err)
 	}
 	return ds.GetHabitLog(entity.HabitLogFilter{ID: []int{data.ID}})
 }
@@ -130,7 +130,7 @@ func (ds *HabitsDataSource) GetHabitLog(filter entity.HabitLogFilter) (*entity.H
 	hl := &entity.HabitLog{}
 	query, args := habitLogFilter(filter).generate()
 	if err := ds.DB.Get(hl, query, args...); err != nil {
-		return nil, catchErr(err)
+		return nil, catchErr("get habit log", err)
 	}
 	return hl, nil
 }
@@ -139,14 +139,14 @@ func (ds *HabitsDataSource) FindHabitLogs(filter entity.HabitLogFilter) ([]*enti
 	hls := []*entity.HabitLog{}
 	query, args := habitLogFilter(filter).generate()
 	if err := ds.DB.Select(&hls, query, args...); err != nil {
-		return nil, catchErr(err)
+		return nil, catchErr("find habit logs", err)
 	}
 	return hls, nil
 }
 
 func (ds *HabitsDataSource) DeleteHabitLog(id int) error {
 	_, err := ds.DB.Exec(`DELETE FROM habit_logs WHERE id = ?`, id)
-	return catchErr(err)
+	return catchErr("delete habit log", err)
 }
 
 func habitFilter(f entity.HabitFilter) *sqlQueryBuilder {
