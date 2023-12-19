@@ -129,7 +129,7 @@ func startCron(a *application.App) error {
 	if err != nil {
 		return err
 	}
-	s.Start()
+	// s.Start()
 	next, err := j.NextRun()
 	if err != nil {
 		a.Log.Fatal(err)
