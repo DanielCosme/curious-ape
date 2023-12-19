@@ -95,12 +95,12 @@ func main() {
 		logger.Info("Finished starting cron Jobs")
 	}()
 
-	// if err := web.App.SetPassword(cfg.Admin.Name, cfg.Admin.Password, entity.AdminRole); err != nil {
-	// 	logger.Fatal(err)
-	// }
-	// if err := web.App.SetPassword(cfg.User.Name, cfg.User.Password, entity.UserRole); err != nil {
-	// 	logger.Fatal(err)
-	// }
+	if err := web.App.SetPassword(cfg.Admin.Name, cfg.Admin.Password, entity.AdminRole); err != nil {
+		logger.Fatal(err)
+	}
+	if err := web.App.SetPassword(cfg.User.Name, cfg.User.Password, entity.UserRole); err != nil {
+		logger.Fatal(err)
+	}
 	// if err := web.App.SetPassword(cfg.Guest.Name, cfg.Guest.Password, entity.GuestRole); err != nil {
 	// 	logger.Fatal(err)
 	// }
