@@ -101,6 +101,10 @@ func (a *App) Oauth2ConnectProvider(provider string) (string, error) {
 func (a *App) Oauth2Success(provider, code string) error {
 	p := entity.IntegrationProvider(provider)
 	config := a.oauth2GetConfigurationForProvider(p)
+	if config == nil {
+		a.Log.Error(errors.New("oauth2 success: invalid provider: " + provider))
+		return errors.New("something went wrong")
+	}
 
 	t, err := config.Exchange(context.Background(), code)
 	if err != nil {
@@ -184,7 +188,7 @@ func (a *App) oauth2GetConfigurationForProvider(provider entity.IntegrationProvi
 	}
 }
 
-func (a *App) Oauth2AddAPIToken(token, provider string) (string, error) {
+func (a *App) AuthAddAPIToken(token, provider string) (string, error) {
 	if token == "" {
 		return "", errors.New("token is empty")
 	}

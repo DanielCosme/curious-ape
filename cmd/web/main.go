@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/go-co-op/gocron/v2"
 	"log"
 	"net/http"
 	"os"
@@ -86,18 +87,56 @@ func main() {
 		},
 	}
 
-	if err := web.App.SetPassword(cfg.Admin.Name, cfg.Admin.Password, entity.AdminRole); err != nil {
-		logger.Fatal(err)
-	}
-	if err := web.App.SetPassword(cfg.User.Name, cfg.User.Password, entity.UserRole); err != nil {
-		logger.Fatal(err)
-	}
-	if err := web.App.SetPassword(cfg.Guest.Name, cfg.Guest.Password, entity.GuestRole); err != nil {
-		logger.Fatal(err)
-	}
+	go func() {
+		logger.Info("Starting cron jobs")
+		if err := startCron(web.App); err != nil {
+			logger.Fatal(err)
+		}
+		logger.Info("Finished starting cron Jobs")
+	}()
+
+	// if err := web.App.SetPassword(cfg.Admin.Name, cfg.Admin.Password, entity.AdminRole); err != nil {
+	// 	logger.Fatal(err)
+	// }
+	// if err := web.App.SetPassword(cfg.User.Name, cfg.User.Password, entity.UserRole); err != nil {
+	// 	logger.Fatal(err)
+	// }
+	// if err := web.App.SetPassword(cfg.Guest.Name, cfg.Guest.Password, entity.GuestRole); err != nil {
+	// 	logger.Fatal(err)
+	// }
 	if err := web.ListenAndServe(); err != nil {
 		logger.Fatal(err)
 	}
+}
+
+func startCron(a *application.App) error {
+	s, err := gocron.NewScheduler()
+	if err != nil {
+		return err
+	}
+
+	j, err := s.NewJob(
+		gocron.DailyJob(1, gocron.NewAtTimes(
+			gocron.NewAtTime(23, 0, 0),
+		)),
+		gocron.NewTask(func() {
+			err := a.SyncFitbitSleepLog(time.Now())
+			if err != nil {
+				a.Log.Error(fmt.Errorf("cron Job: %w", err))
+			}
+		}),
+	)
+	if err != nil {
+		return err
+	}
+	s.Start()
+	next, err := j.NextRun()
+	if err != nil {
+		a.Log.Fatal(err)
+	}
+	a.Log.Info("Cron job next run: ", next)
+
+	return err
 }
 
 func setFilePath(cfg *config) {

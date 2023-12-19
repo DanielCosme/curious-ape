@@ -28,6 +28,7 @@ func ChiRoutes(h *Handler) http.Handler {
 		r.Post("/", h.loginPost)
 	})
 
+	r.Get("/api/oauth2/{provider}/success", h.Oauth2Success)
 	// Protected routes.
 	r.Route("/", func(r chi.Router) {
 		r.Use(h.App.Session.LoadAndSave)
@@ -42,6 +43,13 @@ func ChiRoutes(h *Handler) http.Handler {
 		r.Get("/habit/new", h.newHabitForm)
 		r.Post("/habit/new", h.newHabitPost)
 		r.Post("/habit/log", h.newHabitLogPost)
+
+		// Oauth2
+		r.Route("/oauth2/{provider}", func(r chi.Router) {
+			r.Get("/connect/form", h.Oauth2ConnectForm)
+			r.Get("/connect", h.Oauth2Connect)
+			r.Post("/addToken", h.AddToken)
+		})
 	})
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) { h.notFound(w) })

@@ -83,7 +83,7 @@ func (a *App) HabitUpsertFromSleepLog(sleepLog entity.SleepLog) error {
 		Success:      success,
 		Origin:       sleepLog.Origin,
 		Note:         fmt.Sprintf("Wake up time %s", sleepLog.EndTime.Format(entity.Timestamp)),
-		IsAutomated:  false,
+		IsAutomated:  true,
 	})
 	if err != nil {
 		return err
