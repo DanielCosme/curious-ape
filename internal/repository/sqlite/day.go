@@ -64,8 +64,9 @@ func catchErr(msg string, err error) error {
 		return nil
 	}
 
-	logape.DefaultLogger.Debug(err)
-	switch err.Error() {
+	e := err.Error()
+	logape.DefaultLogger.Debug(msg + ": " + e)
+	switch e {
 	case sql.ErrNoRows.Error():
 		return fmt.Errorf("%w %s", database.ErrNotFound, msg)
 	default:
