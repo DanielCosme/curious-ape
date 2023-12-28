@@ -54,39 +54,12 @@ git_description = $(shell git describe --always --dirty --tags --long)
 linker_flags = '-s -X main.buildTime=${current_time} -X main.version=${git_description}'
 # -extldflags "-static"
 
-## build/api: build the cmd/api application
-.PHONY: build/api/linux
-build/api/linux:
-	@echo 'Building cmd/api...'
-	@echo ${current_time}
-	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/aped ./cmd/httpd
-
-## build/cli: build the cmd/cli application
-.PHONY: build/cli/linux
-build/cli/linux:
-	@echo 'Building cmd/cli...'
-	@echo ${current_time}
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/ape ./cmd/cli
-
 ## build/web: build the cmd/web application
 .PHONY: build/web/linux
 build/web/linux:
 	@echo 'Building cmd/web...'
 	@echo ${current_time}
 	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/ape ./cmd/web
-
-## install/cli: install the cmd/cli application
-.PHONY: install/cli/linux
-install/cli/linux: build/cli/linux
-	@echo 'Installing cmd/cli...'
-	rm ${GOBIN}/ape
-	mv ./bin/ape ${GOBIN}/ape
-
-.PHONY: build/api/mac
-build/api/mac:
-	@echo 'Building cmd/api...'
-	@echo $current_time
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/aped ./cmd/httpd
 
 # ==================================================================================== #
 # QUALITY CONTROL
@@ -145,12 +118,6 @@ production/deploy/api2:
 		&& sudo systemctl restart ape \
 	'
 
-## to be run on the remote machine
-.PHONY: production/reload/api
-production/reload/api: build/api/linux
-	mv ./bin/ape ~/
-	sudo systemctl restart ape
-
 ## production/configure/ape.service: configure the production systemd ape.service file
 .PHONY: production/configure/ape.service
 production/configure/ape.service:
@@ -169,11 +136,3 @@ production/configure/caddyfile:
 		sudo mv ~/Caddyfile /etc/caddy/ \
 		&& sudo systemctl reload caddy \
 	'
-
-# ==================================================================================== #
-# CLIENT
-# ==================================================================================== #
-
-.PHONY: cli/install
-cli/install:
-	go install ./cmd/cli/apectl.go
