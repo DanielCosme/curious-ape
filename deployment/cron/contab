@@ -1,6 +1,0 @@
-# every day at 18:00
-0 18 * * * curl -X POST http://localhost:4000/api/sync/sleep/date/$(date --iso-8601)
-# every day at 23:45
-45 23 * * * curl -X POST http://localhost:4000/api/sync/fitness/date/$(date --iso-8601)
-# every day at 23:45
-45 23 * * * curl -X POST http://localhost:4000/api/sync/work/date/$(date --iso-8601)
