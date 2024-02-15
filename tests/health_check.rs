@@ -5,7 +5,7 @@ use ape::{configuration::get_configuration, startup};
 
 #[tokio::test]
 async fn health_check_works() {
-    let addr = spawn_app();
+    let addr = spawn_app().await;
     let client = reqwest::Client::new();
 
     let response = client
@@ -20,7 +20,7 @@ async fn health_check_works() {
 
 #[tokio::test]
 async fn create_habit_returns_200_for_valid_form_data() {
-    let addr = spawn_app();
+    let addr = spawn_app().await;
     let config = get_configuration().expect("Failed to read configuration");
     let connection_string = config.database.connection_string();
     let mut connection = PgConnection::connect(&connection_string)
@@ -50,7 +50,7 @@ async fn create_habit_returns_200_for_valid_form_data() {
 
 #[tokio::test]
 async fn create_habit_returns_400_when_data_is_missing() {
-    let addr = spawn_app();
+    let addr = spawn_app().await;
     let client = reqwest::Client::new();
     let test_cases = vec![("name=", "missing name")];
 
@@ -72,11 +72,16 @@ async fn create_habit_returns_400_when_data_is_missing() {
     }
 }
 
-fn spawn_app() -> String {
+async fn spawn_app() -> String {
     let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
     let port = listener.local_addr().unwrap().port();
+    let config = get_configuration().expect("Failed to read configuration");
+    let connection_string = config.database.connection_string();
+    let mut connection = PgConnection::connect(&connection_string)
+        .await
+        .expect("Failed to connect to Postgress.");
 
-    let server = startup::run(listener).expect("Failed to bind address");
+    let server = startup::run(listener, connection).expect("Failed to bind address");
     let _ = tokio::spawn(server);
     format!("http://127.0.0.1:{}", port)
 }
