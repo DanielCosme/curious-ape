@@ -2,7 +2,8 @@
 set -x
 set -eo pipefail
 
-# SKIP_DOCKER=true ./scripts/init_db.sh
+# Invoke:
+#       SKIP_DOCKER=true ./scripts/init_db.sh
 
 if ! [ -x "$(command -v psql)" ]; then
     echo >&2 "Error: psql is not installed."
@@ -24,6 +25,7 @@ DB_PASSWORD="${POSTGRES_PASSWORD:=password}"
 DB_NAME="${POSTGRES_DB:=ape}"
 DB_PORT="${POSTGRES_PORT:=5432}"
 DB_HOST="${POSTGRES_HOST:=localhost}"
+
 if [[ -z "${SKIP_DOCKER}" ]]
 then
     docker run \
@@ -33,8 +35,8 @@ then
         -p "${DB_PORT}":5432 \
         -d postgres \
         postgres -N 1000
+        # ^ Increased maximum number of connections for testing purposes
 fi
-# ^ Increased maximum number of connections for testing purposes
 
 # Keep pinging Postgres until it's ready to accept commands
 export PGPASSWORD="${DB_PASSWORD}"
@@ -45,9 +47,8 @@ done
 
 DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
 export DATABASE_URL
-
+echo $DATABASE_URL
 sqlx database create
 sqlx migrate run
+
 # sqlx migrate add create_habits_table
-
-

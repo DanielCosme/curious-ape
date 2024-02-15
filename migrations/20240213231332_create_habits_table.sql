@@ -1,6 +1,6 @@
 -- Add migration script here
 CREATE TABLE habits(
-    id serial NOT NULL,
+    id uuid NOT NULL,
     PRIMARY KEY (id),
     name TEXT NOT NULL UNIQUE,
     description TEXT DEFAULT '',
