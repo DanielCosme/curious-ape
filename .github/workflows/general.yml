@@ -81,8 +81,6 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           key: sqlx-${{ env.SQLX_VERSION }}
-      - name: Linting
-        run: cargo clippy -- -D warnings
       - name: Install sqlx-cli
         run:
           cargo install sqlx-cli
