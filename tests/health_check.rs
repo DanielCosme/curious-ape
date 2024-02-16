@@ -1,15 +1,18 @@
-use sqlx::{Connection, PgConnection};
+use actix_web::guard::Connect;
+use sqlx::{Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
+use uuid::Uuid;
 
-use ape::{configuration::get_configuration, startup};
+use ape::configuration::{get_configuration, DatabaseSettings};
+use ape::startup::run;
 
 #[tokio::test]
 async fn health_check_works() {
-    let addr = spawn_app().await;
+    let app = spawn_app().await;
     let client = reqwest::Client::new();
 
     let response = client
-        .get(addr + "/health_check")
+        .get(app.addr + "/health_check")
         .send()
         .await
         .expect("Failed to excecute request.");
@@ -20,17 +23,12 @@ async fn health_check_works() {
 
 #[tokio::test]
 async fn create_habit_returns_200_for_valid_form_data() {
-    let addr = spawn_app().await;
-    let config = get_configuration().expect("Failed to read configuration");
-    let connection_string = config.database.connection_string();
-    let mut connection = PgConnection::connect(&connection_string)
-        .await
-        .expect("Failed to connect to Postgress.");
+    let app = spawn_app().await;
     let client = reqwest::Client::new();
 
     let body = "name=Wake%20Up&description=wake-up";
     let response = client
-        .post(&format!("{}/create_habit", &addr))
+        .post(&format!("{}/create_habit", &app.addr))
         .header("Content-Type", "application/x-www-form-urlencoded")
         .body(body)
         .send()
@@ -40,7 +38,7 @@ async fn create_habit_returns_200_for_valid_form_data() {
     assert_eq!(200, response.status().as_u16());
 
     let saved = sqlx::query!("SELECT name, description FROM habits",)
-        .fetch_one(&mut connection)
+        .fetch_one(&app.db_pool)
         .await
         .expect("Failed to fetch saved subscription");
 
@@ -50,13 +48,13 @@ async fn create_habit_returns_200_for_valid_form_data() {
 
 #[tokio::test]
 async fn create_habit_returns_400_when_data_is_missing() {
-    let addr = spawn_app().await;
+    let app = spawn_app().await;
     let client = reqwest::Client::new();
     let test_cases = vec![("name=", "missing name")];
 
     for (invalid_body, error_message) in test_cases {
         let response = client
-            .post(&format!("{}/create_habit", &addr))
+            .post(&format!("{}/create_habit", app.addr))
             .header("Content-Type", "application/x-www-form-urlencoded")
             .body(invalid_body)
             .send()
@@ -72,52 +70,42 @@ async fn create_habit_returns_400_when_data_is_missing() {
     }
 }
 
-async fn spawn_app() -> String {
-    let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
-    let port = listener.local_addr().unwrap().port();
-    let config = get_configuration().expect("Failed to read configuration");
-    let connection_string = config.database.connection_string();
-    let mut connection = PgConnection::connect(&connection_string)
-        .await
-        .expect("Failed to connect to Postgress.");
-
-    let server = startup::run(listener, connection).expect("Failed to bind address");
-    let _ = tokio::spawn(server);
-    format!("http://127.0.0.1:{}", port)
+pub struct TestApp {
+    pub addr: String,
+    pub db_pool: PgPool,
 }
 
-// [Curious Ape - Automated habit tracker]
-//
-// As Daniel
-// I want to create a habit,
-// So that I can track it.
-//    POST /create_habit.
-//    Collect Data From HTML.
-//    Parse the request body of a POST request.
-//    Libraries to work with a database.
-//    Setup Migrations for the database.
-//    Get a database connection on API request handlers.
-//    Test side effects in the integration tests.
-//    Avoid "weird" ineractions between tests when working with a database.
-//
-//    What information do I need to create a new habit?
-//          Post /create_habit
-//          Habit
-//          - name -> must exist
-//          - description -> optional
-//
-//          Post /create_habit_log ? name/id
-//          Habit Log
-//          - date - YYYY-MM-DD -> must exist and be valid.
-//          - status - Done :: Not done :: No Info -> Must be: Done :: Not Done
-//
-//          Habit Event/Source
-//          - done - yes :: no
-//          - is_automated: true :: false
-//          - origin: "fitness_record" -> internal resource connection.
-//          - provider: "fitbit" -> external place
-//
-//
-// As Daniel,
-// I want to set a habit as done or not done.
-// So that I can audit my life.
+async fn spawn_app() -> TestApp {
+    let tcp_listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
+    let port = tcp_listener.local_addr().unwrap().port();
+    let addr = format!("http://127.0.0.1:{}", port);
+    let mut config = get_configuration().expect("Failed to read configuration");
+    config.database.database_name = Uuid::new_v4().to_string();
+
+    let db_pool = configure_database(&config.database).await;
+
+    let server = run(tcp_listener, db_pool.clone()).expect("Failed to bind address");
+    let _ = tokio::spawn(server);
+    TestApp { addr, db_pool }
+}
+
+pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
+    let mut conn = PgConnection::connect(&config.connection_string_without_db())
+        .await
+        .expect("Failed to connect to Postgres");
+
+    conn.execute(format!(r#"CREATE DATABASE "{}";"#, config.database_name).as_str())
+        .await
+        .expect("Failed to create database.");
+
+    let conn_pool = PgPool::connect(&config.connection_string())
+        .await
+        .expect("Failed to connect to Postgress");
+
+    sqlx::migrate!("./migrations")
+        .run(&conn_pool)
+        .await
+        .expect("Failed to migrate the database");
+
+    conn_pool
+}

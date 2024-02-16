@@ -1,1 +1,38 @@
-p75
+p89
+
+[Curious Ape - Automated habit tracker]
+
+## Chapter 3 
+
+As Daniel
+I want to create a habit,
+So that I can track it.
+   POST /create_habit.
+   Collect Data From HTML.
+   Parse the request body of a POST request.
+   Libraries to work with a database.
+   Setup Migrations for the database.
+   Get a database connection on API request handlers.
+   Test side effects in the integration tests.
+   Avoid "weird" ineractions between tests when working with a database.
+
+   What information do I need to create a new habit?
+         Post /create_habit
+         Habit
+         - name -> must exist
+         - description -> optional
+
+         Post /create_habit_log ? name/id
+         Habit Log
+         - date - YYYY-MM-DD -> must exist and be valid.
+         - status - Done :: Not done :: No Info -> Must be: Done :: Not Done
+
+         Habit Event/Source
+         - done - yes :: no
+         - is_automated: true :: false
+         - origin: "fitness_record" -> internal resource connection.
+         - provider: "fitbit" -> external place
+
+As Daniel,
+I want to set a habit as done or not done.
+So that I can audit my life.
