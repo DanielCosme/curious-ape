@@ -46,7 +46,12 @@ jobs:
       - name: Install postgresql-client
         run: sudo apt-get update && sudo apt-get install postgresql-client -y
       - name: Migrate database
-        run: SKIP_DOCKER=true ./scripts/init_db.sh
+        run:  | 
+          sudo apt-get install libpq-dev -y
+          SKIP_DOCKER=true ./scripts/init_db.sh
+      - name: Check sqlx-data.json is up-to-date
+        run: |
+          cargo slqx prepare --workspace --check
       - name: Run tests
         run: cargo test
 
@@ -91,7 +96,11 @@ jobs:
       - name: Install postgresql-client
         run: sudo apt-get update && sudo apt-get install postgresql-client -y
       - name: Migrate database
-        run: SKIP_DOCKER=true ./scripts/init_db.sh
+        run:  | 
+          sudo apt-get install libpq-dev -y
+          SKIP_DOCKER=true ./scripts/init_db.sh
+        run: |
+          cargo slqx prepare --workspace --check
       - name: Linting
         run: cargo clippy -- -D warnings
 
