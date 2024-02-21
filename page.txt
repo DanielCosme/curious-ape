@@ -1,4 +1,7 @@
-p163
+p215 Email delivery component
+p209 Chapter 7
+
+p171 Type-Driven Development
 
 [Curious Ape - Automated habit tracker]
 
