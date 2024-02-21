@@ -21,10 +21,11 @@ if ! [ -x "$(command -v sqlx)" ]; then
     exit 1
 fi
 
-DIR=$(dirname "$(readlink -f "$0")")
-ROOT_DIR=$(pwd)
-
-source "$ROOT_DIR/env.sh"
+[ -z "$DB_USER" ] && DB_USER="postgres"
+[ -z "$DB_PASSWORD" ] && DB_PASSWORD="password"
+[ -z "$DB_NAME" ] && DB_NAME="ape"
+[ -z "$DB_PORT" ] && DB_PORT=5432
+[ -z "$DB_HOST" ] && DB_HOST="localhost"
 
 if [[ -z "${SKIP_DOCKER}" ]]
 then
@@ -45,6 +46,8 @@ until psql -h "${DB_HOST}" -U "${DB_USER}" -p "${DB_PORT}" -d "postgres" -c '\q'
     sleep 1
 done
 
+DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+export DATABASE_URL
 sqlx database create
 sqlx migrate run
 
