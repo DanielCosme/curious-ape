@@ -51,6 +51,7 @@ jobs:
           SKIP_DOCKER=true ./scripts/init_db.sh
       - name: Check sqlx-data.json is up-to-date
         run: |
+          SQLX_OFFLINE=true
           cargo sqlx prepare --workspace --check
       - name: Run tests
         run: cargo test
@@ -101,6 +102,7 @@ jobs:
           SKIP_DOCKER=true ./scripts/init_db.sh
       - name: Check sqlx-data.json is up-to-date
         run: |
+          SQLX_OFFLINE=true
           cargo sqlx prepare --workspace --check
       - name: Linting
         run: cargo clippy -- -D warnings
