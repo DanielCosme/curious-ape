@@ -21,11 +21,11 @@ if ! [ -x "$(command -v sqlx)" ]; then
     exit 1
 fi
 
-[ -z "$DB_USER" ] && DB_USER="postgres"
-[ -z "$DB_PASSWORD" ] && DB_PASSWORD="password"
-[ -z "$DB_NAME" ] && DB_NAME="ape"
-[ -z "$DB_PORT" ] && DB_PORT=5432
-[ -z "$DB_HOST" ] && DB_HOST="localhost"
+DB_USER="${POSTGRES_USER:=postgres}"
+DB_PASSWORD="${POSTGRES_PASSWORD:=password}"
+DB_NAME="${POSTGRES_DB:=ape}"
+DB_PORT="${POSTGRES_PORT:=5432}"
+DB_HOST="${POSTGRES_HOST:=localhost}"
 
 if [[ -z "${SKIP_DOCKER}" ]]
 then
