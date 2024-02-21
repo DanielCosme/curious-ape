@@ -1,8 +1,8 @@
 use secrecy::{ExposeSecret, Secret};
 use serde_aux::field_attributes::deserialize_number_from_string;
-use sqlx::ConnectOptions;
 use sqlx::postgres::PgConnectOptions;
 use sqlx::postgres::PgSslMode;
+use sqlx::ConnectOptions;
 
 #[derive(serde::Deserialize)]
 pub struct Settings {
@@ -39,18 +39,17 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
 
     let environment_filename = format!("{}.yaml", environment.as_str());
 
-    println!("{:?}", configuration_directory);
     let settings = config::Config::builder()
         .add_source(config::File::from(
             configuration_directory.join("base.yaml"),
         ))
         .add_source(config::File::from(
             configuration_directory.join(environment_filename),
-        )).
-        add_source(
+        ))
+        .add_source(
             config::Environment::with_prefix("APP")
                 .prefix_separator("_")
-                .separator("_")
+                .separator("_"),
         )
         .build()?;
 
@@ -76,7 +75,7 @@ impl TryFrom<String> for Environment {
 
     fn try_from(s: String) -> Result<Self, Self::Error> {
         match s.to_lowercase().as_str() {
-            "local" => Ok(Self::Production),
+            "local" => Ok(Self::Local),
             "production" => Ok(Self::Production),
             other => Err(format!(
                 "{} is not a supported environment. \

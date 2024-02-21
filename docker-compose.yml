@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  ape:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - 4444:4444
+    depends_on:
+      - postgres
+    environment:
+      - APP_DATABASE_PASSWORD=${DB_PASSWORD?error}
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_DB=${DB_NAME?error}
+      - POSTGRES_USER=${DB_USER?error}
+      - POSTGRES_PASSWORD=${DB_PASSWORD?error} 
+    ports:
+      - "5432:5432"
+    volumes:
+      - /datapool/db/ape:/var/lib/postgresql/data
