@@ -133,9 +133,7 @@ async fn create_habit_returns_400_when_data_is_missing() {
 async fn create_habit_returns_a_400_when_fields_are_present_but_invalid() {
     let app = spawn_app().await;
     let client = reqwest::Client::new();
-    let test_cases = vec![
-        ("name=&description=somedescription", "empty name"),
-    ];
+    let test_cases = vec![("name=&description=somedescription", "empty name")];
 
     for (body, description) in test_cases {
         let response = client

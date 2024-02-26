@@ -13,6 +13,7 @@ async fn main() -> Result<(), std::io::Error> {
 
     // Parse config.
     let cfg = get_configuration().expect("Failed to read configuration");
+    println!("Provider: {:?}", cfg.fitbit);
 
     // Setup Database Connection.
     let conn_pool = PgPool::connect_lazy_with(cfg.database.with_db());

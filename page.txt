@@ -1,4 +1,19 @@
 p215 Email delivery component
+
+Oauth2 example with Rust
+https://github.com/pka/actix-web-oauth2/blob/master/src/bin/google.rs
+
+Fitbit Web API rs
+https://github.com/mvertescher/fitbit-web-api-rs
+
+Fitbit Grabber
+https://github.com/bradfordboyle/fitbit-grabber-rs/tree/master
+
+Fitibt Client
+   - Read environment variables.
+   - Authenticate & Authorize.
+   - Make requests with client.
+
 p209 Chapter 7
 
 p171 Type-Driven Development
@@ -39,3 +54,4 @@ So that I can track it.
 As Daniel,
 I want to set a habit as done or not done.
 So that I can audit my life.
+

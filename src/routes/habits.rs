@@ -15,7 +15,10 @@ impl TryFrom<FormData> for NewHabit {
     type Error = String;
     fn try_from(value: FormData) -> Result<Self, Self::Error> {
         let name = HabitName::parse(value.name)?;
-        Ok(Self { name, description: value.description })
+        Ok(Self {
+            name,
+            description: value.description,
+        })
     }
 }
 
@@ -57,4 +60,3 @@ pub async fn insert_habit(pool: &PgPool, new_habit: NewHabit) -> Result<(), sqlx
 
     Ok(())
 }
-

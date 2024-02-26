@@ -1,3 +1,4 @@
+use actix_web::dev::Url;
 use secrecy::{ExposeSecret, Secret};
 use serde_aux::field_attributes::deserialize_number_from_string;
 use sqlx::postgres::PgConnectOptions;
@@ -8,6 +9,7 @@ use sqlx::ConnectOptions;
 pub struct Settings {
     pub database: DatabaseSettings,
     pub application: ApplicationSettings,
+    pub fitbit: Oauth2Settings,
 }
 
 #[derive(serde::Deserialize)]
@@ -15,6 +17,23 @@ pub struct ApplicationSettings {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub port: u16,
     pub host: String,
+}
+
+// #[derive(serde::Deserialize)]
+// pub enum Provider {
+//     Fitbit,
+// }
+
+
+// Where do I put the integration Enum?
+#[derive(serde::Deserialize,Debug)]
+pub struct Oauth2Settings {
+    provider: String,
+    redirect_url: String,
+    client_id: String,
+    client_secret: String,
+    authorization_uri: String,
+    access_token_uri: String,
 }
 
 #[derive(serde::Deserialize)]

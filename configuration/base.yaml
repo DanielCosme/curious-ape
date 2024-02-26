@@ -7,3 +7,10 @@ database:
   password: "password"
   database_name: "ape"
   require_ssl: false
+fitbit:
+    provider: "fitbit"
+    redirect_url: "http://localhost:4444/api/oauth2/fitbit/success"
+    client_id: ""
+    client_secret: ""
+    authorization_uri: "https://www.fitbit.com/oauth2/authorize"
+    access_token_uri: "https://api.fitbit.com/oauth2/token"
