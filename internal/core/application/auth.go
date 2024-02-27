@@ -16,9 +16,8 @@ func (a *App) SetPassword(name, password string, role entity.Role) error {
 	if password == "" {
 		return errors.New("password cannot be empty")
 	}
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
-	if err != nil {
-		return err
+	if name == "" {
+		return errors.New("name cannot be empty")
 	}
 
 	u, err := a.db.Users.Get(entity.UserFilter{Role: role})
@@ -26,16 +25,18 @@ func (a *App) SetPassword(name, password string, role entity.Role) error {
 		return err
 	}
 	if u == nil {
+		hash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+		if err != nil {
+			return err
+		}
+
 		return a.db.Users.Create(&entity.User{
 			Name:     name,
 			Password: string(hash),
 			Role:     role,
 		})
 	}
-
-	u.Password = string(hash)
-	_, err = a.db.Users.Update(u)
-	return err
+	return nil
 }
 
 // Authenticate returns userID if succesfully authenticated.

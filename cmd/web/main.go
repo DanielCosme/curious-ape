@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/go-co-op/gocron/v2"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/go-co-op/gocron/v2"
 
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/danielcosme/curious-ape/internal/core/application"
@@ -29,8 +30,7 @@ type config struct {
 		DNS string `json:"dns"`
 	} `json:"database"`
 	Server struct {
-		Port     int `json:"port"`
-		FilePath string
+		Port int `json:"port"`
 	} `json:"server"`
 	Integrations struct {
 		Fitbit *entity.Oauth2Config `json:"fitbit"`
@@ -52,7 +52,6 @@ func main() {
 	cfg := new(config)
 	flag.StringVar(&cfg.Environment, "env", "", "Sets the running environment for the application")
 	flag.Parse()
-	setFilePath(cfg)
 	readConfiguration(cfg)
 
 	// logger initialization
@@ -60,7 +59,7 @@ func main() {
 	logape.DefaultLogger = logger
 
 	// SQL datasource initialization
-	db := sqlx.MustConnect(sqlite.DriverName, cfg.Server.FilePath+"/"+cfg.Database.DNS)
+	db := sqlx.MustConnect(sqlite.DriverName, "./"+cfg.Database.DNS)
 
 	sessionManager := scs.New()
 	sessionManager.Store = sqlite3store.New(db.DB)
@@ -98,12 +97,6 @@ func main() {
 	if err := web.App.SetPassword(cfg.Admin.Name, cfg.Admin.Password, entity.AdminRole); err != nil {
 		logger.Fatal(err)
 	}
-	if err := web.App.SetPassword(cfg.User.Name, cfg.User.Password, entity.UserRole); err != nil {
-		logger.Fatal(err)
-	}
-	// if err := web.App.SetPassword(cfg.Guest.Name, cfg.Guest.Password, entity.GuestRole); err != nil {
-	// 	logger.Fatal(err)
-	// }
 	if err := web.ListenAndServe(); err != nil {
 		logger.Fatal(err)
 	}
@@ -134,34 +127,19 @@ func startCron(a *application.App) error {
 	if err != nil {
 		a.Log.Fatal(err)
 	}
-	a.Log.Info("Cron job next run: ", next)
+	a.Log.Info("Cron job next run: ", next.Local())
 
 	return err
 }
 
-func setFilePath(cfg *config) {
-	path := fmt.Sprintf("%s/.ape/server", os.Getenv("HOME"))
-	if err := os.MkdirAll(path, os.ModePerm); err != nil { // $HOME/.ape/server
-		logape.DefaultLogger.Fatal(err)
-	}
-
-	cfg.Server.FilePath = path
-}
-
 func readConfiguration(cfg *config) *config {
 	var err error
-	rawFile := []byte{}
-	filePath := cfg.Server.FilePath + "/"
+	var rawFile []byte
 
-	switch cfg.Environment {
-	case "dev":
-		filePath = filePath + "dev.env.json"
-	case "prod":
-		filePath = filePath + "prod.env.json"
-	default:
-		logape.DefaultLogger.Fatal(errors.NewFatal("no valid environment provided"))
+	if cfg.Environment != "dev" && cfg.Environment != "prod" {
+		logape.DefaultLogger.Fatal(errors.NewFatal("ivalid environment provided " + cfg.Environment))
 	}
-	rawFile, err = os.ReadFile(filePath)
+	rawFile, err = os.ReadFile("config.json")
 	exitIfErr(err)
 
 	err = json.Unmarshal(rawFile, cfg)

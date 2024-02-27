@@ -1,12 +1,13 @@
 module github.com/danielcosme/curious-ape
 
-go 1.21.5
+go 1.22.0
 
 require (
 	github.com/alexedwards/scs/sqlite3store v0.0.0-20230327161757-10d4299e3b24
 	github.com/alexedwards/scs/v2 v2.5.1
 	github.com/danielcosme/go-sdk v0.0.3
 	github.com/go-chi/chi v1.5.4
+	github.com/go-co-op/gocron/v2 v2.0.3
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/justinas/nosurf v1.1.1
@@ -17,7 +18,6 @@ require (
 )
 
 require (
-	github.com/go-co-op/gocron/v2 v2.0.3 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/google/uuid v1.4.0 // indirect
@@ -28,7 +28,6 @@ require (
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
-	github.com/stretchr/testify v1.8.4 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb // indirect
 	golang.org/x/mod v0.14.0 // indirect

@@ -9,10 +9,11 @@ import (
 )
 
 type App struct {
-	db      *database.Repository
-	cfg     *Environment
-	Log     *log.Logger
-	sync    *integrations.Sync
+	db   *database.Repository
+	cfg  *Environment
+	Log  *log.Logger
+	sync *integrations.Sync
+	// TODO(daniel) move the session manager to the transport layer.
 	Session *scs.SessionManager
 }
 

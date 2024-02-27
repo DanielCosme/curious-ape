@@ -1,0 +1,2 @@
+## Cli deps
+go-migrate
