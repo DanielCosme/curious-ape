@@ -1,9 +1,6 @@
 # include .envrc
 DB_PATH=${HOME}/.ape/server/ape.db
 
-# Go migrate for slite3 support
-# go install -tags 'sqlite3' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-
 # ==================================================================================== #
 # HELPERS
 # ==================================================================================== #
@@ -32,21 +29,27 @@ run:
 # BUILD
 # ==================================================================================== #
 
-current_time = $(shell date --iso-8601=seconds)
-git_description = $(shell git describe --always --dirty --tags --long)
-linker_flags = '-s -X main.buildTime=${current_time} -X main.version=${git_description}'
+#current_time = $(shell date --iso-8601=seconds)
+#git_description = $(shell git describe --always --dirty --tags --long)
+#linker_flags = '-s -X main.buildTime=${current_time} -X main.version=${git_description}'
 # -extldflags "-static"
 
-## build/web: build the cmd/web application
-.PHONY: build/web/linux
-build/web/linux:
+## build: Builds container images for the project.
+.PHONY: build
+build:
 	@echo 'Building cmd/web...'
-	@echo ${current_time}
-	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/ape ./cmd/web
+	# @echo ${current_time}
+	./scripts/build.sh
+	# CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/ape ./cmd/web
 
 # ==================================================================================== #
 # QUALITY CONTROL
 # ==================================================================================== #
+
+## test: test all code
+.PHONY: test
+test:
+	./scripts/test.sh
 
 ## audit: tidy dependencies and format, vet and test all code
 .PHONY: audit
