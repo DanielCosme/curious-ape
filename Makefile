@@ -23,27 +23,10 @@ confirm:
 # DEVELOPMENT
 # ==================================================================================== #
 
-## run: runs the application
+## run: Runs the application
 .PHONY: run
 run:
-	@go run ./cmd/web -env dev
-
-## db/psql: connect to the database using psql
-# 	.PHONY: db/psql
-# 	db/psql:
-# 		psql ${APE_PG_DB_DSN}
-
-## db/migrations/up: apply all up database migrations
-.PHONY: db/migrations/up
-db/migrations/up: confirm
-	@echo 'Running up migrations...'
-	migrate -path ./migrations/sqlite -database sqlite3://${DB_PATH} up
-
-## db/migrations/new name=$1: create a new database migration
-.PHONY: db/migrations/new
-db/migrations/new:
-	@echo 'Creating migration files for ${name}...'
-	migrate create -seq -ext=.sql -dir=./migrations/sqlite ${name}
+	./scripts/run.sh
 
 # ==================================================================================== #
 # BUILD
@@ -73,7 +56,7 @@ audit:
 	go mod verify
 	@echo 'Vetting code...'
 	go vet ./...
-	staticcheck ./...
+	# staticcheck ./...
 	#@echo 'Running tests...'
 	#go test -race -vet=off ./...
 

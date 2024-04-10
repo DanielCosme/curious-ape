@@ -2,11 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/go-co-op/gocron/v2"
@@ -50,8 +50,6 @@ type user struct {
 func main() {
 	// flags & configuration
 	cfg := new(config)
-	flag.StringVar(&cfg.Environment, "env", "", "Sets the running environment for the application")
-	flag.Parse()
 	readConfiguration(cfg)
 
 	// logger initialization
@@ -135,9 +133,18 @@ func startCron(a *application.App) error {
 func readConfiguration(cfg *config) *config {
 	var err error
 	var rawFile []byte
+	cfg.Environment = os.Getenv("APE_ENVIRONMENT")
+	cfg.Server.Port, err = strconv.Atoi(os.Getenv("APE_PORT"))
+	if err != nil {
+		logape.DefaultLogger.Fatal(fmt.Errorf("Invalid APE_PORT: '%w'", err))
+	}
 
 	if cfg.Environment != "dev" && cfg.Environment != "prod" {
-		logape.DefaultLogger.Fatal(errors.NewFatal("ivalid environment provided " + cfg.Environment))
+		if cfg.Environment == "" {
+			logape.DefaultLogger.Fatal(errors.NewFatal("Environment variable APE_ENVIRONMENT is empty"))
+		} else {
+			logape.DefaultLogger.Fatal(errors.NewFatal(fmt.Sprintf("Invalid environment: '%s'", cfg.Environment)))
+		}
 	}
 	rawFile, err = os.ReadFile("config.json")
 	exitIfErr(err)
