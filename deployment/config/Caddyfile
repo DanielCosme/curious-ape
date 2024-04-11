@@ -1,9 +1,0 @@
-{
-    email cosmedaniel8@gmail.com
-}
-
-ape.danicos.me {
-    respond /debug/* "Not Permitted" 403
-    reverse_proxy localhost:3000
-    reverse_proxy /v* localhost:4000
-}

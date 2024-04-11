@@ -1,5 +1,6 @@
 FROM golang:1.22 as base-builder
 ENV GOCACHE=/root/.cache/go-build
+ENV CGO_ENABLED=1
 
 # Ape
 
@@ -9,7 +10,6 @@ COPY go.mod go.sum ./
 RUN --mount=type=cache,target=/go/pkg/mod go mod download 
 RUN go mod verify
 COPY . .
-ENV CGO_ENABLED=1
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg/mod \
     go build -ldflags="-extldflags=-static" -o=./bin/ape ./cmd/web
@@ -25,9 +25,8 @@ CMD ["/app/bin/ape"]
 FROM base-builder as migrate-builder
 WORKDIR /app
 RUN git clone --branch v4.17.0 --depth 1 https://github.com/golang-migrate/migrate
-WORKDIR migrate
+WORKDIR /app/migrate
 RUN --mount=type=cache,target=/go/pkg/mod go mod download 
-ENV CGO_ENABLED=1
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg/mod \
     go build -o build/migrate -ldflags="-s -w -extldflags=-static" -tags 'sqlite3' ./cmd/migrate

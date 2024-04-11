@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  curious-ape:
+    container_name: curious-ape
+    image: danielcosme/curious-ape
+    restart: unless-stopped
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 1s
+        max_attempts: 3
+    ports:
+      - 4000:4000
+    volumes:
+      - ./config.json:/app/config.json
+      - db-data:/app/db-data
+    environment:
+      - APE_ENVIRONMENT=prod
+      - APE_PORT=4000
+    depends_on:
+      migrate-ape:
+        condition: service_completed_successfully
+
+  migrate-ape:
+    container_name: migrate-ape
+    image: danielcosme/migrate-ape
+    volumes:
+      - ./migrations/sqlite:/migrations
+      - db-data:/db-data
+    entrypoint: ["migrate", "-path" , "/migrations", "-database", "sqlite3:///db-data/ape.db", up]
+
+volumes:
+  db-data:
