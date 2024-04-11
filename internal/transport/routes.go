@@ -22,7 +22,6 @@ func ChiRoutes(h *Handler) http.Handler {
 
 	r.Route("/login", func(r chi.Router) {
 		r.Use(h.App.Session.LoadAndSave)
-		r.Use(midNoSurf)
 
 		r.Get("/", h.loginForm)
 		r.Post("/", h.loginPost)

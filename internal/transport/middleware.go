@@ -9,7 +9,6 @@ import (
 
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/go-chi/chi"
-	"github.com/justinas/nosurf"
 )
 
 func (h *Handler) midAuthenticate(next http.Handler) http.Handler {
@@ -46,19 +45,6 @@ func midSecureHeaders(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
-}
-
-// Create a NoSurf middleware function which uses a customized CSRF cookie with
-// the Secure, Path and HttpOnly attributes set.
-func midNoSurf(next http.Handler) http.Handler {
-	csrfHandler := nosurf.New(next)
-	csrfHandler.SetBaseCookie(http.Cookie{
-		HttpOnly: true,
-		Path:     "/",
-		Secure:   true,
-	})
-
-	return csrfHandler
 }
 
 func (h *Handler) midRecoverPanic(next http.Handler) http.Handler {

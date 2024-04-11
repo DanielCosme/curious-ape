@@ -10,7 +10,6 @@ require (
 	github.com/go-co-op/gocron/v2 v2.0.3
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/jmoiron/sqlx v1.3.5
-	github.com/justinas/nosurf v1.1.1
 	github.com/mattn/go-sqlite3 v1.14.10
 	golang.org/x/crypto v0.16.0
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5

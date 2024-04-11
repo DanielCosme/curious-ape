@@ -11,7 +11,6 @@ import (
 
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/web"
-	"github.com/justinas/nosurf"
 )
 
 var functions = template.FuncMap{
@@ -36,7 +35,6 @@ func (h *Handler) newTemplateData(r *http.Request) *templateData {
 		CurrentYear:     time.Now().Year(),
 		Flash:           h.App.Session.PopString(r.Context(), "flash"),
 		IsAuthenticated: h.IsAuthenticated(r),
-		CSRFToken:       nosurf.Token(r),
 	}
 }
 

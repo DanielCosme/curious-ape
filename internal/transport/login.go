@@ -23,6 +23,7 @@ func (h *Handler) loginForm(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) loginPost(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
+		h.App.Log.Error(err)
 		h.clientError(w, http.StatusBadRequest)
 		return
 	}
