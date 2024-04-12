@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime/debug"
 	"strconv"
 	"time"
 
@@ -47,14 +48,18 @@ type user struct {
 	Password string `json:"password"`
 }
 
+var version string
+
 func main() {
 	// flags & configuration
 	cfg := new(config)
+	v := Version()
 	readConfiguration(cfg)
 
 	// logger initialization
 	logger := logape.New(os.Stdout, logape.LevelDebug, time.RFC822)
 	logape.DefaultLogger = logger
+	logger.Info("Version ", v)
 
 	// SQL datasource initialization
 	db := sqlx.MustConnect(sqlite.DriverName, "./"+cfg.Database.DNS)
@@ -82,6 +87,7 @@ func main() {
 			WriteTimeout: 10 * time.Second,
 			ErrorLog:     log.New(logger, "", 0),
 		},
+		Version: v,
 	}
 
 	go func() {
@@ -158,4 +164,27 @@ func exitIfErr(err error) {
 	if err != nil {
 		logape.DefaultLogger.Fatal(err)
 	}
+}
+
+func Version() string {
+	hash := "unknown"
+	dirty := false
+
+	bi, ok := debug.ReadBuildInfo()
+	if ok {
+		for _, s := range bi.Settings {
+			switch s.Key {
+			case "vcs.revision":
+				hash = s.Value[:8]
+			case "vcs.modified":
+				if s.Value == "true" {
+					dirty = true
+				}
+			}
+		}
+	}
+	if dirty {
+		return fmt.Sprintf("%s-%s-dirty", version, hash)
+	}
+	return fmt.Sprintf("%s-%s", version, hash)
 }

@@ -10,6 +10,7 @@ import (
 
 type Handler struct {
 	App                  *application.App
+	Version              string
 	templateCache        map[string]*template.Template
 	partialTemplateCache map[string]*template.Template
 }

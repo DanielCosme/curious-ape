@@ -20,10 +20,12 @@
             {{end}}
             {{template "main" .}}
         </main>
-        <footer>
+        <footer style="display:flex;justify-content:space-between">
             <!-- Update the footer to include the current year -->
-            Powered by <a href='https://golang.org/'>Go</a> in {{.CurrentYear}}
+            <p>Powered by <a href='https://golang.org/'>Go</a> in {{.CurrentYear}}</p>
+            <p>{{.Version}}</p>
         </footer>
     </body>
 </html>
 {{end}}
+

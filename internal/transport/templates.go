@@ -20,6 +20,7 @@ var functions = template.FuncMap{
 
 type templateData struct {
 	CurrentYear     int
+	Version         string
 	Habit           *entity.Habit
 	Habits          []*entity.Habit
 	Days            []dayContainer
@@ -35,6 +36,7 @@ func (h *Handler) newTemplateData(r *http.Request) *templateData {
 		CurrentYear:     time.Now().Year(),
 		Flash:           h.App.Session.PopString(r.Context(), "flash"),
 		IsAuthenticated: h.IsAuthenticated(r),
+		Version:         h.Version,
 	}
 }
 

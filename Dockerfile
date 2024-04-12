@@ -13,7 +13,7 @@ RUN go mod verify
 COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg/mod \
-    go build -ldflags="-extldflags=-static -X main.Version=${APE_VERSION}" -o=./bin/ape ./cmd/web
+    go build -ldflags="-s -extldflags=-static -X main.version=${APE_VERSION}" -o=./bin/ape ./cmd/web
 
 
 FROM alpine:latest as ape
