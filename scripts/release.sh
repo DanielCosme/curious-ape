@@ -26,6 +26,8 @@ $cur_dir/test.sh; or exit 1
 
 $cur_dir/build.sh $new_version; or exit 1
 
+git add .semver.yaml
+git commit -m "Bump version to $new_version"
 git tag $new_version
 git push origin $new_version || exit 1
 git push || or exit 1
