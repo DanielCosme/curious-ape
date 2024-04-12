@@ -2,7 +2,6 @@
 
 set root_dir pwd
 set cur_dir (realpath (dirname (status --current-filename)))
-set version_increase $argv[1]
 set current_branch (git branch --show-current)
 
 if not test $current_branch = "main"
@@ -11,7 +10,7 @@ if not test $current_branch = "main"
   exit 1
 end
 
-set -gx new_version (semver up $version_increase); or exit 1
+set -gx new_version (semver get release); or exit 1
 
 # Run tests.
 $cur_dir/test.sh; or exit 1
@@ -24,13 +23,11 @@ $cur_dir/test.sh; or exit 1
 #   - minor
 #   - mayor
 
-$cur_dir/build.sh $new_version; or exit 1
-
-git add .semver.yaml
-git commit -m "Bump version to $new_version"
-git tag $new_version
+git tag $new_version; or exit 1
 git push origin $new_version || exit 1
 git push || or exit 1
+
+$cur_dir/build.sh $new_version; or exit 1
 
 echo "$DOCKER_HUB_PASSWORD" | docker login -u $DOCKER_HUB_USER --password-stdin; or exit 1
 
