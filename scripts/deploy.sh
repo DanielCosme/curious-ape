@@ -22,7 +22,7 @@ echo "--- Synchornizing deployment files ---"
 rsync \
   --verbose \
   --recursive \
-  ./deployment/ \
+  ./deployment/prod/ \
   daniel@danicos.me:~/ape-deployment/ ; or exit 1
 echo "--- Success ---"
 echo ""
