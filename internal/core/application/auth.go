@@ -24,19 +24,24 @@ func (a *App) SetPassword(name, password string, role entity.Role) error {
 	if err != nil && !errors.Is(err, database.ErrNotFound) {
 		return err
 	}
-	if u == nil {
-		hash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
-		if err != nil {
-			return err
-		}
 
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+	if err != nil {
+		return err
+	}
+	if u == nil {
 		return a.db.Users.Create(&entity.User{
 			Name:     name,
 			Password: string(hash),
 			Role:     role,
 		})
 	}
-	return nil
+	_, err = a.db.Users.Update(&entity.User{
+		Name:     name,
+		Password: string(hash),
+		Role:     role,
+	})
+	return err
 }
 
 // Authenticate returns userID if succesfully authenticated.
