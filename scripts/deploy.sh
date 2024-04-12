@@ -10,6 +10,7 @@ if test "$RELEASE" = true
   echo "\
     cd curious-ape
     git pull
+    git checkout main; or exit 1
     ./scripts/release.sh; or exit 1 \
     " | ssh daniel@prime ; or exit 1
     echo "--- Success ---"
