@@ -24,7 +24,7 @@ $cur_dir/test.sh; or exit 1
 #   - minor
 #   - mayor
 
-$cur_dir/build.sh "$new_version-$(git rev-parse --short HEAD)"; or exit 1
+$cur_dir/build.sh $new_version; or exit 1
 
 git tag $new_version
 git push origin $new_version || exit 1

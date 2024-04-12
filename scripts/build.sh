@@ -3,7 +3,7 @@
 set -gx DOCKER_BUILDKIT 1
 
 if test -z $argv[1]
-  set -gx build_version "$(semver get alpha)-$(git rev-parse --short HEAD)"
+  set -gx build_version "$(semver get alpha)"
 else
   set -gx build_version $argv[1]
 end
