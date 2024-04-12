@@ -89,10 +89,10 @@ func (h *Handler) newHabitPost(w http.ResponseWriter, r *http.Request) {
 		h.serverError(w, err)
 		return
 	}
-	h.App.Session.Put(r.Context(), "flash", "Habit successfully created!")
+	h.SessionManager.Put(r.Context(), "flash", "Habit successfully created!")
 
 	data.Habit = habit
-	data.Flash = h.App.Session.PopString(r.Context(), "flash")
+	data.Flash = h.SessionManager.PopString(r.Context(), "flash")
 	h.render(w, http.StatusCreated, "view.gohtml", data)
 }
 

@@ -5,12 +5,14 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/danielcosme/curious-ape/internal/core/application"
 )
 
 type Handler struct {
 	App                  *application.App
 	Version              string
+	SessionManager       *scs.SessionManager
 	templateCache        map[string]*template.Template
 	partialTemplateCache map[string]*template.Template
 }

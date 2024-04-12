@@ -54,24 +54,24 @@ func (h *Handler) loginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.App.Session.RenewToken(r.Context())
+	err = h.SessionManager.RenewToken(r.Context())
 	if err != nil {
 		h.serverError(w, err)
 		return
 	}
 
-	h.App.Session.Put(r.Context(), "authenticatedUserID", id)
+	h.SessionManager.Put(r.Context(), "authenticatedUserID", id)
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
-	if err := h.App.Session.RenewToken(r.Context()); err != nil {
+	if err := h.SessionManager.RenewToken(r.Context()); err != nil {
 		h.serverError(w, err)
 		return
 	}
 
-	h.App.Session.Remove(r.Context(), "authenticatedUserID")
-	h.App.Session.Put(r.Context(), "flash", "You've been logged out sucessfully!")
+	h.SessionManager.Remove(r.Context(), "authenticatedUserID")
+	h.SessionManager.Put(r.Context(), "flash", "You've been logged out sucessfully!")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

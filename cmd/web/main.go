@@ -77,8 +77,7 @@ func main() {
 				Fitbit: cfg.Integrations.Fitbit,
 				Google: cfg.Integrations.Google,
 			},
-			Logger:         logger,
-			SessionManager: sessionManager,
+			Logger: logger,
 		}),
 		Server: &http.Server{
 			Addr:         fmt.Sprintf(":%d", cfg.Server.Port),
@@ -87,7 +86,8 @@ func main() {
 			WriteTimeout: 10 * time.Second,
 			ErrorLog:     log.New(logger, "", 0),
 		},
-		Version: v,
+		Version:               v,
+		SessionManager: sessionManager,
 	}
 
 	go func() {

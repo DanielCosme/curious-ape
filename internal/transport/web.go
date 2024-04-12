@@ -3,18 +3,24 @@ package transport
 import (
 	"net/http"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/danielcosme/curious-ape/internal/core/application"
 	"github.com/danielcosme/go-sdk/log"
 )
 
 type WebClient struct {
-	App     *application.App
-	Server  *http.Server
-	Version string
+	App                   *application.App
+	Server                *http.Server
+	Version               string
+	SessionManager *scs.SessionManager
 }
 
 func (wc *WebClient) ListenAndServe() error {
-	h := &Handler{App: wc.App, Version: wc.Version}
+	h := &Handler{
+		App:                      wc.App,
+		Version:               wc.Version,
+		SessionManager: wc.SessionManager,
+	}
 	tc, err := newTemplateCache()
 	if err != nil {
 		return err

@@ -205,7 +205,6 @@ func NewTestApplication(t *testing.T) *application.App {
 		Config: &application.Environment{
 			Env: "test",
 		},
-		SessionManager: nil,
 	}
 
 	app := application.New(opts)

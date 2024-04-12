@@ -34,7 +34,7 @@ type templateData struct {
 func (h *Handler) newTemplateData(r *http.Request) *templateData {
 	return &templateData{
 		CurrentYear:     time.Now().Year(),
-		Flash:           h.App.Session.PopString(r.Context(), "flash"),
+		Flash:           h.SessionManager.PopString(r.Context(), "flash"),
 		IsAuthenticated: h.IsAuthenticated(r),
 		Version:         h.Version,
 	}

@@ -21,7 +21,7 @@ func ChiRoutes(h *Handler) http.Handler {
 	r.Handle("/static/*", fileServer)
 
 	r.Route("/login", func(r chi.Router) {
-		r.Use(h.App.Session.LoadAndSave)
+		r.Use(h.SessionManager.LoadAndSave)
 
 		r.Get("/", h.loginForm)
 		r.Post("/", h.loginPost)
@@ -30,7 +30,7 @@ func ChiRoutes(h *Handler) http.Handler {
 	r.Get("/api/oauth2/{provider}/success", h.Oauth2Success)
 	// Protected routes.
 	r.Route("/", func(r chi.Router) {
-		r.Use(h.App.Session.LoadAndSave)
+		r.Use(h.SessionManager.LoadAndSave)
 		r.Use(h.midAuthenticate)
 		r.Use(h.RequireAuth)
 

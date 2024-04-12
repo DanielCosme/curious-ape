@@ -1,7 +1,6 @@
 package application
 
 import (
-	"github.com/alexedwards/scs/v2"
 	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/integrations"
@@ -13,8 +12,6 @@ type App struct {
 	cfg  *Environment
 	Log  *log.Logger
 	sync *integrations.Sync
-	// TODO(daniel) move the session manager to the transport layer.
-	Session *scs.SessionManager
 }
 
 // Endpoints and application methods to sync manually
@@ -22,10 +19,9 @@ type App struct {
 //		there is no need for authentication
 
 type AppOptions struct {
-	Logger         *log.Logger
-	Config         *Environment
-	Repository     *database.Repository
-	SessionManager *scs.SessionManager
+	Logger     *log.Logger
+	Config     *Environment
+	Repository *database.Repository
 }
 
 type Environment struct {
@@ -36,11 +32,10 @@ type Environment struct {
 
 func New(opts *AppOptions) *App {
 	a := &App{
-		db:      opts.Repository,
-		cfg:     opts.Config,
-		Log:     opts.Logger,
-		sync:    integrations.NewSync(opts.Logger),
-		Session: opts.SessionManager,
+		db:   opts.Repository,
+		cfg:  opts.Config,
+		Log:  opts.Logger,
+		sync: integrations.NewSync(opts.Logger),
 	}
 
 	a.Log.InfoP("Application running", log.Prop{"environment": a.cfg.Env})

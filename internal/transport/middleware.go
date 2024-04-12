@@ -13,7 +13,7 @@ import (
 
 func (h *Handler) midAuthenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id := h.App.Session.GetInt(r.Context(), "authenticatedUserID")
+		id := h.SessionManager.GetInt(r.Context(), "authenticatedUserID")
 		if id == 0 {
 			next.ServeHTTP(w, r)
 			return
