@@ -1,5 +1,4 @@
-#! /usr/bin/env fish
-
+#!/usr/bin/env fish
 
 # docker run \
 #  -v ./migrations/sqlite:/migrations \

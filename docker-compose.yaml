@@ -26,9 +26,30 @@ services:
     container_name: migrate-ape
     image: danielcosme/migrate-ape
     volumes:
-      - ./migrations/sqlite:/migrations
       - db-data:/db-data
+    depends_on:
+      restore-ape:
+        condition: service_completed_successfully
     entrypoint: ["migrate", "-path" , "/migrations", "-database", "sqlite3:///db-data/ape.db", up]
+  
+  replicate-ape:
+    container_name: replicate-ape
+    image: litestream/litestream
+    volumes:
+      - ./litestream.yml:/etc/litestream.yml
+      - db-data:/db-data
+    depends_on:
+      restore-ape:
+        condition: service_completed_successfully
+    entrypoint: ["/usr/local/bin/litestream", "replicate"]
+
+  restore-ape:
+    container_name: restore-ape
+    image: litestream/litestream
+    volumes:
+      - ./litestream.yml:/etc/litestream.yml
+      - db-data:/db-data
+    entrypoint: ["litestream", "restore", "-if-db-not-exists", "-if-replica-exists", "/db-data/ape.db"]
 
 volumes:
   db-data:

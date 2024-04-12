@@ -1,13 +1,20 @@
-#! /usr/bin/env fish
+#!/usr/bin/env fish
 
 set -gx DOCKER_BUILDKIT 1
 
+if test -z $argv[1]
+  set -gx build_version "$(semver get alpha)-$(git rev-parse --short HEAD)"
+else
+  set -gx build_version $argv[1]
+end
+
 docker build \
-  --tag danielcosme/curious-ape \
+  --build-arg="APE_VERSION=$build_version" \
+  --tag curious-ape \
   --target ape \
   .
 
 docker build \
-  --tag danielcosme/migrate-ape \
+  --tag migrate-ape \
   --target migrate \
   .

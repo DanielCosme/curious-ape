@@ -1,6 +1,7 @@
 FROM golang:1.22 as base-builder
 ENV GOCACHE=/root/.cache/go-build
 ENV CGO_ENABLED=1
+ARG APE_VERSION=unknown
 
 # Ape
 
@@ -12,7 +13,7 @@ RUN go mod verify
 COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg/mod \
-    go build -ldflags="-extldflags=-static" -o=./bin/ape ./cmd/web
+    go build -ldflags="-extldflags=-static -X main.Version=${APE_VERSION}" -o=./bin/ape ./cmd/web
 
 
 FROM alpine:latest as ape
@@ -33,6 +34,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 
 
 FROM alpine:latest AS migrate
+COPY ./migrations/sqlite /migrations
 COPY --from=migrate-builder /app/migrate/build/migrate /usr/local/bin/migrate
 ENTRYPOINT ["migrate"]
 CMD ["--help"]

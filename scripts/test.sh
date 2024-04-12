@@ -1,3 +1,7 @@
-#! /usr/bin/env fish
+#!/usr/bin/env fish
 
-gotest ./...
+if type -q gotest
+  gotest ./...
+else
+  go test ./...
+end
