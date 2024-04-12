@@ -23,7 +23,7 @@ $cur_dir/test.sh; or exit 1
 #   - minor
 #   - mayor
 
-git tag $new_version; or exit 1
+git tag $new_version
 git push origin $new_version || exit 1
 git push || or exit 1
 

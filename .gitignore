@@ -30,3 +30,5 @@ tmp/
 
 # Config
 config.json
+
+/deployment

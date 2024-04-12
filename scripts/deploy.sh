@@ -1,34 +1,40 @@
-#!/usr/bin/env bash
-set -eo pipefail
+#!/usr/bin/env fish
 
-DIR=$(dirname "$(readlink -f "$0")")
-ROOT_DIR=$(pwd)
+if test "$RELEASE" = true
+  echo "--- Pushing code to remote ---"
+  git push; or exit 1
+  echo "--- Success ---"
+  echo ""
 
-source "$ROOT_DIR/tmp/env.sh"
-source "$DIR/functions.sh"
+  echo "--- Starting Release ---"
+  echo "\
+    cd curious-ape
+    git pull
+    ./scripts/release.sh; or exit 1 \
+    " | ssh daniel@prime ; or exit 1
+    echo "--- Success ---"
+  echo ""
+end
 
-echo "--- Pushing code to remote ---"
-git push
 
-echo "--- Deploying to $SERVER ---"
+echo "--- Synchornizing deployment files ---"
+# Transfer directory contents, but not the directory itself
+rsync \
+  --verbose \
+  --recursive \
+  ./deployment/ \
+  daniel@danicos.me:~/ape-deployment/ ; or exit 1
+echo "--- Success ---"
+echo ""
 
+echo "--- Refreshing containers ---"
+echo "\
+    cd ape-deployment &&
+    docker compose pull &&
+    docker compose up -d &&
+    docker system prune -f; or exit 1
+    " | ssh daniel@danicos.me ; or exit 1
+echo "--- Success ---"
+echo ""
 
-echo "Sending configuration file"
-do_scp "$ROOT_DIR/tmp/prod.env.json" "$APP_HOME/.$APP_NAME/server/prod.env.json"
-
-do_ssh 'bash -s' <<-STDIN
-  set -eo pipefail
-
-  rm $APP_HOME/$APP_NAME
-  cd $APP_HOME/repo/curious-ape
-  git pull
-
-  make build/web/linux
-  mv ./bin/$APP_NAME $APP_HOME/$APP_NAME
-
-  echo Running migrations...
-  migrate -path ./migrations/sqlite/ -database sqlite3://$APP_HOME/.$APP_NAME/server/$APP_NAME.db up
-  sudo systemctl restart $APP_NAME
-STDIN
-
-echo "Done!"
+echo "--- Done! ---"
