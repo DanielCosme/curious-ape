@@ -2,6 +2,13 @@
 
 if test "$RELEASE" = true
   echo "--- Pushing code to remote ---"
+
+  if not test $current_branch = "main"
+    echo "git is NOT on the main branch"
+    echo "current branch: " $current_branch
+    exit 1
+  end
+  git diff --exit-code; or echo "Working tree cannot be dirty"; exit 1
   git push; or exit 1
   echo "--- Success ---"
   echo ""
@@ -9,8 +16,8 @@ if test "$RELEASE" = true
   echo "--- Starting Release ---"
   echo "\
     cd curious-ape
-    git pull
     git checkout main; or exit 1
+    git pull; or exit 1
     ./scripts/release.sh; or exit 1 \
     " | ssh daniel@prime ; or exit 1
     echo "--- Success ---"
