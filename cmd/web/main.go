@@ -13,8 +13,6 @@ import (
 	"github.com/danielcosme/curious-ape/internal/application"
 	entity2 "github.com/danielcosme/curious-ape/internal/entity"
 
-	"github.com/go-co-op/gocron/v2"
-
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/danielcosme/curious-ape/internal/repository"
 	"github.com/danielcosme/curious-ape/internal/repository/sqlite"
@@ -80,22 +78,9 @@ func main() {
 		Logger: logger,
 	})
 
-	handler, err := transport.NewHandler(app, v, sessionManager)
+	t, err := transport.NewTransport(app, v, sessionManager)
 	if err != nil {
 		exitIfErr(err)
-	}
-
-	// Setup cron jobs.
-	go func() {
-		logger.Info("Starting cron jobs")
-		if err := startCron(handler.App); err != nil {
-			logger.Fatal(err)
-		}
-		logger.Info("Finished starting cron Jobs")
-	}()
-
-	if err := handler.App.SetPassword(cfg.Admin.Name, cfg.Admin.Password, entity2.AdminRole); err != nil {
-		logger.Fatal(err)
 	}
 
 	addr := fmt.Sprintf(":%d", cfg.Server.Port)
@@ -105,42 +90,12 @@ func main() {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		ErrorLog:     log.New(logger, "", 0),
-		Handler:      transport.ChiRoutes(handler),
+		Handler:      transport.EchoRoutes(t),
 	}
-	handler.App.Log.InfoP("HTTP server listening", logape.Prop{"addr": addr})
+	t.App.Log.InfoP("HTTP server listening", logape.Prop{"addr": addr})
 	if err := server.ListenAndServe(); err != nil {
 		logger.Fatal(err)
 	}
-}
-
-func startCron(a *application.App) error {
-	s, err := gocron.NewScheduler()
-	if err != nil {
-		return err
-	}
-
-	j, err := s.NewJob(
-		gocron.DailyJob(1, gocron.NewAtTimes(
-			gocron.NewAtTime(23, 0, 0),
-		)),
-		gocron.NewTask(func() {
-			err := a.SyncFitbitSleepLog(time.Now())
-			if err != nil {
-				a.Log.Error(fmt.Errorf("cron Job: %w", err))
-			}
-		}),
-	)
-	if err != nil {
-		return err
-	}
-	s.Start()
-	next, err := j.NextRun()
-	if err != nil {
-		a.Log.Fatal(err)
-	}
-	a.Log.Info("Cron job next run: ", next.Local())
-
-	return err
 }
 
 func readConfiguration(cfg *config) *config {

@@ -4,14 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/danielcosme/curious-ape/internal/database"
 	"net/http"
 	"strconv"
+
+	"github.com/danielcosme/curious-ape/internal/database"
 
 	"github.com/go-chi/chi"
 )
 
-func (h *Handler) midAuthenticate(next http.Handler) http.Handler {
+func (h *Transport) midAuthenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id := h.SessionManager.GetInt(r.Context(), "authenticatedUserID")
 		if id == 0 {
@@ -48,7 +49,7 @@ func midSecureHeaders(next http.Handler) http.Handler {
 	})
 }
 
-func (h *Handler) midRecoverPanic(next http.Handler) http.Handler {
+func (h *Transport) midRecoverPanic(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
@@ -61,7 +62,7 @@ func (h *Handler) midRecoverPanic(next http.Handler) http.Handler {
 	})
 }
 
-func (h *Handler) midSetHabit(next http.Handler) http.Handler {
+func (h *Transport) midSetHabit(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil || id < 1 {
@@ -82,7 +83,7 @@ func (h *Handler) midSetHabit(next http.Handler) http.Handler {
 	})
 }
 
-func (h *Handler) RequireAuth(next http.Handler) http.Handler {
+func (h *Transport) RequireAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !h.IsAuthenticated(r) {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)

@@ -8,7 +8,7 @@ import (
 	"github.com/danielcosme/curious-ape/internal/application"
 )
 
-type Handler struct {
+type Transport struct {
 	App                  *application.App
 	Version              string
 	SessionManager       *scs.SessionManager
@@ -16,8 +16,8 @@ type Handler struct {
 	partialTemplateCache map[string]*template.Template
 }
 
-func NewHandler(app *application.App, version string, sm *scs.SessionManager) (*Handler, error) {
-	h := &Handler{
+func NewTransport(app *application.App, version string, sm *scs.SessionManager) (*Transport, error) {
+	t := &Transport{
 		App:            app,
 		Version:        version,
 		SessionManager: sm,
@@ -30,13 +30,13 @@ func NewHandler(app *application.App, version string, sm *scs.SessionManager) (*
 	if err != nil {
 		return nil, err
 	}
-	h.templateCache = tc
-	h.partialTemplateCache = tpc
+	t.templateCache = tc
+	t.partialTemplateCache = tpc
 
-	return h, nil
+	return t, nil
 }
 
-func (h *Handler) IsAuthenticated(r *http.Request) bool {
+func (h *Transport) IsAuthenticated(r *http.Request) bool {
 	isAuthenticated, ok := r.Context().Value(isAuthenticatedCtxKey).(bool)
 	if !ok {
 		return false

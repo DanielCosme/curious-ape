@@ -6,9 +6,20 @@ import (
 	"github.com/danielcosme/curious-ape/web"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/labstack/echo"
 )
 
-func ChiRoutes(h *Handler) http.Handler {
+func EchoRoutes(t *Transport) http.Handler {
+	e := echo.New()
+
+	// Handle static files.
+
+	// Return login form.
+
+	return e
+}
+
+func ChiRoutes(h *Transport) http.Handler {
 	r := chi.NewRouter()
 
 	// A good base middleware stack

@@ -3,12 +3,13 @@ package transport
 import (
 	"bytes"
 	"fmt"
-	entity2 "github.com/danielcosme/curious-ape/internal/entity"
 	"html/template"
 	"io/fs"
 	"net/http"
 	"path/filepath"
 	"time"
+
+	entity2 "github.com/danielcosme/curious-ape/internal/entity"
 
 	"github.com/danielcosme/curious-ape/web"
 )
@@ -31,7 +32,7 @@ type templateData struct {
 	CSRFToken       string
 }
 
-func (h *Handler) newTemplateData(r *http.Request) *templateData {
+func (h *Transport) newTemplateData(r *http.Request) *templateData {
 	return &templateData{
 		CurrentYear:     time.Now().Year(),
 		Flash:           h.SessionManager.PopString(r.Context(), "flash"),
@@ -90,7 +91,7 @@ func newTemplatePartialCache() (map[string]*template.Template, error) {
 	return cache, nil
 }
 
-func (h *Handler) render(w http.ResponseWriter, status int, page string, data *templateData) {
+func (h *Transport) render(w http.ResponseWriter, status int, page string, data *templateData) {
 	ts, ok := h.templateCache[page]
 	if !ok {
 		h.serverError(w, fmt.Errorf("the template %s does not exist", page))
@@ -110,7 +111,7 @@ func (h *Handler) render(w http.ResponseWriter, status int, page string, data *t
 	w.WriteHeader(status)
 }
 
-func (h *Handler) renderPartial(w http.ResponseWriter, status int, page string, data *templateData) {
+func (h *Transport) renderPartial(w http.ResponseWriter, status int, page string, data *templateData) {
 	ts, ok := h.partialTemplateCache[page]
 	if !ok {
 		http.Error(w, fmt.Sprintf("the template %s does not exist", page), http.StatusInternalServerError)

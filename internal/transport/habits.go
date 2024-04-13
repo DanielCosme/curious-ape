@@ -1,11 +1,12 @@
 package transport
 
 import (
-	"github.com/danielcosme/curious-ape/internal/application"
-	entity2 "github.com/danielcosme/curious-ape/internal/entity"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/danielcosme/curious-ape/internal/application"
+	entity2 "github.com/danielcosme/curious-ape/internal/entity"
 
 	"github.com/danielcosme/curious-ape/internal/validator"
 )
@@ -20,7 +21,7 @@ type newHabitForm struct {
 	validator.Validator
 }
 
-func (h *Handler) habit(w http.ResponseWriter, r *http.Request) {
+func (h *Transport) habit(w http.ResponseWriter, r *http.Request) {
 	habit := r.Context().Value("habit").(*entity2.Habit)
 
 	data := h.newTemplateData(r)
@@ -28,13 +29,13 @@ func (h *Handler) habit(w http.ResponseWriter, r *http.Request) {
 	h.render(w, http.StatusOK, "view.gohtml", data)
 }
 
-func (h *Handler) newHabitForm(w http.ResponseWriter, r *http.Request) {
+func (h *Transport) newHabitForm(w http.ResponseWriter, r *http.Request) {
 	data := h.newTemplateData(r)
 	data.Form = newHabitForm{}
 	h.render(w, http.StatusOK, "new_habit.gohtml", data)
 }
 
-func (h *Handler) newHabitPost(w http.ResponseWriter, r *http.Request) {
+func (h *Transport) newHabitPost(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		h.clientError(w, http.StatusBadRequest)
@@ -96,7 +97,7 @@ func (h *Handler) newHabitPost(w http.ResponseWriter, r *http.Request) {
 	h.render(w, http.StatusCreated, "view.gohtml", data)
 }
 
-func (h *Handler) newHabitLogPost(w http.ResponseWriter, r *http.Request) {
+func (h *Transport) newHabitLogPost(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		h.clientError(w, http.StatusBadRequest)

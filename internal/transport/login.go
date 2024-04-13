@@ -2,8 +2,9 @@ package transport
 
 import (
 	"errors"
-	"github.com/danielcosme/curious-ape/internal/database"
 	"net/http"
+
+	"github.com/danielcosme/curious-ape/internal/database"
 
 	"github.com/danielcosme/curious-ape/internal/validator"
 )
@@ -14,13 +15,13 @@ type userLoginForm struct {
 	validator.Validator
 }
 
-func (h *Handler) loginForm(w http.ResponseWriter, r *http.Request) {
+func (h *Transport) loginForm(w http.ResponseWriter, r *http.Request) {
 	data := h.newTemplateData(r)
 	data.Form = userLoginForm{}
 	h.render(w, http.StatusOK, "login.gohtml", data)
 }
 
-func (h *Handler) loginPost(w http.ResponseWriter, r *http.Request) {
+func (h *Transport) loginPost(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		h.App.Log.Error(err)
@@ -65,7 +66,7 @@ func (h *Handler) loginPost(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
+func (h *Transport) logout(w http.ResponseWriter, r *http.Request) {
 	if err := h.SessionManager.RenewToken(r.Context()); err != nil {
 		h.serverError(w, err)
 		return

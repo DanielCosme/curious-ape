@@ -1,12 +1,13 @@
 package transport
 
 import (
-	entity2 "github.com/danielcosme/curious-ape/internal/entity"
 	"net/http"
 	"time"
+
+	entity2 "github.com/danielcosme/curious-ape/internal/entity"
 )
 
-func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
+func (h *Transport) home(w http.ResponseWriter, r *http.Request) {
 	ds, err := h.App.DaysMonth()
 	if err != nil {
 		h.serverError(w, err)
