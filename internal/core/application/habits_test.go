@@ -197,7 +197,6 @@ func NewTestApplication(t *testing.T) *application.App {
 
 	// logger initialization
 	logger := logape.New(os.Stdout, logape.LevelDebug, time.RFC3339)
-	logape.DefaultLogger = logger
 
 	opts := &application.AppOptions{
 		Repository: repository.NewTestSqliteRepository(t),
