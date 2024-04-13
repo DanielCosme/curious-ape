@@ -1,14 +1,13 @@
 package application
 
 import (
+	entity2 "github.com/danielcosme/curious-ape/internal/entity"
 	"strings"
-
-	"github.com/danielcosme/curious-ape/internal/core/entity"
 )
 
-func (a *App) TogglGetProjects() ([]entity.Entity, error) {
-	var es []entity.Entity
-	o, err := a.db.Auths.Get(entity.AuthFilter{Provider: []entity.IntegrationProvider{entity.ProviderToggl}})
+func (a *App) TogglGetProjects() ([]entity2.Entity, error) {
+	var es []entity2.Entity
+	o, err := a.db.Auths.Get(entity2.AuthFilter{Provider: []entity2.IntegrationProvider{entity2.ProviderToggl}})
 	if err != nil {
 		return es, err
 	}
@@ -19,7 +18,7 @@ func (a *App) TogglGetProjects() ([]entity.Entity, error) {
 		return es, err
 	}
 	for _, p := range ps {
-		es = append(es, entity.Entity{
+		es = append(es, entity2.Entity{
 			ID:   p.ID,
 			Name: p.Name,
 		})
@@ -30,7 +29,7 @@ func (a *App) TogglGetProjects() ([]entity.Entity, error) {
 
 // TogglAssignProjectsToGoal . Projects as (string) id, id, id
 func (a *App) TogglAssignProjectsToGoal(ids string) error {
-	o, err := a.db.Auths.Get(entity.AuthFilter{Provider: []entity.IntegrationProvider{entity.ProviderToggl}})
+	o, err := a.db.Auths.Get(entity2.AuthFilter{Provider: []entity2.IntegrationProvider{entity2.ProviderToggl}})
 	if err != nil {
 		return err
 	}
@@ -44,7 +43,7 @@ func (a *App) TogglAssignProjectsToGoal(ids string) error {
 			return err
 		}
 		a.Log.TraceP("Project from time tracking provider successfully linked", props{
-			"provider": entity.ProviderToggl,
+			"provider": entity2.ProviderToggl,
 			"name":     p.Name,
 		})
 	}

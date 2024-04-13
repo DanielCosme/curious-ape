@@ -2,21 +2,21 @@ package application
 
 import (
 	"fmt"
+	database2 "github.com/danielcosme/curious-ape/internal/database"
+	entity2 "github.com/danielcosme/curious-ape/internal/entity"
 	"time"
 
-	"github.com/danielcosme/curious-ape/internal/core/database"
-	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/integrations/toggl"
 	"github.com/danielcosme/go-sdk/errors"
 	"github.com/danielcosme/go-sdk/log"
 )
 
-func (a *App) DaysGetAll() ([]*entity.Day, error) {
-	return a.db.Days.Find(entity.DayFilter{}, database.DaysPipeline(a.db)...)
+func (a *App) DaysGetAll() ([]*entity2.Day, error) {
+	return a.db.Days.Find(entity2.DayFilter{}, database2.DaysPipeline(a.db)...)
 }
 
-func (a *App) DayGetByID(id int) (*entity.Day, error) {
-	return a.db.Days.Get(entity.DayFilter{IDs: []int{id}}, database.DaysJoinHabits(a.db))
+func (a *App) DayGetByID(id int) (*entity2.Day, error) {
+	return a.db.Days.Get(entity2.DayFilter{IDs: []int{id}}, database2.DaysJoinHabits(a.db))
 }
 
 func (a *App) SyncDeepWorkByDateRange(start, end time.Time) error {
@@ -38,7 +38,7 @@ func (a *App) SyncDeepWorkByDateRange(start, end time.Time) error {
 			return nil
 		}
 
-		if err := a.createDeepWorkLog(d, entity.Toggl); err != nil {
+		if err := a.createDeepWorkLog(d, entity2.Toggl); err != nil {
 			return err
 		}
 		togglSleep()
@@ -52,7 +52,7 @@ func (a *App) SyncDeepWorkLog(date time.Time) error {
 	if err != nil {
 		return err
 	}
-	d, err := database.DayGetOrCreate(a.db, date)
+	d, err := database2.DayGetOrCreate(a.db, date)
 	if err != nil {
 		return err
 	}
@@ -65,11 +65,11 @@ func (a *App) SyncDeepWorkLog(date time.Time) error {
 		return nil
 	}
 
-	return a.createDeepWorkLog(d, entity.Toggl)
+	return a.createDeepWorkLog(d, entity2.Toggl)
 }
 
-func (a *App) TogglAPI() (*toggl.API, *entity.Auth, error) {
-	o, err := a.db.Auths.Get(entity.AuthFilter{Provider: []entity.IntegrationProvider{entity.ProviderToggl}})
+func (a *App) TogglAPI() (*toggl.API, *entity2.Auth, error) {
+	o, err := a.db.Auths.Get(entity2.AuthFilter{Provider: []entity2.IntegrationProvider{entity2.ProviderToggl}})
 	if err != nil {
 		return nil, nil, err
 	}
@@ -77,7 +77,7 @@ func (a *App) TogglAPI() (*toggl.API, *entity.Auth, error) {
 }
 
 func (a *App) SyncDeepWork() error {
-	days, err := a.db.Days.Find(entity.DayFilter{}, database.DaysJoinSleepLogs(a.db))
+	days, err := a.db.Days.Find(entity2.DayFilter{}, database2.DaysJoinSleepLogs(a.db))
 	if err != nil {
 		return err
 	}
@@ -95,7 +95,7 @@ func (a *App) SyncDeepWork() error {
 			return nil
 		}
 
-		if err := a.createDeepWorkLog(d, entity.Toggl); err != nil {
+		if err := a.createDeepWorkLog(d, entity2.Toggl); err != nil {
 			return err
 		}
 		togglSleep()
@@ -104,8 +104,8 @@ func (a *App) SyncDeepWork() error {
 	return nil
 }
 
-func workLogFromToggl(s *toggl.Summary) *entity.Day {
-	return &entity.Day{
+func workLogFromToggl(s *toggl.Summary) *entity2.Day {
+	return &entity2.Day{
 		DeepWorkMinutes: int(toggl.ToDuration(s.TotalGrand).Minutes()),
 	}
 }
@@ -115,8 +115,8 @@ func togglSleep() {
 	time.Sleep(time.Second)
 }
 
-func (a *App) HabitUpsertFromDeepWorkLog(d *entity.Day, origin entity.DataSource) error {
-	habitCategory, err := a.HabitCategoryGetByType(entity.HabitTypeDeepWork)
+func (a *App) HabitUpsertFromDeepWorkLog(d *entity2.Day, origin entity2.DataSource) error {
+	habitCategory, err := a.HabitCategoryGetByType(entity2.HabitTypeDeepWork)
 	if err != nil {
 		return err
 	}
@@ -139,55 +139,55 @@ func (a *App) HabitUpsertFromDeepWorkLog(d *entity.Day, origin entity.DataSource
 	return err
 }
 
-func (a *App) DayUpdate(day, data *entity.Day) (*entity.Day, error) {
+func (a *App) DayUpdate(day, data *entity2.Day) (*entity2.Day, error) {
 	var err error
 	day, err = a.dayUpdate(day, data)
 	if err != nil {
 		return nil, err
 	}
 	// create deep work resource (in the future) and upsert habit
-	if err := a.createDeepWorkLog(day, entity.Manual); err != nil {
+	if err := a.createDeepWorkLog(day, entity2.Manual); err != nil {
 		return nil, err
 	}
-	return day, database.ExecuteDaysPipeline([]*entity.Day{day}, database.DaysJoinHabits(a.db))
+	return day, database2.ExecuteDaysPipeline([]*entity2.Day{day}, database2.DaysJoinHabits(a.db))
 }
 
-func (a *App) dayUpdate(day, data *entity.Day) (*entity.Day, error) {
+func (a *App) dayUpdate(day, data *entity2.Day) (*entity2.Day, error) {
 	day.DeepWorkMinutes = data.DeepWorkMinutes
-	return a.db.Days.Update(day, database.DaysPipeline(a.db)...)
+	return a.db.Days.Update(day, database2.DaysPipeline(a.db)...)
 }
 
-func (a *App) createDeepWorkLog(day *entity.Day, origin entity.DataSource) error {
+func (a *App) createDeepWorkLog(day *entity2.Day, origin entity2.DataSource) error {
 	if err := a.HabitUpsertFromDeepWorkLog(day, origin); err != nil {
 		return err
 	}
 
 	a.Log.InfoP("updated deep work log", log.Prop{
 		"origin": origin.Str(),
-		"date":   day.Date.Format(entity.HumanDateWithTime),
+		"date":   day.Date.Format(entity2.HumanDateWithTime),
 	})
 	return nil
 }
 
-func (a *App) daysGetByDateRange(start, end time.Time) ([]*entity.Day, error) {
+func (a *App) daysGetByDateRange(start, end time.Time) ([]*entity2.Day, error) {
 	if start.IsZero() || end.IsZero() {
 		return nil, errors.New("invalid dates")
 	}
 	if start.After(end) {
 		return nil, errors.New("start date must be before end")
 	}
-	return a.db.Days.Find(entity.DayFilter{Dates: datesRange(start, end)})
+	return a.db.Days.Find(entity2.DayFilter{Dates: datesRange(start, end)})
 }
 
-func (a *App) DaysMonth() ([]*entity.Day, error) {
-	var res []*entity.Day
+func (a *App) DaysMonth() ([]*entity2.Day, error) {
+	var res []*entity2.Day
 	var err error
-	var d *entity.Day
+	var d *entity2.Day
 
 	today := time.Now()
 	first := time.Date(today.Year(), today.Month(), 1, 0, 0, 0, 0, today.Location())
-	d, err = a.db.Days.Get(entity.DayFilter{Dates: []time.Time{today}})
-	if err != nil && !errors.Is(err, database.ErrNotFound) {
+	d, err = a.db.Days.Get(entity2.DayFilter{Dates: []time.Time{today}})
+	if err != nil && !errors.Is(err, database2.ErrNotFound) {
 		return nil, err
 	}
 	if d != nil {
@@ -196,17 +196,17 @@ func (a *App) DaysMonth() ([]*entity.Day, error) {
 		if e != nil {
 			return nil, err
 		}
-		return res, database.ExecuteDaysPipeline(res, database.DaysPipeline(a.db)...)
+		return res, database2.ExecuteDaysPipeline(res, database2.DaysPipeline(a.db)...)
 	}
 
 	for _, dt := range datesRange(first, today) {
-		d, err = database.DayGetOrCreate(a.db, dt)
+		d, err = database2.DayGetOrCreate(a.db, dt)
 		if err != nil {
 			return nil, err
 		}
 		res = append(res, d)
 	}
-	return res, database.ExecuteDaysPipeline(res, database.DaysJoinHabits(a.db))
+	return res, database2.ExecuteDaysPipeline(res, database2.DaysJoinHabits(a.db))
 }
 
 func datesRange(start, end time.Time) []time.Time {

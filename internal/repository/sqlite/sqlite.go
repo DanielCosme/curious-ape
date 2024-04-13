@@ -6,7 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/danielcosme/curious-ape/internal/core/entity"
+	"github.com/danielcosme/curious-ape/internal/entity"
+
 	"github.com/danielcosme/go-sdk/log"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -111,7 +112,7 @@ func NewTestSqliteDB(t *testing.T) *sqlx.DB {
 		t.Fatal(err)
 	}
 
-	migrator, err := migrate.NewWithDatabaseInstance("file://../../../migrations/sqlite/", "sqlite3", migrationDriver)
+	migrator, err := migrate.NewWithDatabaseInstance("file://../../migrations/sqlite_backup/", "sqlite3", migrationDriver)
 	if err != nil {
 		t.Fatal(err)
 	}

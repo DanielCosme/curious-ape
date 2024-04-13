@@ -1,9 +1,9 @@
 package repository
 
 import (
+	"github.com/danielcosme/curious-ape/internal/database"
 	"testing"
 
-	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/repository/sqlite"
 	"github.com/jmoiron/sqlx"
 )

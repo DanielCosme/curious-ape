@@ -1,12 +1,12 @@
 package transport
 
 import (
+	"github.com/danielcosme/curious-ape/internal/application"
+	entity2 "github.com/danielcosme/curious-ape/internal/entity"
 	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/danielcosme/curious-ape/internal/core/application"
-	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/validator"
 )
 
@@ -14,14 +14,14 @@ type newHabitForm struct {
 	Date         time.Time
 	CategoryCode string
 	Success      bool
-	Origin       entity.DataSource
+	Origin       entity2.DataSource
 	Note         string
 	IsAutomated  bool
 	validator.Validator
 }
 
 func (h *Handler) habit(w http.ResponseWriter, r *http.Request) {
-	habit := r.Context().Value("habit").(*entity.Habit)
+	habit := r.Context().Value("habit").(*entity2.Habit)
 
 	data := h.newTemplateData(r)
 	data.Habit = habit
@@ -56,7 +56,7 @@ func (h *Handler) newHabitPost(w http.ResponseWriter, r *http.Request) {
 	// Note: Empty
 
 	form := newHabitForm{
-		Origin:      entity.Manual,
+		Origin:      entity2.Manual,
 		IsAutomated: false,
 		// Title:   r.PostForm.Get("title"),
 		// Content: r.PostForm.Get("content"),
@@ -78,9 +78,9 @@ func (h *Handler) newHabitPost(w http.ResponseWriter, r *http.Request) {
 
 	params := &application.NewHabitParams{
 		Date:         time.Now(),
-		CategoryCode: entity.HabitTypeFood.Str(),
+		CategoryCode: entity2.HabitTypeFood.Str(),
 		Success:      true,
-		Origin:       entity.Manual,
+		Origin:       entity2.Manual,
 		Note:         "",
 		IsAutomated:  false,
 	}
@@ -118,7 +118,7 @@ func (h *Handler) newHabitLogPost(w http.ResponseWriter, r *http.Request) {
 		Date:         dt,
 		CategoryCode: r.Form.Get("category"),
 		Success:      success,
-		Origin:       entity.Manual,
+		Origin:       entity2.Manual,
 		IsAutomated:  false,
 	}
 	habit, err := h.App.HabitUpsert(params)
@@ -133,6 +133,6 @@ func (h *Handler) newHabitLogPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	td := h.newTemplateData(r)
-	td.Day = &formatDays([]*entity.Day{day})[0]
+	td.Day = &formatDays([]*entity2.Day{day})[0]
 	h.renderPartial(w, http.StatusOK, "day_row.gohtml", td)
 }

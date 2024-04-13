@@ -2,31 +2,30 @@ package database
 
 import (
 	"errors"
+	entity2 "github.com/danielcosme/curious-ape/internal/entity"
 	"strings"
 	"time"
-
-	"github.com/danielcosme/curious-ape/internal/core/entity"
 )
 
 type Habit interface {
 	// habit
-	Create(*entity.Habit) error
-	Update(*entity.Habit, ...entity.HabitJoin) (*entity.Habit, error)
-	Get(entity.HabitFilter, ...entity.HabitJoin) (*entity.Habit, error)
-	Find(entity.HabitFilter, ...entity.HabitJoin) ([]*entity.Habit, error)
+	Create(*entity2.Habit) error
+	Update(*entity2.Habit, ...entity2.HabitJoin) (*entity2.Habit, error)
+	Get(entity2.HabitFilter, ...entity2.HabitJoin) (*entity2.Habit, error)
+	Find(entity2.HabitFilter, ...entity2.HabitJoin) ([]*entity2.Habit, error)
 	Delete(id int) error
 	// habit log
-	CreateHabitLog(*entity.HabitLog) error
-	UpdateHabitLog(*entity.HabitLog) (*entity.HabitLog, error)
-	GetHabitLog(entity.HabitLogFilter) (*entity.HabitLog, error)
-	FindHabitLogs(entity.HabitLogFilter) ([]*entity.HabitLog, error)
+	CreateHabitLog(*entity2.HabitLog) error
+	UpdateHabitLog(*entity2.HabitLog) (*entity2.HabitLog, error)
+	GetHabitLog(entity2.HabitLogFilter) (*entity2.HabitLog, error)
+	FindHabitLogs(entity2.HabitLogFilter) ([]*entity2.HabitLog, error)
 	DeleteHabitLog(id int) error
 	// habit category
-	GetHabitCategory(entity.HabitCategoryFilter) (*entity.HabitCategory, error)
-	FindHabitCategories(entity.HabitCategoryFilter) ([]*entity.HabitCategory, error)
+	GetHabitCategory(entity2.HabitCategoryFilter) (*entity2.HabitCategory, error)
+	FindHabitCategories(entity2.HabitCategoryFilter) ([]*entity2.HabitCategory, error)
 }
 
-func ExecuteHabitsPipeline(hs []*entity.Habit, hjs ...entity.HabitJoin) error {
+func ExecuteHabitsPipeline(hs []*entity2.Habit, hjs ...entity2.HabitJoin) error {
 	if !(len(hs) > 0) {
 		return nil
 	}
@@ -38,23 +37,23 @@ func ExecuteHabitsPipeline(hs []*entity.Habit, hjs ...entity.HabitJoin) error {
 	return nil
 }
 
-func HabitsPipeline(m *Repository) []entity.HabitJoin {
-	return []entity.HabitJoin{
+func HabitsPipeline(m *Repository) []entity2.HabitJoin {
+	return []entity2.HabitJoin{
 		HabitsJoinDay(m),
 		HabitsJoinCategories(m),
 		HabitsJoinLogs(m),
 	}
 }
 
-func HabitsJoinDay(m *Repository) entity.HabitJoin {
-	return func(hs []*entity.Habit) error {
+func HabitsJoinDay(m *Repository) entity2.HabitJoin {
+	return func(hs []*entity2.Habit) error {
 		if len(hs) > 0 {
-			days, err := m.Days.Find(entity.DayFilter{IDs: HabitToDayIDs(hs)})
+			days, err := m.Days.Find(entity2.DayFilter{IDs: HabitToDayIDs(hs)})
 			if err != nil {
 				return err
 			}
 
-			daysMap := map[int]*entity.Day{}
+			daysMap := map[int]*entity2.Day{}
 			for _, d := range days {
 				daysMap[d.ID] = d
 			}
@@ -67,15 +66,15 @@ func HabitsJoinDay(m *Repository) entity.HabitJoin {
 	}
 }
 
-func HabitsJoinCategories(m *Repository) entity.HabitJoin {
-	return func(hs []*entity.Habit) error {
+func HabitsJoinCategories(m *Repository) entity2.HabitJoin {
+	return func(hs []*entity2.Habit) error {
 		if len(hs) > 0 {
-			cts, err := m.Habits.FindHabitCategories(entity.HabitCategoryFilter{ID: HabitToCategoryIDs(hs)})
+			cts, err := m.Habits.FindHabitCategories(entity2.HabitCategoryFilter{ID: HabitToCategoryIDs(hs)})
 			if err != nil {
 				return err
 			}
 
-			ctsMap := map[int]*entity.HabitCategory{}
+			ctsMap := map[int]*entity2.HabitCategory{}
 			for _, c := range cts {
 				ctsMap[c.ID] = c
 			}
@@ -88,15 +87,15 @@ func HabitsJoinCategories(m *Repository) entity.HabitJoin {
 	}
 }
 
-func HabitsJoinLogs(m *Repository) entity.HabitJoin {
-	return func(hs []*entity.Habit) error {
+func HabitsJoinLogs(m *Repository) entity2.HabitJoin {
+	return func(hs []*entity2.Habit) error {
 		if len(hs) > 0 {
-			hls, err := m.Habits.FindHabitLogs(entity.HabitLogFilter{HabitID: HabitToIDs(hs)})
+			hls, err := m.Habits.FindHabitLogs(entity2.HabitLogFilter{HabitID: HabitToIDs(hs)})
 			if err != nil {
 				return err
 			}
 
-			mapHabits := map[int]*entity.Habit{}
+			mapHabits := map[int]*entity2.Habit{}
 			for _, h := range hs {
 				mapHabits[h.ID] = h
 			}
@@ -109,7 +108,7 @@ func HabitsJoinLogs(m *Repository) entity.HabitJoin {
 	}
 }
 
-func HabitToDayIDs(hs []*entity.Habit) []int {
+func HabitToDayIDs(hs []*entity2.Habit) []int {
 	dayIDs := []int{}
 	dayIDsMap := map[int]int{}
 	for _, h := range hs {
@@ -121,7 +120,7 @@ func HabitToDayIDs(hs []*entity.Habit) []int {
 	return dayIDs
 }
 
-func HabitToCategoryIDs(hs []*entity.Habit) []int {
+func HabitToCategoryIDs(hs []*entity2.Habit) []int {
 	categoryIDs := []int{}
 	categoryIDsMap := map[int]int{}
 	for _, h := range hs {
@@ -133,7 +132,7 @@ func HabitToCategoryIDs(hs []*entity.Habit) []int {
 	return categoryIDs
 }
 
-func HabitToIDs(hs []*entity.Habit) []int {
+func HabitToIDs(hs []*entity2.Habit) []int {
 	IDs := []int{}
 	mapHabitIDs := map[int]int{}
 	for _, h := range hs {
@@ -145,9 +144,9 @@ func HabitToIDs(hs []*entity.Habit) []int {
 	return IDs
 }
 
-func GetOrCreateHabit(db *Repository, date time.Time, categoryCode string, joins ...entity.HabitJoin) (*entity.Habit, error) {
+func GetOrCreateHabit(db *Repository, date time.Time, categoryCode string, joins ...entity2.HabitJoin) (*entity2.Habit, error) {
 	// Make sure the category exists.
-	category, err := db.Habits.GetHabitCategory(entity.HabitCategoryFilter{Code: []string{strings.ToLower(categoryCode)}})
+	category, err := db.Habits.GetHabitCategory(entity2.HabitCategoryFilter{Code: []string{strings.ToLower(categoryCode)}})
 	if err != nil {
 		return nil, err
 	}
@@ -158,17 +157,17 @@ func GetOrCreateHabit(db *Repository, date time.Time, categoryCode string, joins
 	}
 
 	// First check if the habit already exists.
-	h, err := db.Habits.Get(entity.HabitFilter{DayID: []int{day.ID}, CategoryID: []int{category.ID}}, joins...)
+	h, err := db.Habits.Get(entity2.HabitFilter{DayID: []int{day.ID}, CategoryID: []int{category.ID}}, joins...)
 	if err != nil && !errors.Is(err, ErrNotFound) {
 		return nil, err
 	}
 
 	// If it does not exist we create it.
 	if h == nil {
-		h = &entity.Habit{
+		h = &entity2.Habit{
 			DayID:      day.ID,
 			CategoryID: category.ID,
-			Status:     entity.HabitStatusNoInfo,
+			Status:     entity2.HabitStatusNoInfo,
 		}
 		if err := db.Habits.Create(h); err != nil {
 			return nil, err
@@ -181,12 +180,12 @@ func GetOrCreateHabit(db *Repository, date time.Time, categoryCode string, joins
 	return h, nil
 }
 
-func UpsertHabitLog(db *Repository, data *entity.HabitLog) (string, error) {
+func UpsertHabitLog(db *Repository, data *entity2.HabitLog) (string, error) {
 	if data.HabitID == 0 {
 		return "", errors.New("habit ID cannot be 0")
 	}
 
-	hl, err := db.Habits.GetHabitLog(entity.HabitLogFilter{Origin: []entity.DataSource{data.Origin}, HabitID: []int{data.HabitID}})
+	hl, err := db.Habits.GetHabitLog(entity2.HabitLogFilter{Origin: []entity2.DataSource{data.Origin}, HabitID: []int{data.HabitID}})
 	if err != nil && !errors.Is(err, ErrNotFound) {
 		return "", err
 	}

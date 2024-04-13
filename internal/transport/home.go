@@ -1,7 +1,7 @@
 package transport
 
 import (
-	"github.com/danielcosme/curious-ape/internal/core/entity"
+	entity2 "github.com/danielcosme/curious-ape/internal/entity"
 	"net/http"
 	"time"
 )
@@ -19,25 +19,25 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 
 type dayContainer struct {
 	Date    time.Time
-	Wake    *entity.Habit
-	Fitness *entity.Habit
-	Work    *entity.Habit
-	Eat     *entity.Habit
+	Wake    *entity2.Habit
+	Fitness *entity2.Habit
+	Work    *entity2.Habit
+	Eat     *entity2.Habit
 }
 
-func formatDays(ds []*entity.Day) []dayContainer {
+func formatDays(ds []*entity2.Day) []dayContainer {
 	var res []dayContainer
 	for _, d := range ds {
 		dc := dayContainer{Date: d.Date}
 		for _, h := range d.Habits {
 			switch h.Category.Type {
-			case entity.HabitTypeWakeUp:
+			case entity2.HabitTypeWakeUp:
 				dc.Wake = h
-			case entity.HabitTypeFitness:
+			case entity2.HabitTypeFitness:
 				dc.Fitness = h
-			case entity.HabitTypeDeepWork:
+			case entity2.HabitTypeDeepWork:
 				dc.Work = h
-			case entity.HabitTypeFood:
+			case entity2.HabitTypeFood:
 				dc.Eat = h
 			}
 		}
@@ -50,9 +50,9 @@ func formatDays(ds []*entity.Day) []dayContainer {
 	return res
 }
 
-func replace(h *entity.Habit) *entity.Habit {
+func replace(h *entity2.Habit) *entity2.Habit {
 	if h == nil {
-		return &entity.Habit{Status: entity.HabitStatusNoInfo}
+		return &entity2.Habit{Status: entity2.HabitStatusNoInfo}
 	}
 	return h
 }

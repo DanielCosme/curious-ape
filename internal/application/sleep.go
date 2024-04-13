@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	errors2 "errors"
 	"fmt"
+	database2 "github.com/danielcosme/curious-ape/internal/database"
+	entity2 "github.com/danielcosme/curious-ape/internal/entity"
 	"time"
 
-	"github.com/danielcosme/curious-ape/internal/core/database"
-	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/integrations/fitbit"
 	"github.com/danielcosme/go-sdk/errors"
 	"github.com/danielcosme/go-sdk/log"
@@ -17,7 +17,7 @@ func (a *App) SleepDeleteByID(id int) error {
 	return a.db.SleepLogs.Delete(id)
 }
 
-func (a *App) SleepUpdate(sleepLog, data *entity.SleepLog) (*entity.SleepLog, error) {
+func (a *App) SleepUpdate(sleepLog, data *entity2.SleepLog) (*entity2.SleepLog, error) {
 	if err := checkManualOrigin(sleepLog.Origin); err != nil {
 		return nil, err
 	}
@@ -28,10 +28,10 @@ func (a *App) SleepUpdate(sleepLog, data *entity.SleepLog) (*entity.SleepLog, er
 	}
 
 	data.ID = sleepLog.ID
-	return a.db.SleepLogs.Update(data, database.SleepLogsJoinDay(a.db))
+	return a.db.SleepLogs.Update(data, database2.SleepLogsJoinDay(a.db))
 }
 
-func (a *App) SleepCreateFromApi(sleepLog *entity.SleepLog) (*entity.SleepLog, error) {
+func (a *App) SleepCreateFromApi(sleepLog *entity2.SleepLog) (*entity2.SleepLog, error) {
 	if sleepLog.Raw == "" {
 		start := sleepLog.StartTime.AddDate(0, 0, -1)
 		sleepLog.MinutesInBed = sleepLog.EndTime.Sub(start)
@@ -45,26 +45,26 @@ func (a *App) SleepCreateFromApi(sleepLog *entity.SleepLog) (*entity.SleepLog, e
 		})
 	}
 
-	if err := a.createSleepLogs([]*entity.SleepLog{sleepLog}); err != nil {
+	if err := a.createSleepLogs([]*entity2.SleepLog{sleepLog}); err != nil {
 		return nil, err
 	}
-	return a.db.SleepLogs.Get(entity.SleepLogFilter{ID: []int{sleepLog.ID}}, database.SleepLogsJoinDay(a.db))
+	return a.db.SleepLogs.Get(entity2.SleepLogFilter{ID: []int{sleepLog.ID}}, database2.SleepLogsJoinDay(a.db))
 }
 
-func (a *App) SleepLogGet(f entity.SleepLogFilter) (*entity.SleepLog, error) {
-	return a.db.SleepLogs.Get(f, database.SleepLogsJoinDay(a.db))
+func (a *App) SleepLogGet(f entity2.SleepLogFilter) (*entity2.SleepLog, error) {
+	return a.db.SleepLogs.Get(f, database2.SleepLogsJoinDay(a.db))
 }
 
-func (a *App) SleepLogsFind(f entity.SleepLogFilter) ([]*entity.SleepLog, error) {
-	return a.db.SleepLogs.Find(f, database.SleepLogsJoinDay(a.db))
+func (a *App) SleepLogsFind(f entity2.SleepLogFilter) ([]*entity2.SleepLog, error) {
+	return a.db.SleepLogs.Find(f, database2.SleepLogsJoinDay(a.db))
 }
 
 func (a *App) SyncSleep() error {
-	days, err := a.db.Days.Find(entity.DayFilter{}, database.DaysJoinSleepLogs(a.db))
+	days, err := a.db.Days.Find(entity2.DayFilter{}, database2.DaysJoinSleepLogs(a.db))
 	if err != nil {
 		return err
 	}
-	client, err := a.Oauth2GetClient(entity.ProviderFitbit)
+	client, err := a.Oauth2GetClient(entity2.ProviderFitbit)
 	if err != nil {
 		return err
 	}
@@ -78,7 +78,7 @@ func (a *App) SyncSleep() error {
 			if err != nil {
 				return err
 			}
-			sleepLogs, err := toSleepLogFromFitbit([]*entity.Day{d}, payload.Sleep)
+			sleepLogs, err := toSleepLogFromFitbit([]*entity2.Day{d}, payload.Sleep)
 			if err != nil {
 				return err
 			}
@@ -94,7 +94,7 @@ func (a *App) SyncSleep() error {
 
 func (a *App) SyncSleepByDateRange(start, end time.Time) error {
 	// Get client, refreshes token if necessary
-	client, err := a.Oauth2GetClient(entity.ProviderFitbit)
+	client, err := a.Oauth2GetClient(entity2.ProviderFitbit)
 	if err != nil {
 		return err
 	}
@@ -118,13 +118,13 @@ func (a *App) SyncSleepByDateRange(start, end time.Time) error {
 }
 
 func (a *App) SyncFitbitSleepLog(date time.Time) error {
-	day, err := database.DayGetOrCreate(a.db, date)
+	day, err := database2.DayGetOrCreate(a.db, date)
 	if err != nil {
 		return err
 	}
 
 	// Get client, refreshes token if necessary
-	client, err := a.Oauth2GetClient(entity.ProviderFitbit)
+	client, err := a.Oauth2GetClient(entity2.ProviderFitbit)
 	if err != nil {
 		return err
 	}
@@ -135,7 +135,7 @@ func (a *App) SyncFitbitSleepLog(date time.Time) error {
 		return err
 	}
 	// Map fitbit records to application sleep log struct
-	sleepLogs, err := toSleepLogFromFitbit([]*entity.Day{day}, fitbitPayload.Sleep)
+	sleepLogs, err := toSleepLogFromFitbit([]*entity2.Day{day}, fitbitPayload.Sleep)
 	if err != nil {
 		return err
 	}
@@ -144,19 +144,19 @@ func (a *App) SyncFitbitSleepLog(date time.Time) error {
 	return a.createSleepLogs(sleepLogs)
 }
 
-func toSleepLogFromFitbit(days []*entity.Day, sleepRecords []fitbit.Sleep) ([]*entity.SleepLog, error) {
-	sleepLogs := make([]*entity.SleepLog, 0, len(sleepRecords))
-	mapDays := database.DayToMapByISODate(days)
+func toSleepLogFromFitbit(days []*entity2.Day, sleepRecords []fitbit.Sleep) ([]*entity2.SleepLog, error) {
+	sleepLogs := make([]*entity2.SleepLog, 0, len(sleepRecords))
+	mapDays := database2.DayToMapByISODate(days)
 
 	for _, s := range sleepRecords {
-		var day *entity.Day
+		var day *entity2.Day
 		if d, ok := mapDays[s.DateOfSleep]; ok {
 			day = d
 		} else {
 			return nil, errors.New(fmt.Sprintf("not day match for fitbit log on %s", s.DateOfSleep))
 		}
 
-		sleepLog := &entity.SleepLog{
+		sleepLog := &entity2.SleepLog{
 			Day:           day,
 			DayID:         day.ID,
 			Date:          fitbit.ParseDate(s.DateOfSleep),
@@ -164,7 +164,7 @@ func toSleepLogFromFitbit(days []*entity.Day, sleepRecords []fitbit.Sleep) ([]*e
 			EndTime:       fitbit.ParseTime(s.EndTime),
 			IsMainSleep:   s.IsMainSleep,
 			IsAutomated:   true,
-			Origin:        entity.Fitbit,
+			Origin:        entity2.Fitbit,
 			MinutesInBed:  fitbit.ToDuration(s.TimeInBed),
 			MinutesAsleep: fitbit.ToDuration(s.MinutesAsleep),
 			MinutesAwake:  fitbit.ToDuration(s.MinutesAwake),
@@ -185,11 +185,11 @@ func toSleepLogFromFitbit(days []*entity.Day, sleepRecords []fitbit.Sleep) ([]*e
 	return sleepLogs, nil
 }
 
-func (a *App) createSleepLogs(logs []*entity.SleepLog) error {
+func (a *App) createSleepLogs(logs []*entity2.SleepLog) error {
 	for _, l := range logs {
 		op := "Created"
-		testerLog, err := a.db.SleepLogs.Get(entity.SleepLogFilter{DayID: []int{l.Day.ID}})
-		if err != nil && !errors.Is(err, database.ErrNotFound) {
+		testerLog, err := a.db.SleepLogs.Get(entity2.SleepLogFilter{DayID: []int{l.Day.ID}})
+		if err != nil && !errors.Is(err, database2.ErrNotFound) {
 			return err
 		}
 		if testerLog != nil && testerLog.StartTime.Equal(l.StartTime) && testerLog.EndTime.Equal(l.EndTime) {
@@ -200,8 +200,8 @@ func (a *App) createSleepLogs(logs []*entity.SleepLog) error {
 				return fmt.Errorf("sleep log could not be updated: %w", err)
 			}
 		} else if err := a.db.SleepLogs.Create(l); err != nil {
-			if errors2.Is(err, database.ErrUniqueCheckFailed) {
-				a.Log.Error(fmt.Errorf("dayID and main sleep unique check failed for %s", l.Date.Format(entity.HumanDateWithTime)))
+			if errors2.Is(err, database2.ErrUniqueCheckFailed) {
+				a.Log.Error(fmt.Errorf("dayID and main sleep unique check failed for %s", l.Date.Format(entity2.HumanDateWithTime)))
 			}
 			return err
 		}
@@ -213,7 +213,7 @@ func (a *App) createSleepLogs(logs []*entity.SleepLog) error {
 
 		a.Log.InfoP(fmt.Sprintf("%s sleep log", op), log.Prop{
 			"provider": l.Origin.Str(),
-			"date":     l.Date.Format(entity.HumanDateWithTime),
+			"date":     l.Date.Format(entity2.HumanDateWithTime),
 		})
 	}
 

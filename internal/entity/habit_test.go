@@ -1,9 +1,9 @@
 package entity_test
 
 import (
+	"github.com/danielcosme/curious-ape/internal/entity"
 	"testing"
 
-	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"gotest.tools/v3/assert"
 )
 

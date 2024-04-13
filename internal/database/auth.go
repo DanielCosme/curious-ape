@@ -1,6 +1,8 @@
 package database
 
-import "github.com/danielcosme/curious-ape/internal/core/entity"
+import (
+	"github.com/danielcosme/curious-ape/internal/entity"
+)
 
 type Authentication interface {
 	Create(*entity.Auth) error

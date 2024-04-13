@@ -3,12 +3,12 @@ package sqlite
 import (
 	"database/sql"
 	"fmt"
+	database2 "github.com/danielcosme/curious-ape/internal/database"
+	"github.com/danielcosme/curious-ape/internal/entity"
 	logape "github.com/danielcosme/go-sdk/log"
 	"strings"
 	"time"
 
-	"github.com/danielcosme/curious-ape/internal/core/database"
-	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/go-sdk/errors"
 	"github.com/jmoiron/sqlx"
 )
@@ -47,7 +47,7 @@ func (ds *DaysDataSource) Get(filter entity.DayFilter, joins ...entity.DayJoin) 
 	if err := ds.DB.Get(day, q, args...); err != nil {
 		return nil, catchErr("get day", err)
 	}
-	return day, database.ExecuteDaysPipeline([]*entity.Day{day}, joins...)
+	return day, database2.ExecuteDaysPipeline([]*entity.Day{day}, joins...)
 }
 
 func (ds *DaysDataSource) Find(filter entity.DayFilter, joins ...entity.DayJoin) ([]*entity.Day, error) {
@@ -56,7 +56,7 @@ func (ds *DaysDataSource) Find(filter entity.DayFilter, joins ...entity.DayJoin)
 	if err := ds.DB.Select(&days, q, args...); err != nil {
 		return nil, catchErr("find days", err)
 	}
-	return days, database.ExecuteDaysPipeline(days, joins...)
+	return days, database2.ExecuteDaysPipeline(days, joins...)
 }
 
 func catchErr(msg string, err error) error {
@@ -68,10 +68,10 @@ func catchErr(msg string, err error) error {
 	logape.DefaultLogger.Debug(msg + ": " + e)
 	switch e {
 	case sql.ErrNoRows.Error():
-		return fmt.Errorf("%w %s", database.ErrNotFound, msg)
+		return fmt.Errorf("%w %s", database2.ErrNotFound, msg)
 	default:
 		if strings.Contains(err.Error(), "UNIQUE constraint failed:") {
-			return fmt.Errorf("%w %s", database.ErrUniqueCheckFailed, msg)
+			return fmt.Errorf("%w %s", database2.ErrUniqueCheckFailed, msg)
 		}
 		return errors.NewFatal(err.Error())
 	}

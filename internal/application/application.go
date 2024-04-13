@@ -1,8 +1,8 @@
 package application
 
 import (
-	"github.com/danielcosme/curious-ape/internal/core/database"
-	"github.com/danielcosme/curious-ape/internal/core/entity"
+	"github.com/danielcosme/curious-ape/internal/database"
+	"github.com/danielcosme/curious-ape/internal/entity"
 	"github.com/danielcosme/curious-ape/internal/integrations"
 	"github.com/danielcosme/go-sdk/log"
 )

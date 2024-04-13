@@ -10,11 +10,12 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/danielcosme/curious-ape/internal/application"
+	entity2 "github.com/danielcosme/curious-ape/internal/entity"
+
 	"github.com/go-co-op/gocron/v2"
 
 	"github.com/alexedwards/scs/sqlite3store"
-	"github.com/danielcosme/curious-ape/internal/core/application"
-	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/internal/repository"
 	"github.com/danielcosme/curious-ape/internal/repository/sqlite"
 	"github.com/danielcosme/curious-ape/internal/transport"
@@ -34,8 +35,8 @@ type config struct {
 		Port int `json:"port"`
 	} `json:"server"`
 	Integrations struct {
-		Fitbit *entity.Oauth2Config `json:"fitbit"`
-		Google *entity.Oauth2Config `json:"google"`
+		Fitbit *entity2.Oauth2Config `json:"fitbit"`
+		Google *entity2.Oauth2Config `json:"google"`
 	} `json:"integrations"`
 	Environment string `json:"environment"`
 	Admin       user   `json:"admin"`
@@ -69,39 +70,45 @@ func main() {
 	sessionManager.Lifetime = 12 * time.Hour
 	sessionManager.Cookie.SameSite = http.SameSiteStrictMode
 
-	web := &transport.WebClient{
-		App: application.New(&application.AppOptions{
-			Repository: repository.NewSqlite(db),
-			Config: &application.Environment{
-				Env:    cfg.Environment,
-				Fitbit: cfg.Integrations.Fitbit,
-				Google: cfg.Integrations.Google,
-			},
-			Logger: logger,
-		}),
-		Server: &http.Server{
-			Addr:         fmt.Sprintf(":%d", cfg.Server.Port),
-			IdleTimeout:  time.Minute,
-			ReadTimeout:  5 * time.Second,
-			WriteTimeout: 10 * time.Second,
-			ErrorLog:     log.New(logger, "", 0),
+	app := application.New(&application.AppOptions{
+		Repository: repository.NewSqlite(db),
+		Config: &application.Environment{
+			Env:    cfg.Environment,
+			Fitbit: cfg.Integrations.Fitbit,
+			Google: cfg.Integrations.Google,
 		},
-		Version:               v,
-		SessionManager: sessionManager,
+		Logger: logger,
+	})
+
+	handler, err := transport.NewHandler(app, v, sessionManager)
+	if err != nil {
+		exitIfErr(err)
 	}
 
+	// Setup cron jobs.
 	go func() {
 		logger.Info("Starting cron jobs")
-		if err := startCron(web.App); err != nil {
+		if err := startCron(handler.App); err != nil {
 			logger.Fatal(err)
 		}
 		logger.Info("Finished starting cron Jobs")
 	}()
 
-	if err := web.App.SetPassword(cfg.Admin.Name, cfg.Admin.Password, entity.AdminRole); err != nil {
+	if err := handler.App.SetPassword(cfg.Admin.Name, cfg.Admin.Password, entity2.AdminRole); err != nil {
 		logger.Fatal(err)
 	}
-	if err := web.ListenAndServe(); err != nil {
+
+	addr := fmt.Sprintf(":%d", cfg.Server.Port)
+	server := http.Server{
+		Addr:         addr,
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		ErrorLog:     log.New(logger, "", 0),
+		Handler:      transport.ChiRoutes(handler),
+	}
+	handler.App.Log.InfoP("HTTP server listening", logape.Prop{"addr": addr})
+	if err := server.ListenAndServe(); err != nil {
 		logger.Fatal(err)
 	}
 }

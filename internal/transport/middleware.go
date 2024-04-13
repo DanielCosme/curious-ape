@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/danielcosme/curious-ape/internal/database"
 	"net/http"
 	"strconv"
 
-	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/go-chi/chi"
 )
 

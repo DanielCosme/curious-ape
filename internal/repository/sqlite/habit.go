@@ -2,9 +2,9 @@ package sqlite
 
 import (
 	"database/sql"
+	"github.com/danielcosme/curious-ape/internal/database"
+	"github.com/danielcosme/curious-ape/internal/entity"
 
-	"github.com/danielcosme/curious-ape/internal/core/database"
-	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/jmoiron/sqlx"
 )
 

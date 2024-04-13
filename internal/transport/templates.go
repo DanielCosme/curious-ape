@@ -3,13 +3,13 @@ package transport
 import (
 	"bytes"
 	"fmt"
+	entity2 "github.com/danielcosme/curious-ape/internal/entity"
 	"html/template"
 	"io/fs"
 	"net/http"
 	"path/filepath"
 	"time"
 
-	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/curious-ape/web"
 )
 
@@ -21,8 +21,8 @@ var functions = template.FuncMap{
 type templateData struct {
 	CurrentYear     int
 	Version         string
-	Habit           *entity.Habit
-	Habits          []*entity.Habit
+	Habit           *entity2.Habit
+	Habits          []*entity2.Habit
 	Days            []dayContainer
 	Day             *dayContainer
 	Form            any
@@ -129,7 +129,7 @@ func (h *Handler) renderPartial(w http.ResponseWriter, status int, page string, 
 }
 
 func humanDate(t time.Time) string {
-	return t.Format(entity.HumanDate)
+	return t.Format(entity2.HumanDate)
 }
 
 func dateOnly(t time.Time) string {

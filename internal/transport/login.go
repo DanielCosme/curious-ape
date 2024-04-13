@@ -2,9 +2,9 @@ package transport
 
 import (
 	"errors"
+	"github.com/danielcosme/curious-ape/internal/database"
 	"net/http"
 
-	"github.com/danielcosme/curious-ape/internal/core/database"
 	"github.com/danielcosme/curious-ape/internal/validator"
 )
 

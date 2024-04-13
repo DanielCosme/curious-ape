@@ -2,17 +2,17 @@ package application
 
 import (
 	"context"
+	"github.com/danielcosme/curious-ape/internal/database"
+	entity2 "github.com/danielcosme/curious-ape/internal/entity"
 	"net/http"
 	"strconv"
 
-	"github.com/danielcosme/curious-ape/internal/core/database"
-	"github.com/danielcosme/curious-ape/internal/core/entity"
 	"github.com/danielcosme/go-sdk/errors"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/oauth2"
 )
 
-func (a *App) SetPassword(name, password string, role entity.Role) error {
+func (a *App) SetPassword(name, password string, role entity2.Role) error {
 	if password == "" {
 		return errors.New("password cannot be empty")
 	}
@@ -20,7 +20,7 @@ func (a *App) SetPassword(name, password string, role entity.Role) error {
 		return errors.New("name cannot be empty")
 	}
 
-	u, err := a.db.Users.Get(entity.UserFilter{Role: role})
+	u, err := a.db.Users.Get(entity2.UserFilter{Role: role})
 	if err != nil && !errors.Is(err, database.ErrNotFound) {
 		return err
 	}
@@ -30,13 +30,13 @@ func (a *App) SetPassword(name, password string, role entity.Role) error {
 		return err
 	}
 	if u == nil {
-		return a.db.Users.Create(&entity.User{
+		return a.db.Users.Create(&entity2.User{
 			Name:     name,
 			Password: string(hash),
 			Role:     role,
 		})
 	}
-	_, err = a.db.Users.Update(&entity.User{
+	_, err = a.db.Users.Update(&entity2.User{
 		Name:     name,
 		Password: string(hash),
 		Role:     role,
@@ -46,7 +46,7 @@ func (a *App) SetPassword(name, password string, role entity.Role) error {
 
 // Authenticate returns userID if succesfully authenticated.
 func (a *App) Authenticate(username, password string) (int, error) {
-	u, err := a.db.Users.Get(entity.UserFilter{Name: username})
+	u, err := a.db.Users.Get(entity2.UserFilter{Name: username})
 	if err != nil {
 		if errors.Is(err, database.ErrNotFound) {
 			return 0, database.ErrInvalidCredentials
@@ -67,7 +67,7 @@ func (a *App) Authenticate(username, password string) (int, error) {
 }
 
 func (a *App) Exists(id int) (bool, error) {
-	_, err := a.db.Users.Get(entity.UserFilter{ID: id})
+	_, err := a.db.Users.Get(entity2.UserFilter{ID: id})
 	if err != nil {
 		if errors.Is(err, database.ErrNotFound) {
 			return false, nil
@@ -78,13 +78,13 @@ func (a *App) Exists(id int) (bool, error) {
 }
 
 func (a *App) Oauth2ConnectProvider(provider string) (string, error) {
-	p := entity.IntegrationProvider(provider)
-	o, err := a.db.Auths.Get(entity.AuthFilter{Provider: []entity.IntegrationProvider{p}})
+	p := entity2.IntegrationProvider(provider)
+	o, err := a.db.Auths.Get(entity2.AuthFilter{Provider: []entity2.IntegrationProvider{p}})
 	if err != nil && !errors.Is(err, database.ErrNotFound) {
 		return "", err
 	}
 	if o == nil {
-		if err = a.db.Auths.Create(&entity.Auth{Provider: p}); err != nil {
+		if err = a.db.Auths.Create(&entity2.Auth{Provider: p}); err != nil {
 			return "", err
 		}
 	}
@@ -93,7 +93,7 @@ func (a *App) Oauth2ConnectProvider(provider string) (string, error) {
 
 	opts := []oauth2.AuthCodeOption{}
 	switch p {
-	case entity.ProviderGoogle:
+	case entity2.ProviderGoogle:
 		opts = append(opts,
 			oauth2.SetAuthURLParam("access_type", "offline"),
 			oauth2.SetAuthURLParam("approval_prompt", "force"),
@@ -105,7 +105,7 @@ func (a *App) Oauth2ConnectProvider(provider string) (string, error) {
 }
 
 func (a *App) Oauth2Success(provider, code string) error {
-	p := entity.IntegrationProvider(provider)
+	p := entity2.IntegrationProvider(provider)
 	config := a.oauth2GetConfigurationForProvider(p)
 	if config == nil {
 		a.Log.Error(errors.New("oauth2 success: invalid provider: " + provider))
@@ -117,7 +117,7 @@ func (a *App) Oauth2Success(provider, code string) error {
 		return err
 	}
 
-	o, err := a.db.Auths.Get(entity.AuthFilter{Provider: []entity.IntegrationProvider{p}})
+	o, err := a.db.Auths.Get(entity2.AuthFilter{Provider: []entity2.IntegrationProvider{p}})
 	if err != nil {
 		return err
 	}
@@ -131,10 +131,10 @@ func (a *App) Oauth2Success(provider, code string) error {
 	return err
 }
 
-func (a *App) Oauth2GetClient(provider entity.IntegrationProvider) (*http.Client, error) {
+func (a *App) Oauth2GetClient(provider entity2.IntegrationProvider) (*http.Client, error) {
 	config := a.oauth2GetConfigurationForProvider(provider)
 
-	o, err := a.db.Auths.Get(entity.AuthFilter{Provider: []entity.IntegrationProvider{provider}})
+	o, err := a.db.Auths.Get(entity2.AuthFilter{Provider: []entity2.IntegrationProvider{provider}})
 	if err != nil {
 		return nil, err
 	}
@@ -147,12 +147,12 @@ func (a *App) Oauth2GetClient(provider entity.IntegrationProvider) (*http.Client
 	}
 
 	switch provider {
-	case entity.ProviderFitbit:
+	case entity2.ProviderFitbit:
 		newToken, err := config.TokenSource(context.Background(), token).Token()
 		// Check if token is still valid, if not refresh it
 		if newToken.AccessToken != token.AccessToken {
 			// If token was refreshed we persist the new token info
-			_, err = a.db.Auths.Update(&entity.Auth{
+			_, err = a.db.Auths.Update(&entity2.Auth{
 				ID:           o.ID,
 				AccessToken:  newToken.AccessToken,
 				RefreshToken: newToken.RefreshToken,
@@ -171,12 +171,12 @@ func (a *App) Oauth2GetClient(provider entity.IntegrationProvider) (*http.Client
 	return config.Client(context.Background(), token), err
 }
 
-func (a *App) oauth2GetConfigurationForProvider(provider entity.IntegrationProvider) *oauth2.Config {
-	var config *entity.Oauth2Config
+func (a *App) oauth2GetConfigurationForProvider(provider entity2.IntegrationProvider) *oauth2.Config {
+	var config *entity2.Oauth2Config
 	switch provider {
-	case entity.ProviderFitbit:
+	case entity2.ProviderFitbit:
 		config = a.cfg.Fitbit
-	case entity.ProviderGoogle:
+	case entity2.ProviderGoogle:
 		config = a.cfg.Google
 	default:
 		return nil
@@ -199,16 +199,16 @@ func (a *App) AuthAddAPIToken(token, provider string) (string, error) {
 		return "", errors.New("token is empty")
 	}
 
-	switch entity.IntegrationProvider(provider) {
-	case entity.ProviderToggl:
-		o, err := a.db.Auths.Get(entity.AuthFilter{Provider: []entity.IntegrationProvider{entity.ProviderToggl}})
+	switch entity2.IntegrationProvider(provider) {
+	case entity2.ProviderToggl:
+		o, err := a.db.Auths.Get(entity2.AuthFilter{Provider: []entity2.IntegrationProvider{entity2.ProviderToggl}})
 		if err != nil && !errors.Is(err, database.ErrNotFound) {
 			return "", err
 		}
 
 		if o == nil {
-			o = &entity.Auth{
-				Provider:    entity.ProviderToggl,
+			o = &entity2.Auth{
+				Provider:    entity2.ProviderToggl,
 				AccessToken: token,
 				TokenType:   "Bearer",
 			}

@@ -1,0 +1,7 @@
+sqlite:
+  dsn: "ape.db"
+  only:
+    days:
+  wipe: True
+  output: "./internal/repository/models"
+
