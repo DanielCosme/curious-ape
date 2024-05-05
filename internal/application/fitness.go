@@ -2,16 +2,15 @@ package application
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	database2 "github.com/danielcosme/curious-ape/internal/database"
+	"github.com/danielcosme/curious-ape/internal/dates"
 	entity2 "github.com/danielcosme/curious-ape/internal/entity"
 	"strconv"
 	"time"
 
 	"github.com/danielcosme/curious-ape/internal/integrations/google"
-	"github.com/danielcosme/go-sdk/dates"
-	"github.com/danielcosme/go-sdk/errors"
-	"github.com/danielcosme/go-sdk/log"
 )
 
 func (a *App) FitnessFindLogs(filter entity2.FitnessLogFilter) ([]*entity2.FitnessLog, error) {
@@ -165,7 +164,7 @@ func toFitnessLogFromGoogle(days []*entity2.Day, gfls []google.Session) ([]*enti
 func (a *App) createFailedHabitForDays(days []*entity2.Day, category entity2.HabitType, source entity2.DataSource) {
 	habitCategory, err := a.HabitCategoryGetByType(category)
 	if err != nil {
-		a.Log.Error(err)
+		a.Log.Error(err.Error())
 	}
 
 	for _, day := range days {
@@ -178,7 +177,7 @@ func (a *App) createFailedHabitForDays(days []*entity2.Day, category entity2.Hab
 			Note:         fmt.Sprintf("From missing log on data source"),
 		})
 		if err != nil {
-			a.Log.Error(err)
+			a.Log.Error(err.Error())
 		}
 	}
 }
@@ -207,7 +206,7 @@ func (a *App) createFitnessLogs(fls []*entity2.FitnessLog) error {
 	for _, fl := range fls {
 		fl.Date = fl.Day.Date
 		if err := a.db.FitnessLogs.Create(fl); err != nil {
-			a.Log.Warningf("fitness log for %s could not be created: %s", fl.Day.Date.Format(entity2.HumanDateWithTime), err.Error())
+			a.Log.Warn("fitness log for %s could not be created: %s", fl.Day.Date.Format(entity2.HumanDateWithTime), err.Error())
 			continue
 		}
 
@@ -215,11 +214,11 @@ func (a *App) createFitnessLogs(fls []*entity2.FitnessLog) error {
 			return err
 		}
 
-		a.Log.InfoP("Created fitness log", log.Prop{
-			"provider": fl.Origin.Str(),
-			"date":     fl.Day.Date.Format(entity2.HumanDateWithTime),
-			"type":     fl.Type.Str(),
-		})
+		a.Log.Info("Created fitness log",
+			"provider", fl.Origin.Str(),
+			"date", fl.Day.Date.Format(entity2.HumanDateWithTime),
+			"type", fl.Type.Str(),
+		)
 	}
 	return nil
 }
@@ -227,7 +226,6 @@ func (a *App) createFitnessLogs(fls []*entity2.FitnessLog) error {
 func checkManualOrigin(o entity2.DataSource) error {
 	if o != entity2.Manual {
 		return errors.New("only manually crated logs can be updated")
-
 	}
 	return nil
 }

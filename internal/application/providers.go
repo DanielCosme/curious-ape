@@ -38,16 +38,11 @@ func (a *App) TogglAssignProjectsToGoal(ids string) error {
 
 	projects := strings.Split(ids, ",")
 	for _, id := range projects {
-		p, err := api.Projects.GetByID(o.ToogglWorkSpaceID, id)
+		_, err := api.Projects.GetByID(o.ToogglWorkSpaceID, id)
 		if err != nil {
 			return err
 		}
-		a.Log.TraceP("Project from time tracking provider successfully linked", props{
-			"provider": entity2.ProviderToggl,
-			"name":     p.Name,
-		})
 	}
-	a.Log.Trace("All projects for the goal exist on Toggl")
 
 	// Update the project IDs
 	o.ToogglProjectIDs = ids

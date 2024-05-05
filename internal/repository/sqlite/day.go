@@ -5,11 +5,10 @@ import (
 	"fmt"
 	database2 "github.com/danielcosme/curious-ape/internal/database"
 	"github.com/danielcosme/curious-ape/internal/entity"
-	logape "github.com/danielcosme/go-sdk/log"
+	"log/slog"
 	"strings"
 	"time"
 
-	"github.com/danielcosme/go-sdk/errors"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -65,7 +64,6 @@ func catchErr(msg string, err error) error {
 	}
 
 	e := err.Error()
-	logape.DefaultLogger.Debug(msg + ": " + e)
 	switch e {
 	case sql.ErrNoRows.Error():
 		return fmt.Errorf("%w %s", database2.ErrNotFound, msg)
@@ -73,7 +71,8 @@ func catchErr(msg string, err error) error {
 		if strings.Contains(err.Error(), "UNIQUE constraint failed:") {
 			return fmt.Errorf("%w %s", database2.ErrUniqueCheckFailed, msg)
 		}
-		return errors.NewFatal(err.Error())
+		slog.Error(msg, "err", err.Error())
+		return err
 	}
 }
 

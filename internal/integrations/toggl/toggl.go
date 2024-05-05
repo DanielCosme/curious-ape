@@ -1,7 +1,6 @@
 package toggl
 
 import (
-	"io"
 	"net/http"
 )
 
@@ -12,12 +11,12 @@ type API struct {
 	Projects  *ProjectsService
 }
 
-func NewApi(token string, out io.Writer) *API {
+func NewApi(token string) *API {
 	a := &API{
-		Me:        &MeService{client: &Client{Client: http.DefaultClient, token: token, out: out}},
-		Reports:   &ReportsService{client: &Client{Client: http.DefaultClient, token: token, out: out}},
-		Workspace: &WorkspaceService{client: &Client{Client: http.DefaultClient, token: token, out: out}},
-		Projects:  &ProjectsService{client: &Client{Client: http.DefaultClient, token: token, out: out}},
+		Me:        &MeService{client: &Client{Client: http.DefaultClient}},
+		Reports:   &ReportsService{client: &Client{Client: http.DefaultClient}},
+		Workspace: &WorkspaceService{client: &Client{Client: http.DefaultClient}},
+		Projects:  &ProjectsService{client: &Client{Client: http.DefaultClient}},
 	}
 	return a
 }

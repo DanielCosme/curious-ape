@@ -24,7 +24,7 @@ func (h *Transport) loginForm(w http.ResponseWriter, r *http.Request) {
 func (h *Transport) loginPost(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		h.App.Log.Error(err)
+		h.App.Log.Error(err.Error())
 		h.clientError(w, http.StatusBadRequest)
 		return
 	}
@@ -73,6 +73,6 @@ func (h *Transport) logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.SessionManager.Remove(r.Context(), "authenticatedUserID")
-	h.SessionManager.Put(r.Context(), "flash", "You've been logged out sucessfully!")
+	h.SessionManager.Put(r.Context(), "flash", "You've been logged out successfully!")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

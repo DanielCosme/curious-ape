@@ -16,7 +16,7 @@ func (h *Transport) Oauth2Connect(w http.ResponseWriter, r *http.Request) {
 		h.serverError(w, err)
 		return
 	}
-	h.App.Log.Debug("url to redirect: ", url)
+	h.App.Log.Debug("url to redirect: " + url)
 
 	w.Header().Set("location", url)
 	w.WriteHeader(http.StatusTemporaryRedirect)
@@ -40,7 +40,7 @@ func (h *Transport) Oauth2Success(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.App.Log.Info("successfully authenticated with:", prov)
+	h.App.Log.Info("successfully authenticated with: " + prov)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -50,6 +50,6 @@ func (h *Transport) AddToken(rw http.ResponseWriter, r *http.Request) {
 		h.serverError(rw, err)
 		return
 	}
-	h.App.Log.Info("valid token for: ", msg)
+	h.App.Log.Info("valid token for: " + msg)
 	rw.WriteHeader(http.StatusCreated)
 }

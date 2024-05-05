@@ -8,8 +8,6 @@ import (
 
 	"github.com/danielcosme/curious-ape/internal/entity"
 
-	"github.com/danielcosme/go-sdk/log"
-
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/sqlite"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -55,7 +53,6 @@ func (qb *sqlQueryBuilder) generate() (string, []any) {
 		}
 	}
 
-	log.DefaultLogger.Trace(q, " ", args)
 	return q, args
 }
 

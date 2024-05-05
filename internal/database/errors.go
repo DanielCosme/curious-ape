@@ -1,9 +1,8 @@
 package database
 
 import (
+	"errors"
 	"fmt"
-
-	"github.com/danielcosme/go-sdk/errors"
 )
 
 var (

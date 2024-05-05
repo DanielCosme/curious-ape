@@ -4,13 +4,13 @@ import (
 	"github.com/danielcosme/curious-ape/internal/database"
 	"github.com/danielcosme/curious-ape/internal/entity"
 	"github.com/danielcosme/curious-ape/internal/integrations"
-	"github.com/danielcosme/go-sdk/log"
+	"log/slog"
 )
 
 type App struct {
+	Log  *slog.Logger
 	db   *database.Repository
 	cfg  *Environment
-	Log  *log.Logger
 	sync *integrations.Sync
 }
 
@@ -19,7 +19,7 @@ type App struct {
 //		there is no need for authentication
 
 type AppOptions struct {
-	Logger     *log.Logger
+	Logger     *slog.Logger
 	Config     *Environment
 	Repository *database.Repository
 }
@@ -32,13 +32,13 @@ type Environment struct {
 
 func New(opts *AppOptions) *App {
 	a := &App{
+		Log:  opts.Logger,
 		db:   opts.Repository,
 		cfg:  opts.Config,
-		Log:  opts.Logger,
 		sync: integrations.NewSync(opts.Logger),
 	}
 
-	a.Log.InfoP("Application running", log.Prop{"environment": a.cfg.Env})
+	a.Log.Info("Application initialized", "Environment", a.cfg.Env)
 	return a
 }
 

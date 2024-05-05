@@ -1,14 +1,13 @@
 package application
 
 import (
+	"errors"
 	"fmt"
 	database2 "github.com/danielcosme/curious-ape/internal/database"
 	entity2 "github.com/danielcosme/curious-ape/internal/entity"
 	"time"
 
 	"github.com/danielcosme/curious-ape/internal/integrations/toggl"
-	"github.com/danielcosme/go-sdk/errors"
-	"github.com/danielcosme/go-sdk/log"
 )
 
 func (a *App) DaysGetAll() ([]*entity2.Day, error) {
@@ -162,10 +161,10 @@ func (a *App) createDeepWorkLog(day *entity2.Day, origin entity2.DataSource) err
 		return err
 	}
 
-	a.Log.InfoP("updated deep work log", log.Prop{
-		"origin": origin.Str(),
-		"date":   day.Date.Format(entity2.HumanDateWithTime),
-	})
+	a.Log.Info("updated deep work log",
+		"origin", origin.Str(),
+		"date", day.Date.Format(entity2.HumanDateWithTime),
+	)
 	return nil
 }
 

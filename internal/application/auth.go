@@ -2,13 +2,14 @@ package application
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/danielcosme/curious-ape/internal/database"
 	"github.com/danielcosme/curious-ape/internal/entity"
 
-	"github.com/danielcosme/go-sdk/errors"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/oauth2"
 )
@@ -109,7 +110,7 @@ func (a *App) Oauth2Success(provider, code string) error {
 	p := entity.IntegrationProvider(provider)
 	config := a.oauth2GetConfigurationForProvider(p)
 	if config == nil {
-		a.Log.Error(errors.New("oauth2 success: invalid provider: " + provider))
+		a.Log.Error(fmt.Sprint("oauth2 success: invalid provider: " + provider))
 		return errors.New("something went wrong")
 	}
 
@@ -230,7 +231,7 @@ func (a *App) AuthAddAPIToken(token, provider string) (string, error) {
 
 		ws, err := api.Workspace.Get()
 		if err != nil {
-			a.Log.Error(err)
+			a.Log.Error(err.Error())
 		}
 		if len(ws) != 1 {
 			return "", errors.New("we only support one workspace for toggl")

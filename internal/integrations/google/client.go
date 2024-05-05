@@ -12,7 +12,6 @@ import (
 
 type Client struct {
 	*http.Client
-	out io.Writer
 }
 
 func (c *Client) Call(method, path string, urlParams url.Values, i interface{}) error {
@@ -41,7 +40,7 @@ func (c *Client) Call(method, path string, urlParams url.Values, i interface{}) 
 		return c.catchGoogleError(body)
 	}
 	if !json.Valid(body) {
-		c.out.Write(body)
+		// c.out.Write(body)
 		return errors.New("response body is not valid json")
 	}
 
@@ -49,6 +48,6 @@ func (c *Client) Call(method, path string, urlParams url.Values, i interface{}) 
 }
 
 func (c *Client) catchGoogleError(b []byte) error {
-	c.out.Write(b)
+	// c.out.Write(b)
 	return errors.New("google api error")
 }

@@ -2,6 +2,7 @@ package application
 
 import (
 	"encoding/json"
+	"errors"
 	errors2 "errors"
 	"fmt"
 	database2 "github.com/danielcosme/curious-ape/internal/database"
@@ -9,8 +10,6 @@ import (
 	"time"
 
 	"github.com/danielcosme/curious-ape/internal/integrations/fitbit"
-	"github.com/danielcosme/go-sdk/errors"
-	"github.com/danielcosme/go-sdk/log"
 )
 
 func (a *App) SleepDeleteByID(id int) error {
@@ -24,7 +23,7 @@ func (a *App) SleepUpdate(sleepLog, data *entity2.SleepLog) (*entity2.SleepLog, 
 
 	// Habit Upsert From Fitness Log
 	if err := a.HabitUpsertFromSleepLog(*data); err != nil {
-		a.Log.Error(err)
+		a.Log.Error(err.Error())
 	}
 
 	data.ID = sleepLog.ID
@@ -38,11 +37,6 @@ func (a *App) SleepCreateFromApi(sleepLog *entity2.SleepLog) (*entity2.SleepLog,
 		sleepLog.MinutesAsleep = time.Duration(float64(sleepLog.MinutesInBed) * 0.87)
 		// Calculate an average of 13% of bedtime awake
 		sleepLog.MinutesAwake = time.Duration(float64(sleepLog.MinutesInBed) * 0.13)
-		a.Log.DebugP("manual sleep log", log.Prop{
-			"Time in bed": sleepLog.MinutesInBed.String(),
-			"Asleep":      sleepLog.MinutesAwake.String(),
-			"Awake":       sleepLog.MinutesAwake.String(),
-		})
 	}
 
 	if err := a.createSleepLogs([]*entity2.SleepLog{sleepLog}); err != nil {
@@ -201,20 +195,20 @@ func (a *App) createSleepLogs(logs []*entity2.SleepLog) error {
 			}
 		} else if err := a.db.SleepLogs.Create(l); err != nil {
 			if errors2.Is(err, database2.ErrUniqueCheckFailed) {
-				a.Log.Error(fmt.Errorf("dayID and main sleep unique check failed for %s", l.Date.Format(entity2.HumanDateWithTime)))
+				a.Log.Error(fmt.Sprintf("dayID and main sleep unique check failed for %s", l.Date.Format(entity2.HumanDateWithTime)))
 			}
 			return err
 		}
 
 		// Habit Creation From Fitness Log
 		if err := a.HabitUpsertFromSleepLog(*l); err != nil {
-			a.Log.Error(err)
+			a.Log.Error(err.Error())
 		}
 
-		a.Log.InfoP(fmt.Sprintf("%s sleep log", op), log.Prop{
-			"provider": l.Origin.Str(),
-			"date":     l.Date.Format(entity2.HumanDateWithTime),
-		})
+		a.Log.Info(fmt.Sprintf("%s sleep log", op),
+			"provider", l.Origin.Str(),
+			"date", l.Date.Format(entity2.HumanDateWithTime),
+		)
 	}
 
 	return nil

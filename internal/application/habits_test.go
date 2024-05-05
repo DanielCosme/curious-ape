@@ -4,12 +4,13 @@ import (
 	"fmt"
 	application2 "github.com/danielcosme/curious-ape/internal/application"
 	entity2 "github.com/danielcosme/curious-ape/internal/entity"
+	"github.com/lmittmann/tint"
+	"log/slog"
 	"os"
 	"testing"
 	"time"
 
 	"github.com/danielcosme/curious-ape/internal/repository"
-	logape "github.com/danielcosme/go-sdk/log"
 	"gotest.tools/v3/assert"
 )
 
@@ -39,9 +40,6 @@ func TestHabitUpsertManual(t *testing.T) {
 	habit, err = app.HabitUpsert(data)
 	assert.NilError(t, err)
 
-	for _, a := range habit.Logs {
-		fmt.Println("s: ", a.Success)
-	}
 	{
 		hs, err := app.HabitsGetAll(nil)
 		if err != nil {
@@ -196,7 +194,14 @@ func NewTestApplication(t *testing.T) *application2.App {
 	t.Helper()
 
 	// logger initialization
-	logger := logape.New(os.Stdout, logape.LevelDebug, time.RFC3339)
+	logHandler := tint.NewHandler(os.Stdout, &tint.Options{
+		AddSource:   true,
+		Level:       slog.LevelDebug,
+		ReplaceAttr: nil,
+		TimeFormat:  time.RFC822,
+		NoColor:     true,
+	})
+	logger := slog.New(logHandler)
 
 	opts := &application2.AppOptions{
 		Repository: repository.NewTestSqliteRepository(t),

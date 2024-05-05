@@ -1,7 +1,6 @@
 package transport
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"runtime/debug"
@@ -9,7 +8,7 @@ import (
 
 func (h *Transport) serverError(w http.ResponseWriter, err error) {
 	trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
-	h.App.Log.Error(errors.New(trace))
+	h.App.Log.Error(trace)
 
 	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 }

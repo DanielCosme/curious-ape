@@ -14,7 +14,6 @@ const BaseURL = "https://api.track.toggl.com"
 type Client struct {
 	*http.Client
 	token string
-	out   io.Writer
 }
 
 func (c *Client) Call(method, path string, urlParams url.Values, payload any) error {
@@ -45,7 +44,7 @@ func (c *Client) Call(method, path string, urlParams url.Values, payload any) er
 
 	}
 	if !json.Valid(body) {
-		c.out.Write(body)
+		// c.out.Write(body)
 		return errors.New("toggl response body is not valid json")
 	}
 
@@ -53,6 +52,6 @@ func (c *Client) Call(method, path string, urlParams url.Values, payload any) er
 }
 
 func (c *Client) catchTogglErr(body []byte) error {
-	c.out.Write(body)
+	// c.out.Write(body)
 	return errors.New("toggl api error")
 }

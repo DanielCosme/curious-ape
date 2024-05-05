@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"log"
+	"github.com/lmittmann/tint"
+	"log/slog"
 	"net/http"
 	"os"
 	"runtime/debug"
@@ -11,14 +13,12 @@ import (
 	"time"
 
 	"github.com/danielcosme/curious-ape/internal/application"
-	entity2 "github.com/danielcosme/curious-ape/internal/entity"
+	"github.com/danielcosme/curious-ape/internal/entity"
 
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/danielcosme/curious-ape/internal/repository"
 	"github.com/danielcosme/curious-ape/internal/repository/sqlite"
 	"github.com/danielcosme/curious-ape/internal/transport"
-	"github.com/danielcosme/go-sdk/errors"
-	logape "github.com/danielcosme/go-sdk/log"
 	_ "github.com/mattn/go-sqlite3"
 
 	"github.com/alexedwards/scs/v2"
@@ -33,8 +33,8 @@ type config struct {
 		Port int `json:"port"`
 	} `json:"server"`
 	Integrations struct {
-		Fitbit *entity2.Oauth2Config `json:"fitbit"`
-		Google *entity2.Oauth2Config `json:"google"`
+		Fitbit *entity.Oauth2Config `json:"fitbit"`
+		Google *entity.Oauth2Config `json:"google"`
 	} `json:"integrations"`
 	Environment string `json:"environment"`
 	Admin       user   `json:"admin"`
@@ -55,12 +55,17 @@ func main() {
 	v := Version()
 	readConfiguration(cfg)
 
-	// logger initialization
-	logger := logape.New(os.Stdout, logape.LevelDebug, time.RFC822)
-	logape.DefaultLogger = logger
-	logger.Info("Version ", v)
+	logHandler := tint.NewHandler(os.Stdout, &tint.Options{
+		AddSource:   false,
+		Level:       slog.LevelInfo,
+		ReplaceAttr: nil,
+		TimeFormat:  time.RFC822,
+		NoColor:     false,
+	})
+	sLogger := slog.New(logHandler)
+	slog.SetDefault(sLogger)
+	sLogger.Info("Version: " + v)
 
-	// SQL datasource initialization
 	db := sqlx.MustConnect(sqlite.DriverName, "./"+cfg.Database.DNS)
 
 	sessionManager := scs.New()
@@ -75,7 +80,7 @@ func main() {
 			Fitbit: cfg.Integrations.Fitbit,
 			Google: cfg.Integrations.Google,
 		},
-		Logger: logger,
+		Logger: sLogger,
 	})
 
 	t, err := transport.NewTransport(app, v, sessionManager)
@@ -89,12 +94,13 @@ func main() {
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
-		ErrorLog:     log.New(logger, "", 0),
+		ErrorLog:     slog.NewLogLogger(logHandler, slog.LevelError),
 		Handler:      transport.EchoRoutes(t),
 	}
-	t.App.Log.InfoP("HTTP server listening", logape.Prop{"addr": addr})
+	t.App.Log.Info("HTTP server listening", "addr", addr)
 	if err := server.ListenAndServe(); err != nil {
-		logger.Fatal(err)
+		sLogger.Error(err.Error())
+		os.Exit(1)
 	}
 }
 
@@ -104,14 +110,14 @@ func readConfiguration(cfg *config) *config {
 	cfg.Environment = os.Getenv("APE_ENVIRONMENT")
 	cfg.Server.Port, err = strconv.Atoi(os.Getenv("APE_PORT"))
 	if err != nil {
-		logape.DefaultLogger.Fatal(fmt.Errorf("Invalid APE_PORT: '%w'", err))
+		logFatal(fmt.Errorf("invalid APE_PORT: '%w'", err))
 	}
 
 	if cfg.Environment != "dev" && cfg.Environment != "prod" {
 		if cfg.Environment == "" {
-			logape.DefaultLogger.Fatal(errors.NewFatal("Environment variable APE_ENVIRONMENT is empty"))
+			logFatal(errors.New("environment variable APE_ENVIRONMENT is empty"))
 		} else {
-			logape.DefaultLogger.Fatal(errors.NewFatal(fmt.Sprintf("Invalid environment: '%s'", cfg.Environment)))
+			logFatal(fmt.Errorf("invalid environment: '%s'", cfg.Environment))
 		}
 	}
 	rawFile, err = os.ReadFile("config.json")
@@ -124,8 +130,13 @@ func readConfiguration(cfg *config) *config {
 
 func exitIfErr(err error) {
 	if err != nil {
-		logape.DefaultLogger.Fatal(err)
+		logFatal(err)
 	}
+}
+
+func logFatal(err error) {
+	slog.Error("Fatal failure", "err", err.Error(), "stack", string(debug.Stack()))
+	os.Exit(1)
 }
 
 func Version() string {

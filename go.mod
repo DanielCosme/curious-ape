@@ -6,13 +6,13 @@ require (
 	github.com/aarondl/opt v0.0.0-20240108180805-338d04d857dc
 	github.com/alexedwards/scs/sqlite3store v0.0.0-20230327161757-10d4299e3b24
 	github.com/alexedwards/scs/v2 v2.5.1
-	github.com/danielcosme/go-sdk v0.0.3
 	github.com/go-chi/chi v1.5.4
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/google/go-cmp v0.5.9
 	github.com/jaswdr/faker/v2 v2.1.0
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/labstack/echo v3.3.10+incompatible
+	github.com/lmittmann/tint v1.0.4
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/stephenafamo/bob v0.25.0
 	golang.org/x/crypto v0.22.0

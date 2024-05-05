@@ -12,7 +12,6 @@ import (
 
 type Client struct {
 	*http.Client
-	out io.Writer
 }
 
 func (c *Client) Call(method string, path string, urlParams url.Values, i interface{}) error {
@@ -49,6 +48,6 @@ func (c *Client) Call(method string, path string, urlParams url.Values, i interf
 
 func (c *Client) catchFitbitError(b []byte) error {
 	// TODO unmarshal json if any and return string error
-	c.out.Write(b)
+	// c.out.Write(b)
 	return errors.New("fitbit api error")
 }

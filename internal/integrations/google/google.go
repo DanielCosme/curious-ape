@@ -1,7 +1,6 @@
 package google
 
 import (
-	"io"
 	"net/http"
 )
 
@@ -11,7 +10,7 @@ type API struct {
 	Fitness *FitnessService
 }
 
-func NewAPI(client *http.Client, out io.Writer) *API {
-	c := &API{Fitness: &FitnessService{client: Client{Client: client, out: out}}}
+func NewAPI(client *http.Client) *API {
+	c := &API{Fitness: &FitnessService{client: Client{Client: client}}}
 	return c
 }

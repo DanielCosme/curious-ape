@@ -6,8 +6,6 @@ import (
 	entity2 "github.com/danielcosme/curious-ape/internal/entity"
 	"strconv"
 	"time"
-
-	"github.com/danielcosme/go-sdk/log"
 )
 
 type NewHabitParams struct {
@@ -44,23 +42,23 @@ func (a *App) HabitUpsert(params *NewHabitParams) (*entity2.Habit, error) {
 		return nil, err
 	}
 
-	a.Log.InfoP(fmt.Sprintf("habit log succesfully %s", operation), log.Prop{
-		"Type":    habit.Category.Type.Str(),
-		"Success": strconv.FormatBool(hl.Success),
-		"Origin":  hl.Origin.Str(),
-		"Details": hl.Note,
-		"Date":    entity2.FormatDate(params.Date),
-	})
+	a.Log.Info(fmt.Sprintf("habit log succesfully %s", operation),
+		"Type", habit.Category.Type.Str(),
+		"Success", strconv.FormatBool(hl.Success),
+		"Origin", hl.Origin.Str(),
+		"Details", hl.Note,
+		"Date", entity2.FormatDate(params.Date),
+	)
 
 	oldStatus := habit.Status
 	habit.Status = entity2.CalculateHabitStatus(habit.Logs)
 	if oldStatus != habit.Status {
-		a.Log.InfoP("habit status changed", log.Prop{
-			"From": string(oldStatus),
-			"To":   string(habit.Status),
-			"Date": entity2.FormatDate(params.Date),
-			"Type": habit.Category.Type.Str(),
-		})
+		a.Log.Info("habit status changed",
+			"From", string(oldStatus),
+			"To", string(habit.Status),
+			"Date", entity2.FormatDate(params.Date),
+			"Type", habit.Category.Type.Str(),
+		)
 		return a.db.Habits.Update(habit, database2.HabitsPipeline(a.db)...)
 	}
 	return habit, nil
