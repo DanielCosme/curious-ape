@@ -9,4 +9,4 @@
 #  $argv
 
 echo "Running migrations..."
-migrate -path "./migrations/sqlite_backup" -database "sqlite3://./ape.db" $argv
+migrate -path "./migrations/sqlite" -database "sqlite3://./ape.db" $argv

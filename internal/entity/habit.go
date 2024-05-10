@@ -43,7 +43,6 @@ type HabitCategory struct {
 	ID          int       `db:"id"`
 	Name        string    `db:"name"`
 	Type        HabitType `db:"type"`
-	Code        string    `db:"code"`
 	Description string    `db:"description"`
 	Color       string    `db:"color"`
 }
@@ -61,10 +60,10 @@ type HabitType string
 
 const (
 	HabitTypeFood     HabitType = "food"
-	HabitTypeWakeUp   HabitType = "wake_up"
+	HabitTypeWakeUp   HabitType = "wake-up"
 	HabitTypeFitness  HabitType = "fitness"
 	HabitTypeDeepWork HabitType = "deep_work"
-	HabitTypeCustom   HabitType = "custom"
+	HabitTypeCustom   HabitType = "dynamic"
 )
 
 func (ht HabitType) Str() string {

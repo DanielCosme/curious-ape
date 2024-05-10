@@ -1,21 +1,21 @@
 package transport
 
 import (
+	"github.com/labstack/echo/v4"
 	"net/http"
 	"time"
 
 	entity2 "github.com/danielcosme/curious-ape/internal/entity"
 )
 
-func (h *Transport) home(w http.ResponseWriter, r *http.Request) {
-	ds, err := h.App.DaysMonth()
+func (t *Transport) home(c echo.Context) error {
+	ds, err := t.App.DaysMonth()
 	if err != nil {
-		h.serverError(w, err)
-		return
+		return errServer(err)
 	}
-	data := h.newTemplateData(r)
+	data := t.newTemplateData(c.Request())
 	data.Days = formatDays(ds)
-	h.render(w, http.StatusOK, "home.gohtml", data)
+	return c.Render(http.StatusOK, "home.gohtml", data)
 }
 
 type dayContainer struct {

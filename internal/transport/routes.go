@@ -1,23 +1,11 @@
 package transport
 
 import (
-	"net/http"
-
 	"github.com/danielcosme/curious-ape/web"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/labstack/echo"
+	"net/http"
 )
-
-func EchoRoutes(t *Transport) http.Handler {
-	e := echo.New()
-
-	// Handle static files.
-
-	// Return login form.
-
-	return e
-}
 
 func ChiRoutes(h *Transport) http.Handler {
 	r := chi.NewRouter()
@@ -31,28 +19,21 @@ func ChiRoutes(h *Transport) http.Handler {
 	fileServer := http.FileServer(http.FS(web.Files))
 	r.Handle("/static/*", fileServer)
 
-	r.Route("/login", func(r chi.Router) {
-		r.Use(h.SessionManager.LoadAndSave)
-
-		r.Get("/", h.loginForm)
-		r.Post("/", h.loginPost)
-	})
-
 	r.Get("/api/oauth2/{provider}/success", h.Oauth2Success)
 	// Protected routes.
 	r.Route("/", func(r chi.Router) {
 		r.Use(h.SessionManager.LoadAndSave)
-		r.Use(h.midAuthenticate)
-		r.Use(h.RequireAuth)
+		// r.Use(h.midAuthenticateFromSession)
+		// r.Use(h.midRequireAuth)
 
-		r.Get("/", h.home)
-		r.Post("/logout", h.logout)
+		// r.Get("/", h.home)
+		// r.Post("/logout", h.logout)
 
 		// Habits.
-		r.With(h.midSetHabit).Get("/habit/view/{id}", h.habit)
-		r.Get("/habit/new", h.newHabitForm)
-		r.Post("/habit/new", h.newHabitPost)
-		r.Post("/habit/log", h.newHabitLogPost)
+		// r.With(h.midSetHabit).Get("/habit/view/{id}", h.habit)
+		// r.Get("/habit/new", h.newHabitForm)
+		// r.Post("/habit/new", h.newHabitPost)
+		// r.Post("/habit/log", h.newHabitLogPost)
 
 		// Oauth2
 		r.Route("/oauth2/{provider}", func(r chi.Router) {

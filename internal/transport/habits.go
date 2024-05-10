@@ -1,6 +1,8 @@
 package transport
 
 import (
+	"github.com/labstack/echo/v4"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
@@ -21,119 +23,47 @@ type newHabitForm struct {
 	validator.Validator
 }
 
-func (h *Transport) habit(w http.ResponseWriter, r *http.Request) {
-	habit := r.Context().Value("habit").(*entity2.Habit)
-
-	data := h.newTemplateData(r)
+func (t *Transport) habit(c echo.Context) error {
+	habit := c.Get("habit").(*entity2.Habit)
+	data := t.newTemplateData(c.Request())
 	data.Habit = habit
-	h.render(w, http.StatusOK, "view.gohtml", data)
+	return c.Render(http.StatusOK, "view.gohtml", data)
 }
 
-func (h *Transport) newHabitForm(w http.ResponseWriter, r *http.Request) {
-	data := h.newTemplateData(r)
+func (t *Transport) newHabitForm(c echo.Context) error {
+	data := t.newTemplateData(c.Request())
 	data.Form = newHabitForm{}
-	h.render(w, http.StatusOK, "new_habit.gohtml", data)
+	return c.Render(http.StatusOK, "new_habit.gohtml", data)
 }
 
-func (h *Transport) newHabitPost(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+func (t *Transport) newHabitLogPost(c echo.Context) error {
+	slog.Info("HERE")
+	success, err := strconv.ParseBool(c.QueryParam("success"))
 	if err != nil {
-		h.clientError(w, http.StatusBadRequest)
-		return
+		return errServer(err)
 	}
-
-	// Date: form
-	// Success: form
-	// Category code: form
-	// - "food"
-	// - "wake_up"
-	// - "fitness"
-	// - "deep_work"
-	// - "custom"
-
-	// HARDCODED
-	// Origin: transport
-	// IsAutomated: False
-	// Note: Empty
-
-	form := newHabitForm{
-		Origin:      entity2.Manual,
-		IsAutomated: false,
-		// Title:   r.PostForm.Get("title"),
-		// Content: r.PostForm.Get("content"),
-		// Expires: expires,
-	}
-
-	// form.Check(validator.NotBlank(form.Title), "title", "This field cannot be blank")
-	// form.Check(validator.MaxChars(form.Title, 100), "title", "This field cannot be more than 100 characters long")
-	// form.Check(validator.NotBlank(form.Content), "content", "This field cannot be blank")
-	// form.Check(validator.PermittedInt(form.Expires, 1, 7, 365), "expires", "This field must equal 1, 7 or 365")
-
-	data := h.newTemplateData(r)
-	if !form.Valid() {
-		data.Form = form
-		// 422 - unprocessable entity represents a validation error.
-		h.render(w, http.StatusUnprocessableEntity, "new_habit.gohtml", data)
-		return
-	}
-
-	params := &application.NewHabitParams{
-		Date:         time.Now(),
-		CategoryCode: entity2.HabitTypeFood.Str(),
-		Success:      true,
-		Origin:       entity2.Manual,
-		Note:         "",
-		IsAutomated:  false,
-	}
-	habit, err := h.App.HabitUpsert(params)
+	dt, err := time.Parse(time.DateOnly, c.QueryParam("date"))
 	if err != nil {
-		h.serverError(w, err)
-		return
-	}
-	h.SessionManager.Put(r.Context(), "flash", "Habit successfully created!")
-
-	data.Habit = habit
-	data.Flash = h.SessionManager.PopString(r.Context(), "flash")
-	h.render(w, http.StatusCreated, "view.gohtml", data)
-}
-
-func (h *Transport) newHabitLogPost(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
-	if err != nil {
-		h.clientError(w, http.StatusBadRequest)
-		return
-	}
-
-	success, err := strconv.ParseBool(r.Form.Get("success"))
-	if err != nil {
-		h.serverError(w, err)
-		return
-	}
-	dt, err := time.Parse(time.DateOnly, r.Form.Get("date"))
-	if err != nil {
-		h.serverError(w, err)
-		return
+		return errServer(err)
 	}
 
 	params := &application.NewHabitParams{
 		Date:         dt,
-		CategoryCode: r.Form.Get("category"),
+		CategoryCode: c.QueryParam("category"),
 		Success:      success,
 		Origin:       entity2.Manual,
 		IsAutomated:  false,
 	}
-	habit, err := h.App.HabitUpsert(params)
+	habit, err := t.App.HabitUpsert(params)
 	if err != nil {
-		h.serverError(w, err)
-		return
+		return errServer(err)
 	}
-	day, err := h.App.DayGetByID(habit.DayID)
+	day, err := t.App.DayGetByID(habit.DayID)
 	if err != nil {
-		h.serverError(w, err)
-		return
+		return errServer(err)
 	}
 
-	td := h.newTemplateData(r)
+	td := t.newTemplateData(c.Request())
 	td.Day = &formatDays([]*entity2.Day{day})[0]
-	h.renderPartial(w, http.StatusOK, "day_row.gohtml", td)
+	return c.Render(http.StatusOK, partial("day_row.gohtml"), td)
 }

@@ -55,6 +55,7 @@ func main() {
 	v := Version()
 	readConfiguration(cfg)
 
+	// logger configuration
 	logHandler := tint.NewHandler(os.Stdout, &tint.Options{
 		AddSource:   false,
 		Level:       slog.LevelInfo,
@@ -64,14 +65,10 @@ func main() {
 	})
 	sLogger := slog.New(logHandler)
 	slog.SetDefault(sLogger)
+
 	sLogger.Info("Version: " + v)
 
 	db := sqlx.MustConnect(sqlite.DriverName, "./"+cfg.Database.DNS)
-
-	sessionManager := scs.New()
-	sessionManager.Store = sqlite3store.New(db.DB)
-	sessionManager.Lifetime = 12 * time.Hour
-	sessionManager.Cookie.SameSite = http.SameSiteStrictMode
 
 	app := application.New(&application.AppOptions{
 		Repository: repository.NewSqlite(db),
@@ -83,7 +80,14 @@ func main() {
 		Logger: sLogger,
 	})
 
-	t, err := transport.NewTransport(app, v, sessionManager)
+	// err := app.SetPassword("daniel", "test", entity.AdminRole)
+	// exitIfErr(err)
+
+	sessionManager := scs.New()
+	sessionManager.Store = sqlite3store.New(db.DB)
+	sessionManager.Lifetime = 12 * time.Hour
+	sessionManager.Cookie.SameSite = http.SameSiteStrictMode
+	t, err := transport.NewTransport(app, sessionManager, v)
 	if err != nil {
 		exitIfErr(err)
 	}
@@ -99,26 +103,24 @@ func main() {
 	}
 	t.App.Log.Info("HTTP server listening", "addr", addr)
 	if err := server.ListenAndServe(); err != nil {
-		sLogger.Error(err.Error())
-		os.Exit(1)
+		logFatal(err)
 	}
 }
 
 func readConfiguration(cfg *config) *config {
 	var err error
 	var rawFile []byte
-	cfg.Environment = os.Getenv("APE_ENVIRONMENT")
+
 	cfg.Server.Port, err = strconv.Atoi(os.Getenv("APE_PORT"))
 	if err != nil {
 		logFatal(fmt.Errorf("invalid APE_PORT: '%w'", err))
 	}
 
-	if cfg.Environment != "dev" && cfg.Environment != "prod" {
-		if cfg.Environment == "" {
-			logFatal(errors.New("environment variable APE_ENVIRONMENT is empty"))
-		} else {
-			logFatal(fmt.Errorf("invalid environment: '%s'", cfg.Environment))
-		}
+	cfg.Environment = os.Getenv("APE_ENVIRONMENT")
+	if cfg.Environment == "" {
+		logFatal(errors.New("environment variable APE_ENVIRONMENT is empty"))
+	} else if cfg.Environment != "dev" && cfg.Environment != "prod" {
+		logFatal(fmt.Errorf("invalid environment: '%s'", cfg.Environment))
 	}
 	rawFile, err = os.ReadFile("config.json")
 	exitIfErr(err)

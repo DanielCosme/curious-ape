@@ -2,6 +2,7 @@ package transport
 
 import (
 	"errors"
+	"github.com/labstack/echo/v4"
 	"net/http"
 
 	"github.com/danielcosme/curious-ape/internal/database"
@@ -15,64 +16,52 @@ type userLoginForm struct {
 	validator.Validator
 }
 
-func (h *Transport) loginForm(w http.ResponseWriter, r *http.Request) {
-	data := h.newTemplateData(r)
+func (t *Transport) loginForm(c echo.Context) error {
+	data := t.newTemplateData(c.Request())
 	data.Form = userLoginForm{}
-	h.render(w, http.StatusOK, "login.gohtml", data)
+	return c.Render(http.StatusOK, "login.gohtml", data)
 }
 
-func (h *Transport) loginPost(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
-	if err != nil {
-		h.App.Log.Error(err.Error())
-		h.clientError(w, http.StatusBadRequest)
-		return
-	}
-
+func (t *Transport) loginPost(c echo.Context) error {
 	form := userLoginForm{
-		Email:    r.PostForm.Get("email"),
-		Password: r.PostForm.Get("password"),
+		Email:    c.FormValue("email"),
+		Password: c.FormValue("password"),
 	}
 
 	if !form.Valid() {
-		data := h.newTemplateData(r)
+		data := t.newTemplateData(c.Request())
 		data.Form = form
-		h.render(w, http.StatusUnprocessableEntity, "login.gohtml", data)
-		return
+		return c.Render(http.StatusUnprocessableEntity, "login.gohtml", data)
 	}
 
-	id, err := h.App.Authenticate(form.Email, form.Password)
+	id, err := t.App.Authenticate(form.Email, form.Password)
 	if err != nil {
 		if errors.Is(err, database.ErrInvalidCredentials) {
 			form.AddNonFieldError("Email or password is incorrect")
 
-			data := h.newTemplateData(r)
+			data := t.newTemplateData(c.Request())
 			data.Form = form
-			h.render(w, http.StatusUnprocessableEntity, "login.gohtml", data)
+			return c.Render(http.StatusUnprocessableEntity, "login.gohtml", data)
 		} else {
-			h.serverError(w, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
-		return
 	}
 
-	err = h.SessionManager.RenewToken(r.Context())
+	err = t.SessionManager.RenewToken(c.Request().Context())
 	if err != nil {
-		h.serverError(w, err)
-		return
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	h.SessionManager.Put(r.Context(), "authenticatedUserID", id)
-
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	t.SessionManager.Put(c.Request().Context(), ctxKeyAuthenticatedUserID, id)
+	return c.Redirect(http.StatusSeeOther, "/")
 }
 
-func (h *Transport) logout(w http.ResponseWriter, r *http.Request) {
-	if err := h.SessionManager.RenewToken(r.Context()); err != nil {
-		h.serverError(w, err)
-		return
+func (t *Transport) logout(c echo.Context) error {
+	if err := t.SessionManager.RenewToken(c.Request().Context()); err != nil {
+		return errServer(err)
 	}
 
-	h.SessionManager.Remove(r.Context(), "authenticatedUserID")
-	h.SessionManager.Put(r.Context(), "flash", "You've been logged out successfully!")
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	t.SessionManager.Remove(c.Request().Context(), "authenticatedUserID")
+	t.SessionManager.Put(c.Request().Context(), "flash", "You've been logged out successfully!")
+	return c.Redirect(http.StatusSeeOther, "/")
 }

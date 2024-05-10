@@ -14,39 +14,39 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// func (a *App) SetPassword(name, password string, role entity.Role) error {
-// 	if password == "" {
-// 		return errors.New("password cannot be empty")
-// 	}
-// 	if name == "" {
-// 		return errors.New("name cannot be empty")
-// 	}
-//
-// 	u, err := a.db.Users.Get(entity.UserFilter{Role: role})
-// 	if err != nil && !errors.Is(err, database.ErrNotFound) {
-// 		return err
-// 	}
-//
-// 	hash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	if u == nil {
-// 		return a.db.Users.Create(&entity.User{
-// 			Name:     name,
-// 			Password: string(hash),
-// 			Role:     role,
-// 		})
-// 	}
-// 	_, err = a.db.Users.Update(&entity.User{
-// 		Name:     name,
-// 		Password: string(hash),
-// 		Role:     role,
-// 	})
-// 	return err
-// }
+func (a *App) SetPassword(name, password string, role entity.Role) error {
+	if password == "" {
+		return errors.New("password cannot be empty")
+	}
+	if name == "" {
+		return errors.New("name cannot be empty")
+	}
 
-// Authenticate returns userID if succesfully authenticated.
+	u, err := a.db.Users.Get(entity.UserFilter{Role: role})
+	if err != nil && !errors.Is(err, database.ErrNotFound) {
+		return err
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+	if err != nil {
+		return err
+	}
+	if u == nil {
+		return a.db.Users.Create(&entity.User{
+			Name:     name,
+			Password: string(hash),
+			Role:     role,
+		})
+	}
+	_, err = a.db.Users.Update(&entity.User{
+		Name:     name,
+		Password: string(hash),
+		Role:     role,
+	})
+	return err
+}
+
+// Authenticate returns userID if successfully authenticated.
 func (a *App) Authenticate(username, password string) (int, error) {
 	u, err := a.db.Users.Get(entity.UserFilter{Name: username})
 	if err != nil {

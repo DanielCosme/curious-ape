@@ -6,12 +6,12 @@ require (
 	github.com/aarondl/opt v0.0.0-20240108180805-338d04d857dc
 	github.com/alexedwards/scs/sqlite3store v0.0.0-20230327161757-10d4299e3b24
 	github.com/alexedwards/scs/v2 v2.5.1
-	github.com/go-chi/chi v1.5.4
+	github.com/go-chi/chi v1.5.5
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/google/go-cmp v0.5.9
 	github.com/jaswdr/faker/v2 v2.1.0
 	github.com/jmoiron/sqlx v1.3.5
-	github.com/labstack/echo v3.3.10+incompatible
+	github.com/labstack/echo/v4 v4.12.0
 	github.com/lmittmann/tint v1.0.4
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/stephenafamo/bob v0.25.0
@@ -23,6 +23,7 @@ require (
 require (
 	github.com/aarondl/json v0.0.0-20221020222930-8b0db17ef1bf // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
+	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -40,8 +41,9 @@ require (
 	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.24.0 // indirect
-	golang.org/x/sys v0.19.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/text v0.15.0 // indirect
+	golang.org/x/time v0.5.0 // indirect
 	golang.org/x/tools v0.16.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect

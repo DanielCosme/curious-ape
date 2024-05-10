@@ -16,7 +16,7 @@ type Transport struct {
 	partialTemplateCache map[string]*template.Template
 }
 
-func NewTransport(app *application.App, version string, sm *scs.SessionManager) (*Transport, error) {
+func NewTransport(app *application.App, sm *scs.SessionManager, version string) (*Transport, error) {
 	t := &Transport{
 		App:            app,
 		Version:        version,
@@ -36,8 +36,8 @@ func NewTransport(app *application.App, version string, sm *scs.SessionManager) 
 	return t, nil
 }
 
-func (h *Transport) IsAuthenticated(r *http.Request) bool {
-	isAuthenticated, ok := r.Context().Value(isAuthenticatedCtxKey).(bool)
+func (t *Transport) IsAuthenticated(r *http.Request) bool {
+	isAuthenticated, ok := r.Context().Value(ctxKeyIsAuthenticated).(bool)
 	if !ok {
 		return false
 	}
