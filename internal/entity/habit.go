@@ -43,8 +43,9 @@ type HabitCategory struct {
 	ID          int       `db:"id"`
 	Name        string    `db:"name"`
 	Type        HabitType `db:"type"`
-	Description string    `db:"description"`
-	Color       string    `db:"color"`
+	Code        string
+	Description string `db:"description"`
+	Color       string `db:"color"`
 }
 
 type HabitLog struct {

@@ -3,7 +3,6 @@ package transport
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/alexedwards/scs/v2"
 	"github.com/danielcosme/curious-ape/internal/database"
 	"github.com/labstack/echo/v4"
@@ -143,30 +142,16 @@ func (t *Transport) midSetHabit(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func midSecureHeaders(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// TODO make these headers appear ony in prod environments.
-		// w.Header().Set("Content-Security-Policy",
-		// 	"default-src 'self'; style-src 'self' fonts.googleapis.com; font-src fonts.gstatic.com")
-
-		// w.Header().Set("Referrer-Policy", "origin-when-cross-origin")
-		// w.Header().Set("X-Content-Type-Options", "nosniff")
-		// w.Header().Set("X-Frame-Options", "deny")
-		// w.Header().Set("X-XSS-Protection", "0")
-
-		next.ServeHTTP(w, r)
-	})
-}
-
-func (t *Transport) midRecoverPanic(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer func() {
-			if err := recover(); err != nil {
-				w.Header().Set("Connection", "close")
-				t.serverError(w, fmt.Errorf("%s", err))
-			}
-		}()
-
-		next.ServeHTTP(w, r)
-	})
-}
+// func (t *Transport) midRecoverPanic(next http.Handler) http.Handler {
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 		defer func() {
+// 			if err := recover(); err != nil {
+// 				w.Header().Set("Connection", "close")
+// 				t.serverError(w, fmt.Errorf("%s", err))
+// 			}
+// 		}()
+//
+// 		next.ServeHTTP(w, r)
+// 	})
+// }
+//

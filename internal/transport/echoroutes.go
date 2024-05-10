@@ -29,9 +29,7 @@ func EchoRoutes(t *Transport) http.Handler {
 		p.GET("", t.home)
 		p.POST("logout", t.logout)
 
-		p.GET("habit/new", t.newHabitForm)
 		p.POST("habit/log", t.newHabitLogPost)
-		// p.GET("/habit/view/:id", t.habit, t.midSetHabit)
 
 	}
 

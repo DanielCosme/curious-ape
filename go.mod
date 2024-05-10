@@ -6,7 +6,6 @@ require (
 	github.com/aarondl/opt v0.0.0-20240108180805-338d04d857dc
 	github.com/alexedwards/scs/sqlite3store v0.0.0-20230327161757-10d4299e3b24
 	github.com/alexedwards/scs/v2 v2.5.1
-	github.com/go-chi/chi v1.5.5
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/google/go-cmp v0.5.9
 	github.com/jaswdr/faker/v2 v2.1.0

@@ -1,7 +1,6 @@
 package transport
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"html/template"
@@ -112,43 +111,6 @@ func (t *Transport) Render(w io.Writer, name string, data any, c echo.Context) e
 
 func partial(p string) string {
 	return "-partial-" + p
-}
-
-func (t *Transport) render(w http.ResponseWriter, status int, page string, data *templateData) error {
-	ts, ok := t.templateCache[page]
-	if !ok {
-		return fmt.Errorf("the template %s does not exist", page)
-	}
-
-	buf := new(bytes.Buffer)
-	err := ts.ExecuteTemplate(buf, "base", data)
-	if err != nil {
-		return err
-	}
-
-	if _, err := buf.WriteTo(w); err != nil {
-		panic(err)
-	}
-	w.WriteHeader(status)
-	return nil
-}
-
-func (t *Transport) renderPartial(w http.ResponseWriter, status int, page string, data *templateData) {
-	ts, ok := t.partialTemplateCache[page]
-	if !ok {
-		http.Error(w, fmt.Sprintf("the template %s does not exist", page), http.StatusInternalServerError)
-		return
-	}
-	buf := new(bytes.Buffer)
-	err := ts.Execute(buf, data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	if _, err := buf.WriteTo(w); err != nil {
-		panic(err)
-	}
-	w.WriteHeader(status)
 }
 
 func humanDate(t time.Time) string {
