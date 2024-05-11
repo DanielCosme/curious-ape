@@ -1,10 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/danielcosme/curious-ape/internal/database"
 	"github.com/lmittmann/tint"
+	"github.com/stephenafamo/bob"
 	"log/slog"
 	"net/http"
 	"os"
@@ -13,28 +16,25 @@ import (
 	"time"
 
 	"github.com/danielcosme/curious-ape/internal/application"
-	"github.com/danielcosme/curious-ape/internal/entity"
+	"github.com/danielcosme/curious-ape/internal/core"
 
 	"github.com/alexedwards/scs/sqlite3store"
-	"github.com/danielcosme/curious-ape/internal/repository"
-	"github.com/danielcosme/curious-ape/internal/repository/sqlite"
 	"github.com/danielcosme/curious-ape/internal/transport"
 	_ "github.com/mattn/go-sqlite3"
 
 	"github.com/alexedwards/scs/v2"
-	"github.com/jmoiron/sqlx"
 )
 
 type config struct {
 	Database struct {
-		DNS string `json:"dns"`
+		DSN string `json:"dns"`
 	} `json:"database"`
 	Server struct {
 		Port int `json:"port"`
 	} `json:"server"`
 	Integrations struct {
-		Fitbit *entity.Oauth2Config `json:"fitbit"`
-		Google *entity.Oauth2Config `json:"google"`
+		Fitbit *core.Oauth2Config `json:"fitbit"`
+		Google *core.Oauth2Config `json:"google"`
 	} `json:"integrations"`
 	Environment string `json:"environment"`
 	Admin       user   `json:"admin"`
@@ -58,7 +58,7 @@ func main() {
 	// logger configuration
 	logHandler := tint.NewHandler(os.Stdout, &tint.Options{
 		AddSource:   false,
-		Level:       slog.LevelInfo,
+		Level:       slog.LevelDebug,
 		ReplaceAttr: nil,
 		TimeFormat:  time.RFC822,
 		NoColor:     false,
@@ -68,11 +68,14 @@ func main() {
 
 	sLogger.Info("Version: " + v)
 
-	db := sqlx.MustConnect(sqlite.DriverName, "./"+cfg.Database.DNS)
+	db, err := sql.Open("sqlite3", "./"+cfg.Database.DSN)
+	exitIfErr(err)
+	err = db.Ping()
+	exitIfErr(err)
 
 	app := application.New(&application.AppOptions{
-		Repository: repository.NewSqlite(db),
-		Config: &application.Environment{
+		Database: database.New(bob.NewDB(db)),
+		Config: &application.Config{
 			Env:    cfg.Environment,
 			Fitbit: cfg.Integrations.Fitbit,
 			Google: cfg.Integrations.Google,
@@ -80,17 +83,15 @@ func main() {
 		Logger: sLogger,
 	})
 
-	// err := app.SetPassword("daniel", "test", entity.AdminRole)
-	// exitIfErr(err)
+	err = app.SetPassword("daniel", "test", core.AdminRole)
+	exitIfErr(err)
 
 	sessionManager := scs.New()
-	sessionManager.Store = sqlite3store.New(db.DB)
+	sessionManager.Store = sqlite3store.New(db)
 	sessionManager.Lifetime = 12 * time.Hour
 	sessionManager.Cookie.SameSite = http.SameSiteStrictMode
 	t, err := transport.NewTransport(app, sessionManager, v)
-	if err != nil {
-		exitIfErr(err)
-	}
+	exitIfErr(err)
 
 	addr := fmt.Sprintf(":%d", cfg.Server.Port)
 	server := http.Server{

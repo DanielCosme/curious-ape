@@ -1,16 +1,16 @@
 package application
 
 import (
+	"github.com/danielcosme/curious-ape/internal/core"
 	"github.com/danielcosme/curious-ape/internal/database"
-	"github.com/danielcosme/curious-ape/internal/entity"
 	"github.com/danielcosme/curious-ape/internal/integrations"
 	"log/slog"
 )
 
 type App struct {
 	Log  *slog.Logger
-	db   *database.Repository
-	cfg  *Environment
+	db   *database.Database
+	cfg  *Config
 	sync *integrations.Sync
 }
 
@@ -19,27 +19,25 @@ type App struct {
 //		there is no need for authentication
 
 type AppOptions struct {
-	Logger     *slog.Logger
-	Config     *Environment
-	Repository *database.Repository
+	Logger   *slog.Logger
+	Config   *Config
+	Database *database.Database
 }
 
-type Environment struct {
-	Fitbit *entity.Oauth2Config
-	Google *entity.Oauth2Config
+type Config struct {
+	Fitbit *core.Oauth2Config
+	Google *core.Oauth2Config
 	Env    string
 }
 
 func New(opts *AppOptions) *App {
 	a := &App{
 		Log:  opts.Logger,
-		db:   opts.Repository,
+		db:   opts.Database,
 		cfg:  opts.Config,
 		sync: integrations.NewSync(opts.Logger),
 	}
 
-	a.Log.Info("Application initialized", "Environment", a.cfg.Env)
+	a.Log.Info("Application initialized", "Config", a.cfg.Env)
 	return a
 }
-
-type props map[string]string

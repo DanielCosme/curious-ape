@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	entity2 "github.com/danielcosme/curious-ape/internal/entity"
+	"github.com/danielcosme/curious-ape/internal/core"
 )
 
 func (t *Transport) home(c echo.Context) error {
-	ds, err := t.App.DaysMonth()
+	ds, err := t.App.DaysCurMonth()
 	if err != nil {
 		return errServer(err)
 	}
@@ -20,26 +20,26 @@ func (t *Transport) home(c echo.Context) error {
 
 type dayContainer struct {
 	Date    time.Time
-	Wake    *entity2.Habit
-	Fitness *entity2.Habit
-	Work    *entity2.Habit
-	Eat     *entity2.Habit
+	Wake    *core.Habit
+	Fitness *core.Habit
+	Work    *core.Habit
+	Eat     *core.Habit
 }
 
-func formatDays(ds []*entity2.Day) []dayContainer {
+func formatDays(ds []*core.Day) []dayContainer {
 	var res []dayContainer
 	for _, d := range ds {
-		dc := dayContainer{Date: d.Date}
+		dc := dayContainer{Date: d.Date.Time()}
 		for _, h := range d.Habits {
 			switch h.Category.Type {
-			case entity2.HabitTypeWakeUp:
-				dc.Wake = h
-			case entity2.HabitTypeFitness:
-				dc.Fitness = h
-			case entity2.HabitTypeDeepWork:
-				dc.Work = h
-			case entity2.HabitTypeFood:
-				dc.Eat = h
+			case core.HabitTypeWakeUp:
+				dc.Wake = &h
+			case core.HabitTypeExercise:
+				dc.Fitness = &h
+			case core.HabitTypeDeepWork:
+				dc.Work = &h
+			case core.HabitTypeEatHealthy:
+				dc.Eat = &h
 			}
 		}
 		dc.Wake = replace(dc.Wake)
@@ -51,9 +51,9 @@ func formatDays(ds []*entity2.Day) []dayContainer {
 	return res
 }
 
-func replace(h *entity2.Habit) *entity2.Habit {
+func replace(h *core.Habit) *core.Habit {
 	if h == nil {
-		return &entity2.Habit{Status: entity2.HabitStatusNoInfo}
+		return core.NewHabit()
 	}
 	return h
 }

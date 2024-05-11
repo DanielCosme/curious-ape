@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	entity2 "github.com/danielcosme/curious-ape/internal/entity"
+	entity2 "github.com/danielcosme/curious-ape/internal/core"
 
 	"github.com/danielcosme/curious-ape/web"
 )
@@ -19,6 +19,22 @@ import (
 var functions = template.FuncMap{
 	"humanDate": humanDate,
 	"dateOnly":  dateOnly,
+}
+
+func (t *Transport) Render(w io.Writer, name string, data any, c echo.Context) error {
+	if strings.HasPrefix(name, "-partial-") {
+		ts, ok := t.partialTemplateCache[strings.TrimPrefix(name, "-partial-")]
+		if !ok {
+			return fmt.Errorf("the template %s does not exist", name)
+		}
+		return ts.Execute(w, data)
+	}
+
+	ts, ok := t.templateCache[name]
+	if !ok {
+		return fmt.Errorf("the template %s does not exist", name)
+	}
+	return ts.ExecuteTemplate(w, "base", data)
 }
 
 type templateData struct {
@@ -91,22 +107,6 @@ func newTemplatePartialCache() (map[string]*template.Template, error) {
 		cache[name] = ts
 	}
 	return cache, nil
-}
-
-func (t *Transport) Render(w io.Writer, name string, data any, c echo.Context) error {
-	if strings.HasPrefix(name, "-partial-") {
-		ts, ok := t.partialTemplateCache[strings.TrimPrefix(name, "-partial-")]
-		if !ok {
-			return fmt.Errorf("the template %s does not exist", name)
-		}
-		return ts.Execute(w, data)
-	}
-
-	ts, ok := t.templateCache[name]
-	if !ok {
-		return fmt.Errorf("the template %s does not exist", name)
-	}
-	return ts.ExecuteTemplate(w, "base", data)
 }
 
 func partial(p string) string {

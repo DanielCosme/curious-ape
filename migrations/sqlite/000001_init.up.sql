@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS habits (
         day_id              INTEGER NOT NULL,
         habit_category_id   INTEGER NOT NULL,
 
-        status              TEXT CHECK (status IN ('no_info', 'not_done', 'done')),
+        state              TEXT CHECK (state IN ('no_info', 'not_done', 'done')),
 
         FOREIGN KEY (habit_category_id) REFERENCES habit_categories (id) ON DELETE CASCADE,
         FOREIGN KEY (day_id) REFERENCES "days" (id) ON DELETE CASCADE,
@@ -46,20 +46,20 @@ CREATE TABLE IF NOT EXISTS habit_logs (
 CREATE TABLE IF NOT EXISTS auths (
         id                  INTEGER primary key,
 
-        provider            TEXT not null UNIQUE,
-        access_token        TEXT not null UNIQUE,
+        provider            TEXT NOT NULL UNIQUE,
+        access_token        TEXT NOT NULL UNIQUE,
         refresh_token       TEXT,
         token_type          TEXT,
         expiration          DATE
 );
 
 CREATE TABLE IF NOT EXISTS users (
-        id              INTEGER primary key,
+        id              INTEGER PRIMARY KEY,
 
-        name            TEXT not null UNIQUE,
-        password        TEXT not null UNIQUE,
+        username        TEXT NOT NULL UNIQUE,
+        password        TEXT NOT NULL UNIQUE,
         role            TEXT CHECK (role IN ('admin', 'user', 'guest')) NOT NULL,
-        email           TEXT NOT NULL default ''
+        email           TEXT NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS sleep_logs (

@@ -1,7 +1,7 @@
-package entity_test
+package core_test
 
 import (
-	"github.com/danielcosme/curious-ape/internal/entity"
+	"github.com/danielcosme/curious-ape/internal/core"
 	"testing"
 
 	"gotest.tools/v3/assert"
@@ -11,12 +11,12 @@ func TestCalculateHabitStatus(t *testing.T) {
 	t.Parallel()
 
 	testCases := map[string]struct {
-		logs     []*entity.HabitLog
-		expected entity.HabitStatus
+		logs     []*core.HabitLog
+		expected core.HabitState
 	}{
-		"Non-automated unsuccesful overrides automated succesful": {
-			expected: entity.HabitStatusNotDone,
-			logs: []*entity.HabitLog{
+		"Non-automated unsuccessful overrides automated successful": {
+			expected: core.HabitStateNotDone,
+			logs: []*core.HabitLog{
 				{
 					Success:     false,
 					IsAutomated: false,
@@ -31,9 +31,9 @@ func TestCalculateHabitStatus(t *testing.T) {
 				},
 			},
 		},
-		"Non-automated succesful overrides automated unsuccesful": {
-			expected: entity.HabitStatusDone,
-			logs: []*entity.HabitLog{
+		"Non-automated successful overrides automated unsuccessful": {
+			expected: core.HabitStateDone,
+			logs: []*core.HabitLog{
 				{
 					Success:     true,
 					IsAutomated: false,
@@ -48,9 +48,9 @@ func TestCalculateHabitStatus(t *testing.T) {
 				},
 			},
 		},
-		"Automated succesful": {
-			expected: entity.HabitStatusDone,
-			logs: []*entity.HabitLog{
+		"Automated successful": {
+			expected: core.HabitStateDone,
+			logs: []*core.HabitLog{
 				{
 					Success:     false,
 					IsAutomated: true,
@@ -65,9 +65,9 @@ func TestCalculateHabitStatus(t *testing.T) {
 				},
 			},
 		},
-		"Non-automated succesful": {
-			expected: entity.HabitStatusDone,
-			logs: []*entity.HabitLog{
+		"Non-automated successful": {
+			expected: core.HabitStateDone,
+			logs: []*core.HabitLog{
 				{
 					Success:     false,
 					IsAutomated: false,
@@ -82,9 +82,9 @@ func TestCalculateHabitStatus(t *testing.T) {
 				},
 			},
 		},
-		"Automated unsuccesful": {
-			expected: entity.HabitStatusDone,
-			logs: []*entity.HabitLog{
+		"Automated unsuccessful": {
+			expected: core.HabitStateDone,
+			logs: []*core.HabitLog{
 				{
 					Success:     false,
 					IsAutomated: true,
@@ -100,8 +100,8 @@ func TestCalculateHabitStatus(t *testing.T) {
 			},
 		},
 		"All successful": {
-			expected: entity.HabitStatusDone,
-			logs: []*entity.HabitLog{
+			expected: core.HabitStateDone,
+			logs: []*core.HabitLog{
 				{
 					Success:     true,
 					IsAutomated: false,
@@ -113,8 +113,8 @@ func TestCalculateHabitStatus(t *testing.T) {
 			},
 		},
 		"All unsuccessful": {
-			expected: entity.HabitStatusNotDone,
-			logs: []*entity.HabitLog{
+			expected: core.HabitStateNotDone,
+			logs: []*core.HabitLog{
 				{
 					Success:     false,
 					IsAutomated: false,
@@ -126,8 +126,8 @@ func TestCalculateHabitStatus(t *testing.T) {
 			},
 		},
 		"One successful automated": {
-			expected: entity.HabitStatusDone,
-			logs: []*entity.HabitLog{
+			expected: core.HabitStateDone,
+			logs: []*core.HabitLog{
 				{
 					Success:     true,
 					IsAutomated: true,
@@ -135,26 +135,26 @@ func TestCalculateHabitStatus(t *testing.T) {
 			},
 		},
 		"One unsuccessful automated": {
-			expected: entity.HabitStatusNotDone,
-			logs: []*entity.HabitLog{
+			expected: core.HabitStateNotDone,
+			logs: []*core.HabitLog{
 				{
 					Success:     false,
 					IsAutomated: true,
 				},
 			},
 		},
-		"One successful nonautomated": {
-			expected: entity.HabitStatusDone,
-			logs: []*entity.HabitLog{
+		"One successful non-automated": {
+			expected: core.HabitStateDone,
+			logs: []*core.HabitLog{
 				{
 					Success:     true,
 					IsAutomated: false,
 				},
 			},
 		},
-		"One unsuccessful nonautomated": {
-			expected: entity.HabitStatusNotDone,
-			logs: []*entity.HabitLog{
+		"One unsuccessful non-automated": {
+			expected: core.HabitStateNotDone,
+			logs: []*core.HabitLog{
 				{
 					Success:     false,
 					IsAutomated: false,
@@ -162,11 +162,11 @@ func TestCalculateHabitStatus(t *testing.T) {
 			},
 		},
 		"No info with empty logs": {
-			expected: entity.HabitStatusNoInfo,
-			logs:     []*entity.HabitLog{},
+			expected: core.HabitStateNoInfo,
+			logs:     []*core.HabitLog{},
 		},
 		"No info when logs are nil": {
-			expected: entity.HabitStatusNoInfo,
+			expected: core.HabitStateNoInfo,
 			logs:     nil,
 		},
 	}
@@ -174,7 +174,7 @@ func TestCalculateHabitStatus(t *testing.T) {
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
 
-			status := entity.CalculateHabitStatus(tc.logs)
+			status := core.CalculateHabitStatus(tc.logs)
 			assert.Equal(t, tc.expected, status)
 		})
 	}

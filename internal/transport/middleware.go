@@ -2,14 +2,11 @@ package transport
 
 import (
 	"context"
-	"errors"
 	"github.com/alexedwards/scs/v2"
-	"github.com/danielcosme/curious-ape/internal/database"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"log/slog"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -95,7 +92,7 @@ func (t *Transport) midAuthenticateFromSession(next echo.HandlerFunc) echo.Handl
 		if id == 0 {
 			return next(c)
 		}
-		exists, err := t.App.Exists(id)
+		exists, err := t.App.UserExists(id)
 		if err != nil {
 			return err
 		}
@@ -120,38 +117,3 @@ func (t *Transport) midRequireAuth(next echo.HandlerFunc) echo.HandlerFunc {
 		return next(c)
 	}
 }
-
-func (t *Transport) midSetHabit(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil || id < 1 {
-			t.App.Log.Error("Habit id is invalid", "id", id)
-			return errNotFound()
-		}
-
-		habit, err := t.App.HabitGetByID(id)
-		if err != nil {
-			if errors.Is(err, database.ErrNotFound) {
-				return errNotFound()
-			}
-			return errServer(err)
-		}
-
-		c.Set("habit", habit)
-		return next(c)
-	}
-}
-
-// func (t *Transport) midRecoverPanic(next http.Handler) http.Handler {
-// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		defer func() {
-// 			if err := recover(); err != nil {
-// 				w.Header().Set("Connection", "close")
-// 				t.serverError(w, fmt.Errorf("%s", err))
-// 			}
-// 		}()
-//
-// 		next.ServeHTTP(w, r)
-// 	})
-// }
-//

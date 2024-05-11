@@ -1,4 +1,4 @@
-package entity
+package core
 
 type Entity struct {
 	ID   int    `json:"id"`

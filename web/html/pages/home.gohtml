@@ -19,9 +19,9 @@
          <tr>
              <td>{{humanDate .Date}}</td>
              <td>
-                 {{if eq .Wake.Status "not-done" }}
+                 {{if eq .Wake.State "not-done" }}
                  <span>X</span>
-                 {{else if eq .Wake.Status "done"}}
+                 {{else if eq .Wake.State "done"}}
                  <span>O</span>
                  {{else}}
                  <span>_</span>
@@ -36,9 +36,9 @@
                     hx-target="closest tr">N</a>
              </td>
              <td>
-                 {{if eq .Fitness.Status "not-done" }}
+                 {{if eq .Fitness.State "not-done" }}
                      <span>X</span>
-                 {{else if eq .Fitness.Status "done"}}
+                 {{else if eq .Fitness.State "done"}}
                      <span>O</span>
                  {{else}}
                      <span>_</span>
@@ -53,9 +53,9 @@
                     hx-target="closest tr">N</a>
              </td>
              <td>
-                 {{if eq .Work.Status "not-done" }}
+                 {{if eq .Work.State "not-done" }}
                      <span>X</span>
-                 {{else if eq .Work.Status "done"}}
+                 {{else if eq .Work.State "done"}}
                      <span>O</span>
                  {{else}}
                      <span>_</span>
@@ -70,9 +70,9 @@
                     hx-target="closest tr">N</a>
              </td>
              <td>
-                 {{if eq .Eat.Status "not-done" }}
+                 {{if eq .Eat.State "not-done" }}
                      <span>X</span>
-                 {{else if eq .Eat.Status "done"}}
+                 {{else if eq .Eat.State "done"}}
                      <span>O</span>
                  {{else}}
                      <span>_</span>

@@ -1,4 +1,4 @@
-package entity
+package core
 
 import "time"
 
@@ -22,10 +22,3 @@ type SleepLog struct {
 	// Generated
 	Day *Day
 }
-
-type SleepLogFilter struct {
-	ID    []int
-	DayID []int
-}
-
-type SleepLogJoin func(hs []*SleepLog) error

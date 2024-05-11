@@ -1,7 +1,9 @@
 sqlite:
   dsn: "ape.db"
-  only:
-    days:
-  wipe: True
-  output: "./internal/repository/models"
+  except:
+    schema_migrations:
+    sessions:
+  output: "./internal/database/gen/models"
 
+no_factory: True
+wipe: True
