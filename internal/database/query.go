@@ -8,13 +8,13 @@ import (
 	"github.com/stephenafamo/bob/dialect/sqlite"
 )
 
-type DayF struct {
-	Date    core.Date
-	Dates   core.DateSlice
-	WithAll bool
+type DayParams struct {
+	Date  core.Date
+	Dates core.DateSlice
+	R     []Relation
 }
 
-func (f DayF) BuildQuery(exec bob.Executor) *sqlite.ViewQuery[*models.Day, models.DaySlice] {
+func (f DayParams) BuildQuery(exec bob.Executor) *sqlite.ViewQuery[*models.Day, models.DaySlice] {
 	q := models.Days.Query(context.Background(), exec)
 
 	if !f.Date.Time().IsZero() {
@@ -23,6 +23,17 @@ func (f DayF) BuildQuery(exec bob.Executor) *sqlite.ViewQuery[*models.Day, model
 
 	if len(f.Dates) > 0 {
 		q.Apply(models.SelectWhere.Days.Date.In(f.Dates.ToTimeSlice()...))
+	}
+
+	for _, r := range f.R {
+		switch r {
+		case RelationHabit:
+			q.Apply(models.ThenLoadDayHabits())
+		case RelationSleep:
+			q.Apply(models.ThenLoadDaySleepLogs())
+		case RelationFitness:
+			q.Apply(models.ThenLoadDayFitnessLogs())
+		}
 	}
 
 	return q

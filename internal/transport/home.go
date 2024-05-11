@@ -20,26 +20,26 @@ func (t *Transport) home(c echo.Context) error {
 
 type dayContainer struct {
 	Date    time.Time
-	Wake    *core.Habit
-	Fitness *core.Habit
-	Work    *core.Habit
-	Eat     *core.Habit
+	Wake    core.Habit
+	Fitness core.Habit
+	Work    core.Habit
+	Eat     core.Habit
 }
 
-func formatDays(ds []*core.Day) []dayContainer {
+func formatDays(ds []core.Day) []dayContainer {
 	var res []dayContainer
 	for _, d := range ds {
 		dc := dayContainer{Date: d.Date.Time()}
 		for _, h := range d.Habits {
 			switch h.Category.Type {
 			case core.HabitTypeWakeUp:
-				dc.Wake = &h
+				dc.Wake = h
 			case core.HabitTypeExercise:
-				dc.Fitness = &h
+				dc.Fitness = h
 			case core.HabitTypeDeepWork:
-				dc.Work = &h
+				dc.Work = h
 			case core.HabitTypeEatHealthy:
-				dc.Eat = &h
+				dc.Eat = h
 			}
 		}
 		dc.Wake = replace(dc.Wake)
@@ -51,8 +51,8 @@ func formatDays(ds []*core.Day) []dayContainer {
 	return res
 }
 
-func replace(h *core.Habit) *core.Habit {
-	if h == nil {
+func replace(h core.Habit) core.Habit {
+	if h.IsZero() {
 		return core.NewHabit()
 	}
 	return h

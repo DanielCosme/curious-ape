@@ -1,13 +1,7 @@
 package database
 
 import (
-	"errors"
 	"github.com/stephenafamo/bob"
-)
-
-var (
-	ErrNotFound           = errors.New("database: not found")
-	ErrInvalidCredentials = errors.New("database: invalid credentials")
 )
 
 type Database struct {

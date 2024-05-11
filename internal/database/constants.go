@@ -1,7 +1,9 @@
 package database
 
-type DayJoin int
+type Relation int
 
 const (
-	Habit DayJoin = iota + 1
+	RelationHabit Relation = iota + 1
+	RelationSleep
+	RelationFitness
 )

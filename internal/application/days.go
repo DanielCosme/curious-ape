@@ -8,18 +8,21 @@ import (
 )
 
 // DaysCurMonth will return all the Days of the current Month.
-func (a *App) DaysCurMonth() ([]*core.Day, error) {
-	var res []*core.Day
+func (a *App) DaysCurMonth() ([]core.Day, error) {
+	var res []core.Day
 
 	today := core.NewDate(time.Now())
-	day, err := a.db.Days.Get(database.DayF{Date: today})
+	day, err := a.db.Days.Get(database.DayParams{Date: today})
 	if err != nil && !errors.Is(err, database.ErrNotFound) {
 		return nil, err
 	}
 
 	daysOfTheMonth := today.RangeMonth()
-	if day != nil {
-		res, err = a.db.Days.Find(database.DayF{Dates: daysOfTheMonth, WithAll: true})
+	if day.IsZero() {
+		res, err = a.db.Days.Find(database.DayParams{
+			Dates: daysOfTheMonth,
+			R:     database.DayRelations(),
+		})
 		if err != nil {
 			return nil, err
 		}
@@ -27,7 +30,7 @@ func (a *App) DaysCurMonth() ([]*core.Day, error) {
 	}
 
 	for _, date := range daysOfTheMonth {
-		d, err := a.db.Days.GetOrCreate(database.DayF{Date: date})
+		d, err := a.db.Days.GetOrCreate(database.DayParams{Date: date, R: database.DayRelations()})
 		if err != nil {
 			return nil, err
 		}

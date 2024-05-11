@@ -10,16 +10,20 @@ type Habit struct {
 	Logs []HabitLog
 }
 
-func NewHabit() *Habit {
-	return &Habit{
+func NewHabit() Habit {
+	return Habit{
 		state: HabitStateNoInfo,
 		Day:   nil,
 		Logs:  nil,
 	}
 }
 
-func (h Habit) State() HabitState {
+func (h *Habit) State() HabitState {
 	return h.state
+}
+
+func (h *Habit) IsZero() bool {
+	return h.state == ""
 }
 
 func CalculateHabitStatus(logs []*HabitLog) HabitState {

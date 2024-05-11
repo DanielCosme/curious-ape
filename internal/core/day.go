@@ -6,3 +6,7 @@ type Day struct {
 	// generated
 	Habits []Habit
 }
+
+func (d *Day) IsZero() bool {
+	return d.Date.Time().IsZero()
+}
