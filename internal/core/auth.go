@@ -32,8 +32,3 @@ type Oauth2Config struct {
 	AuthURL      string   `json:"auth_url"`
 	Scopes       []string `json:"scopes"`
 }
-
-type AuthFilter struct {
-	ID       []int
-	Provider []IntegrationProvider
-}

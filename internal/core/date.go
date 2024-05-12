@@ -26,10 +26,6 @@ func (d Date) String() string {
 	return d.time.Format(ISO8601)
 }
 
-func (d Date) FormatHuman() string {
-	return d.time.Format(HumanDateWithTime)
-}
-
 func (d Date) Time() time.Time {
 	return d.time
 }

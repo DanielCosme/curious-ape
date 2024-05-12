@@ -27,6 +27,10 @@ const (
 	HabitTypeDynamic    HabitType = "dynamic"
 )
 
-func (ht HabitType) Str() string {
-	return string(ht)
-}
+type AuthRole string
+
+const (
+	AdminRole AuthRole = "admin"
+	UserRole  AuthRole = "user"
+	GuestRole AuthRole = "guest"
+)

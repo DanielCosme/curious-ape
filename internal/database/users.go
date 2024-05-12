@@ -12,7 +12,7 @@ import (
 )
 
 type UserF struct {
-	Role     core.Role
+	Role     core.AuthRole
 	Username string
 }
 

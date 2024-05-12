@@ -10,7 +10,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (a *App) SetPassword(username, password, email string, role core.Role) error {
+func (a *App) SetPassword(username, password, email string, role core.AuthRole) error {
 	a.Log.Info("Setting password", "username", username, "role", role)
 	if password == "" {
 		return errors.New("password cannot be empty")
