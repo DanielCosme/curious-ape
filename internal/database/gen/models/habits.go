@@ -9,9 +9,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/aarondl/opt/null"
 	"github.com/aarondl/opt/omit"
-	"github.com/aarondl/opt/omitnull"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/clause"
 	"github.com/stephenafamo/bob/dialect/sqlite"
@@ -26,10 +24,10 @@ import (
 
 // Habit is an object representing the database table.
 type Habit struct {
-	ID              int32            `db:"id,pk" `
-	DayID           int32            `db:"day_id" `
-	HabitCategoryID int32            `db:"habit_category_id" `
-	State           null.Val[string] `db:"state" `
+	ID              int32  `db:"id,pk" `
+	DayID           int32  `db:"day_id" `
+	HabitCategoryID int32  `db:"habit_category_id" `
+	State           string `db:"state" `
 
 	R habitR `db:"-" `
 }
@@ -58,10 +56,10 @@ type habitR struct {
 // All values are optional, and do not have to be set
 // Generated columns are not included
 type HabitSetter struct {
-	ID              omit.Val[int32]      `db:"id,pk"`
-	DayID           omit.Val[int32]      `db:"day_id"`
-	HabitCategoryID omit.Val[int32]      `db:"habit_category_id"`
-	State           omitnull.Val[string] `db:"state"`
+	ID              omit.Val[int32]  `db:"id,pk"`
+	DayID           omit.Val[int32]  `db:"day_id"`
+	HabitCategoryID omit.Val[int32]  `db:"habit_category_id"`
+	State           omit.Val[string] `db:"state"`
 }
 
 func (s HabitSetter) SetColumns() []string {
@@ -96,7 +94,7 @@ func (s HabitSetter) Overwrite(t *Habit) {
 		t.HabitCategoryID, _ = s.HabitCategoryID.Get()
 	}
 	if !s.State.IsUnset() {
-		t.State, _ = s.State.GetNull()
+		t.State, _ = s.State.Get()
 	}
 }
 
@@ -204,7 +202,7 @@ type habitWhere[Q sqlite.Filterable] struct {
 	ID              sqlite.WhereMod[Q, int32]
 	DayID           sqlite.WhereMod[Q, int32]
 	HabitCategoryID sqlite.WhereMod[Q, int32]
-	State           sqlite.WhereNullMod[Q, string]
+	State           sqlite.WhereMod[Q, string]
 }
 
 func HabitWhere[Q sqlite.Filterable]() habitWhere[Q] {
@@ -212,7 +210,7 @@ func HabitWhere[Q sqlite.Filterable]() habitWhere[Q] {
 		ID:              sqlite.Where[Q, int32](HabitColumns.ID),
 		DayID:           sqlite.Where[Q, int32](HabitColumns.DayID),
 		HabitCategoryID: sqlite.Where[Q, int32](HabitColumns.HabitCategoryID),
-		State:           sqlite.WhereNull[Q, string](HabitColumns.State),
+		State:           sqlite.Where[Q, string](HabitColumns.State),
 	}
 }
 

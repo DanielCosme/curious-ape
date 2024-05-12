@@ -20,9 +20,9 @@ const (
 type HabitType string
 
 const (
-	HabitTypeEatHealthy HabitType = "eat_healthy"
+	HabitTypeEatHealthy HabitType = "food"
 	HabitTypeWakeUp     HabitType = "wake_up"
-	HabitTypeExercise   HabitType = "exercise"
+	HabitTypeExercise   HabitType = "fitness"
 	HabitTypeDeepWork   HabitType = "deep_work"
 	HabitTypeDynamic    HabitType = "dynamic"
 )

@@ -1,5 +1,5 @@
 INSERT INTO habit_categories (name, type)
-VALUES  ("Clean Eating", "food"),
-        ("Wake up early", "wake-up"),
-        ("Workout", "fitness"),
-        ("Deep work", "deep_work");
+VALUES ("Wake up early", "wake_up"),
+       ("Workout", "fitness"),
+       ("Deep work", "deep_work"),
+       ("Clean Eating", "food");

@@ -29,6 +29,9 @@ func (d *Days) Get(p DayParams) (core.Day, error) {
 	if err != nil {
 		return core.Day{}, catchErr("get day", err)
 	}
+	if err := d.LoadHabitRelations(res); err != nil {
+		return core.Day{}, err
+	}
 	return dayToCore(res), nil
 }
 
@@ -36,6 +39,11 @@ func (d *Days) Find(p DayParams) ([]core.Day, error) {
 	res, err := p.BuildQuery(d.db).All()
 	if err != nil {
 		return nil, catchErr("find days", err)
+	}
+	for _, day := range res {
+		if err := d.LoadHabitRelations(day); err != nil {
+			return nil, err
+		}
 	}
 	return daysToCore(res), nil
 }
@@ -51,19 +59,30 @@ func (d *Days) GetOrCreate(p DayParams) (core.Day, error) {
 	return res, err
 }
 
+func (d *Days) LoadHabitRelations(m *models.Day) error {
+	ctx := context.Background()
+	if err := m.R.Habits.LoadHabitHabitCategory(ctx, d.db); err != nil {
+		return err
+	}
+	if err := m.R.Habits.LoadHabitHabitLogs(ctx, d.db); err != nil {
+		return err
+	}
+	return nil
+}
+
 func dayToCore(m *models.Day) core.Day {
-	d := core.Day{
+	day := core.Day{
 		ID:   m.ID,
 		Date: core.NewDate(m.Date),
 	}
-	d.Habits = habitsToCore(m.R.Habits)
-	return d
+	day.Habits = habitsToCore(m.R.Habits)
+	return day
 }
 
 func daysToCore(ds models.DaySlice) []core.Day {
 	res := make([]core.Day, len(ds))
-	for idx, d := range ds {
-		res[idx] = dayToCore(d)
+	for idx, day := range ds {
+		res[idx] = dayToCore(day)
 	}
 	return res
 }

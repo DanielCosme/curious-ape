@@ -3,7 +3,10 @@ package database
 type Relation int
 
 const (
-	RelationHabit Relation = iota + 1
+	RelationDay Relation = iota + 1
+	RelationHabit
+	RelationHabitLogs
+	RelationHabitCategory
 	RelationSleep
 	RelationFitness
 )

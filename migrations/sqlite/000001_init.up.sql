@@ -9,9 +9,9 @@ CREATE INDEX IF NOT EXISTS days_date_idx ON days ("date");
 CREATE TABLE IF NOT EXISTS habit_categories (
         id                  INTEGER PRIMARY KEY,
 
-        name                TEXT NOT NULL                           CHECK (LENGTH(name) > 0),
+        name                TEXT UNIQUE NOT NULL                    CHECK (LENGTH(name) > 0),
         type                TEXT UNIQUE NOT NULL DEFAULT "dynamic"  CHECK (LENGTH(type) > 0),
-        description         TEXT DEFAULT ""
+        description         TEXT NOT NULL DEFAULT ""
 
         CHECK(LENGTH(id) > 0)
 );
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS habits (
         day_id              INTEGER NOT NULL,
         habit_category_id   INTEGER NOT NULL,
 
-        state              TEXT CHECK (state IN ('no_info', 'not_done', 'done')),
+        state              TEXT NOT NULL CHECK (state IN ('no_info', 'not_done', 'done')),
 
         FOREIGN KEY (habit_category_id) REFERENCES habit_categories (id) ON DELETE CASCADE,
         FOREIGN KEY (day_id) REFERENCES "days" (id) ON DELETE CASCADE,
@@ -34,9 +34,8 @@ CREATE TABLE IF NOT EXISTS habit_logs (
         habit_id            INTEGER NOT NULL,
 
         origin              TEXT NOT NULL DEFAULT "unknown" CHECK (length(origin) > 0),
-        success             BOOLEAN DEFAULT false,
+        success             BOOLEAN NOT NULL DEFAULT false,
         is_automated        BOOLEAN NOT NULL DEFAULT false,
-        note                TEXT DEFAULT "",
 
         FOREIGN KEY (habit_id) REFERENCES habits (id) ON DELETE CASCADE,
         UNIQUE (habit_id, origin),

@@ -15,78 +15,7 @@
      </thead>
      <tbody>
      {{range .Days}}
-     {{- /*gotype: github.com/danielcosme/curious-ape/internal/transport.dayContainer*/ -}}
-         <tr>
-             <td>{{humanDate .Date}}</td>
-             <td>
-                 {{if eq .Wake.State "not-done" }}
-                 <span>X</span>
-                 {{else if eq .Wake.State "done"}}
-                 <span>O</span>
-                 {{else}}
-                 <span>_</span>
-                 {{end}}
-                 <a href="#"
-                    hx-post="/habit/log?success=true&category=wake_up&date={{dateOnly .Date}}"
-                    hx-swap="outerHTML"
-                    hx-target="closest tr">Y</a>
-                 <a href="#"
-                    hx-post="/habit/log?success=false&category=wake_up&date={{dateOnly .Date}}"
-                    hx-swap="outerHTML"
-                    hx-target="closest tr">N</a>
-             </td>
-             <td>
-                 {{if eq .Fitness.State "not-done" }}
-                     <span>X</span>
-                 {{else if eq .Fitness.State "done"}}
-                     <span>O</span>
-                 {{else}}
-                     <span>_</span>
-                 {{end}}
-                 <a href="#"
-                    hx-post="/habit/log?success=true&category=fitness&date={{dateOnly .Date}}"
-                    hx-swap="outerHTML"
-                    hx-target="closest tr">Y</a>
-                 <a href="#"
-                    hx-post="/habit/log?success=false&category=fitness&date={{dateOnly .Date}}"
-                    hx-swap="outerHTML"
-                    hx-target="closest tr">N</a>
-             </td>
-             <td>
-                 {{if eq .Work.State "not-done" }}
-                     <span>X</span>
-                 {{else if eq .Work.State "done"}}
-                     <span>O</span>
-                 {{else}}
-                     <span>_</span>
-                 {{end}}
-                 <a href="#"
-                    hx-post="/habit/log?success=true&category=deep_work&date={{dateOnly .Date}}"
-                    hx-swap="outerHTML"
-                    hx-target="closest tr">Y</a>
-                 <a href="#"
-                    hx-post="/habit/log?success=false&category=deep_work&date={{dateOnly .Date}}"
-                    hx-swap="outerHTML"
-                    hx-target="closest tr">N</a>
-             </td>
-             <td>
-                 {{if eq .Eat.State "not-done" }}
-                     <span>X</span>
-                 {{else if eq .Eat.State "done"}}
-                     <span>O</span>
-                 {{else}}
-                     <span>_</span>
-                 {{end}}
-                 <a href="#"
-                    hx-post="/habit/log?success=true&category=food&date={{dateOnly .Date}}"
-                    hx-swap="outerHTML"
-                    hx-target="closest tr">Y</a>
-                 <a href="#"
-                    hx-post="/habit/log?success=false&category=food&date={{dateOnly .Date}}"
-                    hx-swap="outerHTML"
-                    hx-target="closest tr">N</a>
-             </td>
-         </tr>
+         {{template "day_row" .}}
      {{end}}
      </tbody>
 </table>

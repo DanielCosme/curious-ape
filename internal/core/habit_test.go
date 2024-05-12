@@ -1,7 +1,6 @@
-package core_test
+package core
 
 import (
-	"github.com/danielcosme/curious-ape/internal/core"
 	"testing"
 
 	"gotest.tools/v3/assert"
@@ -11,12 +10,12 @@ func TestCalculateHabitStatus(t *testing.T) {
 	t.Parallel()
 
 	testCases := map[string]struct {
-		logs     []*core.HabitLog
-		expected core.HabitState
+		logs     []HabitLog
+		expected HabitState
 	}{
 		"Non-automated unsuccessful overrides automated successful": {
-			expected: core.HabitStateNotDone,
-			logs: []*core.HabitLog{
+			expected: HabitStateNotDone,
+			logs: []HabitLog{
 				{
 					Success:     false,
 					IsAutomated: false,
@@ -32,8 +31,8 @@ func TestCalculateHabitStatus(t *testing.T) {
 			},
 		},
 		"Non-automated successful overrides automated unsuccessful": {
-			expected: core.HabitStateDone,
-			logs: []*core.HabitLog{
+			expected: HabitStateDone,
+			logs: []HabitLog{
 				{
 					Success:     true,
 					IsAutomated: false,
@@ -49,8 +48,8 @@ func TestCalculateHabitStatus(t *testing.T) {
 			},
 		},
 		"Automated successful": {
-			expected: core.HabitStateDone,
-			logs: []*core.HabitLog{
+			expected: HabitStateDone,
+			logs: []HabitLog{
 				{
 					Success:     false,
 					IsAutomated: true,
@@ -66,8 +65,8 @@ func TestCalculateHabitStatus(t *testing.T) {
 			},
 		},
 		"Non-automated successful": {
-			expected: core.HabitStateDone,
-			logs: []*core.HabitLog{
+			expected: HabitStateDone,
+			logs: []HabitLog{
 				{
 					Success:     false,
 					IsAutomated: false,
@@ -83,8 +82,8 @@ func TestCalculateHabitStatus(t *testing.T) {
 			},
 		},
 		"Automated unsuccessful": {
-			expected: core.HabitStateDone,
-			logs: []*core.HabitLog{
+			expected: HabitStateDone,
+			logs: []HabitLog{
 				{
 					Success:     false,
 					IsAutomated: true,
@@ -100,8 +99,8 @@ func TestCalculateHabitStatus(t *testing.T) {
 			},
 		},
 		"All successful": {
-			expected: core.HabitStateDone,
-			logs: []*core.HabitLog{
+			expected: HabitStateDone,
+			logs: []HabitLog{
 				{
 					Success:     true,
 					IsAutomated: false,
@@ -113,8 +112,8 @@ func TestCalculateHabitStatus(t *testing.T) {
 			},
 		},
 		"All unsuccessful": {
-			expected: core.HabitStateNotDone,
-			logs: []*core.HabitLog{
+			expected: HabitStateNotDone,
+			logs: []HabitLog{
 				{
 					Success:     false,
 					IsAutomated: false,
@@ -126,8 +125,8 @@ func TestCalculateHabitStatus(t *testing.T) {
 			},
 		},
 		"One successful automated": {
-			expected: core.HabitStateDone,
-			logs: []*core.HabitLog{
+			expected: HabitStateDone,
+			logs: []HabitLog{
 				{
 					Success:     true,
 					IsAutomated: true,
@@ -135,8 +134,8 @@ func TestCalculateHabitStatus(t *testing.T) {
 			},
 		},
 		"One unsuccessful automated": {
-			expected: core.HabitStateNotDone,
-			logs: []*core.HabitLog{
+			expected: HabitStateNotDone,
+			logs: []HabitLog{
 				{
 					Success:     false,
 					IsAutomated: true,
@@ -144,8 +143,8 @@ func TestCalculateHabitStatus(t *testing.T) {
 			},
 		},
 		"One successful non-automated": {
-			expected: core.HabitStateDone,
-			logs: []*core.HabitLog{
+			expected: HabitStateDone,
+			logs: []HabitLog{
 				{
 					Success:     true,
 					IsAutomated: false,
@@ -153,8 +152,8 @@ func TestCalculateHabitStatus(t *testing.T) {
 			},
 		},
 		"One unsuccessful non-automated": {
-			expected: core.HabitStateNotDone,
-			logs: []*core.HabitLog{
+			expected: HabitStateNotDone,
+			logs: []HabitLog{
 				{
 					Success:     false,
 					IsAutomated: false,
@@ -162,11 +161,11 @@ func TestCalculateHabitStatus(t *testing.T) {
 			},
 		},
 		"No info with empty logs": {
-			expected: core.HabitStateNoInfo,
-			logs:     []*core.HabitLog{},
+			expected: HabitStateNoInfo,
+			logs:     []HabitLog{},
 		},
 		"No info when logs are nil": {
-			expected: core.HabitStateNoInfo,
+			expected: HabitStateNoInfo,
 			logs:     nil,
 		},
 	}
@@ -174,7 +173,7 @@ func TestCalculateHabitStatus(t *testing.T) {
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
 
-			status := core.CalculateHabitStatus(tc.logs)
+			status := calculateHabitState(tc.logs)
 			assert.Equal(t, tc.expected, status)
 		})
 	}

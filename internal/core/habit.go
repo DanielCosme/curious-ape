@@ -2,6 +2,7 @@ package core
 
 type Habit struct {
 	ID       int32
+	DayID    int32
 	Date     Date
 	Category HabitCategory
 	state    HabitState
@@ -10,12 +11,26 @@ type Habit struct {
 	Logs []HabitLog
 }
 
-func NewHabit() Habit {
-	return Habit{
-		state: HabitStateNoInfo,
-		Day:   nil,
-		Logs:  nil,
+type HabitParams struct {
+	Success    bool
+	Date       Date
+	CategoryID int32
+	Origin     DataSource
+	Automated  bool
+}
+
+func (hp *HabitParams) Valid() bool {
+	return !hp.Date.Time().IsZero() && hp.CategoryID > 0
+}
+
+func NewHabit(d Date, c HabitCategory, logs []HabitLog) Habit {
+	h := Habit{
+		Date:     d,
+		Category: c,
+		Logs:     logs,
+		state:    calculateHabitState(logs),
 	}
+	return h
 }
 
 func (h *Habit) State() HabitState {
@@ -23,10 +38,10 @@ func (h *Habit) State() HabitState {
 }
 
 func (h *Habit) IsZero() bool {
-	return h.state == ""
+	return h.state == "" || h.Date.Time().IsZero()
 }
 
-func CalculateHabitStatus(logs []*HabitLog) HabitState {
+func calculateHabitState(logs []HabitLog) HabitState {
 	status := HabitStateNoInfo
 	var override bool
 	for _, log := range logs {
@@ -62,5 +77,4 @@ type HabitLog struct {
 	Success     bool
 	IsAutomated bool
 	Origin      DataSource
-	Note        string
 }

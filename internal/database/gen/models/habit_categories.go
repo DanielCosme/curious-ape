@@ -9,9 +9,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/aarondl/opt/null"
 	"github.com/aarondl/opt/omit"
-	"github.com/aarondl/opt/omitnull"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/clause"
 	"github.com/stephenafamo/bob/dialect/sqlite"
@@ -25,10 +23,10 @@ import (
 
 // HabitCategory is an object representing the database table.
 type HabitCategory struct {
-	ID          int32            `db:"id,pk" `
-	Name        string           `db:"name" `
-	Type        string           `db:"type" `
-	Description null.Val[string] `db:"description" `
+	ID          int32  `db:"id,pk" `
+	Name        string `db:"name" `
+	Type        string `db:"type" `
+	Description string `db:"description" `
 
 	R habitCategoryR `db:"-" `
 }
@@ -55,10 +53,10 @@ type habitCategoryR struct {
 // All values are optional, and do not have to be set
 // Generated columns are not included
 type HabitCategorySetter struct {
-	ID          omit.Val[int32]      `db:"id,pk"`
-	Name        omit.Val[string]     `db:"name"`
-	Type        omit.Val[string]     `db:"type"`
-	Description omitnull.Val[string] `db:"description"`
+	ID          omit.Val[int32]  `db:"id,pk"`
+	Name        omit.Val[string] `db:"name"`
+	Type        omit.Val[string] `db:"type"`
+	Description omit.Val[string] `db:"description"`
 }
 
 func (s HabitCategorySetter) SetColumns() []string {
@@ -93,7 +91,7 @@ func (s HabitCategorySetter) Overwrite(t *HabitCategory) {
 		t.Type, _ = s.Type.Get()
 	}
 	if !s.Description.IsUnset() {
-		t.Description, _ = s.Description.GetNull()
+		t.Description, _ = s.Description.Get()
 	}
 }
 
@@ -197,7 +195,7 @@ type habitCategoryWhere[Q sqlite.Filterable] struct {
 	ID          sqlite.WhereMod[Q, int32]
 	Name        sqlite.WhereMod[Q, string]
 	Type        sqlite.WhereMod[Q, string]
-	Description sqlite.WhereNullMod[Q, string]
+	Description sqlite.WhereMod[Q, string]
 }
 
 func HabitCategoryWhere[Q sqlite.Filterable]() habitCategoryWhere[Q] {
@@ -205,7 +203,7 @@ func HabitCategoryWhere[Q sqlite.Filterable]() habitCategoryWhere[Q] {
 		ID:          sqlite.Where[Q, int32](HabitCategoryColumns.ID),
 		Name:        sqlite.Where[Q, string](HabitCategoryColumns.Name),
 		Type:        sqlite.Where[Q, string](HabitCategoryColumns.Type),
-		Description: sqlite.WhereNull[Q, string](HabitCategoryColumns.Description),
+		Description: sqlite.Where[Q, string](HabitCategoryColumns.Description),
 	}
 }
 

@@ -21,22 +21,6 @@ var functions = template.FuncMap{
 	"dateOnly":  dateOnly,
 }
 
-func (t *Transport) Render(w io.Writer, name string, data any, c echo.Context) error {
-	if strings.HasPrefix(name, "-partial-") {
-		ts, ok := t.partialTemplateCache[strings.TrimPrefix(name, "-partial-")]
-		if !ok {
-			return fmt.Errorf("the template %s does not exist", name)
-		}
-		return ts.Execute(w, data)
-	}
-
-	ts, ok := t.templateCache[name]
-	if !ok {
-		return fmt.Errorf("the template %s does not exist", name)
-	}
-	return ts.ExecuteTemplate(w, "base", data)
-}
-
 type templateData struct {
 	CurrentYear     int
 	Version         string
@@ -48,6 +32,22 @@ type templateData struct {
 	Flash           string
 	IsAuthenticated bool
 	CSRFToken       string
+}
+
+func (t *Transport) Render(w io.Writer, name string, data any, c echo.Context) error {
+	if strings.HasPrefix(name, "-p-") {
+		ts, ok := t.partialTemplateCache[strings.TrimPrefix(name, "-p-")]
+		if !ok {
+			return fmt.Errorf("the template %s does not exist", name)
+		}
+		return ts.Execute(w, data)
+	}
+
+	ts, ok := t.templateCache[name]
+	if !ok {
+		return fmt.Errorf("the template %s does not exist", name)
+	}
+	return ts.ExecuteTemplate(w, "base", data)
 }
 
 func (t *Transport) newTemplateData(r *http.Request) *templateData {
@@ -96,7 +96,7 @@ func newTemplatePartialCache() (map[string]*template.Template, error) {
 	for _, page := range pages {
 		name := filepath.Base(page)
 		patterns := []string{
-			"html/base.gohtml",
+			// "html/base.gohtml",
 			"html/partials/*gohtml",
 			page,
 		}
@@ -110,7 +110,7 @@ func newTemplatePartialCache() (map[string]*template.Template, error) {
 }
 
 func partial(p string) string {
-	return "-partial-" + p
+	return "-p-" + p
 }
 
 func humanDate(t time.Time) string {

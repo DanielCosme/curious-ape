@@ -14,7 +14,7 @@ func NewDate(t time.Time) Date {
 	}
 }
 
-func DateAsISO8601(s string) (Date, error) {
+func DateFromISO8601(s string) (Date, error) {
 	t, err := time.Parse(ISO8601, s)
 	if err != nil {
 		return Date{}, err
