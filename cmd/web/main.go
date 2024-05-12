@@ -124,7 +124,7 @@ func readConfiguration(cfg *config) *config {
 	cfg.Environment = application.Environment(os.Getenv("APE_ENVIRONMENT"))
 	if cfg.Environment == "" {
 		logFatal(errors.New("environment variable APE_ENVIRONMENT is empty"))
-	} else if cfg.Environment != application.Dev && cfg.Environment != application.Prod {
+	} else if cfg.Environment != application.Dev && cfg.Environment != application.Prod && application.Staging != cfg.Environment {
 		logFatal(fmt.Errorf("invalid environment: '%s'", cfg.Environment))
 	}
 	rawFile, err = os.ReadFile("config.json")
