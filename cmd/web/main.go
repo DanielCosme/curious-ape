@@ -155,7 +155,7 @@ func Version() string {
 		for _, s := range bi.Settings {
 			switch s.Key {
 			case "vcs.revision":
-				hash = s.Value[:8]
+				hash = s.Value[:7]
 			case "vcs.modified":
 				if s.Value == "true" {
 					dirty = true

@@ -14,6 +14,7 @@ set -gx new_version (semver get release); or exit 1
 
 # Run tests.
 $cur_dir/test.sh; or exit 1
+$cur_dir/audit.sh; or exit 1
 
 # SEMVER enums
 #   - alpha
