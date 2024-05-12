@@ -38,5 +38,5 @@ func (t *Transport) newHabitLogPost(c echo.Context) error {
 
 	td := t.newTemplateData(c.Request())
 	td.Day = &formatDays([]core.Day{day})[0]
-	return c.Render(http.StatusOK, partial("day_row.gohtml"), td.Day)
+	return c.Render(http.StatusOK, partialDayRow, td.Day)
 }

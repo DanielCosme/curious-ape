@@ -15,7 +15,8 @@ func (t *Transport) home(c echo.Context) error {
 	}
 	data := t.newTemplateData(c.Request())
 	data.Days = formatDays(ds)
-	return c.Render(http.StatusOK, "home.gohtml", data)
+	c.Set("page", pageHome)
+	return c.Render(http.StatusOK, pageHome, data)
 }
 
 type dayContainer struct {

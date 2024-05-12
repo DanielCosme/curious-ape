@@ -20,7 +20,7 @@ type userLoginForm struct {
 func (t *Transport) loginForm(c echo.Context) error {
 	data := t.newTemplateData(c.Request())
 	data.Form = userLoginForm{}
-	return c.Render(http.StatusOK, "login.gohtml", data)
+	return c.Render(http.StatusOK, pageLogin, data)
 }
 
 func (t *Transport) loginPost(c echo.Context) error {
@@ -32,7 +32,7 @@ func (t *Transport) loginPost(c echo.Context) error {
 	if !form.Valid() {
 		data := t.newTemplateData(c.Request())
 		data.Form = form
-		return c.Render(http.StatusUnprocessableEntity, "login.gohtml", data)
+		return c.Render(http.StatusUnprocessableEntity, pageLogin, data)
 	}
 
 	id, err := t.App.Authenticate(form.Email, form.Password)
@@ -42,7 +42,7 @@ func (t *Transport) loginPost(c echo.Context) error {
 
 			data := t.newTemplateData(c.Request())
 			data.Form = form
-			return c.Render(http.StatusUnprocessableEntity, "login.gohtml", data)
+			return c.Render(http.StatusUnprocessableEntity, pageLogin, data)
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}

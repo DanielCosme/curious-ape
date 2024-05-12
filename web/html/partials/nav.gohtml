@@ -3,18 +3,14 @@
     {{if .IsAuthenticated }}
     <div>
         <a href='/'>Home</a>
-        <a href='/oauth2/fitbit/connect/form'>Authenticate</a>
+        <a href='/integrations'>Integrations</a>
     </div>
     {{end}}
     <div>
     {{if .IsAuthenticated}}
         <form action="/logout" method="POST">
-            <!-- Include the CSRF token -->
-            <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
             <button>Logout</button>
         </form>
-    {{else}}
-        <a href="/login">Login</a>
     {{end}}
     </div>
 </nav>

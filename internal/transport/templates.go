@@ -31,14 +31,13 @@ type templateData struct {
 	Form            any
 	Flash           string
 	IsAuthenticated bool
-	CSRFToken       string
 }
 
 func (t *Transport) Render(w io.Writer, name string, data any, c echo.Context) error {
-	if strings.HasPrefix(name, "-p-") {
-		ts, ok := t.partialTemplateCache[strings.TrimPrefix(name, "-p-")]
+	if strings.HasPrefix(name, "p.") {
+		ts, ok := t.partialTemplateCache[strings.TrimPrefix(name, "p.")]
 		if !ok {
-			return fmt.Errorf("the template %s does not exist", name)
+			return fmt.Errorf("the partial template %s does not exist", name)
 		}
 		return ts.Execute(w, data)
 	}
@@ -107,10 +106,6 @@ func newTemplatePartialCache() (map[string]*template.Template, error) {
 		cache[name] = ts
 	}
 	return cache, nil
-}
-
-func partial(p string) string {
-	return "-p-" + p
 }
 
 func humanDate(t time.Time) string {
