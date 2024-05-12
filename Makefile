@@ -17,10 +17,26 @@ confirm:
 # DEVELOPMENT
 # ==================================================================================== #
 
-## run: Runs the application
+## run: Run the application
 .PHONY: run
 run:
 	./scripts/run.sh
+
+## gen-sql: Generate type safe SQL helpers
+.PHONY: gen-sql
+gen-sql:
+	./scripts/migrate.sh up
+	./scripts/gen-sql.sh
+
+## migrate-up: Run SQL migrations up
+.PHONY: migrate-up
+migrate-up:
+	./scripts/migrate.sh up
+
+## migrate-down: Run SQL migrations down
+.PHONY: migrate-down
+migrate-down:
+	./scripts/migrate.sh down
 
 ## build: Builds container images for the project
 .PHONY: build
