@@ -30,9 +30,9 @@ func (d *Database) HabitGetOrCreate(date core.Date, categoryID int32) (core.Habi
 		return res, catchErr("habit get or create", err)
 	}
 
-	day, err := DayParams{Date: date}.BuildQuery(d.executor).One()
+	day, err := d.Days.GetOrCreate(DayParams{Date: date})
 	if err != nil {
-		return res, catchErr("habit get or create", err)
+		return res, catchErr("habit get or create (query day)", err)
 	}
 
 	res, err = d.Habits.Get(HabitParams{DayID: day.ID, CategoryID: hc.ID})

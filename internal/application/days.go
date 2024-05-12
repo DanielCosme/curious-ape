@@ -3,16 +3,18 @@ package application
 import (
 	"github.com/danielcosme/curious-ape/internal/core"
 	"github.com/danielcosme/curious-ape/internal/database"
-	"time"
 )
 
 func (a *App) DayGetByID(id int32) (core.Day, error) {
 	return a.db.Days.Get(database.DayParams{ID: id, R: database.DayRelations()})
 }
 
-// DaysCurMonth will return all the Days of the current Month.
-func (a *App) DaysCurMonth() ([]core.Day, error) {
-	today := core.NewDate(time.Now())
+func (a *App) DayGetOrCreate(date core.Date) (core.Day, error) {
+	return a.db.Days.GetOrCreate(database.DayParams{Date: date, R: database.DayRelations()})
+}
+
+// DaysMonth will return all the Days of the current Month.
+func (a *App) DaysMonth(today core.Date) ([]core.Day, error) {
 	day, err := a.db.Days.Get(database.DayParams{Date: today})
 	if database.IfNotFoundErr(err) {
 		return nil, err

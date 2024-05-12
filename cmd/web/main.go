@@ -36,10 +36,10 @@ type config struct {
 		Fitbit *core.Oauth2Config `json:"fitbit"`
 		Google *core.Oauth2Config `json:"google"`
 	} `json:"integrations"`
-	Environment string `json:"environment"`
-	Admin       user   `json:"admin"`
-	User        user   `json:"user"`
-	Guest       user   `json:"guest"`
+	Environment application.Environment `json:"environment"`
+	Admin       user                    `json:"admin"`
+	User        user                    `json:"user"`
+	Guest       user                    `json:"guest"`
 }
 
 type user struct {
@@ -117,10 +117,10 @@ func readConfiguration(cfg *config) *config {
 		logFatal(fmt.Errorf("invalid APE_PORT: '%w'", err))
 	}
 
-	cfg.Environment = os.Getenv("APE_ENVIRONMENT")
+	cfg.Environment = application.Environment(os.Getenv("APE_ENVIRONMENT"))
 	if cfg.Environment == "" {
 		logFatal(errors.New("environment variable APE_ENVIRONMENT is empty"))
-	} else if cfg.Environment != "dev" && cfg.Environment != "prod" {
+	} else if cfg.Environment != application.Dev && cfg.Environment != application.Prod {
 		logFatal(fmt.Errorf("invalid environment: '%s'", cfg.Environment))
 	}
 	rawFile, err = os.ReadFile("config.json")

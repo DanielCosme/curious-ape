@@ -24,10 +24,19 @@ type AppOptions struct {
 	Database *database.Database
 }
 
+type Environment string
+
+const (
+	Dev     Environment = "dev"
+	Test    Environment = "test"
+	Prod    Environment = "prod"
+	Staging Environment = "staging"
+)
+
 type Config struct {
 	Fitbit *core.Oauth2Config
 	Google *core.Oauth2Config
-	Env    string
+	Env    Environment
 }
 
 func New(opts *AppOptions) *App {

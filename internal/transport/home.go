@@ -9,7 +9,7 @@ import (
 )
 
 func (t *Transport) home(c echo.Context) error {
-	ds, err := t.App.DaysCurMonth()
+	ds, err := t.App.DaysMonth(core.NewDate(time.Now()))
 	if err != nil {
 		return errServer(err)
 	}
