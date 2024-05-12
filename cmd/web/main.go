@@ -83,7 +83,11 @@ func main() {
 		Logger: sLogger,
 	})
 
-	err = app.SetPassword("daniel", "test", core.AdminRole)
+	err = app.SetPassword(
+		os.Getenv("APE_ADMIN_USERNAME"),
+		os.Getenv("APE_ADMIN_PASSWORD"),
+		os.Getenv("APE_ADMIN_EMAIL"),
+		core.AdminRole)
 	exitIfErr(err)
 
 	sessionManager := scs.New()

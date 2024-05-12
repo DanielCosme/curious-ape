@@ -10,7 +10,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (a *App) SetPassword(username, password string, role core.Role) error {
+func (a *App) SetPassword(username, password, email string, role core.Role) error {
 	a.Log.Info("Setting password", "username", username, "role", role)
 	if password == "" {
 		return errors.New("password cannot be empty")
@@ -20,7 +20,7 @@ func (a *App) SetPassword(username, password string, role core.Role) error {
 	}
 
 	u, err := a.db.Users.Get(database.UserF{Role: role, Username: username})
-	if err != nil && !errors.Is(err, database.ErrNotFound) {
+	if database.IfNotFoundErr(err) {
 		return err
 	}
 	if u == nil {
@@ -32,7 +32,7 @@ func (a *App) SetPassword(username, password string, role core.Role) error {
 			Username: omit.From(username),
 			Password: omit.From(string(hash)),
 			Role:     omit.From(string(role)),
-			Email:    omit.From("admin@example.com"),
+			Email:    omit.From(email),
 		})
 		return err
 	}

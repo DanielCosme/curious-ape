@@ -105,7 +105,7 @@ func TestApp_UserExists(t *testing.T) {
 	assert.NilError(t, err)
 	assert.Assert(t, exists == false)
 
-	err = app.SetPassword("daniel", "test", core.AdminRole)
+	err = app.SetPassword("daniel", "test", "admin@example.com", core.AdminRole)
 	assert.NilError(t, err)
 
 	exists, err = app.UserExists(1)
