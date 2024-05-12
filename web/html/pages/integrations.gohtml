@@ -1,8 +1,12 @@
-{{define "title"}}Authenticate integrations{{end}}
+{{define "title"}}Integrations{{end}}
 
 {{define "main"}}
-    <button
-        hx-boost="false"
-        hx-get="/oauth2/fitbit/connect"
-    >Authenticate Fitbit</button>
+    <H2>Integrations</H2>
+    <article>
+        <header>
+            <h3>Fitbit</h3>
+        </header>
+        <p><strong>Status:</strong> {{.Fitbit.State}}</p>
+        <button hx-swap="outerHTML" hx-boost="false" hx-get="/oauth2/fitbit/connect">Authenticate</button>
+    </article>
 {{end}}

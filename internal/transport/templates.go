@@ -31,6 +31,11 @@ type templateData struct {
 	Form            any
 	Flash           string
 	IsAuthenticated bool
+	Fitbit          Integration
+}
+
+type Integration struct {
+	State string
 }
 
 func (t *Transport) Render(w io.Writer, name string, data any, c echo.Context) error {

@@ -15,6 +15,7 @@ func EchoRoutes(t *Transport) http.Handler {
 	e.Use(middleware.RequestLoggerWithConfig(midSlogConfig(t)))
 	e.Use(middleware.Recover())
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
+	e.Use(t.midSecureHeaders)
 
 	e.StaticFS("/static", echo.MustSubFS(web.Files, "static"))
 
@@ -32,7 +33,11 @@ func EchoRoutes(t *Transport) http.Handler {
 
 		p.POST("habit/log", t.newHabitLogPost)
 
+		p.GET("integrations", t.integrationsForm)
+		p.GET("oauth2/:provider/connect", t.oauth2Connect)
 	}
+
+	e.GET("api/oauth2/:provider/success", t.Oauth2Success)
 
 	// In case I need a custom error Handler.
 	// e.HTTPErrorHandler

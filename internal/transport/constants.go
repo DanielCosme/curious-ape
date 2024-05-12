@@ -8,8 +8,9 @@ const (
 )
 
 const (
-	pageHome  = "home.gohtml"
-	pageLogin = "login.gohtml"
+	pageHome         = "home.gohtml"
+	pageLogin        = "login.gohtml"
+	pageIntegrations = "integrations.gohtml"
 )
 
 const (

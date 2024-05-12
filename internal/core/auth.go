@@ -1,28 +1,13 @@
 package core
 
-import "time"
-
-type IntegrationProvider string
+type Integration string
 
 const (
-	ProviderFitbit = "fitbit"
-	ProviderGoogle = "google"
-	ProviderToggl  = "toggl"
-	ProviderSelf   = "me"
+	IntegrationFitbit = "fitbit"
+	IntegrationGoogle = "google"
+	IntegrationToggl  = "toggl"
+	IntegrationSelf   = "me"
 )
-
-type Auth struct {
-	ID           int                 `db:"id"`
-	Provider     IntegrationProvider `db:"provider"`
-	AccessToken  string              `db:"access_token"`
-	RefreshToken string              `db:"refresh_token"`
-	TokenType    string              `db:"token_type"`
-	Expiration   time.Time           `db:"expiration"`
-	// toggl extra
-	ToogglWorkSpaceID    string `db:"toggl_workspace_id"`
-	ToogglOrganizationID string `db:"toggl_organization_id"`
-	ToogglProjectIDs     string `db:"toggl_project_ids"`
-}
 
 type Oauth2Config struct {
 	ClientID     string   `json:"client_id"`

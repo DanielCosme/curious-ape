@@ -118,3 +118,18 @@ func (t *Transport) midRequireAuth(next echo.HandlerFunc) echo.HandlerFunc {
 		return next(c)
 	}
 }
+
+func (t *Transport) midSecureHeaders(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		c.Response().Header().Set("Content-Security-Policy",
+			"default-src 'self'; style-src 'self' fonts.googleapis.com; font-src fonts.gstatic.com")
+
+		c.Response().Header().Set("Access-Control-Allow-Origin", "*")
+		c.Response().Header().Set("Referrer-Policy", "origin-when-cross-origin")
+
+		// c.Response().Header().Set("X-Content-Type-Options", "nosniff")
+		// c.Response().Header().Set("X-Frame-Options", "deny")
+		// c.Response().Header().Set("X-XSS-Protection", "0")
+		return next(c)
+	}
+}

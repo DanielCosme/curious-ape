@@ -19,7 +19,7 @@ func (a *App) SetPassword(username, password, email string, role core.AuthRole) 
 		return errors.New("username cannot be empty")
 	}
 
-	u, err := a.db.Users.Get(database.UserF{Role: role, Username: username})
+	u, err := a.db.Users.Get(database.UserParams{Role: role, Username: username})
 	if database.IfNotFoundErr(err) {
 		return err
 	}
@@ -41,7 +41,7 @@ func (a *App) SetPassword(username, password, email string, role core.AuthRole) 
 
 // Authenticate returns userID if successfully authenticated.
 func (a *App) Authenticate(username, password string) (int, error) {
-	u, err := a.db.Users.Get(database.UserF{Username: username})
+	u, err := a.db.Users.Get(database.UserParams{Username: username})
 	if err != nil {
 		if errors.Is(err, database.ErrNotFound) {
 			return 0, database.ErrInvalidCredentials

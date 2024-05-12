@@ -11,6 +11,7 @@ type Database struct {
 	Users    Users
 	Days     Days
 	Habits   Habits
+	Auths    Auths
 	executor bob.DB
 }
 
@@ -19,6 +20,7 @@ func New(executor bob.DB) *Database {
 		Users:    Users{db: executor},
 		Days:     Days{db: executor},
 		Habits:   Habits{db: executor},
+		Auths:    Auths{db: executor},
 		executor: executor,
 	}
 }

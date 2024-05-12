@@ -62,7 +62,7 @@ func (t *Transport) logout(c echo.Context) error {
 		return errServer(err)
 	}
 
-	t.SessionManager.Remove(c.Request().Context(), "authenticatedUserID")
+	t.SessionManager.Remove(c.Request().Context(), string(ctxKeyAuthenticatedUserID))
 	t.SessionManager.Put(c.Request().Context(), "flash", "You've been logged out successfully!")
 	return c.Redirect(http.StatusSeeOther, "/")
 }

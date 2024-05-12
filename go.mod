@@ -12,6 +12,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/stephenafamo/bob v0.25.0
 	golang.org/x/crypto v0.22.0
+	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	gotest.tools/v3 v3.4.0
 )
 
@@ -19,6 +20,7 @@ require (
 	github.com/aarondl/json v0.0.0-20221020222930-8b0db17ef1bf // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -40,6 +42,8 @@ require (
 	golang.org/x/text v0.15.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	golang.org/x/tools v0.16.0 // indirect
+	google.golang.org/appengine v1.6.7 // indirect
+	google.golang.org/protobuf v1.31.0 // indirect
 	lukechampine.com/uint128 v1.2.0 // indirect
 	modernc.org/cc/v3 v3.40.0 // indirect
 	modernc.org/ccgo/v3 v3.16.13 // indirect
