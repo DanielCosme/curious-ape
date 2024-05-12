@@ -14,6 +14,7 @@ func EchoRoutes(t *Transport) http.Handler {
 
 	e.Use(middleware.RequestLoggerWithConfig(midSlogConfig(t)))
 	e.Use(middleware.Recover())
+	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
 
 	e.StaticFS("/static", echo.MustSubFS(web.Files, "static"))
 
