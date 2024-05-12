@@ -1,6 +1,8 @@
 package transport
 
+type ContextKey string
+
 const (
-	ctxKeyIsAuthenticated     = "isAuthenticated"
-	ctxKeyAuthenticatedUserID = "authenticatedUserID"
+	ctxKeyIsAuthenticated     ContextKey = "isAuthenticated"
+	ctxKeyAuthenticatedUserID ContextKey = "authenticatedUserID"
 )

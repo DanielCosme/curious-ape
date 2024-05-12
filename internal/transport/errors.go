@@ -17,7 +17,3 @@ func errServer(err error) error {
 func errClientError(err error) error {
 	return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 }
-
-func errNotFound() error {
-	return echo.NewHTTPError(http.StatusNotFound)
-}

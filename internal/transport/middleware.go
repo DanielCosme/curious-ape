@@ -2,12 +2,13 @@ package transport
 
 import (
 	"context"
-	"github.com/alexedwards/scs/v2"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/alexedwards/scs/v2"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func midSlogConfig(t *Transport) middleware.RequestLoggerConfig {
@@ -88,7 +89,7 @@ func (t *Transport) midLoadAndSaveCookie(next echo.HandlerFunc) echo.HandlerFunc
 
 func (t *Transport) midAuthenticateFromSession(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		id := t.SessionManager.GetInt(c.Request().Context(), ctxKeyAuthenticatedUserID)
+		id := t.SessionManager.GetInt(c.Request().Context(), string(ctxKeyAuthenticatedUserID))
 		if id == 0 {
 			return next(c)
 		}

@@ -2,8 +2,9 @@ package transport
 
 import (
 	"errors"
-	"github.com/labstack/echo/v4"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 
 	"github.com/danielcosme/curious-ape/internal/database"
 
@@ -52,7 +53,7 @@ func (t *Transport) loginPost(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	t.SessionManager.Put(c.Request().Context(), ctxKeyAuthenticatedUserID, id)
+	t.SessionManager.Put(c.Request().Context(), string(ctxKeyAuthenticatedUserID), id)
 	return c.Redirect(http.StatusSeeOther, "/")
 }
 
