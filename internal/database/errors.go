@@ -1,9 +1,12 @@
 package database
 
-import "errors"
+import (
+	"database/sql"
+	"errors"
+)
 
 var (
-	ErrNotFound           = errors.New("database: not found")
+	ErrNotFound           = sql.ErrNoRows
 	ErrInvalidCredentials = errors.New("database: invalid credentials")
 )
 

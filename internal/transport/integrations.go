@@ -1,27 +1,18 @@
 package transport
 
 import (
-	"fmt"
-	"github.com/danielcosme/curious-ape/internal/core"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
 func (t *Transport) integrationsForm(c echo.Context) error {
-	data := t.newTemplateData(c.Request())
-	data.Fitbit = Integration{State: "Not Authenticated"}
-	return c.Render(http.StatusOK, pageIntegrations, data)
-}
-
-func (t *Transport) oauth2Connect(c echo.Context) error {
-	uri, err := t.App.Oauth2ConnectProvider(core.IntegrationFitbit)
+	integrations, err := t.App.IntegrationsGet()
 	if err != nil {
 		return err
 	}
-
-	t.App.Log.Info(uri)
-	s := fmt.Sprintf(`<a href="%s"><button>Redirect</button></a>`, uri)
-	return c.HTML(http.StatusOK, s)
+	td := t.newTemplateData(c.Request())
+	td.Integrations = integrations
+	return c.Render(http.StatusOK, pageIntegrations, td)
 }
 
 func (t *Transport) Oauth2Success(c echo.Context) error {

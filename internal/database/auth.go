@@ -20,3 +20,8 @@ func (a *Auths) Upsert(s *models.AuthSetter) (*models.Auth, error) {
 		s,
 	)
 }
+
+func (a *Auths) Get(p AuthParams) (*models.Auth, error) {
+	res, err := p.BuildQuery(a.db).One()
+	return res, catchErr("get auth", err)
+}

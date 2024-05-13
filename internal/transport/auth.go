@@ -5,7 +5,7 @@ package transport
 // }
 //
 // func (t *Transport) Oauth2Connect(w http.ResponseWriter, r *http.Request) {
-// 	url, err := t.App.Oauth2ConnectProvider(chi.URLParam(r, "provider"))
+// 	url, err := t.App.GeneratesAuth2URI(chi.URLParam(r, "provider"))
 // 	if err != nil {
 // 		t.serverError(w, err)
 // 		return

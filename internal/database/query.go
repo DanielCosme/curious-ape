@@ -75,15 +75,11 @@ func (f HabitCategoryParams) BuildQuery(exec bob.Executor) *sqlite.ViewQuery[*mo
 }
 
 type AuthParams struct {
-	ID       int32
 	Provider core.Integration
 }
 
 func (f AuthParams) BuildQuery(exec bob.Executor) *sqlite.ViewQuery[*models.Auth, models.AuthSlice] {
 	q := models.Auths.Query(context.Background(), exec)
-	if f.ID > 0 {
-		q.Apply(models.SelectWhere.Auths.ID.EQ(f.ID))
-	}
 	if f.Provider != "" {
 		q.Apply(models.SelectWhere.Auths.Provider.EQ(string(f.Provider)))
 	}

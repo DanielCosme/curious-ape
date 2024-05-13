@@ -2,6 +2,7 @@ package transport
 
 import (
 	"fmt"
+	"github.com/danielcosme/curious-ape/internal/application"
 	"github.com/labstack/echo/v4"
 	"html/template"
 	"io"
@@ -31,11 +32,7 @@ type templateData struct {
 	Form            any
 	Flash           string
 	IsAuthenticated bool
-	Fitbit          Integration
-}
-
-type Integration struct {
-	State string
+	Integrations    []application.IntegrationInfo
 }
 
 func (t *Transport) Render(w io.Writer, name string, data any, c echo.Context) error {

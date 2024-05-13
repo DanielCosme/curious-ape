@@ -42,17 +42,10 @@ func catchErr(op string, err error) error {
 	if err == nil {
 		return nil
 	}
-
 	switch e := err.Error(); e {
-	case sql.ErrNoRows.Error():
-		return fmt.Errorf("%w %s", ErrNotFound, op)
-	// default:
-	// 	if strings.Contains(err.Error(), "UNIQUE constraint failed:") {
-	// 		return fmt.Errorf("%w %s", database.ErrUniqueCheckFailed, msg)
-	// 	}
-	// 	return errors.NewFatal(err.Error())
+	case sql.ErrNoRows.Error(): // Don't log this type of error.
 	default:
 		slog.Error(op + ": " + e)
 	}
-	return err
+	return fmt.Errorf("%w %s", ErrNotFound, op)
 }

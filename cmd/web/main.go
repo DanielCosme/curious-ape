@@ -8,6 +8,7 @@ import (
 	"github.com/danielcosme/curious-ape/internal/database"
 	"github.com/lmittmann/tint"
 	"github.com/stephenafamo/bob"
+	"golang.org/x/oauth2"
 	"log/slog"
 	"net/http"
 	"os"
@@ -33,8 +34,8 @@ type config struct {
 		Port int `json:"port"`
 	} `json:"server"`
 	Integrations struct {
-		Fitbit *core.Oauth2Config `json:"fitbit"`
-		Google *core.Oauth2Config `json:"google"`
+		Fitbit *Oauth2Config `json:"fitbit"`
+		Google *Oauth2Config `json:"google"`
 	} `json:"integrations"`
 	Environment application.Environment `json:"environment"`
 	Admin       user                    `json:"admin"`
@@ -77,8 +78,8 @@ func main() {
 		Database: database.New(bob.NewDB(db)),
 		Config: &application.Config{
 			Env:    cfg.Environment,
-			Fitbit: cfg.Integrations.Fitbit,
-			Google: cfg.Integrations.Google,
+			Fitbit: cfg.Integrations.Fitbit.ToConf(),
+			Google: cfg.Integrations.Google.ToConf(),
 		},
 		Logger: sLogger,
 	})
@@ -167,4 +168,29 @@ func Version() string {
 		return fmt.Sprintf("%s-%s-dirty", version, hash)
 	}
 	return fmt.Sprintf("%s-%s", version, hash)
+}
+
+type Oauth2Config struct {
+	ClientID     string   `json:"client_id"`
+	ClientSecret string   `json:"client_secret"`
+	RedirectURL  string   `json:"redirect_url"`
+	TokenURL     string   `json:"token_url"`
+	AuthURL      string   `json:"auth_url"`
+	AuthStyle    int      `json:"auth_style"`
+	Scopes       []string `json:"scopes"`
+}
+
+func (o Oauth2Config) ToConf() *oauth2.Config {
+	slog.Info("Loading Oauth2 configuration", "redirect", o.RedirectURL)
+	return &oauth2.Config{
+		ClientID:     o.ClientID,
+		ClientSecret: o.ClientSecret,
+		Endpoint: oauth2.Endpoint{
+			AuthURL:   o.AuthURL,
+			TokenURL:  o.TokenURL,
+			AuthStyle: oauth2.AuthStyle(o.AuthStyle), // Zero value means auto-detect.
+		},
+		RedirectURL: o.RedirectURL,
+		Scopes:      o.Scopes,
+	}
 }

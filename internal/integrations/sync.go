@@ -4,7 +4,6 @@ import (
 	"github.com/danielcosme/curious-ape/internal/integrations/fitbit"
 	"github.com/danielcosme/curious-ape/internal/integrations/google"
 	"github.com/danielcosme/curious-ape/internal/integrations/toggl"
-	"log/slog"
 	"net/http"
 )
 
@@ -12,11 +11,10 @@ type Sync struct {
 	Fitbit *fitbit.API
 	Google *google.API
 	Toggl  *toggl.API
-	logger *slog.Logger
 }
 
-func NewSync(l *slog.Logger) *Sync {
-	return &Sync{logger: l}
+func NewSync() *Sync {
+	return &Sync{}
 }
 
 func (s *Sync) FitbitClient(c *http.Client) *fitbit.API {

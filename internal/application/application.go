@@ -1,9 +1,9 @@
 package application
 
 import (
-	"github.com/danielcosme/curious-ape/internal/core"
 	"github.com/danielcosme/curious-ape/internal/database"
 	"github.com/danielcosme/curious-ape/internal/integrations"
+	"golang.org/x/oauth2"
 	"log/slog"
 )
 
@@ -34,8 +34,8 @@ const (
 )
 
 type Config struct {
-	Fitbit *core.Oauth2Config
-	Google *core.Oauth2Config
+	Fitbit *oauth2.Config
+	Google *oauth2.Config
 	Env    Environment
 }
 
@@ -44,7 +44,7 @@ func New(opts *AppOptions) *App {
 		Log:  opts.Logger,
 		db:   opts.Database,
 		cfg:  opts.Config,
-		sync: integrations.NewSync(opts.Logger),
+		sync: integrations.NewSync(),
 	}
 
 	a.Log.Info("Application initialized", "Config", a.cfg.Env)

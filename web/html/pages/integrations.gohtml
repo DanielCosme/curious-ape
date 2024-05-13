@@ -2,11 +2,19 @@
 
 {{define "main"}}
     <H2>Integrations</H2>
+    {{range .Integrations}}
+    {{- /*gotype: github.com/danielcosme/curious-ape/internal/application.IntegrationInfo*/ -}}
     <article>
         <header>
-            <h3>Fitbit</h3>
+            <h3>{{.Name}}</h3>
         </header>
-        <p><strong>Status:</strong> {{.Fitbit.State}}</p>
-        <button hx-swap="outerHTML" hx-boost="false" hx-get="/oauth2/fitbit/connect">Authenticate</button>
+        <p><strong>State:</strong> {{.State}}</p>
+        {{if ne .State "connected"}}
+            <p>{{.Problem}}</p>
+            <a href="{{.AuthURL}}"><button>Authenticate</button></a>
+        {{else}}
+            <p>{{.ProfileInfo}}</p>
+        {{end}}
     </article>
+    {{end}}
 {{end}}
