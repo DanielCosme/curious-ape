@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"os"
 	"runtime/debug"
-	"strconv"
 	"time"
 
 	"github.com/danielcosme/curious-ape/internal/application"
@@ -27,25 +26,24 @@ import (
 )
 
 type config struct {
+	Port     int `json:"port"`
 	Database struct {
-		DSN string `json:"dns"`
+		DSN string `json:"dsn"`
 	} `json:"database"`
-	Server struct {
-		Port int `json:"port"`
-	} `json:"server"`
 	Integrations struct {
 		Fitbit *Oauth2Config `json:"fitbit"`
 		Google *Oauth2Config `json:"google"`
 	} `json:"integrations"`
-	Environment application.Environment `json:"environment"`
-	Admin       user                    `json:"admin"`
-	User        user                    `json:"user"`
-	Guest       user                    `json:"guest"`
+	Environment application.Environment
+	Admin       user `json:"admin"`
+	User        user `json:"user"`
+	Guest       user `json:"guest"`
 }
 
 type user struct {
-	Name     string `json:"name"`
+	UserName string `json:"username"`
 	Password string `json:"password"`
+	Email    string `json:"email"`
 }
 
 var version string
@@ -84,11 +82,7 @@ func main() {
 		Logger: sLogger,
 	})
 
-	err = app.SetPassword(
-		os.Getenv("APE_ADMIN_USERNAME"),
-		os.Getenv("APE_ADMIN_PASSWORD"),
-		os.Getenv("APE_ADMIN_EMAIL"),
-		core.AdminRole)
+	err = app.SetPassword(cfg.Admin.UserName, cfg.Admin.Password, cfg.Admin.Email, core.AdminRole)
 	exitIfErr(err)
 
 	sessionManager := scs.New()
@@ -98,7 +92,7 @@ func main() {
 	t, err := transport.NewTransport(app, sessionManager, v)
 	exitIfErr(err)
 
-	addr := fmt.Sprintf(":%d", cfg.Server.Port)
+	addr := fmt.Sprintf(":%d", cfg.Port)
 	server := http.Server{
 		Addr:         addr,
 		IdleTimeout:  time.Minute,
@@ -116,11 +110,6 @@ func main() {
 func readConfiguration(cfg *config) *config {
 	var err error
 	var rawFile []byte
-
-	cfg.Server.Port, err = strconv.Atoi(os.Getenv("APE_PORT"))
-	if err != nil {
-		logFatal(fmt.Errorf("invalid APE_PORT: '%w'", err))
-	}
 
 	cfg.Environment = application.Environment(os.Getenv("APE_ENVIRONMENT"))
 	if cfg.Environment == "" {

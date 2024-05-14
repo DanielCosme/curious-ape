@@ -11,13 +11,12 @@ services:
         delay: 1s
         max_attempts: 3
     ports:
-      - 4000:4000
+      - "4000:4000"
     volumes:
       - ./config.json:/app/config.json
       - db-data:/app/db-data
     environment:
       - APE_ENVIRONMENT=prod
-      - APE_PORT=4000
     depends_on:
       migrate-ape:
         condition: service_completed_successfully
