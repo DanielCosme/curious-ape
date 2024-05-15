@@ -37,7 +37,7 @@ func (a *App) IntegrationsGet() ([]IntegrationInfo, error) {
 				authURL = a.sync.GenerateOauth2URI(integration)
 				problem = err.Error()
 			} else {
-				sleepLog, err := fitbitAPI.Sleep.GetByDate(time.Now())
+				sleepLog, err := fitbitAPI.Sleep.GetByDate(time.Now().Local())
 				if err != nil {
 					authURL = a.sync.GenerateOauth2URI(integration)
 					problem = err.Error()
@@ -48,19 +48,34 @@ func (a *App) IntegrationsGet() ([]IntegrationInfo, error) {
 						fitbit.ToDuration(sleepLog.Summary.TotalMinutesAsleep))
 				}
 			}
-			fitbitStatus := IntegrationInfo{
+			res = append(res, IntegrationInfo{
 				Name:        "Fitbit",
 				State:       state,
 				ProfileInfo: profileInfo,
 				AuthURL:     authURL,
 				Problem:     problem,
-			}
-			res = append(res, fitbitStatus)
+			})
 		default:
 		}
 	}
 
 	return res, nil
+}
+
+func (a *App) Oauth2Success(provider, code string) error {
+	token, err := a.sync.ExchangeToken(core.Integration(provider), code)
+	if err != nil {
+		return err
+	}
+	_, err = a.db.Auths.Upsert(&models.AuthSetter{
+		Provider:     omit.From(provider),
+		AccessToken:  omit.From(token.AccessToken),
+		RefreshToken: omitnull.From(token.RefreshToken),
+		TokenType:    omitnull.From(token.Type()),
+		Expiration:   omitnull.From(token.Expiry),
+	})
+	a.Log.Info("Authentication successful", "provider", provider, "code", code)
+	return err
 }
 
 func (a *App) fitbitClient() (res fitbit.API, err error) {
@@ -94,20 +109,4 @@ func (a *App) integrationsGetClient(integration core.Integration) (*http.Client,
 		})
 		return err
 	})
-}
-
-func (a *App) Oauth2Success(provider, code string) error {
-	token, err := a.sync.ExchangeToken(core.Integration(provider), code)
-	if err != nil {
-		return err
-	}
-	_, err = a.db.Auths.Upsert(&models.AuthSetter{
-		Provider:     omit.From(provider),
-		AccessToken:  omit.From(token.AccessToken),
-		RefreshToken: omitnull.From(token.RefreshToken),
-		TokenType:    omitnull.From(token.Type()),
-		Expiration:   omitnull.From(token.Expiry),
-	})
-	a.Log.Info("Authentication successful", "provider", provider, "code", code)
-	return err
 }

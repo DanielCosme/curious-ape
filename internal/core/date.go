@@ -10,7 +10,7 @@ type DateSlice []Date
 
 func NewDate(t time.Time) Date {
 	return Date{
-		time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC),
+		time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.Local),
 	}
 }
 

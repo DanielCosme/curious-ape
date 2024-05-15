@@ -1,6 +1,7 @@
 package application
 
 import (
+	"errors"
 	"github.com/danielcosme/curious-ape/internal/database"
 	"github.com/danielcosme/curious-ape/internal/integrations"
 	"golang.org/x/oauth2"
@@ -14,24 +15,11 @@ type App struct {
 	sync *integrations.Integrations
 }
 
-// Endpoints and application methods to sync manually
-// 		Then I will set up cron-jobs on my linux server to invoke them, because they are hosted on the same machine
-//		there is no need for authentication
-
 type AppOptions struct {
 	Logger   *slog.Logger
 	Config   *Config
 	Database *database.Database
 }
-
-type Environment string
-
-const (
-	Dev     Environment = "dev"
-	Test    Environment = "test"
-	Prod    Environment = "prod"
-	Staging Environment = "staging"
-)
 
 type Config struct {
 	Fitbit *oauth2.Config
@@ -40,14 +28,34 @@ type Config struct {
 }
 
 func New(opts *AppOptions) *App {
-	s := integrations.New(opts.Config.Fitbit)
 	a := &App{
 		Log:  opts.Logger,
 		Env:  opts.Config.Env,
 		db:   opts.Database,
-		sync: s,
+		sync: integrations.New(opts.Config.Fitbit),
 	}
-
-	a.Log.Info("Application initialized", "Config", a.Env)
+	a.Log.Info("Application initialized", "Environment", a.Env)
 	return a
+}
+
+type Environment string
+
+const (
+	Prod    Environment = "prod"
+	Staging Environment = "staging"
+	Dev     Environment = "dev"
+	Test    Environment = "test"
+)
+
+func ParseEnvironment(s string) (Environment, error) {
+	switch Environment(s) {
+	case Prod:
+		return Prod, nil
+	case Dev:
+		return Dev, nil
+	case Staging:
+		return Staging, nil
+	case Test:
+	}
+	return "", errors.New("Invalid env value: " + s)
 }

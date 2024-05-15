@@ -36,7 +36,7 @@ func EchoRoutes(t *Transport) http.Handler {
 		p.GET("integrations", t.integrationsForm)
 	}
 
-	e.GET("api/oauth2/:provider/success", t.Oauth2Success)
+	e.GET("api/oauth2/:provider/success", t.oauth2Success)
 
 	// In case I need a custom error Handler.
 	// e.HTTPErrorHandler

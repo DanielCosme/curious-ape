@@ -111,12 +111,11 @@ func readConfiguration(cfg *config) *config {
 	var err error
 	var rawFile []byte
 
-	cfg.Environment = application.Environment(os.Getenv("APE_ENVIRONMENT"))
-	if cfg.Environment == "" {
+	env, err := application.ParseEnvironment(os.Getenv("APE_ENVIRONMENT"))
+	if err != nil {
 		logFatal(errors.New("environment variable APE_ENVIRONMENT is empty"))
-	} else if cfg.Environment != application.Dev && cfg.Environment != application.Prod && application.Staging != cfg.Environment {
-		logFatal(fmt.Errorf("invalid environment: '%s'", cfg.Environment))
 	}
+	cfg.Environment = env
 	rawFile, err = os.ReadFile("config.json")
 	exitIfErr(err)
 

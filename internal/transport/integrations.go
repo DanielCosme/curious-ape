@@ -15,7 +15,7 @@ func (t *Transport) integrationsForm(c echo.Context) error {
 	return c.Render(http.StatusOK, pageIntegrations, td)
 }
 
-func (t *Transport) Oauth2Success(c echo.Context) error {
+func (t *Transport) oauth2Success(c echo.Context) error {
 	provider := c.Param("provider")
 	code := c.QueryParam("code")
 	err := t.App.Oauth2Success(provider, code)

@@ -15,9 +15,9 @@ type Integrations struct {
 	google *oauth2.Config
 }
 
-func New(fitbitConf *oauth2.Config) *Integrations {
+func New(fitbit *oauth2.Config) *Integrations {
 	return &Integrations{
-		fitbit: fitbitConf,
+		fitbit: fitbit,
 	}
 }
 
@@ -50,7 +50,7 @@ func (i *Integrations) GetHttpClient(provider core.Integration, currentToken *oa
 	default:
 		panic("not implemented: " + provider)
 	}
-	// Refresh if necessary token.
+	// Refresh token if necessary.
 	newToken, err = config.TokenSource(context.Background(), currentToken).Token()
 	if err != nil {
 		return
