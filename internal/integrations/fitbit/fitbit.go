@@ -12,12 +12,15 @@ const BaseURL = "https://api.fitbit.com"
 // Fitbit-Rate-Limit-Reset: 	The number of seconds until the rate limit resets.
 
 type API struct {
-	Sleep *SleepService
+	Sleep  *SleepService
+	client *http.Client
 }
 
-func NewAPI(client *http.Client) *API {
-	c := &API{Sleep: &SleepService{client: Client{Client: client}}}
-	return c
+func NewAPI(client *http.Client) API {
+	return API{
+		client: client,
+		Sleep:  &SleepService{client: Client{Client: client}},
+	}
 }
 
 func formatDate(time time.Time) string {

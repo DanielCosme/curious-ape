@@ -18,11 +18,9 @@ func (t *Transport) integrationsForm(c echo.Context) error {
 func (t *Transport) Oauth2Success(c echo.Context) error {
 	provider := c.Param("provider")
 	code := c.QueryParam("code")
-
 	err := t.App.Oauth2Success(provider, code)
 	if err != nil {
 		return err
 	}
-	t.App.Log.Info("Authentication successful", "provider", provider, "code", code)
 	return c.Redirect(http.StatusSeeOther, "/integrations")
 }

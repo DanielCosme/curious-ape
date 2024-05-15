@@ -9,9 +9,9 @@ import (
 
 type App struct {
 	Log  *slog.Logger
+	Env  Environment
 	db   *database.Database
-	cfg  *Config
-	sync *integrations.Sync
+	sync *integrations.Integrations
 }
 
 // Endpoints and application methods to sync manually
@@ -40,13 +40,14 @@ type Config struct {
 }
 
 func New(opts *AppOptions) *App {
+	s := integrations.New(opts.Config.Fitbit)
 	a := &App{
 		Log:  opts.Logger,
+		Env:  opts.Config.Env,
 		db:   opts.Database,
-		cfg:  opts.Config,
-		sync: integrations.NewSync(),
+		sync: s,
 	}
 
-	a.Log.Info("Application initialized", "Config", a.cfg.Env)
+	a.Log.Info("Application initialized", "Config", a.Env)
 	return a
 }

@@ -25,7 +25,7 @@ func (t *Transport) newHabitLogPost(c echo.Context) error {
 		Success:    success,
 		Date:       date,
 		CategoryID: int32(categoryID),
-		Origin:     core.WebUI,
+		Origin:     core.DataSourceWebUI,
 		Automated:  false,
 	})
 	if err != nil {

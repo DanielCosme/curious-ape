@@ -82,7 +82,7 @@ func main() {
 		Logger: sLogger,
 	})
 
-	err = app.SetPassword(cfg.Admin.UserName, cfg.Admin.Password, cfg.Admin.Email, core.AdminRole)
+	err = app.SetPassword(cfg.Admin.UserName, cfg.Admin.Password, cfg.Admin.Email, core.AuthRoleAdmin)
 	exitIfErr(err)
 
 	sessionManager := scs.New()

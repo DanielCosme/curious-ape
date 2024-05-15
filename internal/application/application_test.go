@@ -25,7 +25,7 @@ func TestHabitUpsertManual(t *testing.T) {
 		Success:    true,
 		Date:       core.NewDate(time.Now()),
 		CategoryID: 1,
-		Origin:     core.Fitbit,
+		Origin:     core.DataSourceFitbit,
 		Automated:  true,
 	})
 	assert.NilError(t, err)
@@ -36,14 +36,14 @@ func TestHabitUpsertManual(t *testing.T) {
 		ID:          1,
 		Success:     true,
 		IsAutomated: true,
-		Origin:      core.Fitbit,
+		Origin:      core.DataSourceFitbit,
 	})
 
 	habit, err = app.HabitUpsert(core.HabitParams{
 		Success:    false,
 		Date:       core.NewDate(time.Now()),
 		CategoryID: 1,
-		Origin:     core.Fitbit,
+		Origin:     core.DataSourceFitbit,
 		Automated:  true,
 	})
 	assert.NilError(t, err)
@@ -55,7 +55,7 @@ func TestHabitUpsertManual(t *testing.T) {
 		Success:    true,
 		Date:       core.NewDate(time.Now()),
 		CategoryID: 1,
-		Origin:     core.WebUI,
+		Origin:     core.DataSourceWebUI,
 		Automated:  false,
 	})
 	assert.NilError(t, err)
@@ -75,13 +75,13 @@ func TestDay(t *testing.T) {
 	assert.Assert(t, day.IsZero() == false)
 	assert.Assert(t, day.ID > 0)
 
-	_, err = app.HabitUpsert(core.HabitParams{Success: true, Date: day.Date, CategoryID: 1, Origin: core.Manual})
+	_, err = app.HabitUpsert(core.HabitParams{Success: true, Date: day.Date, CategoryID: 1, Origin: core.DataSourceManual})
 	assert.NilError(t, err)
-	_, err = app.HabitUpsert(core.HabitParams{Success: true, Date: day.Date, CategoryID: 2, Origin: core.Manual})
+	_, err = app.HabitUpsert(core.HabitParams{Success: true, Date: day.Date, CategoryID: 2, Origin: core.DataSourceManual})
 	assert.NilError(t, err)
-	_, err = app.HabitUpsert(core.HabitParams{Success: true, Date: day.Date, CategoryID: 3, Origin: core.Manual})
+	_, err = app.HabitUpsert(core.HabitParams{Success: true, Date: day.Date, CategoryID: 3, Origin: core.DataSourceManual})
 	assert.NilError(t, err)
-	_, err = app.HabitUpsert(core.HabitParams{Success: true, Date: day.Date, CategoryID: 4, Origin: core.Manual})
+	_, err = app.HabitUpsert(core.HabitParams{Success: true, Date: day.Date, CategoryID: 4, Origin: core.DataSourceManual})
 	assert.NilError(t, err)
 
 	date2 := core.NewDate(date1.Time().AddDate(0, 0, 1))
@@ -105,7 +105,7 @@ func TestApp_UserExists(t *testing.T) {
 	assert.NilError(t, err)
 	assert.Assert(t, exists == false)
 
-	err = app.SetPassword("daniel", "test", "admin@example.com", core.AdminRole)
+	err = app.SetPassword("daniel", "test", "admin@example.com", core.AuthRoleAdmin)
 	assert.NilError(t, err)
 
 	exists, err = app.UserExists(1)

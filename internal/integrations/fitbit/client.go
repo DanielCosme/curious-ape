@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -47,7 +48,6 @@ func (c *Client) Call(method string, path string, urlParams url.Values, i interf
 }
 
 func (c *Client) catchFitbitError(b []byte) error {
-	// TODO unmarshal json if any and return string error
-	// c.out.Write(b)
-	return errors.New("fitbit api error")
+	slog.Error("Fitbit ERR", "message", string(b))
+	return errors.New("fitbit api error check logs")
 }

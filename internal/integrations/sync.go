@@ -1,30 +1,81 @@
 package integrations
 
 import (
-	"github.com/danielcosme/curious-ape/internal/integrations/fitbit"
-	"github.com/danielcosme/curious-ape/internal/integrations/google"
-	"github.com/danielcosme/curious-ape/internal/integrations/toggl"
+	"context"
+	"errors"
 	"net/http"
+
+	"github.com/danielcosme/curious-ape/internal/core"
+
+	"golang.org/x/oauth2"
 )
 
-type Sync struct {
-	Fitbit *fitbit.API
-	Google *google.API
-	Toggl  *toggl.API
+type Integrations struct {
+	fitbit *oauth2.Config
+	google *oauth2.Config
 }
 
-func NewSync() *Sync {
-	return &Sync{}
+func New(fitbitConf *oauth2.Config) *Integrations {
+	return &Integrations{
+		fitbit: fitbitConf,
+	}
 }
 
-func (s *Sync) FitbitClient(c *http.Client) *fitbit.API {
-	return fitbit.NewAPI(c)
+func (i *Integrations) GenerateOauth2URI(provider core.Integration) string {
+	var opts []oauth2.AuthCodeOption
+	var config *oauth2.Config
+	switch provider {
+	case core.IntegrationFitbit:
+		config = i.fitbit
+	case core.IntegrationGoogle:
+		config = i.fitbit
+		opts = append(opts,
+			oauth2.SetAuthURLParam("access_type", "offline"),
+			oauth2.SetAuthURLParam("approval_prompt", "force"),
+		)
+	default:
+		return ""
+	}
+	return config.AuthCodeURL("", opts...)
 }
 
-func (s *Sync) GoogleClient(c *http.Client) *google.API {
-	return google.NewAPI(c)
+func (i *Integrations) GetHttpClient(provider core.Integration, currentToken *oauth2.Token, updateFunc func(integration core.Integration, t *oauth2.Token) error) (res *http.Client, err error) {
+	var newToken *oauth2.Token
+	var config *oauth2.Config
+	switch provider {
+	case core.IntegrationFitbit:
+		config = i.fitbit
+	case core.IntegrationGoogle:
+		config = i.google
+	default:
+		panic("not implemented: " + provider)
+	}
+	// Refresh if necessary token.
+	newToken, err = config.TokenSource(context.Background(), currentToken).Token()
+	if err != nil {
+		return
+	}
+	if newToken.AccessToken != currentToken.AccessToken {
+		// Update token in database.
+		err = updateFunc(provider, newToken)
+		if err != nil {
+			return
+		}
+		currentToken = newToken
+	}
+	res = config.Client(context.Background(), currentToken)
+	return
 }
 
-func (s *Sync) TogglClient(token string) *toggl.API {
-	return toggl.NewApi(token)
+func (i *Integrations) ExchangeToken(provider core.Integration, code string) (res *oauth2.Token, err error) {
+	var config *oauth2.Config
+	switch provider {
+	case core.IntegrationFitbit:
+		config = i.fitbit
+	case core.IntegrationGoogle:
+		config = i.google
+	default:
+		return res, errors.New("non-implemented provider: " + string(provider))
+	}
+	return config.Exchange(context.Background(), code)
 }
