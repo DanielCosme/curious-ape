@@ -26,7 +26,6 @@ if test "$RELEASE" = true
   echo ""
 end
 
-
 echo "--- Synchronizing deployment files ---"
 # Transfer directory contents, but not the directory itself
 rsync \

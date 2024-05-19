@@ -5,15 +5,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/danielcosme/curious-ape/internal/database"
-	"github.com/lmittmann/tint"
-	"github.com/stephenafamo/bob"
-	"golang.org/x/oauth2"
 	"log/slog"
 	"net/http"
 	"os"
 	"runtime/debug"
 	"time"
+
+	"github.com/danielcosme/curious-ape/internal/database"
+	"github.com/go-co-op/gocron/v2"
+	"github.com/lmittmann/tint"
+	"github.com/stephenafamo/bob"
+	"golang.org/x/oauth2"
 
 	"github.com/danielcosme/curious-ape/internal/application"
 	"github.com/danielcosme/curious-ape/internal/core"
@@ -91,6 +93,11 @@ func main() {
 	sessionManager.Cookie.SameSite = http.SameSiteStrictMode
 	t, err := transport.NewTransport(app, sessionManager, v)
 	exitIfErr(err)
+
+	app.Log.Info("Launching cron jobs")
+	if err := setUpCronJobs(app); err != nil {
+		logFatal(err)
+	}
 
 	addr := fmt.Sprintf(":%d", cfg.Port)
 	server := http.Server{
@@ -181,4 +188,37 @@ func (o Oauth2Config) ToConf() *oauth2.Config {
 		RedirectURL: o.RedirectURL,
 		Scopes:      o.Scopes,
 	}
+}
+
+func setUpCronJobs(a *application.App) error {
+	s, err := gocron.NewScheduler()
+	if err != nil {
+		return err
+	}
+
+	_, err = s.NewJob(
+		gocron.DailyJob(1, gocron.NewAtTimes(
+			gocron.NewAtTime(23, 0, 0),
+		)),
+		gocron.NewTask(func() {
+			if err := a.SleepSync(core.NewDateToday()); err != nil {
+				a.Log.Error(err.Error())
+			}
+		}),
+		gocron.WithName("Sleep logs sync"),
+	)
+	if err != nil {
+		return err
+	}
+	s.Start()
+
+	for _, j := range s.Jobs() {
+		next, err := j.NextRun()
+		if err != nil {
+			return err
+		}
+		a.Log.Info("Cron job configured", "name", j.Name(), "next_run", next.Format(core.HumanDateWithTime))
+	}
+
+	return nil
 }

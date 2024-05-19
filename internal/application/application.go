@@ -2,10 +2,11 @@ package application
 
 import (
 	"errors"
+	"log/slog"
+
 	"github.com/danielcosme/curious-ape/internal/database"
 	"github.com/danielcosme/curious-ape/internal/integrations"
 	"golang.org/x/oauth2"
-	"log/slog"
 )
 
 type App struct {
