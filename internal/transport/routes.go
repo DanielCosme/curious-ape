@@ -34,6 +34,8 @@ func EchoRoutes(t *Transport) http.Handler {
 		p.POST("habit/log", t.newHabitLogPost)
 
 		p.GET("integrations", t.integrationsForm)
+
+		p.POST("sync/:date", t.sync)
 	}
 
 	e.GET("api/oauth2/:provider/success", t.oauth2Success)

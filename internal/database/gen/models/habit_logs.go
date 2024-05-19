@@ -29,6 +29,7 @@ type HabitLog struct {
 	Origin      string `db:"origin" `
 	Success     bool   `db:"success" `
 	IsAutomated bool   `db:"is_automated" `
+	Detail      string `db:"detail" `
 
 	R habitLogR `db:"-" `
 }
@@ -60,10 +61,11 @@ type HabitLogSetter struct {
 	Origin      omit.Val[string] `db:"origin"`
 	Success     omit.Val[bool]   `db:"success"`
 	IsAutomated omit.Val[bool]   `db:"is_automated"`
+	Detail      omit.Val[string] `db:"detail"`
 }
 
 func (s HabitLogSetter) SetColumns() []string {
-	vals := make([]string, 0, 5)
+	vals := make([]string, 0, 6)
 	if !s.ID.IsUnset() {
 		vals = append(vals, "id")
 	}
@@ -82,6 +84,10 @@ func (s HabitLogSetter) SetColumns() []string {
 
 	if !s.IsAutomated.IsUnset() {
 		vals = append(vals, "is_automated")
+	}
+
+	if !s.Detail.IsUnset() {
+		vals = append(vals, "detail")
 	}
 
 	return vals
@@ -103,10 +109,13 @@ func (s HabitLogSetter) Overwrite(t *HabitLog) {
 	if !s.IsAutomated.IsUnset() {
 		t.IsAutomated, _ = s.IsAutomated.Get()
 	}
+	if !s.Detail.IsUnset() {
+		t.Detail, _ = s.Detail.Get()
+	}
 }
 
 func (s HabitLogSetter) InsertMod() bob.Mod[*dialect.InsertQuery] {
-	vals := make([]bob.Expression, 0, 5)
+	vals := make([]bob.Expression, 0, 6)
 	if !s.ID.IsUnset() {
 		vals = append(vals, sqlite.Arg(s.ID))
 	}
@@ -127,6 +136,10 @@ func (s HabitLogSetter) InsertMod() bob.Mod[*dialect.InsertQuery] {
 		vals = append(vals, sqlite.Arg(s.IsAutomated))
 	}
 
+	if !s.Detail.IsUnset() {
+		vals = append(vals, sqlite.Arg(s.Detail))
+	}
+
 	return im.Values(vals...)
 }
 
@@ -135,7 +148,7 @@ func (s HabitLogSetter) Apply(q *dialect.UpdateQuery) {
 }
 
 func (s HabitLogSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 5)
+	exprs := make([]bob.Expression, 0, 6)
 
 	if !s.ID.IsUnset() {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
@@ -172,6 +185,13 @@ func (s HabitLogSetter) Expressions(prefix ...string) []bob.Expression {
 		}})
 	}
 
+	if !s.Detail.IsUnset() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			sqlite.Quote(append(prefix, "detail")...),
+			sqlite.Arg(s.Detail),
+		}})
+	}
+
 	return exprs
 }
 
@@ -181,6 +201,7 @@ type habitLogColumnNames struct {
 	Origin      string
 	Success     string
 	IsAutomated string
+	Detail      string
 }
 
 type habitLogRelationshipJoins[Q dialect.Joinable] struct {
@@ -207,12 +228,14 @@ var HabitLogColumns = struct {
 	Origin      sqlite.Expression
 	Success     sqlite.Expression
 	IsAutomated sqlite.Expression
+	Detail      sqlite.Expression
 }{
 	ID:          sqlite.Quote("habit_logs", "id"),
 	HabitID:     sqlite.Quote("habit_logs", "habit_id"),
 	Origin:      sqlite.Quote("habit_logs", "origin"),
 	Success:     sqlite.Quote("habit_logs", "success"),
 	IsAutomated: sqlite.Quote("habit_logs", "is_automated"),
+	Detail:      sqlite.Quote("habit_logs", "detail"),
 }
 
 type habitLogWhere[Q sqlite.Filterable] struct {
@@ -221,6 +244,7 @@ type habitLogWhere[Q sqlite.Filterable] struct {
 	Origin      sqlite.WhereMod[Q, string]
 	Success     sqlite.WhereMod[Q, bool]
 	IsAutomated sqlite.WhereMod[Q, bool]
+	Detail      sqlite.WhereMod[Q, string]
 }
 
 func HabitLogWhere[Q sqlite.Filterable]() habitLogWhere[Q] {
@@ -230,6 +254,7 @@ func HabitLogWhere[Q sqlite.Filterable]() habitLogWhere[Q] {
 		Origin:      sqlite.Where[Q, string](HabitLogColumns.Origin),
 		Success:     sqlite.Where[Q, bool](HabitLogColumns.Success),
 		IsAutomated: sqlite.Where[Q, bool](HabitLogColumns.IsAutomated),
+		Detail:      sqlite.Where[Q, string](HabitLogColumns.Detail),
 	}
 }
 

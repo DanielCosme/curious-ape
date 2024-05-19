@@ -11,6 +11,7 @@ type Database struct {
 	Users    Users
 	Days     Days
 	Habits   Habits
+	Sleep    SleepLogs
 	Auths    Auths
 	executor bob.DB
 }
@@ -20,14 +21,15 @@ func New(executor bob.DB) *Database {
 		Users:    Users{db: executor},
 		Days:     Days{db: executor},
 		Habits:   Habits{db: executor},
+		Sleep:    SleepLogs{db: executor},
 		Auths:    Auths{db: executor},
 		executor: executor,
 	}
 }
 
-func (d *Database) HabitGetOrCreate(date core.Date, categoryID int32) (core.Habit, error) {
+func (d *Database) HabitGetOrCreate(date core.Date, habitType core.HabitType) (core.Habit, error) {
 	var res core.Habit
-	hc, err := HabitCategoryParams{ID: categoryID}.BuildQuery(d.executor).One()
+	hc, err := HabitCategoryParams{Type: habitType}.BuildQuery(d.executor).One()
 	if err != nil {
 		return res, catchErr("habit get or create", err)
 	}

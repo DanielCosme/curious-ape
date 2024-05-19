@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"github.com/danielcosme/curious-ape/internal/core"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -23,4 +24,23 @@ func (t *Transport) oauth2Success(c echo.Context) error {
 		return err
 	}
 	return c.Redirect(http.StatusSeeOther, "/integrations")
+}
+
+func (t *Transport) sync(c echo.Context) error {
+	d, err := core.DateFromISO8601(c.Param("date"))
+	if err != nil {
+		return err
+	}
+	err = t.App.SleepSync(d)
+	if err != nil {
+		return err
+	}
+	day, err := t.App.DayGetOrCreate(d)
+	if err != nil {
+		return err
+	}
+
+	td := t.newTemplateData(c.Request())
+	td.Day = &formatDays([]core.Day{day})[0]
+	return c.Render(http.StatusOK, partialDayRow, td.Day)
 }

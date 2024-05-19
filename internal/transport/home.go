@@ -44,13 +44,13 @@ func formatDays(ds []core.Day) []dayContainer {
 			}
 		}
 		dc.Wake = replace(dc.Wake)
-		dc.Wake.Category.ID = 1
+		dc.Wake.Category.Type = core.HabitTypeWakeUp
 		dc.Fitness = replace(dc.Fitness)
-		dc.Fitness.Category.ID = 2
+		dc.Fitness.Category.Type = core.HabitTypeExercise
 		dc.Work = replace(dc.Work)
-		dc.Work.Category.ID = 3
+		dc.Work.Category.Type = core.HabitTypeDeepWork
 		dc.Eat = replace(dc.Eat)
-		dc.Eat.Category.ID = 4
+		dc.Eat.Category.Type = core.HabitTypeEatHealthy
 		res = append(res, dc)
 	}
 	return res

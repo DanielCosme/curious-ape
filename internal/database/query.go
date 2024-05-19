@@ -63,13 +63,17 @@ func (f HabitParams) BuildQuery(exec bob.Executor) *sqlite.ViewQuery[*models.Hab
 }
 
 type HabitCategoryParams struct {
-	ID int32
+	ID   int32
+	Type core.HabitType
 }
 
 func (f HabitCategoryParams) BuildQuery(exec bob.Executor) *sqlite.ViewQuery[*models.HabitCategory, models.HabitCategorySlice] {
 	q := models.HabitCategories.Query(context.Background(), exec)
 	if f.ID > 0 {
 		q.Apply(models.SelectWhere.HabitCategories.ID.EQ(f.ID))
+	}
+	if f.Type != "" {
+		q.Apply(models.SelectWhere.HabitCategories.Type.EQ(string(f.Type)))
 	}
 	return q
 }
@@ -89,4 +93,11 @@ func (f AuthParams) BuildQuery(exec bob.Executor) *sqlite.ViewQuery[*models.Auth
 type UserParams struct {
 	Role     core.AuthRole
 	Username string
+}
+
+type SleepLogParams struct{}
+
+func (f SleepLogParams) BuildQuery(exec bob.Executor) *sqlite.ViewQuery[*models.SleepLog, models.SleepLogSlice] {
+	q := models.SleepLogs.Query(context.Background(), exec)
+	return q
 }

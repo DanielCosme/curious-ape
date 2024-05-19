@@ -8,11 +8,11 @@ import (
 	"log/slog"
 )
 
-func (a *App) HabitUpsert(params core.HabitParams) (habit core.Habit, err error) {
+func (a *App) HabitUpsert(params core.NewHabitParams) (habit core.Habit, err error) {
 	if !params.Valid() {
 		return habit, errors.New("invalid habit params")
 	}
-	habit, err = a.db.HabitGetOrCreate(params.Date, params.CategoryID)
+	habit, err = a.db.HabitGetOrCreate(params.Date, params.HabitType)
 	if err != nil {
 		return habit, err
 	}
@@ -21,7 +21,13 @@ func (a *App) HabitUpsert(params core.HabitParams) (habit core.Habit, err error)
 		Origin:      omit.From(string(params.Origin)),
 		Success:     omit.From(params.Success),
 		IsAutomated: omit.From(params.Automated),
+		Detail:      omit.From(params.Detail),
 	})
-	slog.Info("Habit logged", "name", habit.Category.Name, "state", habit.State())
+	slog.Info("Habit logged",
+		"name", habit.Category.Name,
+		"state", habit.State(),
+		"origin", params.Origin,
+		"detail", params.Detail,
+	)
 	return
 }

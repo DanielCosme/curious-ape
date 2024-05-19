@@ -10,7 +10,6 @@ import (
 	"github.com/danielcosme/curious-ape/internal/integrations/fitbit"
 	"golang.org/x/oauth2"
 	"net/http"
-	"time"
 )
 
 type IntegrationInfo struct {
@@ -22,7 +21,6 @@ type IntegrationInfo struct {
 }
 
 func (a *App) IntegrationsGet() ([]IntegrationInfo, error) {
-	// TODO Improve this.
 	var res []IntegrationInfo
 	currentIntegrations := []core.Integration{core.IntegrationFitbit}
 
@@ -32,20 +30,14 @@ func (a *App) IntegrationsGet() ([]IntegrationInfo, error) {
 
 		switch integration {
 		case core.IntegrationFitbit:
-			fitbitAPI, err := a.fitbitClient()
+			sls, err := a.sleepLogsGetFromFitbit(core.NewDateToday())
 			if err != nil {
 				authURL = a.sync.GenerateOauth2URI(integration)
 				problem = err.Error()
 			} else {
-				sleepLog, err := fitbitAPI.Sleep.GetByDate(time.Now().Local())
-				if err != nil {
-					authURL = a.sync.GenerateOauth2URI(integration)
-					problem = err.Error()
-				} else {
-					state = IntegrationConnected
-					profileInfo = fmt.Sprintf(
-						"Total time asleep today: %s",
-						fitbit.ToDuration(sleepLog.Summary.TotalMinutesAsleep))
+				state = IntegrationConnected
+				if len(sls) > 0 {
+					profileInfo = fmt.Sprintf("Total time asleep last night: %s", sls[0].MinutesAsleep)
 				}
 			}
 			res = append(res, IntegrationInfo{

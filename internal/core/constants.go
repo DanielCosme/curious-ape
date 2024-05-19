@@ -35,14 +35,11 @@ const (
 	AuthRoleGuest AuthRole = "guest"
 )
 
-type DataSource string
+type OriginLog string
 
 const (
-	DataSourceWebUI  DataSource = "web_ui"
-	DataSourceManual DataSource = "manual"
-	DataSourceFitbit DataSource = "fitbit"
-	DataSourceGoogle DataSource = "google"
-	DataSourceToggl  DataSource = "toggl"
+	OriginLogManual OriginLog = "manual_log"
+	OriginLogSleep  OriginLog = "sleep_log"
 )
 
 type Integration string

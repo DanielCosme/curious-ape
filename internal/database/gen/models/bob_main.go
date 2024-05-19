@@ -76,6 +76,7 @@ var ColumnNames = struct {
 		Origin:      "origin",
 		Success:     "success",
 		IsAutomated: "is_automated",
+		Detail:      "detail",
 	},
 	Habits: habitColumnNames{
 		ID:              "id",

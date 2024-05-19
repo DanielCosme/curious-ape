@@ -16,17 +16,13 @@ func (t *Transport) newHabitLogPost(c echo.Context) error {
 	if err != nil {
 		return errClientError(err)
 	}
-	categoryID, err := strconv.Atoi(c.QueryParam("category"))
-	if err != nil {
-		return errClientError(err)
-	}
 
-	habit, err := t.App.HabitUpsert(core.HabitParams{
-		Success:    success,
-		Date:       date,
-		CategoryID: int32(categoryID),
-		Origin:     core.DataSourceWebUI,
-		Automated:  false,
+	habit, err := t.App.HabitUpsert(core.NewHabitParams{
+		Success:   success,
+		Date:      date,
+		HabitType: core.HabitType(c.QueryParam("category")),
+		Origin:    core.OriginLogManual,
+		Automated: false,
 	})
 	if err != nil {
 		return errServer(err)

@@ -14,12 +14,15 @@ func NewDate(t time.Time) Date {
 	}
 }
 
-func DateFromISO8601(s string) (Date, error) {
-	t, err := time.Parse(ISO8601, s)
-	if err != nil {
-		return Date{}, err
+func NewDateToday() Date {
+	t := time.Now().Local()
+	return Date{
+		time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.Local),
 	}
-	return NewDate(t), nil
+}
+
+func (d Date) IsEqual(t time.Time) bool {
+	return d.Time().Equal(NewDate(t).Time())
 }
 
 func (d Date) String() string {
@@ -54,4 +57,12 @@ func (ds DateSlice) ToTimeSlice() []time.Time {
 		res[idx] = d.Time()
 	}
 	return res
+}
+
+func DateFromISO8601(s string) (Date, error) {
+	t, err := time.Parse(ISO8601, s)
+	if err != nil {
+		return Date{}, err
+	}
+	return NewDate(t), nil
 }

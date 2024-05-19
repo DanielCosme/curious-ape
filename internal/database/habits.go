@@ -40,7 +40,7 @@ func (h *Habits) AddLog(s *models.HabitLogSetter) (res core.Habit, err error) {
 		h.db,
 		true,
 		[]string{"habit_id", "origin"},
-		[]string{"success"},
+		[]string{"success", "detail"},
 		s,
 	)
 	if err != nil {
@@ -67,6 +67,9 @@ func habitToCore(m *models.Habit) core.Habit {
 }
 
 func habitsToCore(ms models.HabitSlice) []core.Habit {
+	if len(ms) == 0 {
+		return nil
+	}
 	res := make([]core.Habit, len(ms))
 	for idx, h := range ms {
 		res[idx] = habitToCore(h)
@@ -80,7 +83,8 @@ func habitLogsToCore(ls models.HabitLogSlice) (res []core.HabitLog) {
 			ID:          l.ID,
 			Success:     l.Success,
 			IsAutomated: l.IsAutomated,
-			Origin:      core.DataSource(l.Origin),
+			Origin:      core.OriginLog(l.Origin),
+			Detail:      l.Detail,
 		})
 	}
 	return

@@ -42,9 +42,9 @@ type Environment string
 
 const (
 	Prod    Environment = "prod"
-	Staging Environment = "staging"
 	Dev     Environment = "dev"
 	Test    Environment = "test"
+	Staging Environment = "staging"
 )
 
 func ParseEnvironment(s string) (Environment, error) {

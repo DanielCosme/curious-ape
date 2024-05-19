@@ -172,7 +172,7 @@ func TestCalculateHabitStatus(t *testing.T) {
 
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
-			status := calculateHabitState(tc.logs)
+			status, _ := calculateHabitState(tc.logs)
 			assert.Equal(t, tc.expected, status)
 		})
 	}

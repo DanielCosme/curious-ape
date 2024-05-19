@@ -21,12 +21,12 @@ func TestHabitUpsertManual(t *testing.T) {
 	t.Parallel()
 	app := NewTestApplication(t)
 
-	habit, err := app.HabitUpsert(core.HabitParams{
-		Success:    true,
-		Date:       core.NewDate(time.Now()),
-		CategoryID: 1,
-		Origin:     core.DataSourceFitbit,
-		Automated:  true,
+	habit, err := app.HabitUpsert(core.NewHabitParams{
+		Success:   true,
+		Date:      core.NewDate(time.Now()),
+		HabitType: core.HabitTypeWakeUp,
+		Origin:    core.OriginLogSleep,
+		Automated: true,
 	})
 	assert.NilError(t, err)
 	assert.Assert(t, habit.IsZero() == false)
@@ -36,27 +36,27 @@ func TestHabitUpsertManual(t *testing.T) {
 		ID:          1,
 		Success:     true,
 		IsAutomated: true,
-		Origin:      core.DataSourceFitbit,
+		Origin:      core.OriginLogSleep,
 	})
 
-	habit, err = app.HabitUpsert(core.HabitParams{
-		Success:    false,
-		Date:       core.NewDate(time.Now()),
-		CategoryID: 1,
-		Origin:     core.DataSourceFitbit,
-		Automated:  true,
+	habit, err = app.HabitUpsert(core.NewHabitParams{
+		Success:   false,
+		Date:      core.NewDate(time.Now()),
+		HabitType: core.HabitTypeWakeUp,
+		Origin:    core.OriginLogSleep,
+		Automated: true,
 	})
 	assert.NilError(t, err)
 	assert.Assert(t, habit.IsZero() == false)
 	assert.Assert(t, habit.State() == core.HabitStateNotDone)
 	assert.Assert(t, len(habit.Logs) == 1)
 
-	habit, err = app.HabitUpsert(core.HabitParams{
-		Success:    true,
-		Date:       core.NewDate(time.Now()),
-		CategoryID: 1,
-		Origin:     core.DataSourceWebUI,
-		Automated:  false,
+	habit, err = app.HabitUpsert(core.NewHabitParams{
+		Success:   true,
+		Date:      core.NewDate(time.Now()),
+		HabitType: core.HabitTypeWakeUp,
+		Origin:    core.OriginLogManual,
+		Automated: false,
 	})
 	assert.NilError(t, err)
 	assert.Assert(t, habit.IsZero() == false)
@@ -75,13 +75,13 @@ func TestDay(t *testing.T) {
 	assert.Assert(t, day.IsZero() == false)
 	assert.Assert(t, day.ID > 0)
 
-	_, err = app.HabitUpsert(core.HabitParams{Success: true, Date: day.Date, CategoryID: 1, Origin: core.DataSourceManual})
+	_, err = app.HabitUpsert(core.NewHabitParams{Success: true, Date: day.Date, HabitType: core.HabitTypeWakeUp, Origin: core.OriginLogManual})
 	assert.NilError(t, err)
-	_, err = app.HabitUpsert(core.HabitParams{Success: true, Date: day.Date, CategoryID: 2, Origin: core.DataSourceManual})
+	_, err = app.HabitUpsert(core.NewHabitParams{Success: true, Date: day.Date, HabitType: core.HabitTypeExercise, Origin: core.OriginLogManual})
 	assert.NilError(t, err)
-	_, err = app.HabitUpsert(core.HabitParams{Success: true, Date: day.Date, CategoryID: 3, Origin: core.DataSourceManual})
+	_, err = app.HabitUpsert(core.NewHabitParams{Success: true, Date: day.Date, HabitType: core.HabitTypeDeepWork, Origin: core.OriginLogManual})
 	assert.NilError(t, err)
-	_, err = app.HabitUpsert(core.HabitParams{Success: true, Date: day.Date, CategoryID: 4, Origin: core.DataSourceManual})
+	_, err = app.HabitUpsert(core.NewHabitParams{Success: true, Date: day.Date, HabitType: core.HabitTypeEatHealthy, Origin: core.OriginLogManual})
 	assert.NilError(t, err)
 
 	date2 := core.NewDate(date1.Time().AddDate(0, 0, 1))

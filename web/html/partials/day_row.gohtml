@@ -11,13 +11,16 @@
                 <span>_</span>
             {{end}}
             <a href="#"
-               hx-post="/habit/log?success=true&category={{.Wake.Category.ID}}&date={{dateOnly .Date}}"
+               hx-post="/habit/log?success=true&category={{.Wake.Category.Type}}&date={{dateOnly .Date}}"
                hx-swap="outerHTML"
                hx-target="closest tr">Y</a>
             <a href="#"
-               hx-post="/habit/log?success=false&category={{.Wake.Category.ID}}&date={{dateOnly .Date}}"
+               hx-post="/habit/log?success=false&category={{.Wake.Category.Type}}&date={{dateOnly .Date}}"
                hx-swap="outerHTML"
                hx-target="closest tr">N</a>
+            {{with .Wake.Main.Detail}}
+                <span> {{.}}</span>
+            {{end}}
         </td>
         <td>
             {{if eq .Fitness.State "not_done" }}
@@ -28,11 +31,11 @@
                 <span>_</span>
             {{end}}
             <a href="#"
-               hx-post="/habit/log?success=true&category={{.Fitness.Category.ID}}&date={{dateOnly .Date}}"
+               hx-post="/habit/log?success=true&category={{.Fitness.Category.Type}}&date={{dateOnly .Date}}"
                hx-swap="outerHTML"
                hx-target="closest tr">Y</a>
             <a href="#"
-               hx-post="/habit/log?success=false&category={{.Fitness.Category.ID}}&date={{dateOnly .Date}}"
+               hx-post="/habit/log?success=false&category={{.Fitness.Category.Type}}&date={{dateOnly .Date}}"
                hx-swap="outerHTML"
                hx-target="closest tr">N</a>
         </td>
@@ -45,11 +48,11 @@
                 <span>_</span>
             {{end}}
             <a href="#"
-               hx-post="/habit/log?success=true&category={{.Work.Category.ID}}&date={{dateOnly .Date}}"
+               hx-post="/habit/log?success=true&category={{.Work.Category.Type}}&date={{dateOnly .Date}}"
                hx-swap="outerHTML"
                hx-target="closest tr">Y</a>
             <a href="#"
-               hx-post="/habit/log?success=false&category={{.Work.Category.ID}}&date={{dateOnly .Date}}"
+               hx-post="/habit/log?success=false&category={{.Work.Category.Type}}&date={{dateOnly .Date}}"
                hx-swap="outerHTML"
                hx-target="closest tr">N</a>
         </td>
@@ -62,13 +65,19 @@
                 <span>_</span>
             {{end}}
             <a href="#"
-               hx-post="/habit/log?success=true&category={{.Eat.Category.ID}}&date={{dateOnly .Date}}"
+               hx-post="/habit/log?success=true&category={{.Eat.Category.Type}}&date={{dateOnly .Date}}"
                hx-swap="outerHTML"
                hx-target="closest tr">Y</a>
             <a href="#"
-               hx-post="/habit/log?success=false&category={{.Eat.Category.ID}}&date={{dateOnly .Date}}"
+               hx-post="/habit/log?success=false&category={{.Eat.Category.Type}}&date={{dateOnly .Date}}"
                hx-swap="outerHTML"
                hx-target="closest tr">N</a>
+        </td>
+        <td>
+           <button hx-post="/sync/{{dateOnly .Date}}"
+                   hx-swap="outerHTML"
+                   hx-target="closest tr"
+                   class="button-primary">Sync</button>
         </td>
     </tr>
 {{end}}
