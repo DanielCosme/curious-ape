@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 )
@@ -44,7 +45,7 @@ func (c *Client) Call(method, path string, urlParams url.Values, payload any) er
 
 	}
 	if !json.Valid(body) {
-		// c.out.Write(body)
+		slog.Error(string(body))
 		return errors.New("toggl response body is not valid json")
 	}
 
@@ -52,6 +53,6 @@ func (c *Client) Call(method, path string, urlParams url.Values, payload any) er
 }
 
 func (c *Client) catchTogglErr(body []byte) error {
-	// c.out.Write(body)
+	slog.Error(string(body))
 	return errors.New("toggl api error")
 }

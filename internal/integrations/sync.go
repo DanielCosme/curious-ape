@@ -3,6 +3,7 @@ package integrations
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"net/http"
 
 	"github.com/danielcosme/curious-ape/internal/core"
@@ -40,7 +41,6 @@ func (i *Integrations) GenerateOauth2URI(provider core.Integration) string {
 }
 
 func (i *Integrations) GetHttpClient(provider core.Integration, currentToken *oauth2.Token, updateFunc func(integration core.Integration, t *oauth2.Token) error) (res *http.Client, err error) {
-	var newToken *oauth2.Token
 	var config *oauth2.Config
 	switch provider {
 	case core.IntegrationFitbit:
@@ -50,18 +50,18 @@ func (i *Integrations) GetHttpClient(provider core.Integration, currentToken *oa
 	default:
 		panic("not implemented: " + provider)
 	}
-	// Refresh token if necessary.
-	newToken, err = config.TokenSource(context.Background(), currentToken).Token()
-	if err != nil {
-		return
-	}
-	if newToken.AccessToken != currentToken.AccessToken {
-		// Update token in database.
-		err = updateFunc(provider, newToken)
+	if !currentToken.Valid() {
+		slog.Info("Refreshing token")
+		// Refresh token.
+		currentToken, err = config.TokenSource(context.Background(), currentToken).Token()
 		if err != nil {
 			return
 		}
-		currentToken = newToken
+		// Update token in database.
+		err = updateFunc(provider, currentToken)
+		if err != nil {
+			return
+		}
 	}
 	res = config.Client(context.Background(), currentToken)
 	return
