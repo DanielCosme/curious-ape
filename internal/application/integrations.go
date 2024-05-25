@@ -72,9 +72,6 @@ func (a *App) Oauth2Success(provider, code string) error {
 
 func (a *App) fitbitClient() (res fitbit.API, err error) {
 	client, err := a.integrationsGetClient(core.IntegrationFitbit)
-	if err != nil {
-		return res, err
-	}
 	res = fitbit.NewAPI(client)
 	return
 }
