@@ -35,3 +35,9 @@ func (a *App) DaysMonth(today core.Date) ([]core.Day, error) {
 
 	return a.db.Days.Find(database.DayParams{Dates: daysOfTheMonth, R: database.DayRelations()})
 }
+
+type DaysSlice []core.Day
+
+func (a DaysSlice) Len() int           { return len(a) }
+func (a DaysSlice) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a DaysSlice) Less(i, j int) bool { return a[i].Date.Time().After(a[j].Date.Time()) }

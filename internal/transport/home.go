@@ -1,8 +1,10 @@
 package transport
 
 import (
+	"github.com/danielcosme/curious-ape/internal/application"
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/danielcosme/curious-ape/internal/core"
@@ -14,6 +16,7 @@ func (t *Transport) home(c echo.Context) error {
 		return errServer(err)
 	}
 	data := t.newTemplateData(c.Request())
+	sort.Sort(application.DaysSlice(ds))
 	data.Days = formatDays(ds)
 	c.Set("page", pageHome)
 	return c.Render(http.StatusOK, pageHome, data)
