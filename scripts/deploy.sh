@@ -21,7 +21,7 @@ if test "$RELEASE" = true
     git checkout main; or exit 1
     git pull; or exit 1
     ./scripts/release.sh; or exit 1 \
-    " | ssh daniel@prime ; or exit 1
+    " | ssh daniel@ubi-prime ; or exit 1
     echo "--- Success ---"
   echo ""
 end
