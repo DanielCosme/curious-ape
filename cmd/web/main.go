@@ -69,7 +69,8 @@ func main() {
 
 	sLogger.Info("Version: " + v)
 
-	db, err := sql.Open("sqlite3", "./"+cfg.Database.DSN)
+	slog.Info("Opening database", "path", cfg.Database.DSN)
+	db, err := sql.Open("sqlite3", cfg.Database.DSN)
 	exitIfErr(err)
 	err = db.Ping()
 	exitIfErr(err)
@@ -123,8 +124,10 @@ func readConfiguration(cfg *config) *config {
 		logFatal(errors.New("environment variable APE_ENVIRONMENT is empty"))
 	}
 	cfg.Environment = env
-	rawFile, err = os.ReadFile("./data/config.json")
+	configPath := "./data/config.json"
+	rawFile, err = os.ReadFile(configPath)
 	exitIfErr(err)
+	slog.Info("Loaded configuration", "path", configPath)
 
 	err = json.Unmarshal(rawFile, cfg)
 	exitIfErr(err)
