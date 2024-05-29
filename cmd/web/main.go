@@ -123,7 +123,7 @@ func readConfiguration(cfg *config) *config {
 		logFatal(errors.New("environment variable APE_ENVIRONMENT is empty"))
 	}
 	cfg.Environment = env
-	rawFile, err = os.ReadFile("config.json")
+	rawFile, err = os.ReadFile("./data/config.json")
 	exitIfErr(err)
 
 	err = json.Unmarshal(rawFile, cfg)

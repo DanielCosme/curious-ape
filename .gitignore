@@ -31,4 +31,4 @@ tmp/
 # Config
 config.json
 
-/deployment
+/data
