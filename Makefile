@@ -22,6 +22,11 @@ confirm:
 run:
 	./scripts/run.sh
 
+## db: Quickly access the database
+.PHONY: db
+db:
+	sqlite3 -box ape.db
+
 ## gen-sql: Generate type safe SQL helpers
 .PHONY: gen-sql
 gen-sql:
