@@ -18,7 +18,6 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 
 FROM alpine:latest as ape
 WORKDIR /app
-USER daniel
 COPY --from=ape-builder /app/bin/ape /app/bin/ape
 CMD ["/app/bin/ape"]
 
@@ -35,7 +34,6 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 
 
 FROM alpine:latest AS migrate
-USER daniel
 COPY ./migrations/sqlite /migrations
 COPY --from=migrate-builder /app/migrate/build/migrate /usr/local/bin/migrate
 ENTRYPOINT ["migrate"]
