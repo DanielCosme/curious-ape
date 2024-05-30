@@ -61,38 +61,6 @@ items:
                   subPath: config.json
                 - name: db-data
                   mountPath: /app/db-data
-          volumes:
-            - name: litestream-config
-              configMap:
-                name: ape-litestream-prod
-                items:
-                  - key: litestream.yaml
-                    path: litestream.yml
-            - name: ape-config
-              configMap:
-                name: curious-ape-prod
-            - name: db-data
-              persistentVolumeClaim:
-                claimName: curious-ape-pvc
-  - apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      name: curious-ape-backup
-      labels:
-        app: curious-ape-backup
-    spec:
-      replicas: 1
-      selector:
-        matchLabels:
-          app: curious-ape-backup
-      template:
-        metadata:
-          labels:
-            app: curious-ape-backup
-        spec:
-          nodeSelector:
-            kubernetes.io/hostname: ape-1
-          containers:
             - name: replicate-ape
               image: litestream/litestream
               command:
@@ -111,6 +79,9 @@ items:
                 items:
                   - key: litestream.yaml
                     path: litestream.yml
+            - name: ape-config
+              configMap:
+                name: curious-ape-prod
             - name: db-data
               persistentVolumeClaim:
                 claimName: curious-ape-pvc
