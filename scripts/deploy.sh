@@ -28,7 +28,7 @@ end
 
 
 # We are assuming that the kubectl client is properly configured.
-echo "--- Synchronizing kubernetes resources ---"
+echo "--- Synchronizing Kubernetes resources ---"
 
 kubectl create \
         configmap \
