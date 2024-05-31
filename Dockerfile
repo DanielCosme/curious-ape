@@ -17,6 +17,9 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 
 
 FROM alpine:latest as ape
+
+RUN apk add --no-cache tzdata
+ENV TZ=America/Toronto
 WORKDIR /app
 COPY --from=ape-builder /app/bin/ape /app/bin/ape
 CMD ["/app/bin/ape"]
