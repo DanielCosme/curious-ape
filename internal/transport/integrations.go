@@ -35,6 +35,10 @@ func (t *Transport) sync(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	err = t.App.DeepWorkSync(d)
+	if err != nil {
+		return err
+	}
 	day, err := t.App.DayGetOrCreate(d)
 	if err != nil {
 		return err

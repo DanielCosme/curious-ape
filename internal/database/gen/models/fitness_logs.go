@@ -488,7 +488,7 @@ func (o *FitnessLog) Preload(name string, retrieved any) error {
 	}
 
 	switch name {
-	case "Day":
+	case "Date":
 		rel, ok := retrieved.(*Day)
 		if !ok {
 			return fmt.Errorf("fitnessLog cannot load %T as %q", retrieved, name)
@@ -507,7 +507,7 @@ func (o *FitnessLog) Preload(name string, retrieved any) error {
 
 func PreloadFitnessLogDay(opts ...sqlite.PreloadOption) sqlite.Preloader {
 	return sqlite.Preload[*Day, DaySlice](orm.Relationship{
-		Name: "Day",
+		Name: "Date",
 		Sides: []orm.RelSide{
 			{
 				From: "fitness_logs",

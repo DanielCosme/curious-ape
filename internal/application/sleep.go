@@ -25,7 +25,7 @@ func (a *App) SleepSync(d core.Date) error {
 		if err != nil {
 			return err
 		}
-		a.Log.Info("Sleep log added", "date", sl.Date, "duration", sl.MinutesAsleep)
+		a.Log.Info("Sleep log added", "date", sl.Date, "duration", sl.MinutesAsleep.String())
 	}
 	return nil
 }

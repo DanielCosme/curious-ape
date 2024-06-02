@@ -613,7 +613,7 @@ func (o *SleepLog) Preload(name string, retrieved any) error {
 	}
 
 	switch name {
-	case "Day":
+	case "Date":
 		rel, ok := retrieved.(*Day)
 		if !ok {
 			return fmt.Errorf("sleepLog cannot load %T as %q", retrieved, name)
@@ -632,7 +632,7 @@ func (o *SleepLog) Preload(name string, retrieved any) error {
 
 func PreloadSleepLogDay(opts ...sqlite.PreloadOption) sqlite.Preloader {
 	return sqlite.Preload[*Day, DaySlice](orm.Relationship{
-		Name: "Day",
+		Name: "Date",
 		Sides: []orm.RelSide{
 			{
 				From: "sleep_logs",

@@ -13,6 +13,7 @@ import (
 var TableNames = struct {
 	Auths           string
 	Days            string
+	DeepWorkLogs    string
 	FitnessLogs     string
 	HabitCategories string
 	HabitLogs       string
@@ -22,6 +23,7 @@ var TableNames = struct {
 }{
 	Auths:           "auths",
 	Days:            "days",
+	DeepWorkLogs:    "deep_work_logs",
 	FitnessLogs:     "fitness_logs",
 	HabitCategories: "habit_categories",
 	HabitLogs:       "habit_logs",
@@ -33,6 +35,7 @@ var TableNames = struct {
 var ColumnNames = struct {
 	Auths           authColumnNames
 	Days            dayColumnNames
+	DeepWorkLogs    deepWorkLogColumnNames
 	FitnessLogs     fitnessLogColumnNames
 	HabitCategories habitCategoryColumnNames
 	HabitLogs       habitLogColumnNames
@@ -51,6 +54,14 @@ var ColumnNames = struct {
 	Days: dayColumnNames{
 		ID:   "id",
 		Date: "date",
+	},
+	DeepWorkLogs: deepWorkLogColumnNames{
+		ID:          "id",
+		DayID:       "day_id",
+		Date:        "date",
+		Seconds:     "seconds",
+		IsAutomated: "is_automated",
+		Origin:      "origin",
 	},
 	FitnessLogs: fitnessLogColumnNames{
 		ID:        "id",
@@ -120,6 +131,7 @@ var (
 func Where[Q sqlite.Filterable]() struct {
 	Auths           authWhere[Q]
 	Days            dayWhere[Q]
+	DeepWorkLogs    deepWorkLogWhere[Q]
 	FitnessLogs     fitnessLogWhere[Q]
 	HabitCategories habitCategoryWhere[Q]
 	HabitLogs       habitLogWhere[Q]
@@ -130,6 +142,7 @@ func Where[Q sqlite.Filterable]() struct {
 	return struct {
 		Auths           authWhere[Q]
 		Days            dayWhere[Q]
+		DeepWorkLogs    deepWorkLogWhere[Q]
 		FitnessLogs     fitnessLogWhere[Q]
 		HabitCategories habitCategoryWhere[Q]
 		HabitLogs       habitLogWhere[Q]
@@ -139,6 +152,7 @@ func Where[Q sqlite.Filterable]() struct {
 	}{
 		Auths:           AuthWhere[Q](),
 		Days:            DayWhere[Q](),
+		DeepWorkLogs:    DeepWorkLogWhere[Q](),
 		FitnessLogs:     FitnessLogWhere[Q](),
 		HabitCategories: HabitCategoryWhere[Q](),
 		HabitLogs:       HabitLogWhere[Q](),
@@ -161,6 +175,7 @@ type joinSet[Q any] struct {
 
 type joins[Q dialect.Joinable] struct {
 	Days            joinSet[dayRelationshipJoins[Q]]
+	DeepWorkLogs    joinSet[deepWorkLogRelationshipJoins[Q]]
 	FitnessLogs     joinSet[fitnessLogRelationshipJoins[Q]]
 	HabitCategories joinSet[habitCategoryRelationshipJoins[Q]]
 	HabitLogs       joinSet[habitLogRelationshipJoins[Q]]
@@ -171,6 +186,7 @@ type joins[Q dialect.Joinable] struct {
 func getJoins[Q dialect.Joinable](ctx context.Context) joins[Q] {
 	return joins[Q]{
 		Days:            daysJoin[Q](ctx),
+		DeepWorkLogs:    deepWorkLogsJoin[Q](ctx),
 		FitnessLogs:     fitnessLogsJoin[Q](ctx),
 		HabitCategories: habitCategoriesJoin[Q](ctx),
 		HabitLogs:       habitLogsJoin[Q](ctx),

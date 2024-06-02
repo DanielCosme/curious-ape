@@ -45,9 +45,10 @@ type DaysStmt = bob.QueryStmt[*Day, DaySlice]
 
 // dayR is where relationships are stored.
 type dayR struct {
-	FitnessLogs FitnessLogSlice // fk_fitness_logs_0
-	Habits      HabitSlice      // fk_habits_0
-	SleepLogs   SleepLogSlice   // fk_sleep_logs_0
+	DeepWorkLogs DeepWorkLogSlice // fk_deep_work_logs_0
+	FitnessLogs  FitnessLogSlice  // fk_fitness_logs_0
+	Habits       HabitSlice       // fk_habits_0
+	SleepLogs    SleepLogSlice    // fk_sleep_logs_0
 }
 
 // DaySetter is used for insert/upsert/update operations
@@ -123,16 +124,18 @@ type dayColumnNames struct {
 }
 
 type dayRelationshipJoins[Q dialect.Joinable] struct {
-	FitnessLogs bob.Mod[Q]
-	Habits      bob.Mod[Q]
-	SleepLogs   bob.Mod[Q]
+	DeepWorkLogs bob.Mod[Q]
+	FitnessLogs  bob.Mod[Q]
+	Habits       bob.Mod[Q]
+	SleepLogs    bob.Mod[Q]
 }
 
 func buildDayRelationshipJoins[Q dialect.Joinable](ctx context.Context, typ string) dayRelationshipJoins[Q] {
 	return dayRelationshipJoins[Q]{
-		FitnessLogs: daysJoinFitnessLogs[Q](ctx, typ),
-		Habits:      daysJoinHabits[Q](ctx, typ),
-		SleepLogs:   daysJoinSleepLogs[Q](ctx, typ),
+		DeepWorkLogs: daysJoinDeepWorkLogs[Q](ctx, typ),
+		FitnessLogs:  daysJoinFitnessLogs[Q](ctx, typ),
+		Habits:       daysJoinHabits[Q](ctx, typ),
+		SleepLogs:    daysJoinSleepLogs[Q](ctx, typ),
 	}
 }
 
@@ -259,6 +262,14 @@ func (o DaySlice) ReloadAll(ctx context.Context, exec bob.Executor) error {
 	return nil
 }
 
+func daysJoinDeepWorkLogs[Q dialect.Joinable](ctx context.Context, typ string) bob.Mod[Q] {
+	return mods.QueryMods[Q]{
+		dialect.Join[Q](typ, DeepWorkLogs.NameAs(ctx)).On(
+			DeepWorkLogColumns.DayID.EQ(DayColumns.ID),
+		),
+	}
+}
+
 func daysJoinFitnessLogs[Q dialect.Joinable](ctx context.Context, typ string) bob.Mod[Q] {
 	return mods.QueryMods[Q]{
 		dialect.Join[Q](typ, FitnessLogs.NameAs(ctx)).On(
@@ -281,6 +292,24 @@ func daysJoinSleepLogs[Q dialect.Joinable](ctx context.Context, typ string) bob.
 			SleepLogColumns.DayID.EQ(DayColumns.ID),
 		),
 	}
+}
+
+// DeepWorkLogs starts a query for related objects on deep_work_logs
+func (o *Day) DeepWorkLogs(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) DeepWorkLogsQuery {
+	return DeepWorkLogs.Query(ctx, exec, append(mods,
+		sm.Where(DeepWorkLogColumns.DayID.EQ(sqlite.Arg(o.ID))),
+	)...)
+}
+
+func (os DaySlice) DeepWorkLogs(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) DeepWorkLogsQuery {
+	PKArgs := make([]bob.Expression, len(os))
+	for i, o := range os {
+		PKArgs[i] = sqlite.ArgGroup(o.ID)
+	}
+
+	return DeepWorkLogs.Query(ctx, exec, append(mods,
+		sm.Where(sqlite.Group(DeepWorkLogColumns.DayID).In(PKArgs...)),
+	)...)
 }
 
 // FitnessLogs starts a query for related objects on fitness_logs
@@ -343,6 +372,20 @@ func (o *Day) Preload(name string, retrieved any) error {
 	}
 
 	switch name {
+	case "DeepWorkLogs":
+		rels, ok := retrieved.(DeepWorkLogSlice)
+		if !ok {
+			return fmt.Errorf("day cannot load %T as %q", retrieved, name)
+		}
+
+		o.R.DeepWorkLogs = rels
+
+		for _, rel := range rels {
+			if rel != nil {
+				rel.R.Day = o
+			}
+		}
+		return nil
 	case "FitnessLogs":
 		rels, ok := retrieved.(FitnessLogSlice)
 		if !ok {
@@ -388,6 +431,78 @@ func (o *Day) Preload(name string, retrieved any) error {
 	default:
 		return fmt.Errorf("day has no relationship %q", name)
 	}
+}
+
+func ThenLoadDayDeepWorkLogs(queryMods ...bob.Mod[*dialect.SelectQuery]) sqlite.Loader {
+	return sqlite.Loader(func(ctx context.Context, exec bob.Executor, retrieved any) error {
+		loader, isLoader := retrieved.(interface {
+			LoadDayDeepWorkLogs(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
+		})
+		if !isLoader {
+			return fmt.Errorf("object %T cannot load DayDeepWorkLogs", retrieved)
+		}
+
+		err := loader.LoadDayDeepWorkLogs(ctx, exec, queryMods...)
+
+		// Don't cause an issue due to missing relationships
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil
+		}
+
+		return err
+	})
+}
+
+// LoadDayDeepWorkLogs loads the day's DeepWorkLogs into the .R struct
+func (o *Day) LoadDayDeepWorkLogs(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if o == nil {
+		return nil
+	}
+
+	// Reset the relationship
+	o.R.DeepWorkLogs = nil
+
+	related, err := o.DeepWorkLogs(ctx, exec, mods...).All()
+	if err != nil {
+		return err
+	}
+
+	for _, rel := range related {
+		rel.R.Day = o
+	}
+
+	o.R.DeepWorkLogs = related
+	return nil
+}
+
+// LoadDayDeepWorkLogs loads the day's DeepWorkLogs into the .R struct
+func (os DaySlice) LoadDayDeepWorkLogs(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if len(os) == 0 {
+		return nil
+	}
+
+	deepWorkLogs, err := os.DeepWorkLogs(ctx, exec, mods...).All()
+	if err != nil {
+		return err
+	}
+
+	for _, o := range os {
+		o.R.DeepWorkLogs = nil
+	}
+
+	for _, o := range os {
+		for _, rel := range deepWorkLogs {
+			if o.ID != rel.DayID {
+				continue
+			}
+
+			rel.R.Day = o
+
+			o.R.DeepWorkLogs = append(o.R.DeepWorkLogs, rel)
+		}
+	}
+
+	return nil
 }
 
 func ThenLoadDayFitnessLogs(queryMods ...bob.Mod[*dialect.SelectQuery]) sqlite.Loader {
@@ -601,6 +716,72 @@ func (os DaySlice) LoadDaySleepLogs(ctx context.Context, exec bob.Executor, mods
 
 			o.R.SleepLogs = append(o.R.SleepLogs, rel)
 		}
+	}
+
+	return nil
+}
+
+func insertDayDeepWorkLogs0(ctx context.Context, exec bob.Executor, deepWorkLogs1 []*DeepWorkLogSetter, day0 *Day) (DeepWorkLogSlice, error) {
+	for i := range deepWorkLogs1 {
+		deepWorkLogs1[i].DayID = omit.From(day0.ID)
+	}
+
+	ret, err := DeepWorkLogs.InsertMany(ctx, exec, deepWorkLogs1...)
+	if err != nil {
+		return ret, fmt.Errorf("insertDayDeepWorkLogs0: %w", err)
+	}
+
+	return ret, nil
+}
+
+func attachDayDeepWorkLogs0(ctx context.Context, exec bob.Executor, count int, deepWorkLogs1 DeepWorkLogSlice, day0 *Day) (DeepWorkLogSlice, error) {
+	setter := &DeepWorkLogSetter{
+		DayID: omit.From(day0.ID),
+	}
+
+	err := DeepWorkLogs.Update(ctx, exec, setter, deepWorkLogs1...)
+	if err != nil {
+		return nil, fmt.Errorf("attachDayDeepWorkLogs0: %w", err)
+	}
+
+	return deepWorkLogs1, nil
+}
+
+func (day0 *Day) InsertDeepWorkLogs(ctx context.Context, exec bob.Executor, related ...*DeepWorkLogSetter) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	deepWorkLogs1, err := insertDayDeepWorkLogs0(ctx, exec, related, day0)
+	if err != nil {
+		return err
+	}
+
+	day0.R.DeepWorkLogs = append(day0.R.DeepWorkLogs, deepWorkLogs1...)
+
+	for _, rel := range deepWorkLogs1 {
+		rel.R.Day = day0
+	}
+	return nil
+}
+
+func (day0 *Day) AttachDeepWorkLogs(ctx context.Context, exec bob.Executor, related ...*DeepWorkLog) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	deepWorkLogs1 := DeepWorkLogSlice(related)
+
+	_, err = attachDayDeepWorkLogs0(ctx, exec, len(related), deepWorkLogs1, day0)
+	if err != nil {
+		return err
+	}
+
+	day0.R.DeepWorkLogs = append(day0.R.DeepWorkLogs, deepWorkLogs1...)
+
+	for _, rel := range related {
+		rel.R.Day = day0
 	}
 
 	return nil

@@ -15,7 +15,7 @@ type SleepLogs struct {
 }
 
 func (sls *SleepLogs) Upsert(sleepLog core.SleepLog) (core.SleepLog, error) {
-	setter := fromCoreToSetter(sleepLog)
+	setter := fromSleepLogCoreToSetter(sleepLog)
 	sl, err := models.SleepLogs.Upsert(
 		context.Background(),
 		sls.db,
@@ -30,7 +30,7 @@ func (sls *SleepLogs) Upsert(sleepLog core.SleepLog) (core.SleepLog, error) {
 	return sleepLogToCore(sl), nil
 }
 
-func fromCoreToSetter(sl core.SleepLog) *models.SleepLogSetter {
+func fromSleepLogCoreToSetter(sl core.SleepLog) *models.SleepLogSetter {
 	return &models.SleepLogSetter{
 		ID:             omit.FromCond(sl.ID, sl.ID > 0),
 		DayID:          omit.From(sl.DayID),

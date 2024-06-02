@@ -1,6 +1,9 @@
 package application
 
-import "github.com/danielcosme/curious-ape/internal/core"
+import (
+	"github.com/danielcosme/curious-ape/internal/core"
+	"github.com/danielcosme/curious-ape/internal/database"
+)
 
 func (a *App) DeepWorkSync(d core.Date) error {
 	dwLog, err := a.deepWorkFromToggl(d)
@@ -13,15 +16,26 @@ func (a *App) DeepWorkSync(d core.Date) error {
 		if err != nil {
 			return err
 		}
-		// TODO: Insert Deep Work Log into the database, also log it.
+		dwLog, err = a.db.DeepWork.Upsert(dwLog)
+		if err != nil {
+			return err
+		}
+		a.Log.Info("Deep Work log added", "date", dwLog.Date, "duration", dwLog.Duration.String())
 	}
 	return nil
 }
 
 func (a *App) deepWorkFromToggl(d core.Date) (res core.DeepWorkLog, err error) {
-	summary, err := a.sync.TogglAPI.Reports.GetDaySummary(d.Time())
+	day, err := a.db.Days.GetOrCreate(database.DayParams{Date: d})
+	if err != nil {
+		return res, err
+	}
+	summary, err := a.sync.TogglAPI.Reports.GetDaySummary(day.Date.Time())
 	if err != nil {
 		return
 	}
-	return core.NewDeepWorkLog(summary.TotalDuration, d), err
+	res = core.NewDeepWorkLog(summary.TotalDuration, day)
+	res.IsAutomated = true
+	res.Origin = core.IntegrationToggl
+	return
 }

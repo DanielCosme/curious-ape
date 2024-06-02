@@ -3,14 +3,19 @@ package core
 import "time"
 
 type DeepWorkLog struct {
-	Day      Date
-	Duration time.Duration
+	ID          int32
+	DayID       int32
+	Date        Date
+	Duration    time.Duration
+	Origin      Integration
+	IsAutomated bool
 }
 
-func NewDeepWorkLog(d time.Duration, day Date) DeepWorkLog {
+func NewDeepWorkLog(dur time.Duration, day Day) DeepWorkLog {
 	return DeepWorkLog{
-		Day:      day,
-		Duration: d,
+		Duration: dur,
+		DayID:    day.ID,
+		Date:     day.Date,
 	}
 }
 
@@ -19,7 +24,7 @@ func (d *DeepWorkLog) IsZero() bool {
 }
 
 func (d *DeepWorkLog) ToHabitLogDeepWork() (res NewHabitParams) {
-	res.Date = d.Day
+	res.Date = d.Date
 	res.HabitType = HabitTypeDeepWork
 	res.Origin = OriginLogDeepWork
 	res.Automated = true

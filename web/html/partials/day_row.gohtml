@@ -55,6 +55,9 @@
                hx-post="/habit/log?success=false&category={{.Work.Category.Type}}&date={{dateOnly .Date}}"
                hx-swap="outerHTML"
                hx-target="closest tr">N</a>
+            {{with .Work.Main.Detail}}
+                <span> {{.}}</span>
+            {{end}}
         </td>
         <td>
             {{if eq .Eat.State "not_done" }}

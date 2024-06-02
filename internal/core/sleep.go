@@ -13,7 +13,7 @@ type SleepLog struct {
 	EndTime     time.Time
 	IsMainSleep bool
 	IsAutomated bool
-	Origin      OriginLog
+	Origin      Integration
 	Raw         []byte
 	// Minutes
 	MinutesInBed  time.Duration

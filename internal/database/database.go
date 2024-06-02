@@ -12,6 +12,7 @@ type Database struct {
 	Days     Days
 	Habits   Habits
 	Sleep    SleepLogs
+	DeepWork DeepWorkLogs
 	Auths    Auths
 	executor bob.DB
 }
@@ -22,6 +23,7 @@ func New(executor bob.DB) *Database {
 		Days:     Days{db: executor},
 		Habits:   Habits{db: executor},
 		Sleep:    SleepLogs{db: executor},
+		DeepWork: DeepWorkLogs{db: executor},
 		Auths:    Auths{db: executor},
 		executor: executor,
 	}
