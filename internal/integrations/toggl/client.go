@@ -1,35 +1,46 @@
 package toggl
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
-	"net/url"
 )
 
 const BaseURL = "https://api.track.toggl.com"
 
+// in case of 4xx error - don't try another request with the same payload, inspect the response body, most of the time it has a readable message.
+// in case of 5xx error - have a random delay before the next request.
+// in case of 429 (Too Many Requests) - back off for a few minutes (you can expect a rate of 1req/sec to be available).
+// in case of 410 (Gone) - don't try this endpoint again.
+// in case of 402 (Payment required) - workspace should be upgraded to have access to said feature, don't repeat the request until that has happened.
+
 type Client struct {
 	*http.Client
-	token string
+	token       string
+	workspaceID int
 }
 
-func (c *Client) Call(method, path string, urlParams url.Values, payload any) error {
-	reqURL := BaseURL + path
-	if urlParams != nil {
-		reqURL = fmt.Sprintf("%s?%s", reqURL, urlParams.Encode())
+func (c *Client) Call(method, path string, reqBody, resPayload any) error {
+	var bd io.Reader
+	if reqBody != nil {
+		jsonBody, err := json.Marshal(reqBody)
+		if err != nil {
+			return err
+		}
+		bd = bytes.NewReader(jsonBody)
 	}
 
+	reqURL := BaseURL + path
 	// Make request
-	req, err := http.NewRequest(method, reqURL, nil)
+	req, err := http.NewRequest(method, reqURL, bd)
 	if err != nil {
 		return err
 	}
 
-	req.Header.Set("accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
 	req.SetBasicAuth(c.token, "api_token")
 	res, err := c.Do(req)
 	if err != nil {
@@ -49,7 +60,7 @@ func (c *Client) Call(method, path string, urlParams url.Values, payload any) er
 		return errors.New("toggl response body is not valid json")
 	}
 
-	return json.Unmarshal(body, payload)
+	return json.Unmarshal(body, resPayload)
 }
 
 func (c *Client) catchTogglErr(body []byte) error {

@@ -23,9 +23,11 @@ type AppOptions struct {
 }
 
 type Config struct {
-	Fitbit *oauth2.Config
-	Google *oauth2.Config
-	Env    Environment
+	Fitbit           *oauth2.Config
+	Google           *oauth2.Config
+	TogglToken       string
+	TogglWorkspaceID int
+	Env              Environment
 }
 
 func New(opts *AppOptions) *App {
@@ -33,7 +35,7 @@ func New(opts *AppOptions) *App {
 		Log:  opts.Logger,
 		Env:  opts.Config.Env,
 		db:   opts.Database,
-		sync: integrations.New(opts.Config.Fitbit),
+		sync: integrations.New(opts.Config.TogglWorkspaceID, opts.Config.TogglToken, opts.Config.Fitbit),
 	}
 	a.Log.Info("Application initialized", "Environment", a.Env)
 	return a

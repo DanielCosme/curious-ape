@@ -35,6 +35,10 @@ type config struct {
 	Integrations struct {
 		Fitbit *Oauth2Config `json:"fitbit"`
 		Google *Oauth2Config `json:"google"`
+		Toggl  struct {
+			Token       string `json:"api_token"`
+			WorkspaceID int    `json:"workspace_id"`
+		} `json:"toggl"`
 	} `json:"integrations"`
 	Environment application.Environment
 	Admin       user `json:"admin"`
@@ -78,9 +82,11 @@ func main() {
 	app := application.New(&application.AppOptions{
 		Database: database.New(bob.NewDB(db)),
 		Config: &application.Config{
-			Env:    cfg.Environment,
-			Fitbit: cfg.Integrations.Fitbit.ToConf(),
-			Google: cfg.Integrations.Google.ToConf(),
+			Env:              cfg.Environment,
+			Fitbit:           cfg.Integrations.Fitbit.ToConf(),
+			Google:           cfg.Integrations.Google.ToConf(),
+			TogglToken:       cfg.Integrations.Toggl.Token,
+			TogglWorkspaceID: cfg.Integrations.Toggl.WorkspaceID,
 		},
 		Logger: sLogger,
 	})
@@ -90,7 +96,7 @@ func main() {
 
 	sessionManager := scs.New()
 	sessionManager.Store = sqlite3store.New(db)
-	sessionManager.Lifetime = 12 * time.Hour
+	sessionManager.Lifetime = 48 * time.Hour
 	sessionManager.Cookie.SameSite = http.SameSiteStrictMode
 	t, err := transport.NewTransport(app, sessionManager, v)
 	exitIfErr(err)
@@ -220,7 +226,7 @@ func setUpCronJobs(a *application.App) error {
 		if err != nil {
 			return err
 		}
-		a.Log.Info("Cron job configured", "name", j.Name(), "next_run", next.Format(core.HumanDateWithTime))
+		a.Log.Info("Cron job configured", "name", j.Name(), "next_run", next.Format(core.HumanDateWithTime), "Timezone", next.Location().String())
 	}
 
 	return nil

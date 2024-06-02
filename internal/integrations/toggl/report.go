@@ -1,8 +1,8 @@
 package toggl
 
 import (
+	"fmt"
 	"net/http"
-	"net/url"
 	"time"
 )
 
@@ -10,49 +10,42 @@ type ReportsService struct {
 	client *Client
 }
 
+type SummaryEnvelope struct {
+	Logs          []*Summary
+	TotalDuration time.Duration
+}
+
 type Summary struct {
-	TotalGrand int    `json:"total_grand"`
-	Data       []Data `json:"data"`
-}
-type Data struct {
-	ID    int     `json:"id"`
-	Title Title   `json:"title"`
-	Time  int     `json:"time"`
-	Items []Items `json:"items"`
-}
-type Title struct {
-	Project  string `json:"project"`
-	Color    string `json:"color"`
-	HexColor string `json:"hex_color"`
-}
-type Items struct {
-	Title      TimeEntryTitle `json:"title"`
-	Time       int            `json:"time"`
-	LocalStart string         `json:"local_start"`
-}
-type TimeEntryTitle struct {
-	TimeEntry string `json:"time_entry"`
+	BillableSeconds int `json:"billable_seconds"`
+	ProjectID       int `json:"project_id"`
+	TrackedSeconds  int `json:"tracked_seconds"`
+	UserID          int `json:"user_id"`
 }
 
-func (s *ReportsService) GetDaySummaryForProjectIDs(day time.Time, projectIDs, workspaceID string) (*Summary, error) {
-	params := NewPrams(s.client.token, workspaceID)
-	params.Set("since", FormatDate(day))
-	params.Set("until", FormatDate(day))
-	params.Set("project_ids", projectIDs)
-	return s.summaryRequest(params)
+func (s *ReportsService) GetDaySummary(day time.Time) (res SummaryEnvelope, err error) {
+	type query struct {
+		StartDate string `json:"start_date"`
+		EndDate   string `json:"end_date"`
+	}
+	d := FormatDate(day)
+	ss, err := s.summaryRequest(&query{
+		StartDate: d,
+		EndDate:   d,
+	})
+	if err != nil {
+		return
+	}
+	totalSeconds := 0
+	for _, s := range ss {
+		totalSeconds += s.TrackedSeconds
+	}
+	res.TotalDuration = time.Second * time.Duration(totalSeconds)
+	return
 }
 
-// NewPrams returns mandatory params for the toggl api
-func NewPrams(userAgent, workspaceID string) url.Values {
-	params := url.Values{}
-	params.Set("user_agent", userAgent)
-	params.Set("workspace_id", workspaceID)
-	return params
-}
-
-func (s *ReportsService) summaryRequest(params url.Values) (*Summary, error) {
-	var summary *Summary
-	err := s.client.Call(http.MethodGet, "/reports/api/v2/summary", params, &summary)
+func (s *ReportsService) summaryRequest(body any) ([]*Summary, error) {
+	var summary []*Summary
+	err := s.client.Call(http.MethodPost, fmt.Sprintf("/reports/api/v3/workspace/%d/projects/summary", s.client.workspaceID), body, &summary)
 	return summary, err
 }
 

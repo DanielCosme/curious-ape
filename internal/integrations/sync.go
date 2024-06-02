@@ -3,6 +3,7 @@ package integrations
 import (
 	"context"
 	"errors"
+	"github.com/danielcosme/curious-ape/internal/integrations/toggl"
 	"log/slog"
 	"net/http"
 
@@ -12,14 +13,28 @@ import (
 )
 
 type Integrations struct {
-	fitbit *oauth2.Config
-	google *oauth2.Config
+	TogglAPI *toggl.API
+	fitbit   *oauth2.Config
+	google   *oauth2.Config
+	list     []core.Integration
 }
 
-func New(fitbit *oauth2.Config) *Integrations {
-	return &Integrations{
-		fitbit: fitbit,
+func New(togglWorkspaceID int, togglToken string, fitbit *oauth2.Config) *Integrations {
+	i := &Integrations{
+		fitbit:   fitbit,
+		TogglAPI: toggl.NewApi(togglWorkspaceID, togglToken),
 	}
+	if fitbit != nil {
+		i.list = append(i.list, core.IntegrationFitbit)
+	}
+	if togglToken != "" {
+		i.list = append(i.list, core.IntegrationToggl)
+	}
+	return i
+}
+
+func (i *Integrations) IntegrationsList() []core.Integration {
+	return i.list
 }
 
 func (i *Integrations) GenerateOauth2URI(provider core.Integration) string {

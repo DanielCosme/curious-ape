@@ -13,7 +13,7 @@ type Me struct {
 	ID                 int       `json:"id"`
 	APIToken           string    `json:"api_token"`
 	Email              string    `json:"email"`
-	Fullname           string    `json:"fullname"`
+	FullName           string    `json:"fullname"`
 	Timezone           string    `json:"timezone"`
 	DefaultWorkspaceID int       `json:"default_workspace_id"`
 	BeginningOfWeek    int       `json:"beginning_of_week"`

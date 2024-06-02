@@ -11,12 +11,17 @@ type API struct {
 	Projects  *ProjectsService
 }
 
-func NewApi(token string) *API {
+func NewApi(workspaceID int, token string) *API {
+	client := &Client{
+		Client:      http.DefaultClient,
+		workspaceID: workspaceID,
+		token:       token,
+	}
 	a := &API{
-		Me:        &MeService{client: &Client{Client: http.DefaultClient}},
-		Reports:   &ReportsService{client: &Client{Client: http.DefaultClient}},
-		Workspace: &WorkspaceService{client: &Client{Client: http.DefaultClient}},
-		Projects:  &ProjectsService{client: &Client{Client: http.DefaultClient}},
+		Me:        &MeService{client: client},
+		Reports:   &ReportsService{client: client},
+		Workspace: &WorkspaceService{client: client},
+		Projects:  &ProjectsService{client: client},
 	}
 	return a
 }

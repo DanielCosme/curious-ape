@@ -10,22 +10,23 @@ import (
 	"github.com/danielcosme/curious-ape/internal/integrations/fitbit"
 	"golang.org/x/oauth2"
 	"net/http"
+	"time"
 )
 
 type IntegrationInfo struct {
-	Name        string
-	State       IntegrationState
-	ProfileInfo string
-	AuthURL     string
-	Problem     string
+	Name    string
+	State   IntegrationState
+	Info    []string
+	AuthURL string
+	Problem string
 }
 
 func (a *App) IntegrationsGet() ([]IntegrationInfo, error) {
 	var res []IntegrationInfo
-	currentIntegrations := []core.Integration{core.IntegrationFitbit}
 
-	for _, integration := range currentIntegrations {
-		var profileInfo, authURL, problem string
+	for _, integration := range a.sync.IntegrationsList() {
+		var info []string
+		var authURL, problem string
 		state := IntegrationDisconnected
 
 		switch integration {
@@ -37,15 +38,48 @@ func (a *App) IntegrationsGet() ([]IntegrationInfo, error) {
 			} else {
 				state = IntegrationConnected
 				if len(sls) > 0 {
-					profileInfo = fmt.Sprintf("Total time asleep last night: %s", sls[0].MinutesAsleep)
+					info = append(info, fmt.Sprintf("Total time asleep last night: %s", sls[0].MinutesAsleep))
 				}
 			}
 			res = append(res, IntegrationInfo{
-				Name:        "Fitbit",
-				State:       state,
-				ProfileInfo: profileInfo,
-				AuthURL:     authURL,
-				Problem:     problem,
+				Name:    "Fitbit",
+				State:   state,
+				Info:    info,
+				AuthURL: authURL,
+				Problem: problem,
+			})
+		case core.IntegrationToggl:
+			profile, err := a.sync.TogglAPI.Me.GetProfile()
+			if err != nil {
+				problem = err.Error()
+			} else if profile != nil {
+				state = IntegrationConnected
+				name := fmt.Sprintf("Profile name: %s", profile.FullName)
+				timeZone := fmt.Sprintf("Timezone: %s", profile.Timezone)
+				info = append(info, name, timeZone)
+
+				ws, err := a.sync.TogglAPI.Workspace.Get()
+				if err == nil {
+					for _, w := range ws {
+						info = append(info, fmt.Sprintf("Workspace: %s - ID: %d", w.Name, w.ID))
+					}
+				} else {
+					a.Log.Error(err.Error())
+				}
+
+				summary, err := a.sync.TogglAPI.Reports.GetDaySummary(time.Now())
+				if err != nil {
+					a.Log.Error(err.Error())
+				} else {
+					info = append(info, fmt.Sprintf("Total time so far: %s", summary.TotalDuration))
+				}
+			}
+			res = append(res, IntegrationInfo{
+				Name:    "Toggl",
+				State:   state,
+				Info:    info,
+				AuthURL: authURL,
+				Problem: problem,
 			})
 		default:
 		}

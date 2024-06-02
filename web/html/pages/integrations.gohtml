@@ -11,9 +11,12 @@
         <p><strong>State:</strong> {{.State}}</p>
         {{if ne .State "connected"}}
             <p>{{.Problem}}</p>
-            <a href="{{.AuthURL}}" target="_blank"><button>Authenticate</button></a>
-        {{else}}
-            <p>{{.ProfileInfo}}</p>
+            {{with .AuthURL}}
+            <a href="{{.}}" target="_blank"><button>Authenticate</button></a>
+            {{end}}
+        {{end}}
+        {{range .Info}}
+            <li>{{.}}</li>
         {{end}}
     </article>
     {{end}}
