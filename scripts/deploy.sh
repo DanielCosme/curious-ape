@@ -39,5 +39,6 @@ kubectl create \
         | kubectl apply -f -
 
 kubectl apply -f ./kube/deployment.yaml
+kubectl rollout restart deployment curious-ape
 
 echo "--- Success ---"
