@@ -153,23 +153,14 @@ func logFatal(err error) {
 
 func Version() string {
 	hash := "unknown"
-	dirty := false
-
 	bi, ok := debug.ReadBuildInfo()
 	if ok {
 		for _, s := range bi.Settings {
 			switch s.Key {
 			case "vcs.revision":
 				hash = s.Value[:7]
-			case "vcs.modified":
-				if s.Value == "true" {
-					dirty = true
-				}
 			}
 		}
-	}
-	if dirty {
-		return fmt.Sprintf("%s-%s-dirty", version, hash)
 	}
 	return fmt.Sprintf("%s-%s", version, hash)
 }
