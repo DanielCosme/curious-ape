@@ -28,7 +28,7 @@ func (d *DeepWorkLog) ToHabitLogDeepWork() (res NewHabitParams) {
 	res.HabitType = HabitTypeDeepWork
 	res.Origin = OriginLogDeepWork
 	res.Automated = true
-	res.Detail = d.Duration.String()
+	res.Detail = d.Duration.Round(time.Minute).String()
 	if d.Duration > time.Hour*5 {
 		res.Success = true
 	}
