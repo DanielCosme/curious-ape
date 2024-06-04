@@ -35,7 +35,7 @@ func New(opts *AppOptions) *App {
 		Log:  opts.Logger,
 		Env:  opts.Config.Env,
 		db:   opts.Database,
-		sync: integrations.New(opts.Config.TogglWorkspaceID, opts.Config.TogglToken, opts.Config.Fitbit),
+		sync: integrations.New(opts.Config.TogglWorkspaceID, opts.Config.TogglToken, opts.Config.Fitbit, opts.Config.Google),
 	}
 	a.Log.Info("Application initialized", "Environment", a.Env)
 	return a

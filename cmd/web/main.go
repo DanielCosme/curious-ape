@@ -226,6 +226,20 @@ func setUpCronJobs(a *application.App) error {
 		return err
 	}
 
+	_, err = s.NewJob(
+		gocron.DailyJob(1, gocron.NewAtTimes(
+			gocron.NewAtTime(23, 55, 0),
+		)),
+		gocron.NewTask(func() {
+			if err := a.FitnessSync(today); err != nil {
+				a.Log.Error(err.Error())
+			}
+		}),
+		gocron.WithName("Fitness logs sync"),
+	)
+	if err != nil {
+		return err
+	}
 	s.Start()
 
 	for _, j := range s.Jobs() {

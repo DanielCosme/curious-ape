@@ -8,6 +8,7 @@ import (
 	"github.com/danielcosme/curious-ape/internal/database"
 	"github.com/danielcosme/curious-ape/internal/database/gen/models"
 	"github.com/danielcosme/curious-ape/internal/integrations/fitbit"
+	"github.com/danielcosme/curious-ape/internal/integrations/google"
 	"golang.org/x/oauth2"
 	"net/http"
 	"time"
@@ -23,6 +24,7 @@ type IntegrationInfo struct {
 
 func (a *App) IntegrationsGet() ([]IntegrationInfo, error) {
 	var res []IntegrationInfo
+	today := core.NewDateToday()
 
 	for _, integration := range a.sync.IntegrationsList() {
 		var info []string
@@ -30,8 +32,26 @@ func (a *App) IntegrationsGet() ([]IntegrationInfo, error) {
 		state := IntegrationDisconnected
 
 		switch integration {
+		case core.IntegrationGoogle:
+			_, err := a.fitnessLogsFromGoogle(today)
+			if err != nil {
+				authURL = a.sync.GenerateOauth2URI(integration)
+				problem = err.Error()
+			} else {
+				state = IntegrationConnected
+				// if len(sls) > 0 {
+				// 	info = append(info, fmt.Sprintf("Total time asleep last night: %s", sls[0].MinutesAsleep))
+				// }
+			}
+			res = append(res, IntegrationInfo{
+				Name:    "Google",
+				State:   state,
+				Info:    info,
+				AuthURL: authURL,
+				Problem: problem,
+			})
 		case core.IntegrationFitbit:
-			sls, err := a.sleepLogsGetFromFitbit(core.NewDateToday())
+			sls, err := a.sleepLogsGetFromFitbit(today)
 			if err != nil {
 				authURL = a.sync.GenerateOauth2URI(integration)
 				problem = err.Error()
@@ -107,6 +127,12 @@ func (a *App) Oauth2Success(provider, code string) error {
 func (a *App) fitbitClient() (res fitbit.API, err error) {
 	client, err := a.integrationsGetClient(core.IntegrationFitbit)
 	res = fitbit.NewAPI(client)
+	return
+}
+
+func (a *App) googleClient() (res google.API, err error) {
+	client, err := a.integrationsGetClient(core.IntegrationGoogle)
+	res = google.NewAPI(client)
 	return
 }
 

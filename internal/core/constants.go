@@ -41,6 +41,7 @@ const (
 	OriginLogManual   OriginLog = "manual_log"
 	OriginLogSleep    OriginLog = "sleep_log"
 	OriginLogDeepWork OriginLog = "deep_work_log"
+	OriginLogFitness  OriginLog = "fitness_log"
 )
 
 type Integration string

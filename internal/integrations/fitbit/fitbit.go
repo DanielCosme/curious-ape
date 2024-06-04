@@ -18,8 +18,8 @@ type API struct {
 
 func NewAPI(client *http.Client) API {
 	return API{
-		client: client,
 		Sleep:  &SleepService{client: Client{Client: client}},
+		client: client,
 	}
 }
 

@@ -51,6 +51,16 @@ func (d Date) RangeMonth() DateSlice {
 
 }
 
+func (d Date) ToEndOfDay() time.Time {
+	t := d.Time()
+	return time.Date(t.Year(), t.Month(), t.Day(), 23, 59, 59, 0, t.Location())
+}
+
+func (d Date) ToBeginningOfDay() time.Time {
+	t := d.Time()
+	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+}
+
 func (ds DateSlice) ToTimeSlice() []time.Time {
 	res := make([]time.Time, len(ds))
 	for idx, d := range ds {

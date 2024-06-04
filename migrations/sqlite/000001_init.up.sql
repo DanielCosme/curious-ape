@@ -68,8 +68,8 @@ CREATE TABLE IF NOT EXISTS sleep_logs (
         "date"              DATE NOT NULL,
         start_time          DATE NOT NULL,
         end_time            DATE NOT NULL,
-        is_main_sleep       BOOLEAN DEFAULT true,
-        is_automated        BOOLEAN DEFAULT false,
+        is_main_sleep       BOOLEAN DEFAULT TRUE,
+        is_automated        BOOLEAN DEFAULT FALSE,
         origin              TEXT NOT NULL CHECK (length(origin) > 1),
         total_time_in_bed   INTEGER DEFAULT 0,
         minutes_asleep      INTEGER DEFAULT 0,
@@ -84,16 +84,16 @@ CREATE TABLE IF NOT EXISTS sleep_logs (
 );
 
 CREATE TABLE IF NOT EXISTS fitness_logs (
-        id                  INTEGER primary key,
-        day_id              INTEGER not null,
+        id                  INTEGER PRIMARY KEY,
+        day_id              INTEGER NOT NULL,
 
-        "date"              DATE not null,
-        start_time          DATE not null,
-        end_time            DATE not null,
-        "type"              TEXT not null default '',
-        title               TEXT not null default '',
-        origin              TEXT not null CHECK (length(origin) > 1),
-        note                TEXT default '',
+        "date"              DATE NOT NULL,
+        start_time          DATE NOT NULL,
+        end_time            DATE NOT NULL,
+        "type"              TEXT NOT NULL DEFAULT '',
+        title               TEXT NOT NULL DEFAULT '',
+        origin              TEXT NOT NULL CHECK (length(origin) > 1),
+        note                TEXT DEFAULT '',
         raw                 TEXT,
 
         FOREIGN KEY (day_id) REFERENCES "days" (id) ON DELETE CASCADE,

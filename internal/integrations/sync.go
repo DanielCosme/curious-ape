@@ -19,13 +19,17 @@ type Integrations struct {
 	list     []core.Integration
 }
 
-func New(togglWorkspaceID int, togglToken string, fitbit *oauth2.Config) *Integrations {
+func New(togglWorkspaceID int, togglToken string, fitbit, google *oauth2.Config) *Integrations {
 	i := &Integrations{
-		fitbit:   fitbit,
 		TogglAPI: toggl.NewApi(togglWorkspaceID, togglToken),
+		fitbit:   fitbit,
+		google:   google,
 	}
-	if fitbit != nil {
+	if i.fitbit != nil {
 		i.list = append(i.list, core.IntegrationFitbit)
+	}
+	if i.google != nil {
+		i.list = append(i.list, core.IntegrationGoogle)
 	}
 	if togglToken != "" {
 		i.list = append(i.list, core.IntegrationToggl)
@@ -44,7 +48,7 @@ func (i *Integrations) GenerateOauth2URI(provider core.Integration) string {
 	case core.IntegrationFitbit:
 		config = i.fitbit
 	case core.IntegrationGoogle:
-		config = i.fitbit
+		config = i.google
 		opts = append(opts,
 			oauth2.SetAuthURLParam("access_type", "offline"),
 			oauth2.SetAuthURLParam("approval_prompt", "force"),
@@ -66,7 +70,7 @@ func (i *Integrations) GetHttpClient(provider core.Integration, currentToken *oa
 		panic("not implemented: " + provider)
 	}
 	if !currentToken.Valid() {
-		slog.Info("Refreshing token")
+		slog.Info("Refreshing token", "provider", string(provider))
 		// Refresh token.
 		currentToken, err = config.TokenSource(context.Background(), currentToken).Token()
 		if err != nil {

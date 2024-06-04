@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"github.com/aarondl/opt/omit"
 	"github.com/danielcosme/curious-ape/internal/core"
 	"github.com/danielcosme/curious-ape/internal/database/gen/models"
 	"github.com/stephenafamo/bob"
@@ -46,7 +47,16 @@ func (h *Habits) AddLog(s *models.HabitLogSetter) (res core.Habit, err error) {
 	if err != nil {
 		return res, err
 	}
-	return h.Get(HabitParams{ID: s.HabitID.MustGet()})
+	res, err = h.Get(HabitParams{ID: s.HabitID.MustGet()})
+	if err != nil {
+		return res, err
+	}
+	return res, models.Habits.Update(
+		context.Background(),
+		h.db,
+		&models.HabitSetter{State: omit.From(string(res.State()))},
+		&models.Habit{ID: res.ID},
+	)
 }
 
 func (h *Habits) GetCategory(p HabitCategoryParams) (core.HabitCategory, error) {

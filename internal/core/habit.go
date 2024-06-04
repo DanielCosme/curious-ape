@@ -1,9 +1,5 @@
 package core
 
-import (
-	"time"
-)
-
 type Habit struct {
 	ID       int32
 	DayID    int32
@@ -42,19 +38,6 @@ type NewHabitParams struct {
 
 func (hp *NewHabitParams) Valid() bool {
 	return !hp.Date.Time().IsZero() && hp.HabitType != ""
-}
-
-func (sl *SleepLog) ToHabitLogWakeUp() (res NewHabitParams) {
-	res.Date = sl.Date
-	res.HabitType = HabitTypeWakeUp
-	res.Origin = OriginLogSleep
-	res.Automated = true
-	res.Detail = sl.EndTime.Format(Time)
-	wakeUpTime := time.Date(sl.EndTime.Year(), sl.EndTime.Month(), sl.EndTime.Day(), 6, 0, 0, 0, sl.EndTime.Location())
-	if sl.EndTime.Before(wakeUpTime) {
-		res.Success = true
-	}
-	return res
 }
 
 func NewHabit(d Date, c HabitCategory, logs []HabitLog) Habit {

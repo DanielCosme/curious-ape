@@ -10,7 +10,7 @@ type API struct {
 	Fitness *FitnessService
 }
 
-func NewAPI(client *http.Client) *API {
-	c := &API{Fitness: &FitnessService{client: Client{Client: client}}}
+func NewAPI(client *http.Client) API {
+	c := API{Fitness: &FitnessService{client: Client{Client: client}}}
 	return c
 }

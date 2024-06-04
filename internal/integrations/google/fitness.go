@@ -3,6 +3,7 @@ package google
 import (
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 )
 
@@ -48,4 +49,9 @@ func (s *FitnessService) GetFitnessSessions(startTime, endTime time.Time) ([]Ses
 
 func formatTime(t time.Time) string {
 	return t.Format(time.RFC3339)
+}
+
+func ParseMillis(s string) time.Time {
+	millis, _ := strconv.Atoi(s)
+	return time.UnixMilli(int64(millis))
 }

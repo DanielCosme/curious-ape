@@ -34,3 +34,16 @@ func NewSleepLog(day Day) SleepLog {
 	}
 	return sl
 }
+
+func (sl *SleepLog) ToHabitLogWakeUp() (res NewHabitParams) {
+	res.Date = sl.Date
+	res.HabitType = HabitTypeWakeUp
+	res.Origin = OriginLogSleep
+	res.Automated = true
+	res.Detail = sl.EndTime.Format(Time)
+	wakeUpTime := time.Date(sl.EndTime.Year(), sl.EndTime.Month(), sl.EndTime.Day(), 6, 0, 0, 0, sl.EndTime.Location())
+	if sl.EndTime.Before(wakeUpTime) {
+		res.Success = true
+	}
+	return res
+}
