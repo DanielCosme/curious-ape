@@ -37,5 +37,6 @@ func (a *App) deepWorkFromToggl(d core.Date) (res core.DeepWorkLog, err error) {
 	res = core.NewDeepWorkLog(summary.TotalDuration, day)
 	res.IsAutomated = true
 	res.Origin = core.IntegrationToggl
+	res.DayID = day.ID
 	return
 }

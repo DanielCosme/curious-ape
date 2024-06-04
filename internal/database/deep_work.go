@@ -20,7 +20,7 @@ func (dw *DeepWorkLogs) Upsert(log core.DeepWorkLog) (res core.DeepWorkLog, err 
 		context.Background(),
 		dw.db,
 		true,
-		[]string{"origin"},
+		[]string{"origin", "day_id"},
 		nil,
 		setter,
 	)

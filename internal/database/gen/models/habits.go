@@ -407,7 +407,7 @@ func (o *Habit) Preload(name string, retrieved any) error {
 			}
 		}
 		return nil
-	case "Date":
+	case "Day":
 		rel, ok := retrieved.(*Day)
 		if !ok {
 			return fmt.Errorf("habit cannot load %T as %q", retrieved, name)
@@ -510,7 +510,7 @@ func (os HabitSlice) LoadHabitHabitLogs(ctx context.Context, exec bob.Executor, 
 
 func PreloadHabitDay(opts ...sqlite.PreloadOption) sqlite.Preloader {
 	return sqlite.Preload[*Day, DaySlice](orm.Relationship{
-		Name: "Date",
+		Name: "Day",
 		Sides: []orm.RelSide{
 			{
 				From: "habits",

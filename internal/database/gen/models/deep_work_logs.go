@@ -388,7 +388,7 @@ func (o *DeepWorkLog) Preload(name string, retrieved any) error {
 	}
 
 	switch name {
-	case "Date":
+	case "Day":
 		rel, ok := retrieved.(*Day)
 		if !ok {
 			return fmt.Errorf("deepWorkLog cannot load %T as %q", retrieved, name)
@@ -407,7 +407,7 @@ func (o *DeepWorkLog) Preload(name string, retrieved any) error {
 
 func PreloadDeepWorkLogDay(opts ...sqlite.PreloadOption) sqlite.Preloader {
 	return sqlite.Preload[*Day, DaySlice](orm.Relationship{
-		Name: "Date",
+		Name: "Day",
 		Sides: []orm.RelSide{
 			{
 				From: "deep_work_logs",
