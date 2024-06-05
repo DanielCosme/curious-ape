@@ -25,6 +25,18 @@ func (a *App) FitnessSync(d core.Date) error {
 		}
 		a.Log.Info("Fitness log added", "date", fl.Date, "origin", fl.Origin)
 	}
+	if len(fitnessLogs) == 0 {
+		_, err := a.HabitUpsert(core.NewHabitParams{
+			Success:   false,
+			Date:      d,
+			HabitType: core.HabitTypeExercise,
+			Origin:    core.OriginLogFitness,
+			Automated: true,
+		})
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
