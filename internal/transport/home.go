@@ -28,6 +28,7 @@ type dayContainer struct {
 	Fitness core.Habit
 	Work    core.Habit
 	Eat     core.Habit
+	Score   int
 }
 
 func formatDays(ds []core.Day) []dayContainer {
@@ -44,6 +45,9 @@ func formatDays(ds []core.Day) []dayContainer {
 				dc.Work = h
 			case core.HabitTypeEatHealthy:
 				dc.Eat = h
+			}
+			if h.State() == core.HabitStateDone {
+				dc.Score++
 			}
 		}
 		dc.Wake = replace(dc.Wake)
