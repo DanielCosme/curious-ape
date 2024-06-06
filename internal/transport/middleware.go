@@ -18,11 +18,13 @@ func midSlogConfig(t *Transport) middleware.RequestLoggerConfig {
 		LogURI:      true,
 		LogError:    true,
 		HandleError: false, // forwards error to the global error handler, so it can decide appropriate status code
+		LogRemoteIP: true,
 		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
 			if v.Error == nil {
 				t.App.Log.LogAttrs(context.Background(), slog.LevelInfo, v.Method,
 					slog.String("uri", v.URI),
 					slog.Int("status", v.Status),
+					slog.String("IP", v.RemoteIP),
 				)
 			} else {
 				t.App.Log.LogAttrs(context.Background(), slog.LevelError, v.Method,
