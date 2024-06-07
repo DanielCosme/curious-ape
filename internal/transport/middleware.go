@@ -30,6 +30,7 @@ func midSlogConfig(t *Transport) middleware.RequestLoggerConfig {
 				t.App.Log.LogAttrs(context.Background(), slog.LevelError, v.Method,
 					slog.String("uri", v.URI),
 					slog.Int("status", v.Status),
+					slog.String("IP", v.RemoteIP),
 					slog.String("err", v.Error.Error()),
 				)
 			}
