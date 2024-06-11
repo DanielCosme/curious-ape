@@ -196,13 +196,12 @@ func setUpCronJobs(a *application.App) error {
 		return err
 	}
 
-	today := core.NewDateToday()
 	_, err = s.NewJob(
 		gocron.DailyJob(1, gocron.NewAtTimes(
 			gocron.NewAtTime(23, 0, 0),
 		)),
 		gocron.NewTask(func() {
-			if err := a.SleepSync(today); err != nil {
+			if err := a.SleepSync(core.NewDateToday()); err != nil {
 				a.Log.Error(err.Error())
 			}
 		}),
@@ -216,7 +215,7 @@ func setUpCronJobs(a *application.App) error {
 			gocron.NewAtTime(23, 55, 0),
 		)),
 		gocron.NewTask(func() {
-			if err := a.DeepWorkSync(today); err != nil {
+			if err := a.DeepWorkSync(core.NewDateToday()); err != nil {
 				a.Log.Error(err.Error())
 			}
 		}),
@@ -231,7 +230,7 @@ func setUpCronJobs(a *application.App) error {
 			gocron.NewAtTime(23, 55, 0),
 		)),
 		gocron.NewTask(func() {
-			if err := a.FitnessSync(today); err != nil {
+			if err := a.FitnessSync(core.NewDateToday()); err != nil {
 				a.Log.Error(err.Error())
 			}
 		}),
