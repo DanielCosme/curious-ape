@@ -31,19 +31,7 @@ func (t *Transport) sync(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	err = t.App.SleepSync(d)
-	if err != nil {
-		return err
-	}
-	err = t.App.DeepWorkSync(d)
-	if err != nil {
-		return err
-	}
-	err = t.App.FitnessSync(d)
-	if err != nil {
-		return err
-	}
-	day, err := t.App.DayGetOrCreate(d)
+	day, err := t.App.SyncDay(d)
 	if err != nil {
 		return err
 	}

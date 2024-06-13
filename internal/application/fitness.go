@@ -7,7 +7,7 @@ import (
 	"github.com/danielcosme/curious-ape/internal/integrations/google"
 )
 
-func (a *App) FitnessSync(d core.Date) error {
+func (a *App) fitnessSync(d core.Date) error {
 	fitnessLogs, err := a.fitnessLogsFromGoogle(d)
 	if err != nil {
 		return err

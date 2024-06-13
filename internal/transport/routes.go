@@ -20,8 +20,10 @@ func EchoRoutes(t *Transport) http.Handler {
 	e.StaticFS("/static", echo.MustSubFS(web.Files, "static"))
 
 	login := e.Group("/login", t.midLoadAndSaveCookie)
-	login.GET("", t.loginForm)
-	login.POST("", t.loginPost)
+	{
+		login.GET("", t.loginForm)
+		login.POST("", t.loginPost)
+	}
 
 	p := e.Group("/", t.midLoadAndSaveCookie)
 	{
@@ -38,6 +40,7 @@ func EchoRoutes(t *Transport) http.Handler {
 		p.POST("sync/:date", t.sync)
 	}
 
+	// TODO make this endpoint protected
 	e.GET("api/oauth2/:provider/success", t.oauth2Success)
 
 	// In case I need a custom error Handler.

@@ -25,86 +25,94 @@ type IntegrationInfo struct {
 func (a *App) IntegrationsGet() ([]IntegrationInfo, error) {
 	var res []IntegrationInfo
 	today := core.NewDateToday()
+	integrationList := a.sync.IntegrationsList()
+	infoCh := make(chan IntegrationInfo)
 
-	for _, integration := range a.sync.IntegrationsList() {
+	for _, integration := range integrationList {
 		var info []string
 		var authURL, problem string
 		state := IntegrationDisconnected
 
 		switch integration {
 		case core.IntegrationGoogle:
-			_, err := a.fitnessLogsFromGoogle(today)
-			if err != nil {
-				authURL = a.sync.GenerateOauth2URI(integration)
-				problem = err.Error()
-			} else {
-				state = IntegrationConnected
-				// if len(sls) > 0 {
-				// 	info = append(info, fmt.Sprintf("Total time asleep last night: %s", sls[0].MinutesAsleep))
-				// }
-			}
-			res = append(res, IntegrationInfo{
-				Name:    "Google",
-				State:   state,
-				Info:    info,
-				AuthURL: authURL,
-				Problem: problem,
-			})
-		case core.IntegrationFitbit:
-			sls, err := a.sleepLogsGetFromFitbit(today)
-			if err != nil {
-				authURL = a.sync.GenerateOauth2URI(integration)
-				problem = err.Error()
-			} else {
-				state = IntegrationConnected
-				if len(sls) > 0 {
-					info = append(info, fmt.Sprintf("Total time asleep last night: %s", sls[0].MinutesAsleep))
-				}
-			}
-			res = append(res, IntegrationInfo{
-				Name:    "Fitbit",
-				State:   state,
-				Info:    info,
-				AuthURL: authURL,
-				Problem: problem,
-			})
-		case core.IntegrationToggl:
-			profile, err := a.sync.TogglAPI.Me.GetProfile()
-			if err != nil {
-				problem = err.Error()
-			} else if profile != nil {
-				state = IntegrationConnected
-				name := fmt.Sprintf("Profile name: %s", profile.FullName)
-				timeZone := fmt.Sprintf("Timezone: %s", profile.Timezone)
-				info = append(info, name, timeZone)
-
-				ws, err := a.sync.TogglAPI.Workspace.Get()
-				if err == nil {
-					for _, w := range ws {
-						info = append(info, fmt.Sprintf("Workspace: %s - ID: %d", w.Name, w.ID))
-					}
-				} else {
-					a.Log.Error(err.Error())
-				}
-
-				summary, err := a.sync.TogglAPI.Reports.GetDaySummary(time.Now())
+			go func() {
+				_, err := a.fitnessLogsFromGoogle(today)
 				if err != nil {
-					a.Log.Error(err.Error())
+					authURL = a.sync.GenerateOauth2URI(integration)
+					problem = err.Error()
 				} else {
-					info = append(info, fmt.Sprintf("Total time so far: %s", summary.TotalDuration))
+					state = IntegrationConnected
 				}
-			}
-			res = append(res, IntegrationInfo{
-				Name:    "Toggl",
-				State:   state,
-				Info:    info,
-				AuthURL: authURL,
-				Problem: problem,
-			})
+				infoCh <- IntegrationInfo{
+					Name:    "Google",
+					State:   state,
+					Info:    info,
+					AuthURL: authURL,
+					Problem: problem,
+				}
+			}()
+		case core.IntegrationFitbit:
+			go func() {
+				sls, err := a.sleepLogsGetFromFitbit(today)
+				if err != nil {
+					authURL = a.sync.GenerateOauth2URI(integration)
+					problem = err.Error()
+				} else {
+					state = IntegrationConnected
+					if len(sls) > 0 {
+						info = append(info, fmt.Sprintf("Total time asleep last night: %s", sls[0].MinutesAsleep))
+					}
+				}
+				infoCh <- IntegrationInfo{
+					Name:    "Fitbit",
+					State:   state,
+					Info:    info,
+					AuthURL: authURL,
+					Problem: problem,
+				}
+			}()
+		case core.IntegrationToggl:
+			go func() {
+				profile, err := a.sync.TogglAPI.Me.GetProfile()
+				if err != nil {
+					problem = err.Error()
+				} else if profile != nil {
+					state = IntegrationConnected
+					name := fmt.Sprintf("Profile name: %s", profile.FullName)
+					timeZone := fmt.Sprintf("Timezone: %s", profile.Timezone)
+					info = append(info, name, timeZone)
+
+					ws, err := a.sync.TogglAPI.Workspace.Get()
+					if err == nil {
+						for _, w := range ws {
+							info = append(info, fmt.Sprintf("Workspace: %s - ID: %d", w.Name, w.ID))
+						}
+					} else {
+						a.Log.Error(err.Error())
+					}
+
+					summary, err := a.sync.TogglAPI.Reports.GetDaySummary(time.Now())
+					if err != nil {
+						a.Log.Error(err.Error())
+					} else {
+						info = append(info, fmt.Sprintf("Total time so far: %s", summary.TotalDuration))
+					}
+				}
+				infoCh <- IntegrationInfo{
+					Name:    "Toggl",
+					State:   state,
+					Info:    info,
+					AuthURL: authURL,
+					Problem: problem,
+				}
+			}()
 		default:
 		}
 	}
 
+	for i := 0; i < len(integrationList); i++ {
+		res = append(res, <-infoCh)
+	}
 	return res, nil
 }
 

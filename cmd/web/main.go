@@ -198,43 +198,14 @@ func setUpCronJobs(a *application.App) error {
 
 	_, err = s.NewJob(
 		gocron.DailyJob(1, gocron.NewAtTimes(
-			gocron.NewAtTime(23, 0, 0),
-		)),
-		gocron.NewTask(func() {
-			if err := a.SleepSync(core.NewDateToday()); err != nil {
-				a.Log.Error(err.Error())
-			}
-		}),
-		gocron.WithName("Sleep logs sync"),
-	)
-	if err != nil {
-		return err
-	}
-	_, err = s.NewJob(
-		gocron.DailyJob(1, gocron.NewAtTimes(
 			gocron.NewAtTime(23, 55, 0),
 		)),
 		gocron.NewTask(func() {
-			if err := a.DeepWorkSync(core.NewDateToday()); err != nil {
+			if _, err := a.SyncDay(core.NewDateToday()); err != nil {
 				a.Log.Error(err.Error())
 			}
 		}),
-		gocron.WithName("Deep work logs sync"),
-	)
-	if err != nil {
-		return err
-	}
-
-	_, err = s.NewJob(
-		gocron.DailyJob(1, gocron.NewAtTimes(
-			gocron.NewAtTime(23, 55, 0),
-		)),
-		gocron.NewTask(func() {
-			if err := a.FitnessSync(core.NewDateToday()); err != nil {
-				a.Log.Error(err.Error())
-			}
-		}),
-		gocron.WithName("Fitness logs sync"),
+		gocron.WithName("Sync Day"),
 	)
 	if err != nil {
 		return err

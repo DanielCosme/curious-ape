@@ -8,7 +8,7 @@ import (
 	"github.com/danielcosme/curious-ape/internal/integrations/fitbit"
 )
 
-func (a *App) SleepSync(d core.Date) error {
+func (a *App) sleepSync(d core.Date) error {
 	sls, err := a.sleepLogsGetFromFitbit(d)
 	if err != nil {
 		return err

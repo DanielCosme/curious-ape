@@ -5,7 +5,7 @@ import (
 	"github.com/danielcosme/curious-ape/internal/database"
 )
 
-func (a *App) DeepWorkSync(d core.Date) error {
+func (a *App) deepWorkSync(d core.Date) error {
 	dwLog, err := a.deepWorkFromToggl(d)
 	if err != nil {
 		return err
