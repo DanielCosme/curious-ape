@@ -2,7 +2,7 @@ package core
 
 const (
 	ISO8601           = "2006-01-02"
-	HumanDate         = "02 Mon, Jan"
+	HumanDate         = "02 Mon"
 	HumanDateWeekDay  = "Monday, 02 Jan 2006"
 	HumanDateWithTime = "Monday, 02 Jan 2006 at 15:04"
 	Timestamp         = "15:04:05"

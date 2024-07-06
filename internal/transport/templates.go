@@ -3,6 +3,7 @@ package transport
 import (
 	"fmt"
 	"github.com/danielcosme/curious-ape/internal/application"
+	"github.com/danielcosme/curious-ape/internal/core"
 	"github.com/labstack/echo/v4"
 	"html/template"
 	"io"
@@ -12,21 +13,20 @@ import (
 	"strings"
 	"time"
 
-	entity2 "github.com/danielcosme/curious-ape/internal/core"
-
 	"github.com/danielcosme/curious-ape/web"
 )
 
 var functions = template.FuncMap{
 	"humanDate": humanDate,
 	"dateOnly":  dateOnly,
+	"lastMonth": lastMonth,
 }
 
 type templateData struct {
 	CurrentYear     int
 	Version         string
-	Habit           *entity2.Habit
-	Habits          []*entity2.Habit
+	Habit           *core.Habit
+	Habits          []*core.Habit
 	Days            []dayContainer
 	Day             *dayContainer
 	Form            any
@@ -111,9 +111,16 @@ func newTemplatePartialCache() (map[string]*template.Template, error) {
 }
 
 func humanDate(t time.Time) string {
-	return t.Format(entity2.HumanDate)
+	return t.Format(core.HumanDate)
 }
 
 func dateOnly(t time.Time) string {
 	return t.Format(time.DateOnly)
+}
+
+func lastMonth(t time.Time) string {
+	d := t.AddDate(0, -1, 0)
+	d = time.Date(d.Year(), d.Month(), 1, 0, 0, 0, 0, d.Location()).
+		AddDate(0, 1, -1)
+	return dateOnly(d)
 }

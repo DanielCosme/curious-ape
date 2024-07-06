@@ -6,8 +6,8 @@ import (
 	"github.com/aarondl/opt/omitnull"
 	"github.com/danielcosme/curious-ape/internal/core"
 	"github.com/danielcosme/curious-ape/internal/database/gen/models"
-	"github.com/danielcosme/curious-ape/internal/integrations/fitbit"
 	"github.com/stephenafamo/bob"
+	"time"
 )
 
 type SleepLogs struct {
@@ -58,11 +58,15 @@ func sleepLogToCore(m *models.SleepLog) (sl core.SleepLog) {
 	sl.EndTime = m.EndTime
 	sl.IsMainSleep = m.IsMainSleep.GetOrZero()
 	sl.IsAutomated = m.IsAutomated.GetOrZero()
-	sl.MinutesAsleep = fitbit.ToDuration(int(m.MinutesAsleep.GetOrZero()))
-	sl.MinutesAwake = fitbit.ToDuration(int(m.MinutesAwake.GetOrZero()))
-	sl.MinutesDeep = fitbit.ToDuration(int(m.MinutesDeep.GetOrZero()))
-	sl.MinutesRem = fitbit.ToDuration(int(m.MinutesRem.GetOrZero()))
-	sl.MinutesLight = fitbit.ToDuration(int(m.MinutesLight.GetOrZero()))
-	sl.MinutesInBed = fitbit.ToDuration(int(m.TotalTimeInBed.GetOrZero()))
+	sl.MinutesAsleep = toDuration(int(m.MinutesAsleep.GetOrZero()))
+	sl.MinutesAwake = toDuration(int(m.MinutesAwake.GetOrZero()))
+	sl.MinutesDeep = toDuration(int(m.MinutesDeep.GetOrZero()))
+	sl.MinutesRem = toDuration(int(m.MinutesRem.GetOrZero()))
+	sl.MinutesLight = toDuration(int(m.MinutesLight.GetOrZero()))
+	sl.MinutesInBed = toDuration(int(m.TotalTimeInBed.GetOrZero()))
 	return sl
+}
+
+func toDuration(i int) time.Duration {
+	return time.Duration(i) * time.Minute
 }

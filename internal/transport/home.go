@@ -11,7 +11,17 @@ import (
 )
 
 func (t *Transport) home(c echo.Context) error {
-	ds, err := t.App.DaysMonth(core.NewDate(time.Now()))
+	var d core.Date
+	var err error
+	if dayParam := c.QueryParam("day"); dayParam == "" {
+		d = core.NewDate(time.Now())
+	} else {
+		d, err = core.DateFromISO8601(dayParam)
+		if err != nil {
+			return errClientError(err)
+		}
+	}
+	ds, err := t.App.DaysMonth(d)
 	if err != nil {
 		return errServer(err)
 	}

@@ -1,8 +1,8 @@
 {{define "title"}}Home{{end}}
 
 {{define "main"}}
-<h2>Days</h2>
 {{if .Days}}
+<h2>{{(index .Days 0).Date.Month.String}}</h2>
  <table class="u-full-width">
      <thead>
          <tr>
@@ -21,6 +21,9 @@
      {{end}}
      </tbody>
 </table>
+ <button>
+     <a href="/?day={{lastMonth (index .Days 0).Date}}">Previous</a>
+ </button>
 {{else}}
 <p>There's nothing to see here yet!</p>
 {{end}}
