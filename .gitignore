@@ -30,4 +30,4 @@ tmp/
 
 # Config
 config.json
-/kube/prod
+/deployment

@@ -26,19 +26,24 @@ if test "$RELEASE" = true
   echo ""
 end
 
-
-# We are assuming that the kubectl client is properly configured.
-echo "--- Synchronizing Kubernetes resources ---"
-
-kubectl create \
-        configmap \
-        curious-ape-prod \
-        --from-file=./kube/prod/config.json \
-        --dry-run=client \
-        -o yaml \
-        | kubectl apply -f -
-
-kubectl apply -f ./kube/deployment.yaml
-kubectl rollout restart deployment curious-ape
-
+echo "--- Synchronizing deployment files ---"
+# Transfer directory contents, but not the directory itself
+rsync \
+  --verbose \
+  --recursive \
+  ./deployment/prod/ \
+  daniel@danicos.me:~/ape-deployment/ ; or exit 1
 echo "--- Success ---"
+echo ""
+
+echo "--- Refreshing containers ---"
+echo "\
+    cd ape-deployment &&
+    docker compose pull &&
+    docker compose up -d &&
+    docker system prune -f; or exit 1
+    " | ssh daniel@danicos.me ; or exit 1
+echo "--- Success ---"
+echo ""
+
+echo "--- Done! ---"
