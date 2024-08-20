@@ -1,6 +1,6 @@
 module github.com/danielcosme/curious-ape
 
-go 1.22.2
+go 1.23.0
 
 require (
 	github.com/aarondl/opt v0.0.0-20240108180805-338d04d857dc
