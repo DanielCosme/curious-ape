@@ -2,6 +2,7 @@ package transport
 
 import (
 	"fmt"
+	"github.com/a-h/templ"
 	"github.com/danielcosme/curious-ape/internal/application"
 	"github.com/danielcosme/curious-ape/internal/core"
 	"github.com/labstack/echo/v4"
@@ -33,6 +34,11 @@ type templateData struct {
 	Flash           string
 	IsAuthenticated bool
 	Integrations    []application.IntegrationInfo
+}
+
+func (t *Transport) RenderTempl(statusCode int, c echo.Context, tmpl templ.Component) error {
+	c.Response().Writer.WriteHeader(statusCode)
+	return tmpl.Render(c.Request().Context(), c.Response().Writer)
 }
 
 func (t *Transport) Render(w io.Writer, name string, data any, c echo.Context) error {

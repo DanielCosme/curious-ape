@@ -27,6 +27,19 @@ run:
 db:
 	sqlite3 -box ape.db
 
+
+## watch: Watches for changes in the Web UI
+.PHONY: watch
+watch:
+	templ generate --watch
+
+## gen: Run all generators of the project
+.PHONY: gen
+gen:
+	./scripts/migrate.sh up
+	./scripts/gen-sql.sh
+	./scripts/gen-templ.sh
+
 ## gen-sql: Generate type safe SQL helpers
 .PHONY: gen-sql
 gen-sql:

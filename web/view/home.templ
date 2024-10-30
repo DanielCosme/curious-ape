@@ -1,0 +1,53 @@
+package view
+
+var secondName = "ardila"
+
+type GlobalState struct {
+    Version       string
+    Year          string
+    Authenticated bool
+}
+
+templ Home(td GlobalState) {
+    @layout(td, "Home") {
+    }
+}
+
+templ layout(td GlobalState, title string) {
+    <!doctype html>
+    <html lang="en">
+        <head>
+            <meta charset="utf-8"/>
+            <title>{ title } - Curious Ape</title>
+            <link rel="stylesheet" href="/static/css/normalize.css" type="text/css"/>
+            <link rel="stylesheet" href="/static/css/skeleton.css" type="text/css"/>
+            <link rel="shortcut icon" href="/static/img/favicon.png" type="image/x-icon"/>
+            <script src="/static/js/htmx.js"></script>
+        </head>
+        <body hx-boost="true" class="container">
+            <header>
+                <h1><a href="/">Curious Ape</a></h1>
+            </header>
+            <nav>
+                 if td.Authenticated {
+                    <div>
+                        <a href="/">Home</a>
+                        <a href="/integrations">Integrations</a>
+                    </div>
+                 }
+            </nav>
+            <main class="u-full-width">
+                { children... }
+            </main>
+            if td.Authenticated {
+                <form action="/logout" method="POST">
+                    <button>Logout</button>
+                </form>
+            }
+            <footer style="display:flex;justify-content:space-between">
+                <p>Powered by <a href="https://golang.org/">Go</a> in { td.Year }</p>
+                <p>{ td.Version }</p>
+            </footer>
+        </body>
+    </html>
+}

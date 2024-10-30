@@ -1,13 +1,16 @@
 package transport
 
 import (
-	"github.com/danielcosme/curious-ape/internal/application"
-	"github.com/labstack/echo/v4"
+	"fmt"
 	"net/http"
 	"sort"
 	"time"
 
+	"github.com/danielcosme/curious-ape/internal/application"
+	"github.com/labstack/echo/v4"
+
 	"github.com/danielcosme/curious-ape/internal/core"
+	"github.com/danielcosme/curious-ape/internal/view"
 )
 
 func (t *Transport) home(c echo.Context) error {
@@ -28,8 +31,13 @@ func (t *Transport) home(c echo.Context) error {
 	data := t.newTemplateData(c.Request())
 	sort.Sort(application.DaysSlice(ds))
 	data.Days = formatDays(ds)
-	c.Set("page", pageHome)
-	return c.Render(http.StatusOK, pageHome, data)
+
+	td := view.GlobalState{
+		Version:       data.Version,
+		Year:          fmt.Sprintf("%d", data.CurrentYear),
+		Authenticated: t.IsAuthenticated(c.Request()),
+	}
+	return t.RenderTempl(http.StatusOK, c, view.Home(td))
 }
 
 type dayContainer struct {
