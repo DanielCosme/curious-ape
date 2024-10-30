@@ -1,6 +1,11 @@
 package view
 
-var secondName = "ardila"
+import (
+    "fmt"
+	"time"
+	"github.com/danielcosme/curious-ape/internal/core"
+	"github.com/danielcosme/curious-ape/internal/application"
+)
 
 type GlobalState struct {
     Version       string
@@ -8,9 +13,145 @@ type GlobalState struct {
     Authenticated bool
 }
 
-templ Home(td GlobalState) {
+type DaySummary struct {
+	Date    time.Time
+	Wake    core.Habit
+	Fitness core.Habit
+	Work    core.Habit
+	Eat     core.Habit
+	Score   int
+}
+
+templ Home(td GlobalState, days []DaySummary) {
     @layout(td, "Home") {
+        @Days_Summary(days)
     }
+}
+
+templ Login(td GlobalState) {
+    @layout(td, "Login") {
+        @login(td)
+    }
+}
+
+templ Integrations(td GlobalState, info []application.IntegrationInfo) {
+    @layout(td, "Integrations") {
+        @integrations(info)
+    }
+}
+
+templ integrations(info []application.IntegrationInfo) {
+    <h2>Integrations</h2>
+    for _, i := range info {
+        <article>
+            <header>
+                <h3>{ i.Name }</h3>
+            </header>
+            <p><strong>State:</strong> { string(i.State) }</p>
+            if i.State != "connected" {
+                <p>{ i.Problem }</p>
+            }
+            if i.AuthURL != "" {
+                <a href={ templ.URL(i.AuthURL) } target="_blank"><button>Authenticate</button></a>
+            }
+            for _, i := range i.Info {
+                <li>{ i }</li>
+            }
+       </article>
+    }
+}
+
+templ login(td GlobalState) {
+    <form action='/login' method='POST' novalidate class="u-full-width">
+        <div>
+            <label>Email:</label>
+            <input type='email' name='email' value=''>
+        </div>
+        <div>
+            <label>Password:</label>
+            <input type='password' name='password'>
+        </div>
+        <div>
+            <input type='submit' value='Login'>
+        </div>
+    </form>
+}
+
+templ Days_Summary(days []DaySummary) {
+    <h2>{ days[0].Date.Month().String() }</h2>
+     <table class="u-full-width">
+         <thead>
+             <tr>
+                 <th>Date</th>
+                 <th>Wake Up</th>
+                 <th>Fitness</th>
+                 <th>Work</th>
+                 <th>Eat</th>
+                 <th></th>
+                 <th>Score</th>
+             </tr>
+         </thead>
+         <tbody>
+            for _, d := range days {
+                @Day_Summary_Row(d)
+            }
+         </tbody>
+    </table>
+     <button>
+         <a href={ templ.URL(fmt.Sprintf("/?day=%s", lastMonth(days[0].Date))) }>Previous</a>
+     </button>
+}
+
+func lastMonth(t time.Time) string {
+	d := t.AddDate(0, -1, 0)
+	d = time.Date(d.Year(), d.Month(), 1, 0, 0, 0, 0, d.Location()).
+		AddDate(0, 1, -1)
+	return dateOnly(d)
+}
+
+func dateOnly(t time.Time) string {
+	return t.Format(time.DateOnly)
+}
+
+templ day_summary_habit_cell(h core.Habit) {
+    <td>
+        if h.State() == "not_done" {
+            <span>X</span>
+        } else if h.State() == "done" {
+            <span>O</span>
+        } else {
+            <span>_</span>
+        }
+        {{ date := h.Date.Time().Format(time.DateOnly)}}
+        {{ postSuccess := fmt.Sprintf("/habit/log?success=true&category=%s&date=%s", h.Category.Type, date) }}
+        {{ postNoSuccess := fmt.Sprintf("/habit/log?success=false&category=%s&date=%s", h.Category.Type, date) }}
+        <a href="#"
+            hx-post={string(templ.URL(postSuccess))}
+            hx-swap="outerHTML"
+            hx-target="closest tr">Y</a>
+        <a href="#"
+            hx-post={string(templ.URL(postNoSuccess))}
+            hx-swap="outerHTML"
+            hx-target="closest tr">N</a>
+        <span>{ h.Main().Detail }</span>
+    </td>
+}
+
+templ Day_Summary_Row(d DaySummary) {
+    <tr>
+        <td>{ d.Date.Format(core.HumanDate) }</td>
+        @day_summary_habit_cell(d.Wake)
+        @day_summary_habit_cell(d.Fitness)
+        @day_summary_habit_cell(d.Work)
+        @day_summary_habit_cell(d.Eat)
+        <td>
+           <button hx-post={ string(templ.URL(fmt.Sprintf("/sync/%s", d.Date.Format(core.ISO8601)))) }
+                   hx-swap="outerHTML"
+                   hx-target="closest tr"
+                   class="button-primary">Sync</button>
+        </td>
+        <td>{ fmt.Sprintf("%d", d.Score) }</td>
+    </tr>
 }
 
 templ layout(td GlobalState, title string) {

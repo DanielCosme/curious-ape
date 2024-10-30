@@ -2,6 +2,7 @@ package transport
 
 import (
 	"github.com/danielcosme/curious-ape/internal/core"
+	"github.com/danielcosme/curious-ape/internal/view"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -12,8 +13,7 @@ func (t *Transport) integrationsForm(c echo.Context) error {
 		return err
 	}
 	td := t.newTemplateData(c.Request())
-	td.Integrations = integrations
-	return c.Render(http.StatusOK, pageIntegrations, td)
+	return t.RenderTempl(http.StatusOK, c, view.Integrations(td, integrations))
 }
 
 func (t *Transport) oauth2Success(c echo.Context) error {
@@ -36,7 +36,6 @@ func (t *Transport) sync(c echo.Context) error {
 		return err
 	}
 
-	td := t.newTemplateData(c.Request())
-	td.Day = &formatDays([]core.Day{day})[0]
-	return c.Render(http.StatusOK, partialDayRow, td.Day)
+	viewDay := formatDays([]core.Day{day})[0]
+	return t.RenderTempl(http.StatusOK, c, view.Day_Summary_Row(viewDay))
 }

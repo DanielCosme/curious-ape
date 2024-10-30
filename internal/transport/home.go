@@ -1,7 +1,6 @@
 package transport
 
 import (
-	"fmt"
 	"net/http"
 	"sort"
 	"time"
@@ -28,31 +27,16 @@ func (t *Transport) home(c echo.Context) error {
 	if err != nil {
 		return errServer(err)
 	}
-	data := t.newTemplateData(c.Request())
+	td := t.newTemplateData(c.Request())
 	sort.Sort(application.DaysSlice(ds))
-	data.Days = formatDays(ds)
-
-	td := view.GlobalState{
-		Version:       data.Version,
-		Year:          fmt.Sprintf("%d", data.CurrentYear),
-		Authenticated: t.IsAuthenticated(c.Request()),
-	}
-	return t.RenderTempl(http.StatusOK, c, view.Home(td))
+	days := formatDays(ds)
+	return t.RenderTempl(http.StatusOK, c, view.Home(td, days))
 }
 
-type dayContainer struct {
-	Date    time.Time
-	Wake    core.Habit
-	Fitness core.Habit
-	Work    core.Habit
-	Eat     core.Habit
-	Score   int
-}
-
-func formatDays(ds []core.Day) []dayContainer {
-	var res []dayContainer
+func formatDays(ds []core.Day) []view.DaySummary {
+	var res []view.DaySummary
 	for _, d := range ds {
-		dc := dayContainer{Date: d.Date.Time()}
+		dc := view.DaySummary{Date: d.Date.Time()}
 		for _, h := range d.Habits {
 			switch h.Category.Type {
 			case core.HabitTypeWakeUp:

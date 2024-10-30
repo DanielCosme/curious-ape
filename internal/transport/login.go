@@ -2,6 +2,7 @@ package transport
 
 import (
 	"errors"
+	"github.com/danielcosme/curious-ape/internal/view"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -19,8 +20,7 @@ type userLoginForm struct {
 
 func (t *Transport) loginForm(c echo.Context) error {
 	data := t.newTemplateData(c.Request())
-	data.Form = userLoginForm{}
-	return c.Render(http.StatusOK, pageLogin, data)
+	return t.RenderTempl(http.StatusOK, c, view.Login(data))
 }
 
 func (t *Transport) loginPost(c echo.Context) error {
@@ -31,18 +31,15 @@ func (t *Transport) loginPost(c echo.Context) error {
 
 	if !form.Valid() {
 		data := t.newTemplateData(c.Request())
-		data.Form = form
-		return c.Render(http.StatusUnprocessableEntity, pageLogin, data)
+		return t.RenderTempl(http.StatusUnprocessableEntity, c, view.Login(data))
 	}
 
 	id, err := t.App.Authenticate(form.Email, form.Password)
 	if err != nil {
 		if errors.Is(err, database.ErrInvalidCredentials) {
 			form.AddNonFieldError("Email or password is incorrect")
-
 			data := t.newTemplateData(c.Request())
-			data.Form = form
-			return c.Render(http.StatusUnprocessableEntity, pageLogin, data)
+			return t.RenderTempl(http.StatusUnprocessableEntity, c, view.Login(data))
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}

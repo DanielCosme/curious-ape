@@ -1,7 +1,6 @@
 package transport
 
 import (
-	"html/template"
 	"net/http"
 
 	"github.com/alexedwards/scs/v2"
@@ -9,11 +8,9 @@ import (
 )
 
 type Transport struct {
-	App                  *application.App
-	Version              string
-	SessionManager       *scs.SessionManager
-	templateCache        map[string]*template.Template
-	partialTemplateCache map[string]*template.Template
+	App            *application.App
+	Version        string
+	SessionManager *scs.SessionManager
 }
 
 func NewTransport(app *application.App, sm *scs.SessionManager, version string) (*Transport, error) {
@@ -22,17 +19,6 @@ func NewTransport(app *application.App, sm *scs.SessionManager, version string) 
 		Version:        version,
 		SessionManager: sm,
 	}
-	tc, err := newTemplateCache()
-	if err != nil {
-		return nil, err
-	}
-	tpc, err := newTemplatePartialCache()
-	if err != nil {
-		return nil, err
-	}
-	t.templateCache = tc
-	t.partialTemplateCache = tpc
-
 	return t, nil
 }
 

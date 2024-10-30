@@ -1,4 +1,4 @@
 #!/usr/bin/env fish
 
-templ generate -path ./web/view
+TEMPL_EXPERIMENT=rawgo templ generate -path ./web/view; or exit 1
 mv ./web/view/*templ.go* ./internal/view/

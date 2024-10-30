@@ -10,7 +10,6 @@ import (
 
 func EchoRoutes(t *Transport) http.Handler {
 	e := echo.New()
-	e.Renderer = t
 
 	e.Use(middleware.RequestLoggerWithConfig(midSlogConfig(t)))
 	e.Use(middleware.Recover())

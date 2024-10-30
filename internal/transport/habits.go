@@ -2,6 +2,7 @@ package transport
 
 import (
 	"github.com/danielcosme/curious-ape/internal/core"
+	"github.com/danielcosme/curious-ape/internal/view"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"strconv"
@@ -32,7 +33,6 @@ func (t *Transport) newHabitLogPost(c echo.Context) error {
 		return errServer(err)
 	}
 
-	td := t.newTemplateData(c.Request())
-	td.Day = &formatDays([]core.Day{day})[0]
-	return c.Render(http.StatusOK, partialDayRow, td.Day)
+	d := formatDays([]core.Day{day})[0]
+	return t.RenderTempl(http.StatusOK, c, view.Day_Summary_Row(d))
 }
