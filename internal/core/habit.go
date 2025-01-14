@@ -77,7 +77,6 @@ func calculateHabitState(logs []HabitLog) (state HabitState, mainLog HabitLog) {
 			override = true
 			continue
 		}
-
 		if !override {
 			if log.Success {
 				state = HabitStateDone

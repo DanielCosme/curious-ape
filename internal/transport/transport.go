@@ -13,13 +13,12 @@ type Transport struct {
 	SessionManager *scs.SessionManager
 }
 
-func NewTransport(app *application.App, sm *scs.SessionManager, version string) (*Transport, error) {
-	t := &Transport{
+func NewTransport(app *application.App, sm *scs.SessionManager, version string) *Transport {
+	return &Transport{
 		App:            app,
 		Version:        version,
 		SessionManager: sm,
 	}
-	return t, nil
 }
 
 func (t *Transport) IsAuthenticated(r *http.Request) bool {
