@@ -3,7 +3,7 @@ module github.com/danielcosme/curious-ape
 go 1.23.0
 
 require (
-	github.com/a-h/templ v0.2.778
+	github.com/a-h/templ v0.3.819
 	github.com/aarondl/opt v0.0.0-20240108180805-338d04d857dc
 	github.com/alexedwards/scs/sqlite3store v0.0.0-20230327161757-10d4299e3b24
 	github.com/alexedwards/scs/v2 v2.5.1
@@ -13,7 +13,7 @@ require (
 	github.com/lmittmann/tint v1.0.4
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/stephenafamo/bob v0.25.0
-	golang.org/x/crypto v0.26.0
+	golang.org/x/crypto v0.31.0
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	gotest.tools/v3 v3.4.0
 )
@@ -41,10 +41,10 @@ require (
 	go.uber.org/atomic v1.7.0 // indirect
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f // indirect
 	golang.org/x/mod v0.20.0 // indirect
-	golang.org/x/net v0.28.0 // indirect
-	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.23.0 // indirect
-	golang.org/x/text v0.17.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
+	golang.org/x/sync v0.10.0 // indirect
+	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	golang.org/x/tools v0.24.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
