@@ -52,23 +52,23 @@ func formatDays(ds []core.Day) []view.DaySummary {
 				dc.Score++
 			}
 		}
-		dc.Wake = replace(dc.Wake)
+		dc.Wake = replace(dc.Wake, dc.Date)
 		dc.Wake.Category.Type = core.HabitTypeWakeUp
-		dc.Fitness = replace(dc.Fitness)
+		dc.Fitness = replace(dc.Fitness, dc.Date)
 		dc.Fitness.Category.Type = core.HabitTypeExercise
-		dc.Work = replace(dc.Work)
+		dc.Work = replace(dc.Work, dc.Date)
 		dc.Work.Category.Type = core.HabitTypeDeepWork
-		dc.Eat = replace(dc.Eat)
+		dc.Eat = replace(dc.Eat, dc.Date)
 		dc.Eat.Category.Type = core.HabitTypeEatHealthy
 		res = append(res, dc)
 	}
 	return res
 }
 
-func replace(h core.Habit) core.Habit {
+func replace(h core.Habit, d time.Time) core.Habit {
 	if h.IsZero() {
 		// TODO: replace this for something better.
-		return core.NewHabit(core.NewDate(time.Now()), core.HabitCategory{}, nil)
+		return core.NewHabit(core.NewDate(d), core.HabitCategory{}, nil)
 	}
 	return h
 }
