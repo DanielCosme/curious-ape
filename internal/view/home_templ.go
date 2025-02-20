@@ -352,7 +352,7 @@ func Days_Summary(days []DaySummary) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</h2><table class=\"u-full-width\"><thead><tr><th>Date</th><th>Wake Up</th><th>Fitness</th><th>Work</th><th>Eat</th><th></th><th>Score</th></tr></thead> <tbody>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</h2><table class=\"u-full-width\"><thead><tr><th>Date</th><th>Wake Up</th><th>Fitness</th><th>Work</th><th>Eat Clean</th><th></th><th>Score</th></tr></thead> <tbody>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
