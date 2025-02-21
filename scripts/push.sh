@@ -27,9 +27,9 @@ $cur_dir/audit.sh; or exit 1
 git diff --exit-code; or echo "Working tree cannot be dirty" and exit 1
 
 git tag $new_version
-git push origin $new_version || exit 1
 git push || or exit 1
+git push origin $new_version || exit 1
 
-set -gx APE_VERSION $new_version
+set -Ux APE_VERSION $new_version
 
 echo "--- Success ---"
