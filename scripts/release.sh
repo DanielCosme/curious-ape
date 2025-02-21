@@ -3,7 +3,8 @@
 set root_dir pwd
 set cur_dir (realpath (dirname (status --current-filename)))
 
-set -Ux $APE_VERSION $argv[1]
+echo "Ape version: " $arvg[1]; or exit
+set -Ux APE_VERSION $argv[1]; or exit
 
 $cur_dir/build.sh $APE_VERSION; or exit 1
 

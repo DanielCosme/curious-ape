@@ -2,7 +2,7 @@
 
 if test "$RELEASE" = true
   ./scripts/push.sh; or exit 1
-  echo $APE_VERSION
+  set -Ux APE_VERSION (semver get release); or exit 1
 
   echo "--- Starting Release ---"
   echo "\
