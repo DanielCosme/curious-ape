@@ -1,4 +1,4 @@
-FROM golang:1.23.0 AS base-builder
+FROM golang:1.24.0 AS base-builder
 ENV GOCACHE=/root/.cache/go-build
 ENV CGO_ENABLED=1
 ARG APE_VERSION=unknown
