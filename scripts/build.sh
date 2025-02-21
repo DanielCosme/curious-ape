@@ -18,3 +18,8 @@ docker build \
   --tag migrate-ape \
   --target migrate \
   . ; or exit
+
+docker build \
+  --tag curious-ape-ci \
+  --target ape-ci \
+  . ; or exit

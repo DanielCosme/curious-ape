@@ -3,8 +3,6 @@ ENV GOCACHE=/root/.cache/go-build
 ENV CGO_ENABLED=1
 ARG APE_VERSION=unknown
 
-# Ape
-
 FROM base-builder AS ape-builder
 WORKDIR /app
 COPY go.mod go.sum ./
@@ -16,15 +14,23 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     go build -ldflags="-s -extldflags=-static -X main.version=${APE_VERSION}" -o=./bin/ape ./cmd/web
 
 
-FROM alpine:latest AS ape
+# CI Container
+FROM ape-builder AS ape-ci
+RUN apt update -y
+RUN apt install -y fish
+RUN ./scripts/bootstrap_dev.sh
+RUN make ci
+CMD ["make", "ci"]
 
+
+# Main App
+FROM alpine:latest AS ape
 RUN apk add --no-cache tzdata
 ENV TZ=America/Toronto
 WORKDIR /app
 COPY --from=ape-builder /app/bin/ape /app/bin/ape
 CMD ["/app/bin/ape"]
 
-# Migrate
 
 FROM base-builder AS migrate-builder
 WORKDIR /app
@@ -36,6 +42,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     go build -o build/migrate -ldflags="-s -w -extldflags=-static" -tags 'sqlite3' ./cmd/migrate
 
 
+# Migrate Container
 FROM alpine:latest AS migrate
 COPY ./migrations/sqlite /migrations
 COPY --from=migrate-builder /app/migrate/build/migrate /usr/local/bin/migrate
