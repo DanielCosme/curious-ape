@@ -3,7 +3,11 @@
 set root_dir pwd
 set cur_dir (realpath (dirname (status --current-filename)))
 
+set -Ux $APE_VERSION $argv[1]
+
 $cur_dir/build.sh $APE_VERSION; or exit 1
+
+docker run curious-ape-ci; or exit 1
 
 echo "$DOCKER_HUB_PASSWORD" | docker login -u $DOCKER_HUB_USER --password-stdin; or exit 1
 

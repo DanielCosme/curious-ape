@@ -31,5 +31,7 @@ git push || or exit 1
 git push origin $new_version || exit 1
 
 set -Ux APE_VERSION $new_version
+echo $new_version
+echo $APE_VERSION
 
 echo "--- Success ---"

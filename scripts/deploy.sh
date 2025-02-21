@@ -9,7 +9,7 @@ if test "$RELEASE" = true
     cd curious-ape
     git checkout main; or exit 1
     git pull; or exit 1
-    APE_VERSION=$APE_VERSION ./scripts/release.sh; or exit 1 \
+    ./scripts/release.sh $APE_VERSION; or exit 1 \
     " | ssh daniel@danicos.me ; or exit 1
     echo "--- Success ---"
   echo ""
