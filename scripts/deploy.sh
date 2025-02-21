@@ -2,14 +2,13 @@
 
 if test "$RELEASE" = true
   ./scripts/push.sh; or exit 1
-  set -Ux APE_VERSION (semver get release); or exit 1
 
   echo "--- Starting Release ---"
   echo "\
     cd curious-ape
     git checkout main; or exit 1
     git pull; or exit 1
-    ./scripts/release.sh $APE_VERSION; or exit 1 \
+    ./scripts/release.sh; or exit 1 \
     " | ssh daniel@danicos.me ; or exit 1
     echo "--- Success ---"
   echo ""

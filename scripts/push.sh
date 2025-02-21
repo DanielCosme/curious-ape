@@ -10,15 +10,7 @@ if not test $current_branch = "main"
   exit 1
 end
 
-# SEMVER enums
-#   - alpha
-#   - beta
-#   - rc (release candidate)
-#   - release
-#   - minor
-#   - mayor
-
-set -gx new_version (semver get release); or exit 1
+set -gx new_version (cat VERSION.txt); or exit 1
 
 # Run tests.
 $cur_dir/test.sh; or exit 1
@@ -30,7 +22,7 @@ git tag $new_version
 git push || or exit 1
 git push origin $new_version || exit 1
 
-set -Ux APE_VERSION $new_version
+set -gx APE_VERSION $new_version
 echo $new_version
 echo $APE_VERSION
 
