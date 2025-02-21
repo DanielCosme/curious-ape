@@ -22,8 +22,6 @@ git tag $new_version
 git push || or exit 1
 git push origin $new_version || exit 1
 
-set -gx APE_VERSION $new_version
 echo $new_version
-echo $APE_VERSION
 
 echo "--- Success ---"
