@@ -2,11 +2,7 @@
 
 set -gx DOCKER_BUILDKIT 1
 
-if test -z $argv[1]
-  set -gx build_version (semver get beta); or exit
-else
-  set -gx build_version $argv[1]
-end
+set -gx build_version (cat VERSION.txt)
 
 docker build \
   --build-arg="APE_VERSION=$build_version" \
