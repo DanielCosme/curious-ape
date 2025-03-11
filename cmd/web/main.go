@@ -11,17 +11,17 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/danielcosme/curious-ape/internal/database"
+	"github.com/danielcosme/curious-ape/pkg/database"
 	"github.com/go-co-op/gocron/v2"
 	"github.com/lmittmann/tint"
 	"github.com/stephenafamo/bob"
 	"golang.org/x/oauth2"
 
-	"github.com/danielcosme/curious-ape/internal/application"
-	"github.com/danielcosme/curious-ape/internal/core"
+	"github.com/danielcosme/curious-ape/pkg/application"
+	"github.com/danielcosme/curious-ape/pkg/core"
 
 	"github.com/alexedwards/scs/sqlite3store"
-	"github.com/danielcosme/curious-ape/internal/transport"
+	"github.com/danielcosme/curious-ape/pkg/transport"
 	_ "github.com/mattn/go-sqlite3"
 
 	"github.com/alexedwards/scs/v2"
@@ -55,6 +55,16 @@ type user struct {
 var version string
 
 func main() {
+	// TODO(daniel): Curious Ape is now SPA (Single Page Application).
+	// 		The backend is built in Go.
+	//		The font-end is built with Vue.
+	/*
+		TODO(daniel):
+			- Remove the web layer.
+			- Remove templ and HTMX.
+			- Add API Generation from API Specification.
+	*/
+
 	// flags & configuration
 	cfg := new(config)
 	v := Version()

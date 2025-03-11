@@ -3,7 +3,6 @@ module github.com/danielcosme/curious-ape
 go 1.24.0
 
 require (
-	github.com/a-h/templ v0.3.833
 	github.com/aarondl/opt v0.0.0-20240108180805-338d04d857dc
 	github.com/alexedwards/scs/sqlite3store v0.0.0-20230327161757-10d4299e3b24
 	github.com/alexedwards/scs/v2 v2.5.1
