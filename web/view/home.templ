@@ -62,7 +62,7 @@ templ integrations(info []application.IntegrationInfo) {
 }
 
 templ login(td GlobalState) {
-    <form action='/login' method='POST' novalidate class="u-full-width">
+    <form action='/login' method='POST' novalidate>
         <div>
             <label>Email:</label>
             <input type='email' name='email' value=''>
@@ -79,7 +79,7 @@ templ login(td GlobalState) {
 
 templ Days_Summary(days []DaySummary) {
     <h2>{ days[0].Date.Month().String() }</h2>
-     <table class="u-full-width">
+     <table>
          <thead>
              <tr>
                  <th>Date</th>
@@ -148,7 +148,7 @@ templ Day_Summary_Row(d DaySummary) {
            <button hx-post={ string(templ.URL(fmt.Sprintf("/sync/%s", d.Date.Format(core.ISO8601)))) }
                    hx-swap="outerHTML"
                    hx-target="closest tr"
-                   class="button-primary">Sync</button>
+                   >Sync</button>
         </td>
         <td>{ fmt.Sprintf("%d", d.Score) }</td>
     </tr>
@@ -161,34 +161,30 @@ templ layout(td GlobalState, title string) {
             <meta charset="utf-8"/>
             <title>{ title } - Curious Ape</title>
             <link rel="stylesheet" href="/static/css/normalize.css" type="text/css"/>
-            <link rel="stylesheet" href="/static/css/skeleton.css" type="text/css"/>
+            <!-- <link rel="stylesheet" href="/static/css/skeleton.css" type="text/css"/> -->
+            <link rel="stylesheet" href="/static/css/me.css" type="text/css"/>
             <link rel="shortcut icon" href="/static/img/favicon.png" type="image/x-icon"/>
             <script src="/static/js/htmx.js"></script>
         </head>
-        <body hx-boost="true" class="container">
-            <header>
-                <h1><a href="/">Curious Ape</a></h1>
-            </header>
-            <nav>
-                 if td.Authenticated {
-                    <div>
-                        <a href="/">Home</a>
-                        <a href="/integrations">Integrations</a>
-                    </div>
-                 }
-            </nav>
-            <main class="u-full-width">
-                { children... }
-            </main>
+        <body hx-boost="true" class="ape-grid-container">
+            <div class="ape-flex">
             if td.Authenticated {
+                <nav>
+                   <div>
+                       <a href="/">Home</a>
+                       <a href="/integrations">Integrations</a>
+                   </div>
+                </nav>
                 <form action="/logout" method="POST">
                     <button>Logout</button>
                 </form>
-            }
-            <footer style="display:flex;justify-content:space-between">
                 <p>Powered by <a href="https://golang.org/">Go</a> in { td.Year }</p>
                 <p>{ td.Version }</p>
-            </footer>
+            }
+            </div>
+            <main>
+                { children... }
+            </main>
         </body>
     </html>
 }

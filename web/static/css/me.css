@@ -1,0 +1,24 @@
+/* {
+  outline: 1px solid purple;
+}
+ */
+
+.ape-grid-container {
+  display:grid;
+  grid-template-columns: 20% 80%;
+  grid-row-gap: 20px;
+  grid-template-areas: "nav main";
+  /* grid-column-gap: 20px; */
+  box-sizing: border-box;
+}
+
+.ape-grid-container-vertical {
+  display:grid;
+  grid-template-rows: 80% 2fr 1fr 1fr;
+  grid-row-gap: 5px;
+}
+
+.ape-flex {
+  display: flex;
+  flex-direction: column;
+}
