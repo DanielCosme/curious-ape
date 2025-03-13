@@ -2,63 +2,69 @@ package database
 
 import (
 	"context"
-	"errors"
 	"github.com/aarondl/opt/omit"
-	"github.com/aarondl/opt/omitnull"
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/database/gen/models"
 	"github.com/stephenafamo/bob"
+	"github.com/stephenafamo/bob/dialect/sqlite"
+	"time"
 )
 
 type FitnessLogs struct {
 	db bob.DB
 }
 
-func (fls *FitnessLogs) Upsert(fitnessLog core.FitnessLog) (core.FitnessLog, error) {
-	if fitnessLog.DayID == 0 {
-		return core.FitnessLog{}, errors.New("day ID cannot be 0")
+func (fls *FitnessLogs) Upsert(s *models.FitnessLogSetter) (*models.FitnessLog, error) {
+	fitnessLog, err := models.FitnessLogs.Insert(s).One(context.Background(), fls.db)
+	if err == nil {
+		return fitnessLog, nil
 	}
-	fl, err := models.FitnessLogs.Upsert(
-		context.Background(),
-		fls.db,
-		true,
-		[]string{"day_id", "start_time"},
-		nil,
-		fromFitnessLogToSetter(fitnessLog),
-	)
-	return fitnessLogToCore(fl), err
+
+	if models.FitnessLogErrors.ErrUniqueDayIdAndStartTime.Is(err) {
+		fitnessLog, err = fls.Get(FitnessLogParams{
+			DayID:     s.DayID.GetOrZero(),
+			StartTime: s.StartTime.GetOrZero(),
+		})
+		if err != nil {
+			return nil, err
+		}
+		s.ID = omit.From(fitnessLog.ID)
+		fitnessLog, err = models.FitnessLogs.Update(s.UpdateMod()).One(context.Background(), fls.db)
+		if err == nil {
+			return fitnessLog, nil
+		}
+	}
+	return nil, catchDBErr("fitness: upsert", err)
 }
 
-func fromFitnessLogToSetter(fl core.FitnessLog) *models.FitnessLogSetter {
-	return &models.FitnessLogSetter{
-		ID:        omit.FromCond(fl.ID, fl.ID > 0),
-		DayID:     omit.From(fl.DayID),
-		Date:      omit.From(fl.Date.Time()),
-		StartTime: omit.From(fl.StartTime),
-		EndTime:   omit.From(fl.EndTime),
-		Type:      omit.From(fl.Type),
-		Title:     omit.From(fl.Title),
-		Origin:    omit.From(string(fl.Origin)),
-		Note:      omitnull.From(fl.Note),
-		Raw:       omitnull.From(fl.Raw),
+func (dw *FitnessLogs) Get(p FitnessLogParams) (*models.FitnessLog, error) {
+	fitnessLog, err := p.BuildQuery().One(context.Background(), dw.db)
+	if err != nil {
+		return nil, catchDBErr("fitness logs: get", err)
 	}
+	return fitnessLog, nil
 }
 
-func fitnessLogToCore(m *models.FitnessLog) (fl core.FitnessLog) {
-	if m == nil {
-		return fl
+type FitnessLogParams struct {
+	ID        int32
+	DayID     int32
+	Origin    core.OriginLog
+	StartTime time.Time
+}
+
+func (f FitnessLogParams) BuildQuery() *sqlite.ViewQuery[*models.FitnessLog, models.FitnessLogSlice] {
+	q := models.FitnessLogs.Query()
+	if f.ID > 0 {
+		q.Apply(models.SelectWhere.FitnessLogs.ID.EQ(f.ID))
 	}
-	fl.ID = m.ID
-	fl.DayID = m.DayID
-	fl.Date = core.NewDate(m.Date)
-	fl.StartTime = m.StartTime
-	fl.EndTime = m.EndTime
-	fl.Type = m.Type
-	fl.Title = m.Title
-	fl.Origin = core.Integration(m.Origin)
-	fl.Note = m.Note.GetOrZero()
-	if !m.Raw.IsNull() {
-		fl.Raw = m.Raw.MustGet()
+	if f.DayID > 0 {
+		q.Apply(models.SelectWhere.FitnessLogs.DayID.EQ(f.DayID))
 	}
-	return
+	if f.Origin != "" {
+		q.Apply(models.SelectWhere.FitnessLogs.Origin.EQ(string(f.Origin)))
+	}
+	if !f.StartTime.IsZero() {
+		q.Apply(models.SelectWhere.FitnessLogs.StartTime.EQ(f.StartTime))
+	}
+	return q
 }

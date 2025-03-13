@@ -2,9 +2,10 @@ package application
 
 import (
 	"github.com/danielcosme/curious-ape/pkg/core"
+	"github.com/danielcosme/curious-ape/pkg/database/gen/models"
 )
 
-func (a *App) SyncDay(d core.Date) (core.Day, error) {
+func (a *App) SyncDay(d core.Date) (*models.Day, error) {
 	errCh := make(chan error)
 
 	go func() {

@@ -6,105 +6,94 @@ import (
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/database/gen/models"
 	"github.com/stephenafamo/bob"
+	"github.com/stephenafamo/bob/dialect/sqlite"
 )
 
 type Habits struct {
 	db bob.DB
 }
 
-func (h *Habits) Get(p HabitParams) (core.Habit, error) {
-	habit, err := p.BuildQuery(h.db).One()
+func (h *Habits) Get(p HabitParams) (*models.Habit, error) {
+	habit, err := p.BuildQuery().One(context.Background(), h.db)
 	if err != nil {
-		return core.Habit{}, catchErr("get habit", err)
+		return nil, catchDBErr("habits: get", err)
 	}
-	return habitToCore(habit), nil
+	return habit, nil
 }
 
-func (h *Habits) Create(s models.HabitSetter) (core.Habit, error) {
-	habit, err := models.Habits.Insert(context.Background(), h.db, &s)
+func (h *Habits) Upsert(s *models.HabitSetter) (*models.Habit, error) {
+	habit, err := models.Habits.Insert(s).One(context.Background(), h.db)
 	if err != nil {
-		return core.Habit{}, catchErr("create habit", err)
+		if models.HabitErrors.ErrUniqueDayIdAndHabitCategoryId.Is(err) {
+			habit, err = h.Get(HabitParams{
+				DayID:      s.DayID.GetOrZero(),
+				CategoryID: s.HabitCategoryID.GetOrZero(),
+			})
+			if err != nil {
+				return nil, catchDBErr("habits: create", err)
+			}
+
+			s.ID = omit.From(habit.ID)
+			habit, err = models.Habits.Update(s.UpdateMod()).One(context.Background(), h.db)
+			if err != nil {
+				return nil, catchDBErr("habits: create", err)
+			}
+		} else {
+			return nil, catchDBErr("habits: create", err)
+		}
 	}
 	ctx := context.Background()
 	if err := habit.LoadHabitDay(ctx, h.db); err != nil {
-		return core.Habit{}, catchErr("create habit", err)
+		return nil, catchDBErr("habits: create: load habit day", err)
 	}
 	if err := habit.LoadHabitHabitCategory(ctx, h.db); err != nil {
-		return core.Habit{}, catchErr("create habit", err)
+		return nil, catchDBErr("habits: create: load habit category", err)
 	}
-	return habitToCore(habit), nil
+	return habit, nil
 }
 
-func (h *Habits) AddLog(s *models.HabitLogSetter) (res core.Habit, err error) {
-	_, err = models.HabitLogs.Upsert(
-		context.Background(),
-		h.db,
-		true,
-		[]string{"habit_id", "origin"},
-		[]string{"success", "detail"},
-		s,
-	)
+func (h *Habits) GetCategory(p HabitCategoryParams) (*models.HabitCategory, error) {
+	hc, err := p.BuildQuery().One(context.Background(), h.db)
 	if err != nil {
-		return res, err
+		return nil, catchDBErr("habit_category: get", err)
 	}
-	res, err = h.Get(HabitParams{ID: s.HabitID.MustGet()})
-	if err != nil {
-		return res, err
-	}
-	return res, models.Habits.Update(
-		context.Background(),
-		h.db,
-		&models.HabitSetter{State: omit.From(string(res.State()))},
-		&models.Habit{ID: res.ID},
-	)
+	return hc, nil
 }
 
-func (h *Habits) GetCategory(p HabitCategoryParams) (core.HabitCategory, error) {
-	hc, err := p.BuildQuery(h.db).One()
-	if err != nil {
-		return core.HabitCategory{}, catchErr("get category", err)
-	}
-	return habitCategoryToCore(hc), nil
+type HabitParams struct {
+	ID         int32
+	DayID      int32
+	CategoryID int32
 }
 
-func habitToCore(m *models.Habit) core.Habit {
-	cat := habitCategoryToCore(m.R.HabitCategory)
-	logs := habitLogsToCore(m.R.HabitLogs)
-	habit := core.NewHabit(core.NewDate(m.R.Day.Date), cat, logs)
-	habit.ID = m.ID
-	habit.DayID = m.R.Day.ID
-	return habit
+func (f HabitParams) BuildQuery() *sqlite.ViewQuery[*models.Habit, models.HabitSlice] {
+	q := models.Habits.Query()
+	if f.ID > 0 {
+		q.Apply(models.SelectWhere.Habits.ID.EQ(f.ID))
+	}
+	if f.DayID > 0 {
+		q.Apply(models.SelectWhere.Habits.DayID.EQ(f.DayID))
+	}
+	if f.CategoryID > 0 {
+		q.Apply(models.SelectWhere.Habits.HabitCategoryID.EQ(f.CategoryID))
+	}
+	q.Apply(models.PreloadHabitDay())
+	q.Apply(models.PreloadHabitHabitCategory())
+	return q
 }
 
-func habitsToCore(ms models.HabitSlice) []core.Habit {
-	if len(ms) == 0 {
-		return nil
-	}
-	res := make([]core.Habit, len(ms))
-	for idx, h := range ms {
-		res[idx] = habitToCore(h)
-	}
-	return res
+type HabitCategoryParams struct {
+	ID   int32
+	Kind core.HabitKind
 }
 
-func habitLogsToCore(ls models.HabitLogSlice) (res []core.HabitLog) {
-	for _, l := range ls {
-		res = append(res, core.HabitLog{
-			ID:          l.ID,
-			Success:     l.Success,
-			IsAutomated: l.IsAutomated,
-			Origin:      core.OriginLog(l.Origin),
-			Detail:      l.Detail,
-		})
+func (f HabitCategoryParams) BuildQuery() *sqlite.ViewQuery[*models.HabitCategory, models.HabitCategorySlice] {
+	q := models.HabitCategories.Query()
+	if f.ID > 0 {
+		q.Apply(models.SelectWhere.HabitCategories.ID.EQ(f.ID))
 	}
-	return
-}
-
-func habitCategoryToCore(m *models.HabitCategory) core.HabitCategory {
-	return core.HabitCategory{
-		ID:          m.ID,
-		Name:        m.Name,
-		Type:        core.HabitType(m.Type),
-		Description: m.Description,
+	if f.Kind != "" {
+		q.Apply(models.SelectWhere.HabitCategories.Kind.EQ(string(f.Kind)))
 	}
+	return q
 }

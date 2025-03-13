@@ -1,2 +1,0 @@
-ALTER TABLE habit_logs
-ADD COLUMN detail TEXT NOT NULL DEFAULT "";

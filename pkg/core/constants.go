@@ -17,14 +17,13 @@ const (
 	HabitStateNoInfo  HabitState = "no_info"
 )
 
-type HabitType string
+type HabitKind string
 
 const (
-	HabitTypeEatHealthy HabitType = "food"
-	HabitTypeWakeUp     HabitType = "wake_up"
-	HabitTypeExercise   HabitType = "fitness"
-	HabitTypeDeepWork   HabitType = "deep_work"
-	HabitTypeDynamic    HabitType = "dynamic"
+	HabitKindEatHealthy HabitKind = "food"
+	HabitKindWakeUp     HabitKind = "wake_up"
+	HabitkindFitness    HabitKind = "fitness"
+	HabitKindDeepWork   HabitKind = "deep_work"
 )
 
 type AuthRole string
@@ -38,10 +37,11 @@ const (
 type OriginLog string
 
 const (
-	OriginLogManual   OriginLog = "manual_log"
-	OriginLogSleep    OriginLog = "sleep_log"
-	OriginLogDeepWork OriginLog = "deep_work_log"
-	OriginLogFitness  OriginLog = "fitness_log"
+	OriginLogManual OriginLog = "manual"
+	OriginLogWebUI  OriginLog = "web_ui"
+	OriginLogFitbit           = IntegrationFitbit
+	OriginLogToggl            = IntegrationToggl
+	OriginLogGoogle           = IntegrationGoogle
 )
 
 type Integration string

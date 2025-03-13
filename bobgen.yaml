@@ -3,7 +3,7 @@ sqlite:
   except:
     schema_migrations:
     sessions:
-  output: "./internal/database/gen/models"
+  output: "./pkg/database/gen/models"
 
 no_factory: True
 wipe: True

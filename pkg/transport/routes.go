@@ -11,7 +11,7 @@ import (
 func EchoRoutes(t *Transport) http.Handler {
 	e := echo.New()
 
-	// e.Use(middleware.RequestLoggerWithConfig(midSlogConfig(t)))
+	e.Use(middleware.RequestLoggerWithConfig(midSlogConfig(t)))
 	e.Use(middleware.Recover())
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
 	// e.Use(t.midSecureHeaders)
@@ -33,7 +33,7 @@ func EchoRoutes(t *Transport) http.Handler {
 		// p.POST("logout", t.logout)
 	}
 
-	// TODO make this endpoint protected
+	// TODO make this endpoint protected.
 	// e.GET("api/oauth2/:provider/success", t.oauth2Success)
 
 	// In case I need a custom error Handler.

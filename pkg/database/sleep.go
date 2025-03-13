@@ -3,10 +3,10 @@ package database
 import (
 	"context"
 	"github.com/aarondl/opt/omit"
-	"github.com/aarondl/opt/omitnull"
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/database/gen/models"
 	"github.com/stephenafamo/bob"
+	"github.com/stephenafamo/bob/dialect/sqlite"
 	"time"
 )
 
@@ -14,57 +14,60 @@ type SleepLogs struct {
 	db bob.DB
 }
 
-func (sls *SleepLogs) Upsert(sleepLog core.SleepLog) (core.SleepLog, error) {
-	setter := fromSleepLogCoreToSetter(sleepLog)
-	sl, err := models.SleepLogs.Upsert(
-		context.Background(),
-		sls.db,
-		true,
-		[]string{"day_id", "is_main_sleep"},
-		nil,
-		setter,
-	)
+func (fls *SleepLogs) Upsert(s *models.SleepLogSetter) (*models.SleepLog, error) {
+	sleepLog, err := models.SleepLogs.Insert(s).One(context.Background(), fls.db)
+	if err == nil {
+		return sleepLog, nil
+	}
+
+	if models.SleepLogErrors.ErrUniqueDayIdAndIsMainSleep.Is(err) {
+		ref := s.IsMainSleep.GetOrZero()
+		sleepLog, err = fls.Get(SleepLogParams{
+			DayID:       s.DayID.GetOrZero(),
+			IsMainSleep: &ref,
+		})
+		if err != nil {
+			return nil, err
+		}
+		s.ID = omit.From(sleepLog.ID)
+		sleepLog, err = models.SleepLogs.Update(s.UpdateMod()).One(context.Background(), fls.db)
+		if err == nil {
+			return sleepLog, nil
+		}
+	}
+	return nil, catchDBErr("sleep: upsert", err)
+}
+
+func (sls *SleepLogs) Get(p SleepLogParams) (*models.SleepLog, error) {
+	sleepLog, err := p.BuildQuery().One(context.Background(), sls.db)
 	if err != nil {
-		return core.SleepLog{}, err
+		return nil, catchDBErr("sleep logs: get", err)
 	}
-	return sleepLogToCore(sl), nil
+	return sleepLog, nil
 }
 
-func fromSleepLogCoreToSetter(sl core.SleepLog) *models.SleepLogSetter {
-	return &models.SleepLogSetter{
-		ID:             omit.FromCond(sl.ID, sl.ID > 0),
-		DayID:          omit.From(sl.DayID),
-		Date:           omit.From(sl.Date.Time()),
-		StartTime:      omit.From(sl.StartTime),
-		EndTime:        omit.From(sl.EndTime),
-		IsMainSleep:    omitnull.From(sl.IsMainSleep),
-		IsAutomated:    omitnull.From(sl.IsAutomated),
-		Origin:         omit.From(string(sl.Origin)),
-		TotalTimeInBed: omitnull.From(int32(sl.MinutesInBed.Minutes())),
-		MinutesAsleep:  omitnull.From(int32(sl.MinutesAsleep.Minutes())),
-		MinutesRem:     omitnull.From(int32(sl.MinutesRem.Minutes())),
-		MinutesDeep:    omitnull.From(int32(sl.MinutesDeep.Minutes())),
-		MinutesLight:   omitnull.From(int32(sl.MinutesLight.Minutes())),
-		MinutesAwake:   omitnull.From(int32(sl.MinutesAwake.Minutes())),
-		Raw:            omitnull.From(string(sl.Raw)),
-	}
+type SleepLogParams struct {
+	ID          int32
+	DayID       int32
+	Origin      core.OriginLog
+	IsMainSleep *bool
 }
 
-func sleepLogToCore(m *models.SleepLog) (sl core.SleepLog) {
-	sl.ID = m.ID
-	sl.DayID = m.DayID
-	sl.Date = core.NewDate(m.Date)
-	sl.StartTime = m.StartTime
-	sl.EndTime = m.EndTime
-	sl.IsMainSleep = m.IsMainSleep.GetOrZero()
-	sl.IsAutomated = m.IsAutomated.GetOrZero()
-	sl.MinutesAsleep = toDuration(int(m.MinutesAsleep.GetOrZero()))
-	sl.MinutesAwake = toDuration(int(m.MinutesAwake.GetOrZero()))
-	sl.MinutesDeep = toDuration(int(m.MinutesDeep.GetOrZero()))
-	sl.MinutesRem = toDuration(int(m.MinutesRem.GetOrZero()))
-	sl.MinutesLight = toDuration(int(m.MinutesLight.GetOrZero()))
-	sl.MinutesInBed = toDuration(int(m.TotalTimeInBed.GetOrZero()))
-	return sl
+func (f SleepLogParams) BuildQuery() *sqlite.ViewQuery[*models.SleepLog, models.SleepLogSlice] {
+	q := models.SleepLogs.Query()
+	if f.ID > 0 {
+		q.Apply(models.SelectWhere.SleepLogs.ID.EQ(f.ID))
+	}
+	if f.DayID > 0 {
+		q.Apply(models.SelectWhere.SleepLogs.DayID.EQ(f.DayID))
+	}
+	if f.Origin != "" {
+		q.Apply(models.SelectWhere.SleepLogs.Origin.EQ(string(f.Origin)))
+	}
+	if f.IsMainSleep != nil {
+		q.Apply(models.SelectWhere.SleepLogs.IsMainSleep.EQ(*f.IsMainSleep))
+	}
+	return q
 }
 
 func toDuration(i int) time.Duration {

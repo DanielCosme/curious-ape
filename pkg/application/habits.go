@@ -1,33 +1,33 @@
 package application
 
 import (
-	"errors"
 	"github.com/aarondl/opt/omit"
 	"github.com/danielcosme/curious-ape/pkg/core"
+	"github.com/danielcosme/curious-ape/pkg/database"
 	"github.com/danielcosme/curious-ape/pkg/database/gen/models"
 	"log/slog"
 )
 
-func (a *App) HabitUpsert(params core.NewHabitParams) (habit core.Habit, err error) {
-	if !params.Valid() {
-		return habit, errors.New("invalid habit params")
-	}
-	habit, err = a.db.HabitGetOrCreate(params.Date, params.HabitType)
+func (a *App) HabitUpsert(date core.Date, hk core.HabitKind, state core.HabitState) (*models.Habit, error) {
+	hc, err := a.db.Habits.GetCategory(database.HabitCategoryParams{Kind: hk})
 	if err != nil {
-		return habit, err
+		return nil, err
 	}
-	habit, err = a.db.Habits.AddLog(&models.HabitLogSetter{
-		HabitID:     omit.From(habit.ID),
-		Origin:      omit.From(string(params.Origin)),
-		Success:     omit.From(params.Success),
-		IsAutomated: omit.From(params.Automated),
-		Detail:      omit.From(params.Detail),
+	day, err := a.db.Days.GetOrCreate(database.DayParams{Date: date})
+	if err != nil {
+		return nil, err
+	}
+	habit, err := a.db.Habits.Upsert(&models.HabitSetter{
+		DayID:           omit.From(day.ID),
+		HabitCategoryID: omit.From(hc.ID),
+		State:           omit.From(string(state)),
 	})
+	if err != nil {
+		return nil, err
+	}
 	slog.Info("Habit logged",
-		"name", habit.Category.Name,
-		"state", habit.State(),
-		"origin", params.Origin,
-		"detail", params.Detail,
-	)
-	return
+		"name", hc.Name,
+		"state", habit.State,
+		"date", day.Date.Format(core.HumanDateWeekDay))
+	return habit, nil
 }

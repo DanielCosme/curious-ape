@@ -1,6 +1,9 @@
 package core
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type Date struct {
 	time time.Time
@@ -12,6 +15,11 @@ func NewDate(t time.Time) Date {
 	return Date{
 		time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.Local),
 	}
+}
+
+func (d Date) MarshalJSON() ([]byte, error) {
+	s := fmt.Sprintf("%q", d.String())
+	return []byte(s), nil
 }
 
 func NewDateToday() Date {

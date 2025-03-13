@@ -20,7 +20,7 @@ func (a *App) SetPassword(username, password, email string, role core.AuthRole) 
 	}
 
 	u, err := a.db.Users.Get(database.UserParams{Role: role, Username: username})
-	if database.IfNotFoundErr(err) {
+	if database.IgnoreIfErrNotFound(err) {
 		return err
 	}
 	if u == nil {
@@ -28,7 +28,7 @@ func (a *App) SetPassword(username, password, email string, role core.AuthRole) 
 		if err != nil {
 			return err
 		}
-		_, err = a.db.Users.Create(models.UserSetter{
+		_, err = a.db.Users.Create(&models.UserSetter{
 			Username: omit.From(username),
 			Password: omit.From(string(hash)),
 			Role:     omit.From(string(role)),

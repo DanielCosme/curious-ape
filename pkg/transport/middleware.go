@@ -1,6 +1,12 @@
 package transport
 
-/*
+import (
+	"context"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"log/slog"
+)
+
 func midSlogConfig(t *Transport) middleware.RequestLoggerConfig {
 	return middleware.RequestLoggerConfig{
 		LogMethod:   true,
@@ -29,6 +35,7 @@ func midSlogConfig(t *Transport) middleware.RequestLoggerConfig {
 	}
 }
 
+/*
 func (t *Transport) midLoadAndSaveCookie(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
@@ -120,7 +127,7 @@ func (t *Transport) midSecureHeaders(next echo.HandlerFunc) echo.HandlerFunc {
 		c.Response().Header().Set("Access-Control-Allow-Origin", "*")
 		c.Response().Header().Set("Referrer-Policy", "origin-when-cross-origin")
 
-		// c.Response().Header().Set("X-Content-Type-Options", "nosniff")
+		// c.Response().Header().Set("X-Content-Kind-Options", "nosniff")
 		// c.Response().Header().Set("X-Frame-Options", "deny")
 		// c.Response().Header().Set("X-XSS-Protection", "0")
 		return next(c)

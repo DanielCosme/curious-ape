@@ -2,7 +2,7 @@ package core
 
 type Day struct {
 	ID   int32
-	Date Date
+	Date Date `json:"date"`
 	// generated
 	Habits []Habit
 }

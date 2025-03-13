@@ -2,8 +2,10 @@ package application
 
 import (
 	"encoding/json"
-	"errors"
+	"github.com/aarondl/opt/omit"
+	"github.com/aarondl/opt/omitnull"
 	"github.com/danielcosme/curious-ape/pkg/core"
+	"github.com/danielcosme/curious-ape/pkg/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/integrations/google"
 )
 
@@ -12,35 +14,24 @@ func (a *App) fitnessSync(d core.Date) error {
 	if err != nil {
 		return err
 	}
-	for idx, fl := range fitnessLogs {
-		if idx == 0 {
-			_, err := a.HabitUpsert(fl.ToHabitLogFitness())
-			if err != nil {
-				return err
-			}
-		}
-		fl, err = a.db.Fitness.Upsert(fl)
+
+	habitState := core.HabitStateNotDone
+	for idx, setter := range fitnessLogs {
+		fl, err := a.db.Fitness.Upsert(setter)
 		if err != nil {
 			return err
 		}
 		a.Log.Info("Fitness log added", "date", fl.Date, "origin", fl.Origin)
-	}
-	if len(fitnessLogs) == 0 {
-		_, err := a.HabitUpsert(core.NewHabitParams{
-			Success:   false,
-			Date:      d,
-			HabitType: core.HabitTypeExercise,
-			Origin:    core.OriginLogFitness,
-			Automated: true,
-		})
-		if err != nil {
-			return err
+
+		if idx == 0 {
+			habitState = core.HabitStateDone
 		}
 	}
-	return nil
+	_, err = a.HabitUpsert(d, core.HabitkindFitness, habitState)
+	return err
 }
 
-func (a *App) fitnessLogsFromGoogle(d core.Date) (res []core.FitnessLog, err error) {
+func (a *App) fitnessLogsFromGoogle(d core.Date) (res []*models.FitnessLogSetter, err error) {
 	googleClient, err := a.googleClient()
 	if err != nil {
 		return
@@ -50,38 +41,36 @@ func (a *App) fitnessLogsFromGoogle(d core.Date) (res []core.FitnessLog, err err
 		return
 	}
 
-	sessions, err := googleClient.Fitness.GetFitnessSessions(day.Date.ToBeginningOfDay(), day.Date.ToEndOfDay())
+	date := core.NewDate(day.Date)
+	sessions, err := googleClient.Fitness.GetFitnessSessions(date.ToBeginningOfDay(), date.ToEndOfDay())
 	if err != nil {
 		return
 	}
 	for _, s := range sessions {
-		fitnessLog, err := fitnessLogFromGoogle(day, s)
+		fl, err := fitnessLogFromGoogle(day, s)
 		if err != nil {
 			return nil, err
 		}
-		res = append(res, fitnessLog)
+		res = append(res, fl)
 	}
 	return
 }
 
-func fitnessLogFromGoogle(day core.Day, session google.Session) (res core.FitnessLog, err error) {
-	startTime := google.ParseMillis(session.StartTimeMillis)
-	if !day.Date.IsEqual(startTime) {
-		return res, errors.New("fitness log from google: expected date-time for current day do not match")
-	}
-
-	res = core.NewFitnessLog(day)
-	res.Title = session.Name
-	res.Date = day.Date
-	res.StartTime = startTime
-	res.EndTime = google.ParseMillis(session.EndTimeMillis)
-	res.Origin = core.IntegrationGoogle
-	res.Note = session.Application.PackageName
-
+func fitnessLogFromGoogle(day *models.Day, session google.Session) (*models.FitnessLogSetter, error) {
 	raw, err := json.Marshal(&session)
 	if err != nil {
-		return res, err
+		return nil, err
 	}
-	res.Raw = string(raw)
-	return
+	setter := &models.FitnessLogSetter{
+		DayID:     omit.From(day.ID),
+		Type:      omit.From("strong"),
+		Title:     omit.From(session.Name),
+		Date:      omit.From(day.Date),
+		StartTime: omit.From(google.ParseMillis(session.StartTimeMillis)),
+		EndTime:   omit.From(google.ParseMillis(session.EndTimeMillis)),
+		Origin:    omit.From(core.OriginLogGoogle),
+		Note:      omitnull.From(session.Application.PackageName),
+		Raw:       omitnull.From(string(raw)),
+	}
+	return setter, nil
 }

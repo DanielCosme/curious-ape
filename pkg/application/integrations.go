@@ -60,7 +60,9 @@ func (a *App) IntegrationsGet() ([]IntegrationInfo, error) {
 				} else {
 					state = IntegrationConnected
 					if len(sls) > 0 {
-						info = append(info, fmt.Sprintf("Total time asleep last night: %s", sls[0].MinutesAsleep))
+						minutes := sls[0].MinutesAsleep.GetOrZero()
+						dur := time.Duration(minutes) * time.Minute
+						info = append(info, fmt.Sprintf("Total time asleep last night: %s", dur.String()))
 					}
 				}
 				infoCh <- IntegrationInfo{

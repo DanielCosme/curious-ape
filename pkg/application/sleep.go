@@ -3,9 +3,13 @@ package application
 import (
 	"encoding/json"
 	"errors"
+	"github.com/aarondl/opt/omit"
+	"github.com/aarondl/opt/omitnull"
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/database"
+	"github.com/danielcosme/curious-ape/pkg/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/integrations/fitbit"
+	"time"
 )
 
 func (a *App) sleepSync(d core.Date) error {
@@ -13,24 +17,29 @@ func (a *App) sleepSync(d core.Date) error {
 	if err != nil {
 		return err
 	}
-	for _, sl := range sls {
-		if sl.IsMainSleep {
-			habitLogParams := sl.ToHabitLogWakeUp()
-			_, err := a.HabitUpsert(habitLogParams)
+	for _, setter := range sls {
+		sl, err := a.db.Sleep.Upsert(setter)
+		if err != nil {
+			return err
+		}
+		dur := fitbit.ToDuration(int(sl.MinutesAsleep.GetOrZero()))
+		a.Log.Info("Sleep log added", "date", sl.Date, "duration", dur.String())
+		if sl.IsMainSleep.GetOrZero() {
+			habitState := core.HabitStateNotDone
+			wakeUpTime := time.Date(sl.EndTime.Year(), sl.EndTime.Month(), sl.EndTime.Day(), 6, 0, 0, 0, sl.EndTime.Location())
+			if sl.EndTime.Before(wakeUpTime) {
+				habitState = core.HabitStateDone
+			}
+			_, err := a.HabitUpsert(d, core.HabitKindWakeUp, habitState)
 			if err != nil {
 				return err
 			}
 		}
-		sl, err = a.db.Sleep.Upsert(sl)
-		if err != nil {
-			return err
-		}
-		a.Log.Info("Sleep log added", "date", sl.Date, "duration", sl.MinutesAsleep.String())
 	}
 	return nil
 }
 
-func (a *App) sleepLogsGetFromFitbit(dates ...core.Date) (res []core.SleepLog, err error) {
+func (a *App) sleepLogsGetFromFitbit(dates ...core.Date) (res []*models.SleepLogSetter, err error) {
 	fitbitClient, err := a.fitbitClient()
 	if err != nil {
 		return
@@ -40,7 +49,7 @@ func (a *App) sleepLogsGetFromFitbit(dates ...core.Date) (res []core.SleepLog, e
 		if err != nil {
 			return res, err
 		}
-		sleepLogs, err := fitbitClient.Sleep.GetByDate(day.Date.Time())
+		sleepLogs, err := fitbitClient.Sleep.GetByDate(day.Date)
 		if err != nil {
 			return res, err
 		}
@@ -55,26 +64,25 @@ func (a *App) sleepLogsGetFromFitbit(dates ...core.Date) (res []core.SleepLog, e
 	return
 }
 
-func sleepLogFromFitbit(day core.Day, s fitbit.Sleep) (core.SleepLog, error) {
-	sleepLog := core.NewSleepLog(day)
-	if !day.Date.IsEqual(fitbit.ParseDate(s.DateOfSleep)) {
-		return core.SleepLog{}, errors.New("sleep log from fitbit: dates do not match with current day")
+func sleepLogFromFitbit(day *models.Day, s fitbit.Sleep) (*models.SleepLogSetter, error) {
+	date := core.NewDate(day.Date)
+	if !date.IsEqual(fitbit.ParseDate(s.DateOfSleep)) {
+		return nil, errors.New("sleep log from fitbit: dates do not match with current day")
 	}
 	raw, err := json.Marshal(&s)
 	if err != nil {
-		return core.SleepLog{}, err
+		return nil, err
 	}
-	sleepLog.Raw = raw
-	sleepLog.IsAutomated = true
-	sleepLog.Origin = core.IntegrationFitbit
-	sleepLog.IsMainSleep = s.IsMainSleep
-	sleepLog.StartTime = fitbit.ParseTime(s.StartTime)
-	sleepLog.EndTime = fitbit.ParseTime(s.EndTime)
-	sleepLog.MinutesInBed = fitbit.ToDuration(s.TimeInBed)
-	sleepLog.MinutesAsleep = fitbit.ToDuration(s.MinutesAsleep)
-	sleepLog.MinutesAwake = fitbit.ToDuration(s.MinutesAwake)
-	sleepLog.MinutesRem = fitbit.ToDuration(s.Levels.Summary.Rem.Minutes)
-	sleepLog.MinutesDeep = fitbit.ToDuration(s.Levels.Summary.Deep.Minutes)
-	sleepLog.MinutesLight = fitbit.ToDuration(s.Levels.Summary.Light.Minutes)
+	sleepLog := &models.SleepLogSetter{
+		DayID:          omit.From(day.ID),
+		Date:           omit.From(day.Date),
+		StartTime:      omit.From(fitbit.ParseTime(s.StartTime)),
+		EndTime:        omit.From(fitbit.ParseTime(s.EndTime)),
+		IsMainSleep:    omitnull.From(s.IsMainSleep),
+		TotalTimeInBed: omitnull.From(int32(fitbit.ToDuration(s.TimeInBed).Minutes())),
+		MinutesAsleep:  omitnull.From(int32(fitbit.ToDuration(s.MinutesAsleep).Minutes())),
+		Origin:         omit.From(core.OriginLogFitbit),
+		Raw:            omitnull.From(string(raw)),
+	}
 	return sleepLog, nil
 }
