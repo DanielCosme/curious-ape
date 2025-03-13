@@ -24,13 +24,18 @@ func EchoRoutes(t *Transport) http.Handler {
 	// 	login.POST("", t.loginPost)
 	// }
 
-	p := e.Group("/" /*t.midLoadAndSaveCookie*/)
+	// p := e.Group("/" /*t.midLoadAndSaveCookie*/)
 	{
-		p.GET("", t.home)
+		// p.GET("", t.home)
 		// p.Use(t.midAuthenticateFromSession)
 		// p.Use(t.midRequireAuth)
 
 		// p.POST("logout", t.logout)
+	}
+
+	api := e.Group("/api/v1")
+	{
+		api.GET("", t.home)
 	}
 
 	// TODO make this endpoint protected.
