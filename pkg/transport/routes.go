@@ -14,28 +14,23 @@ func EchoRoutes(t *Transport) http.Handler {
 	e.Use(middleware.RequestLoggerWithConfig(midSlogConfig(t)))
 	e.Use(middleware.Recover())
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
-	// e.Use(t.midSecureHeaders)
+	e.Use(t.midSecureHeaders)
 
 	e.StaticFS("/static", echo.MustSubFS(web.Files, "static"))
+	e.StaticFS("/", echo.MustSubFS(web.Files, "dist"))
 
-	// login := e.Group("/login", t.midLoadAndSaveCookie)
-	// {
-	// 	login.GET("", t.loginForm)
-	// 	login.POST("", t.loginPost)
-	// }
-
-	// p := e.Group("/" /*t.midLoadAndSaveCookie*/)
+	login := e.Group("/api/v1/login", t.midLoadAndSaveCookie)
 	{
-		// p.GET("", t.home)
-		// p.Use(t.midAuthenticateFromSession)
-		// p.Use(t.midRequireAuth)
-
-		// p.POST("logout", t.logout)
+		login.POST("", t.loginPost)
 	}
 
-	api := e.Group("/api/v1")
+	api := e.Group("/api/v1", t.midLoadAndSaveCookie)
 	{
+		api.Use(t.midAuthenticateFromSession)
+		api.Use(t.midRequireAuth)
 		api.GET("", t.home)
+
+		// p.POST("logout", t.logout)
 	}
 
 	// TODO make this endpoint protected.

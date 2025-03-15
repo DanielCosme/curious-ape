@@ -2,9 +2,13 @@ package transport
 
 import (
 	"context"
+	"github.com/alexedwards/scs/v2"
+	"github.com/danielcosme/curious-ape/pkg/application"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"log/slog"
+	"net/http"
+	"time"
 )
 
 func midSlogConfig(t *Transport) middleware.RequestLoggerConfig {
@@ -35,7 +39,6 @@ func midSlogConfig(t *Transport) middleware.RequestLoggerConfig {
 	}
 }
 
-/*
 func (t *Transport) midLoadAndSaveCookie(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
@@ -108,7 +111,7 @@ func (t *Transport) midAuthenticateFromSession(next echo.HandlerFunc) echo.Handl
 func (t *Transport) midRequireAuth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		if !t.IsAuthenticated(c.Request()) {
-			return c.Redirect(http.StatusSeeOther, "/login")
+			return c.NoContent(http.StatusUnauthorized)
 		}
 
 		// Set the "Cache-Control: no-store" header so that pages require
@@ -124,7 +127,13 @@ func (t *Transport) midSecureHeaders(next echo.HandlerFunc) echo.HandlerFunc {
 		c.Response().Header().Set("Content-Security-Policy",
 			"default-src 'self'; style-src 'self' fonts.googleapis.com; font-src fonts.gstatic.com")
 
-		c.Response().Header().Set("Access-Control-Allow-Origin", "*")
+		if t.App.Env == application.Dev {
+			// NOTE(daniel): To make vue/vite work on dev mode
+			c.Response().Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+			c.Response().Header().Set("Access-Control-Allow-Credentials", "true")
+		} else {
+			c.Response().Header().Set("Access-Control-Allow-Origin", "https://danicos.me")
+		}
 		c.Response().Header().Set("Referrer-Policy", "origin-when-cross-origin")
 
 		// c.Response().Header().Set("X-Content-Kind-Options", "nosniff")
@@ -133,4 +142,3 @@ func (t *Transport) midSecureHeaders(next echo.HandlerFunc) echo.HandlerFunc {
 		return next(c)
 	}
 }
-*/

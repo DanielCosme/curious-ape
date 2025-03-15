@@ -108,6 +108,7 @@ func main() {
 	sessionManager.Store = sqlite3store.New(db)
 	sessionManager.Lifetime = 48 * time.Hour
 	sessionManager.Cookie.SameSite = http.SameSiteStrictMode
+	sessionManager.Cookie.Name = "ape-session"
 	t := transport.NewTransport(app, sessionManager, v)
 
 	app.Log.Info("Launching cron jobs")

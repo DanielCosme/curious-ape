@@ -32,3 +32,4 @@ tmp/
 config.json
 /deployment
 .vscode
+dist/

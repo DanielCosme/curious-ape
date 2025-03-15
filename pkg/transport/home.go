@@ -16,7 +16,6 @@ func (t *Transport) home(c echo.Context) error {
 	if err != nil {
 		return errServer(err)
 	}
-
 	return c.JSON(http.StatusOK, days)
 }
 
