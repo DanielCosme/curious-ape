@@ -10,7 +10,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <h1>Curious Ape</h1>
+  <h2>Days</h2>
   <pre>{{ daysStore.days }}</pre>
 </template>
 

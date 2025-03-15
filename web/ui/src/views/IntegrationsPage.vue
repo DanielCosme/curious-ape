@@ -2,7 +2,7 @@
 </script>
 
 <template>
-  <h1>Integrations</h1>
+  <h2>Integrations</h2>
 </template>
 
 <style scoped>
