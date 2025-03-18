@@ -28,7 +28,11 @@ func EchoRoutes(t *Transport) http.Handler {
 	{
 		api.Use(t.midAuthenticateFromSession)
 		api.Use(t.midRequireAuth)
+
 		api.GET("", t.home)
+
+		api.GET("/integrations", t.integrationsGetAll)
+		api.GET("/integrations/:provider", t.integrationsGet)
 
 		// p.POST("logout", t.logout)
 	}

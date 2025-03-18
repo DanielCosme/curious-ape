@@ -15,106 +15,103 @@ import (
 )
 
 type IntegrationInfo struct {
-	Name    string
-	State   IntegrationState
-	Info    []string
-	AuthURL string
-	Problem string
+	Name        string `json:"name"`
+	IsConnected bool   `json:"isConnected"`
+	Info        []string
+	AuthURL     string
+	Problem     string
 }
 
-func (a *App) IntegrationsGet() ([]IntegrationInfo, error) {
+func (a *App) IntegrationsGetAll() ([]IntegrationInfo, error) {
 	var res []IntegrationInfo
+	for _, integration := range a.sync.IntegrationsList() {
+		res = append(res, IntegrationInfo{
+			Name:        core.ToUpperFist(string(integration)),
+			IsConnected: false,
+		})
+	}
+	return res, nil
+}
+
+func (a *App) IntegrationsGet(provider core.Integration) (IntegrationInfo, error) {
+	var res IntegrationInfo
+	var info []string
+	var authURL, problem string
+	isConnected := false
 	today := core.NewDateToday()
-	integrationList := a.sync.IntegrationsList()
-	infoCh := make(chan IntegrationInfo)
 
-	for _, integration := range integrationList {
-		var info []string
-		var authURL, problem string
-		state := IntegrationDisconnected
-
-		switch integration {
-		case core.IntegrationGoogle:
-			go func() {
-				_, err := a.fitnessLogsFromGoogle(today)
-				if err != nil {
-					authURL = a.sync.GenerateOauth2URI(integration)
-					problem = err.Error()
-				} else {
-					state = IntegrationConnected
-				}
-				infoCh <- IntegrationInfo{
-					Name:    "Google",
-					State:   state,
-					Info:    info,
-					AuthURL: authURL,
-					Problem: problem,
-				}
-			}()
-		case core.IntegrationFitbit:
-			go func() {
-				sls, err := a.sleepLogsGetFromFitbit(today)
-				if err != nil {
-					authURL = a.sync.GenerateOauth2URI(integration)
-					problem = err.Error()
-				} else {
-					state = IntegrationConnected
-					if len(sls) > 0 {
-						minutes := sls[0].MinutesAsleep.GetOrZero()
-						dur := time.Duration(minutes) * time.Minute
-						info = append(info, fmt.Sprintf("Total time asleep last night: %s", dur.String()))
-					}
-				}
-				infoCh <- IntegrationInfo{
-					Name:    "Fitbit",
-					State:   state,
-					Info:    info,
-					AuthURL: authURL,
-					Problem: problem,
-				}
-			}()
-		case core.IntegrationToggl:
-			go func() {
-				profile, err := a.sync.TogglAPI.Me.GetProfile()
-				if err != nil {
-					problem = err.Error()
-				} else if profile != nil {
-					state = IntegrationConnected
-					name := fmt.Sprintf("Profile name: %s", profile.FullName)
-					timeZone := fmt.Sprintf("Timezone: %s", profile.Timezone)
-					info = append(info, name, timeZone)
-
-					ws, err := a.sync.TogglAPI.Workspace.Get()
-					if err == nil {
-						for _, w := range ws {
-							info = append(info, fmt.Sprintf("Workspace: %s - ID: %d", w.Name, w.ID))
-						}
-					} else {
-						a.Log.Error(err.Error())
-					}
-
-					summary, err := a.sync.TogglAPI.Reports.GetDaySummary(time.Now())
-					if err != nil {
-						a.Log.Error(err.Error())
-					} else {
-						info = append(info, fmt.Sprintf("Total time so far: %s", summary.TotalDuration))
-					}
-				}
-				infoCh <- IntegrationInfo{
-					Name:    "Toggl",
-					State:   state,
-					Info:    info,
-					AuthURL: authURL,
-					Problem: problem,
-				}
-			}()
-		default:
+	switch provider {
+	case core.IntegrationGoogle:
+		_, err := a.fitnessLogsFromGoogle(today)
+		if err != nil {
+			authURL = a.sync.GenerateOauth2URI(provider)
+			problem = err.Error()
+		} else {
+			isConnected = true
 		}
+		res = IntegrationInfo{
+			Name:        "Google",
+			IsConnected: isConnected,
+			Info:        info,
+			AuthURL:     authURL,
+			Problem:     problem,
+		}
+	case core.IntegrationFitbit:
+		sls, err := a.sleepLogsGetFromFitbit(today)
+		if err != nil {
+			authURL = a.sync.GenerateOauth2URI(provider)
+			problem = err.Error()
+		} else {
+			isConnected = true
+			if len(sls) > 0 {
+				minutes := sls[0].MinutesAsleep.GetOrZero()
+				dur := time.Duration(minutes) * time.Minute
+				info = append(info, fmt.Sprintf("Total time asleep last night: %s", dur.String()))
+			}
+		}
+		res = IntegrationInfo{
+			Name:        "Fitbit",
+			IsConnected: isConnected,
+			Info:        info,
+			AuthURL:     authURL,
+			Problem:     problem,
+		}
+	case core.IntegrationToggl:
+		profile, err := a.sync.TogglAPI.Me.GetProfile()
+		if err != nil {
+			problem = err.Error()
+		} else if profile != nil {
+			isConnected = true
+			name := fmt.Sprintf("Profile name: %s", profile.FullName)
+			timeZone := fmt.Sprintf("Timezone: %s", profile.Timezone)
+			info = append(info, name, timeZone)
+
+			ws, err := a.sync.TogglAPI.Workspace.Get()
+			if err == nil {
+				for _, w := range ws {
+					info = append(info, fmt.Sprintf("Workspace: %s - ID: %d", w.Name, w.ID))
+				}
+			} else {
+				a.Log.Error(err.Error())
+			}
+
+			summary, err := a.sync.TogglAPI.Reports.GetDaySummary(time.Now())
+			if err != nil {
+				a.Log.Error(err.Error())
+			} else {
+				info = append(info, fmt.Sprintf("Total time so far: %s", summary.TotalDuration))
+			}
+		}
+		res = IntegrationInfo{
+			Name:        "Toggl",
+			IsConnected: isConnected,
+			Info:        info,
+			AuthURL:     authURL,
+			Problem:     problem,
+		}
+	default:
 	}
 
-	for i := 0; i < len(integrationList); i++ {
-		res = append(res, <-infoCh)
-	}
 	return res, nil
 }
 

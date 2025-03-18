@@ -1,5 +1,7 @@
 package core
 
+import "strings"
+
 const (
 	ISO8601           = "2006-01-02"
 	HumanDate         = "02 Mon"
@@ -51,3 +53,7 @@ const (
 	IntegrationGoogle = "google"
 	IntegrationToggl  = "toggl"
 )
+
+func ToUpperFist(s string) string {
+	return strings.ToUpper(s[:1]) + s[1:]
+}
