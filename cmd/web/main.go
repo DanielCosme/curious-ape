@@ -215,7 +215,7 @@ func setUpCronJobs(a *application.App) error {
 				a.Log.Error(err.Error())
 			}
 		}),
-		gocron.WithName("Sync Day"),
+		gocron.WithName("Sync DaySummary"),
 	)
 	if err != nil {
 		return err

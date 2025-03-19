@@ -7,11 +7,11 @@ import (
 	"hash/maphash"
 	"strings"
 
+	"github.com/mattn/go-sqlite3"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/clause"
 	"github.com/stephenafamo/bob/dialect/sqlite"
 	"github.com/stephenafamo/bob/dialect/sqlite/dialect"
-	sqliteDriver "modernc.org/sqlite"
 )
 
 var TableNames = struct {
@@ -231,9 +231,9 @@ func (e *UniqueConstraintError) Error() string {
 }
 
 func (e *UniqueConstraintError) Is(target error) bool {
-	err, ok := target.(*sqliteDriver.Error)
+	err, ok := target.(sqlite3.Error)
 	if !ok {
 		return false
 	}
-	return err.Code() == 2067 && strings.Contains(err.Error(), e.s)
+	return err.ExtendedCode == 2067 && strings.Contains(err.Error(), e.s)
 }

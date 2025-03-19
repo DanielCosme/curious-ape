@@ -15,7 +15,6 @@ require (
 	golang.org/x/crypto v0.31.0
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	gotest.tools/v3 v3.4.0
-	modernc.org/sqlite v1.20.3
 )
 
 require (
@@ -57,6 +56,7 @@ require (
 	modernc.org/mathutil v1.6.0 // indirect
 	modernc.org/memory v1.8.0 // indirect
 	modernc.org/opt v0.1.3 // indirect
+	modernc.org/sqlite v1.20.3 // indirect
 	modernc.org/strutil v1.2.0 // indirect
 	modernc.org/token v1.1.0 // indirect
 )

@@ -4,11 +4,25 @@ import (
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"time"
 )
 
-type Day struct {
-	ID   int32  `json:"id"`
-	Date string `json:"date"`
+type DaysPayload struct {
+	Month string       `json:"month"`
+	Days  []DaySummary `json:"days"`
+}
+
+type DaySummary struct {
+	ID     int32        `json:"id"`
+	Key    string       `json:"key"`
+	Date   time.Time    `json:"date"`
+	WakeUp HabitSummary `json:"wake_up"`
+	Sleep  HabitSummary `json:"sleep"`
+	Work   HabitSummary `json:"work"`
+	Eat    HabitSummary `json:"eat"`
+}
+
+type HabitSummary struct {
 }
 
 func (t *Transport) home(c echo.Context) error {
@@ -19,4 +33,4 @@ func (t *Transport) home(c echo.Context) error {
 	return c.JSON(http.StatusOK, days)
 }
 
-// func dayToTranspor(days []*core.Day)
+// func dayToTranspor(days []*core.DaySummary)
