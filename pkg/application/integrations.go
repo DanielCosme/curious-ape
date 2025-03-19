@@ -132,18 +132,18 @@ func (a *App) Oauth2Success(provider, code string) error {
 }
 
 func (a *App) fitbitClient() (res fitbit.API, err error) {
-	client, err := a.integrationsGetClient(core.IntegrationFitbit)
+	client, err := a.integrationsGetHttpClient(core.IntegrationFitbit)
 	res = fitbit.NewAPI(client)
 	return
 }
 
 func (a *App) googleClient() (res google.API, err error) {
-	client, err := a.integrationsGetClient(core.IntegrationGoogle)
+	client, err := a.integrationsGetHttpClient(core.IntegrationGoogle)
 	res = google.NewAPI(client)
 	return
 }
 
-func (a *App) integrationsGetClient(integration core.Integration) (*http.Client, error) {
+func (a *App) integrationsGetHttpClient(integration core.Integration) (*http.Client, error) {
 	o, err := a.db.Auths.Get(database.AuthParams{Provider: integration})
 	if err != nil {
 		return nil, err

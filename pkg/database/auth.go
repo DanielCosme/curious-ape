@@ -19,7 +19,6 @@ func (a *Auths) Upsert(s *models.AuthSetter) (*models.Auth, error) {
 		return auth, nil
 
 	}
-
 	if models.AuthErrors.ErrUniqueProvider.Is(err) {
 		auth, err = a.Get(AuthParams{Provider: core.Integration(s.Provider.GetOrZero())})
 		if err != nil {
@@ -29,7 +28,6 @@ func (a *Auths) Upsert(s *models.AuthSetter) (*models.Auth, error) {
 		s.ID = omit.From(auth.ID)
 		return models.Auths.Update(s.UpdateMod()).One(context.Background(), a.db)
 	}
-
 	return nil, catchDBErr("auths: upsert", err)
 }
 

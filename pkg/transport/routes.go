@@ -37,8 +37,8 @@ func EchoRoutes(t *Transport) http.Handler {
 		// p.POST("logout", t.logout)
 	}
 
-	// TODO make this endpoint protected.
-	// e.GET("api/oauth2/:provider/success", t.oauth2Success)
+	// TODO make this endpoint protected?
+	e.GET("api/oauth2/:provider/success", t.oauth2Success)
 
 	// In case I need a custom error Handler.
 	// e.HTTPErrorHandler
