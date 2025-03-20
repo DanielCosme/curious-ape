@@ -7,4 +7,5 @@ const (
 	RelationHabit
 	RelationSleep
 	RelationFitness
+	RelationWork
 )

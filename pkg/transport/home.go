@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"sort"
+	"time"
 )
 
 type DaysPayload struct {
@@ -15,14 +16,17 @@ type DaysPayload struct {
 }
 
 type DaySummary struct {
-	Key     string       `json:"key"`
-	Date    string       `json:"date"`
-	Day     string       `json:"day"`
-	WakeUp  HabitSummary `json:"wake_up"`
-	Fitness HabitSummary `json:"fitness"`
-	Work    HabitSummary `json:"work"`
-	Eat     HabitSummary `json:"eat"`
-	Score   int          `json:"score"`
+	Key           string       `json:"key"`
+	Date          string       `json:"date"`
+	Day           string       `json:"day"`
+	WakeUp        HabitSummary `json:"wake_up_habit"`
+	Fitness       HabitSummary `json:"fitness_habit"`
+	Work          HabitSummary `json:"work_habit"`
+	Eat           HabitSummary `json:"eat_habit"`
+	WakeUpDetail  string       `json:"wake_up_detail"`
+	FitnessDetail string       `json:"fitness_detail"`
+	WorkDetail    string       `json:"work_detail"`
+	Score         int          `json:"score"`
 }
 
 type HabitSummary struct {
@@ -35,9 +39,7 @@ func (t *Transport) home(c echo.Context) error {
 	if err != nil {
 		return errServer(err)
 	}
-	daysPayload := DaysPayload{
-		Month: days[0].Date.Month().String(),
-	}
+	daysPayload := DaysPayload{Month: days[0].Date.Month().String()}
 	sort.Sort(DaysSliceSort(days))
 	for _, day := range days {
 		daysPayload.Days = append(daysPayload.Days, dayDBToSummary(day))
@@ -71,6 +73,29 @@ func dayDBToSummary(day *models.Day) DaySummary {
 			ds.Eat = habitDBToTransport(h)
 		}
 	}
+	for _, sl := range day.R.SleepLogs {
+		if sl.IsMainSleep.GetOrZero() {
+			ds.WakeUpDetail = sl.EndTime.Format(core.Time)
+			break
+		}
+	}
+	for idx, f := range day.R.FitnessLogs {
+		// 15:21 - 16:05 (44m0s)
+		ds.FitnessDetail = fmt.Sprintf(
+			"%s - %s (%s)",
+			f.StartTime.Format(core.Time),
+			f.EndTime.Format(core.Time),
+			f.EndTime.Sub(f.StartTime).Round(time.Minute))
+		// TODO: figure out how to handle this once I have more fitness logs per day.
+		if idx == 0 {
+			break
+		}
+	}
+	var workDuration time.Duration
+	for _, wl := range day.R.DeepWorkLogs {
+		workDuration += time.Duration(wl.Seconds) * time.Second
+	}
+	ds.WorkDetail = workDuration.Round(time.Minute).String()
 	return ds
 }
 

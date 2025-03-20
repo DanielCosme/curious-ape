@@ -96,6 +96,8 @@ func (f *DayParams) BuildQuery() *sqlite.ViewQuery[*models.Day, models.DaySlice]
 			q.Apply(models.ThenLoadDaySleepLogs())
 		case RelationFitness:
 			q.Apply(models.ThenLoadDayFitnessLogs())
+		case RelationWork:
+			q.Apply(models.ThenLoadDayDeepWorkLogs())
 		}
 	}
 	return q
@@ -106,5 +108,6 @@ func DayRelations() []Relation {
 		RelationHabit,
 		RelationFitness,
 		RelationSleep,
+		RelationWork,
 	}
 }

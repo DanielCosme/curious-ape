@@ -9,10 +9,13 @@ export interface DaySummary {
     key: string
     date: string
     day: string
-    wake_up: HabitSummary
-    fitness: HabitSummary
-    work: HabitSummary
-    eat: HabitSummary
+    wake_up_habit: HabitSummary
+    fitness_habit: HabitSummary
+    work_habit: HabitSummary
+    eat_habit: HabitSummary
+    wake_up_detail: string
+    fitness_detail: string
+    work_detail: string
     score: number
 }
 

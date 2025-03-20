@@ -20,8 +20,6 @@ onMounted(async () => {
 </script>
 
 <template>
-  <h1>Days</h1>
-
   <h2>{{ days_summary.month }}</h2>
   <table class="u-full-width">
     <thead>

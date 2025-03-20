@@ -26,32 +26,35 @@ async function update_habit(ht: HabitType, hs: HabitState) {
   <tr>
     <td>{{ ds.day }}</td>
     <td>
-      <span v-if="ds.wake_up.state === HabitState.Done">O</span>
-      <span v-else-if="ds.wake_up.state === HabitState.NotDone">X</span>
-      <span v-else-if="ds.wake_up.state === HabitState.NoInfo">_</span>
-      <button @click="update_habit(ds.wake_up.type, HabitState.Done)" class="habit-button">Y</button>
-      <button @click="update_habit(ds.wake_up.type, HabitState.NotDone)" class="habit-button">N</button>
+      <span class="habit-done" v-if="ds.wake_up_habit.state === HabitState.Done"><strong>O</strong></span>
+      <span class="habit-not-done" v-else-if="ds.wake_up_habit.state === HabitState.NotDone">X</span>
+      <span v-else-if="ds.wake_up_habit.state === HabitState.NoInfo">_</span>
+      <button @click="update_habit(ds.wake_up_habit.type, HabitState.Done)" class="habit-button">Y</button>
+      <button @click="update_habit(ds.wake_up_habit.type, HabitState.NotDone)" class="habit-button">N</button>
+      <span>{{ ds.wake_up_detail }}</span>
     </td>
     <td>
-      <span v-if="ds.fitness.state === HabitState.Done">O</span>
-      <span v-else-if="ds.fitness.state === HabitState.NotDone">X</span>
-      <span v-else-if="ds.fitness.state === HabitState.NoInfo">_</span>
-      <button @click="update_habit(ds.fitness.type, HabitState.Done)" class="habit-button">Y</button>
-      <button @click="update_habit(ds.fitness.type, HabitState.NotDone)" class="habit-button">N</button>
+      <span class="habit-done" v-if="ds.fitness_habit.state === HabitState.Done"><strong>O</strong></span>
+      <span class="habit-not-done" v-else-if="ds.fitness_habit.state === HabitState.NotDone">X</span>
+      <span v-else-if="ds.fitness_habit.state === HabitState.NoInfo">_</span>
+      <button @click="update_habit(ds.fitness_habit.type, HabitState.Done)" class="habit-button">Y</button>
+      <button @click="update_habit(ds.fitness_habit.type, HabitState.NotDone)" class="habit-button">N</button>
+      <span>{{ ds.fitness_detail }}</span>
     </td>
     <td>
-      <span v-if="ds.work.state === HabitState.Done">O</span>
-      <span v-else-if="ds.work.state === HabitState.NotDone">X</span>
-      <span v-else-if="ds.work.state === HabitState.NoInfo">_</span>
-      <button @click="update_habit(ds.work.type, HabitState.Done)" class="habit-button">Y</button>
-      <button @click="update_habit(ds.work.type, HabitState.NotDone)" class="habit-button">N</button>
+      <span class="habit-done" v-if="ds.work_habit.state === HabitState.Done"><strong>O</strong></span>
+      <span class="habit-not-done" v-else-if="ds.work_habit.state === HabitState.NotDone">X</span>
+      <span v-else-if="ds.work_habit.state === HabitState.NoInfo">_</span>
+      <button @click="update_habit(ds.work_habit.type, HabitState.Done)" class="habit-button">Y</button>
+      <button @click="update_habit(ds.work_habit.type, HabitState.NotDone)" class="habit-button">N</button>
+      <span>{{ ds.work_detail }}</span>
     </td>
     <td>
-      <span v-if="ds.eat.state === HabitState.Done">O</span>
-      <span v-else-if="ds.eat.state === HabitState.NotDone">X</span>
-      <span v-else-if="ds.eat.state === HabitState.NoInfo">_</span>
-      <button @click="update_habit(ds.eat.type, HabitState.Done)" class="habit-button">Y</button>
-      <button @click="update_habit(ds.eat.type, HabitState.NotDone)" class="habit-button">N</button>
+      <span class="habit-done" v-if="ds.eat_habit.state === HabitState.Done"><strong>O</strong></span>
+      <span class="habit-not-done" v-else-if="ds.eat_habit.state === HabitState.NotDone">X</span>
+      <span v-else-if="ds.eat_habit.state === HabitState.NoInfo">_</span>
+      <button @click="update_habit(ds.eat_habit.type, HabitState.Done)" class="habit-button">Y</button>
+      <button @click="update_habit(ds.eat_habit.type, HabitState.NotDone)" class="habit-button">N</button>
     </td>
     <td>
       <button class="button-primary" @click="sync">Sync</button>
@@ -61,6 +64,12 @@ async function update_habit(ht: HabitType, hs: HabitState) {
 </template>
 
 <style scoped>
+.habit-done {
+  color: forestgreen;
+}
+.habit-not-done {
+  color: red;
+}
 span {
   padding: 0 0.3rem;
 }
@@ -69,14 +78,11 @@ a {
 }
 .habit-button {
   padding: 4px;
-  margin-bottom: 0;
   height: 20px;
   line-height: 0;
+  margin: 1px;
 }
 .habit-button:hover {
   background-color: rgba(115,255,236,0.25);
 }
 </style>
-
-// Emit event from here
-// The parent component will go the Get request and refresh the child component?

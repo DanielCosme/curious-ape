@@ -20,10 +20,7 @@ func EchoRoutes(t *Transport) http.Handler {
 	e.StaticFS("/static", echo.MustSubFS(web.Files, "static"))
 	// e.StaticFS("/", echo.MustSubFS(web.Files, "dist"))
 
-	login := e.Group("/api/v1/login", t.midLoadAndSaveCookie)
-	{
-		login.POST("", t.loginPost)
-	}
+	e.POST("/api/v1/login", t.loginPost, t.midLoadAndSaveCookie)
 
 	api := e.Group("/api/v1", t.midLoadAndSaveCookie)
 	{
