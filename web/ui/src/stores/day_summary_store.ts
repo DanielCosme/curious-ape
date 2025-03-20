@@ -13,6 +13,7 @@ export interface DaySummary {
     fitness: HabitSummary
     work: HabitSummary
     eat: HabitSummary
+    score: number
 }
 
 export interface HabitSummary {

@@ -30,7 +30,7 @@ func (a *App) sleepSync(d core.Date) error {
 			if sl.EndTime.Before(wakeUpTime) {
 				habitState = core.HabitStateDone
 			}
-			_, err := a.HabitUpsert(d, core.HabitTypeWakeUp, habitState)
+			_, err := a.HabitUpsertAutomated(d, core.HabitTypeWakeUp, habitState)
 			if err != nil {
 				return err
 			}

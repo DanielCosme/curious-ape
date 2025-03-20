@@ -87,6 +87,7 @@ var ColumnNames = struct {
 		DayID:           "day_id",
 		HabitCategoryID: "habit_category_id",
 		State:           "state",
+		Automated:       "automated",
 	},
 	SleepLogs: sleepLogColumnNames{
 		ID:             "id",

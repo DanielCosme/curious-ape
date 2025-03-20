@@ -10,7 +10,9 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/aarondl/opt/null"
 	"github.com/aarondl/opt/omit"
+	"github.com/aarondl/opt/omitnull"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/sqlite"
 	"github.com/stephenafamo/bob/dialect/sqlite/dialect"
@@ -24,10 +26,11 @@ import (
 
 // Habit is an object representing the database table.
 type Habit struct {
-	ID              int32  `db:"id,pk" `
-	DayID           int32  `db:"day_id" `
-	HabitCategoryID int32  `db:"habit_category_id" `
-	State           string `db:"state" `
+	ID              int32          `db:"id,pk" `
+	DayID           int32          `db:"day_id" `
+	HabitCategoryID int32          `db:"habit_category_id" `
+	State           string         `db:"state" `
+	Automated       null.Val[bool] `db:"automated" `
 
 	R habitR `db:"-" `
 }
@@ -53,6 +56,7 @@ type habitColumnNames struct {
 	DayID           string
 	HabitCategoryID string
 	State           string
+	Automated       string
 }
 
 var HabitColumns = buildHabitColumns("habits")
@@ -63,6 +67,7 @@ type habitColumns struct {
 	DayID           sqlite.Expression
 	HabitCategoryID sqlite.Expression
 	State           sqlite.Expression
+	Automated       sqlite.Expression
 }
 
 func (c habitColumns) Alias() string {
@@ -80,6 +85,7 @@ func buildHabitColumns(alias string) habitColumns {
 		DayID:           sqlite.Quote(alias, "day_id"),
 		HabitCategoryID: sqlite.Quote(alias, "habit_category_id"),
 		State:           sqlite.Quote(alias, "state"),
+		Automated:       sqlite.Quote(alias, "automated"),
 	}
 }
 
@@ -88,6 +94,7 @@ type habitWhere[Q sqlite.Filterable] struct {
 	DayID           sqlite.WhereMod[Q, int32]
 	HabitCategoryID sqlite.WhereMod[Q, int32]
 	State           sqlite.WhereMod[Q, string]
+	Automated       sqlite.WhereNullMod[Q, bool]
 }
 
 func (habitWhere[Q]) AliasedAs(alias string) habitWhere[Q] {
@@ -100,6 +107,7 @@ func buildHabitWhere[Q sqlite.Filterable](cols habitColumns) habitWhere[Q] {
 		DayID:           sqlite.Where[Q, int32](cols.DayID),
 		HabitCategoryID: sqlite.Where[Q, int32](cols.HabitCategoryID),
 		State:           sqlite.Where[Q, string](cols.State),
+		Automated:       sqlite.WhereNull[Q, bool](cols.Automated),
 	}
 }
 
@@ -115,14 +123,15 @@ type habitErrors struct {
 // All values are optional, and do not have to be set
 // Generated columns are not included
 type HabitSetter struct {
-	ID              omit.Val[int32]  `db:"id,pk" `
-	DayID           omit.Val[int32]  `db:"day_id" `
-	HabitCategoryID omit.Val[int32]  `db:"habit_category_id" `
-	State           omit.Val[string] `db:"state" `
+	ID              omit.Val[int32]    `db:"id,pk" `
+	DayID           omit.Val[int32]    `db:"day_id" `
+	HabitCategoryID omit.Val[int32]    `db:"habit_category_id" `
+	State           omit.Val[string]   `db:"state" `
+	Automated       omitnull.Val[bool] `db:"automated" `
 }
 
 func (s HabitSetter) SetColumns() []string {
-	vals := make([]string, 0, 4)
+	vals := make([]string, 0, 5)
 	if !s.ID.IsUnset() {
 		vals = append(vals, "id")
 	}
@@ -137,6 +146,10 @@ func (s HabitSetter) SetColumns() []string {
 
 	if !s.State.IsUnset() {
 		vals = append(vals, "state")
+	}
+
+	if !s.Automated.IsUnset() {
+		vals = append(vals, "automated")
 	}
 
 	return vals
@@ -155,6 +168,9 @@ func (s HabitSetter) Overwrite(t *Habit) {
 	if !s.State.IsUnset() {
 		t.State, _ = s.State.Get()
 	}
+	if !s.Automated.IsUnset() {
+		t.Automated, _ = s.Automated.GetNull()
+	}
 }
 
 func (s *HabitSetter) Apply(q *dialect.InsertQuery) {
@@ -167,7 +183,7 @@ func (s *HabitSetter) Apply(q *dialect.InsertQuery) {
 	}
 
 	q.AppendValues(bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
-		vals := make([]bob.Expression, 0, 4)
+		vals := make([]bob.Expression, 0, 5)
 		if !s.ID.IsUnset() {
 			vals = append(vals, sqlite.Arg(s.ID))
 		}
@@ -184,6 +200,10 @@ func (s *HabitSetter) Apply(q *dialect.InsertQuery) {
 			vals = append(vals, sqlite.Arg(s.State))
 		}
 
+		if !s.Automated.IsUnset() {
+			vals = append(vals, sqlite.Arg(s.Automated))
+		}
+
 		return bob.ExpressSlice(ctx, w, d, start, vals, "", ", ", "")
 	}))
 }
@@ -193,7 +213,7 @@ func (s HabitSetter) UpdateMod() bob.Mod[*dialect.UpdateQuery] {
 }
 
 func (s HabitSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 4)
+	exprs := make([]bob.Expression, 0, 5)
 
 	if !s.ID.IsUnset() {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
@@ -220,6 +240,13 @@ func (s HabitSetter) Expressions(prefix ...string) []bob.Expression {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			sqlite.Quote(append(prefix, "state")...),
 			sqlite.Arg(s.State),
+		}})
+	}
+
+	if !s.Automated.IsUnset() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			sqlite.Quote(append(prefix, "automated")...),
+			sqlite.Arg(s.Automated),
 		}})
 	}
 

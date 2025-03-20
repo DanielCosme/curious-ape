@@ -56,7 +56,7 @@ async function update_habit(ht: HabitType, hs: HabitState) {
     <td>
       <button class="button-primary" @click="sync">Sync</button>
     </td>
-    <td>2</td>
+    <td>{{ ds.score }}</td>
   </tr>
 </template>
 

@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS habits (
         habit_category_id   INTEGER NOT NULL,
 
         state              TEXT NOT NULL CHECK (state IN ('done', 'not_done','no_info')),
+        automated          BOOLEAN,
 
         FOREIGN KEY (habit_category_id) REFERENCES habit_categories (id) ON DELETE CASCADE,
         FOREIGN KEY (day_id) REFERENCES "days" (id) ON DELETE CASCADE,

@@ -24,12 +24,19 @@ func (h *Habits) Upsert(s *models.HabitSetter) (*models.Habit, error) {
 	habit, err := models.Habits.Insert(s).One(context.Background(), h.db)
 	if err != nil {
 		if models.HabitErrors.ErrUniqueDayIdAndHabitCategoryId.Is(err) {
-			habit, err = models.Habits.
-				Update(s.UpdateMod(),
-					models.UpdateWhere.Habits.DayID.EQ(s.DayID.GetOrZero()),
-					models.UpdateWhere.Habits.HabitCategoryID.EQ(s.HabitCategoryID.GetOrZero()),
-				).
-				One(context.Background(), h.db)
+			habit, err = models.Habits.Query(
+				models.SelectWhere.Habits.DayID.EQ(s.DayID.GetOrZero()),
+				models.SelectWhere.Habits.HabitCategoryID.EQ(s.HabitCategoryID.GetOrZero()),
+			).One(context.Background(), h.db)
+			if err != nil {
+				return nil, catchDBErr("habits: upsert", err)
+			}
+
+			// No-op for a non-automated habit for which the update is automated.
+			if !habit.Automated.GetOrZero() && s.Automated.GetOrZero() {
+				return habit, nil
+			}
+			err = habit.Update(context.Background(), h.db, s)
 			if err != nil {
 				return nil, catchDBErr("habits: create", err)
 			}

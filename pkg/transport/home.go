@@ -6,6 +6,7 @@ import (
 	"github.com/danielcosme/curious-ape/pkg/database/gen/models"
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"sort"
 )
 
 type DaysPayload struct {
@@ -21,6 +22,7 @@ type DaySummary struct {
 	Fitness HabitSummary `json:"fitness"`
 	Work    HabitSummary `json:"work"`
 	Eat     HabitSummary `json:"eat"`
+	Score   int          `json:"score"`
 }
 
 type HabitSummary struct {
@@ -36,6 +38,7 @@ func (t *Transport) home(c echo.Context) error {
 	daysPayload := DaysPayload{
 		Month: days[0].Date.Month().String(),
 	}
+	sort.Sort(DaysSliceSort(days))
 	for _, day := range days {
 		daysPayload.Days = append(daysPayload.Days, dayDBToSummary(day))
 	}
@@ -54,6 +57,9 @@ func dayDBToSummary(day *models.Day) DaySummary {
 		Eat:     HabitSummary{State: core.HabitStateNoInfo, Type: core.HabitTypeEatHealthy},
 	}
 	for _, h := range day.R.Habits {
+		if h.State == string(core.HabitStateDone) {
+			ds.Score++
+		}
 		switch core.HabitType(h.R.HabitCategory.Kind) {
 		case core.HabitTypeWakeUp:
 			ds.WakeUp = habitDBToTransport(h)
@@ -74,3 +80,9 @@ func habitDBToTransport(h *models.Habit) HabitSummary {
 		State: core.HabitState(h.State),
 	}
 }
+
+type DaysSliceSort []*models.Day
+
+func (a DaysSliceSort) Len() int           { return len(a) }
+func (a DaysSliceSort) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a DaysSliceSort) Less(i, j int) bool { return a[i].Date.After(a[j].Date) }
