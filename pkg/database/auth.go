@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"github.com/aarondl/opt/omit"
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/database/gen/models"
 	"github.com/stephenafamo/bob"
@@ -20,13 +19,9 @@ func (a *Auths) Upsert(s *models.AuthSetter) (*models.Auth, error) {
 
 	}
 	if models.AuthErrors.ErrUniqueProvider.Is(err) {
-		auth, err = a.Get(AuthParams{Provider: core.Integration(s.Provider.GetOrZero())})
-		if err != nil {
-			return nil, err
-		}
-
-		s.ID = omit.From(auth.ID)
-		return models.Auths.Update(s.UpdateMod()).One(context.Background(), a.db)
+		return models.Auths.
+			Update(s.UpdateMod(), models.UpdateWhere.Auths.Provider.EQ(s.Provider.GetOrZero())).
+			One(context.Background(), a.db)
 	}
 	return nil, catchDBErr("auths: upsert", err)
 }

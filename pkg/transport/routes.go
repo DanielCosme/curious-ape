@@ -34,7 +34,8 @@ func EchoRoutes(t *Transport) http.Handler {
 
 		api.GET("/integrations", t.integrationsGetAll)
 		api.GET("/integrations/:provider", t.integrationsGet)
-		api.POST("/sync", t.syncDay)
+		api.POST("/days/sync", t.syncDay)
+		api.POST("/habits/update", t.updateHabit)
 
 		// p.POST("logout", t.logout)
 	}

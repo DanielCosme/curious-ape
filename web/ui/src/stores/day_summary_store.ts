@@ -26,7 +26,7 @@ export enum HabitState {
     NoInfo = "no_info",
 }
 
-enum HabitType {
+export enum HabitType {
     WakeUp = "wake_up",
     Fitness = "fitness",
     DeepWork = "deep_work",

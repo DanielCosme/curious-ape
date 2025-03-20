@@ -24,14 +24,12 @@ func (h *Habits) Upsert(s *models.HabitSetter) (*models.Habit, error) {
 	habit, err := models.Habits.Insert(s).One(context.Background(), h.db)
 	if err != nil {
 		if models.HabitErrors.ErrUniqueDayIdAndHabitCategoryId.Is(err) {
-			habit, err = h.Get(HabitParams{
-				DayID:      s.DayID.GetOrZero(),
-				CategoryID: s.HabitCategoryID.GetOrZero(),
-			})
-			if err != nil {
-				return nil, catchDBErr("habits: create", err)
-			}
-			err = habit.Update(context.Background(), h.db, s)
+			habit, err = models.Habits.
+				Update(s.UpdateMod(),
+					models.UpdateWhere.Habits.DayID.EQ(s.DayID.GetOrZero()),
+					models.UpdateWhere.Habits.HabitCategoryID.EQ(s.HabitCategoryID.GetOrZero()),
+				).
+				One(context.Background(), h.db)
 			if err != nil {
 				return nil, catchDBErr("habits: create", err)
 			}

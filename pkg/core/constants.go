@@ -28,6 +28,20 @@ const (
 	HabitTypeDeepWork   HabitType = "deep_work"
 )
 
+func HabitTypeFromString(s string) HabitType {
+	switch s {
+	case "food":
+		return HabitTypeEatHealthy
+	case "wake_up":
+		return HabitTypeWakeUp
+	case "fitness":
+		return HabitTypeFitness
+	case "deep_work":
+		return HabitTypeDeepWork
+	}
+	return "undefined"
+}
+
 type AuthRole string
 
 const (
