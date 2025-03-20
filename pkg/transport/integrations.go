@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"fmt"
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -31,4 +32,16 @@ func (t *Transport) oauth2Success(c echo.Context) error {
 		return err
 	}
 	return c.Redirect(http.StatusSeeOther, "/integrations")
+}
+
+func (t *Transport) syncDay(c echo.Context) error {
+	day, err := core.DateFromISO8601(c.QueryParam("day"))
+	if err != nil {
+		return errClientError(fmt.Errorf("invalid date param - %w", err))
+	}
+	dayDB, err := t.App.SyncDay(day)
+	if err != nil {
+		return errServer(err)
+	}
+	return c.JSON(http.StatusOK, dayDBToSummary(dayDB))
 }

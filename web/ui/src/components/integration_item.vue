@@ -2,7 +2,6 @@
   // TODO: Make this component cached with a <KeepAlive>
   import { onMounted, ref } from 'vue'
   import {get_ape} from "@/api/fetch.ts";
-  import IntegrationsPage from "@/views/IntegrationsPage.vue";
 
   interface IntegrationItem {
     name: string

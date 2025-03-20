@@ -25,4 +25,7 @@
 </template>
 
 <style scoped>
+nav a {
+  margin-right: 1rem;
+}
 </style>

@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"github.com/aarondl/opt/omit"
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/database/gen/models"
 	"github.com/stephenafamo/bob"
@@ -27,8 +26,8 @@ func (dw *DeepWorkLogs) Upsert(s *models.DeepWorkLogSetter) (log *models.DeepWor
 		if err != nil {
 			return nil, err
 		}
-		s.ID = omit.From(workLog.ID)
-		workLog, err = models.DeepWorkLogs.Update(s.UpdateMod()).One(context.Background(), dw.db)
+		// s.ID = omit.From(workLog.ID)
+		err = workLog.Update(context.Background(), dw.db, s)
 		if err == nil {
 			return workLog, nil
 		}

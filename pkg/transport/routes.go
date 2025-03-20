@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"github.com/danielcosme/curious-ape/pkg/application"
 	"github.com/danielcosme/curious-ape/web"
 	"net/http"
 
@@ -17,7 +18,7 @@ func EchoRoutes(t *Transport) http.Handler {
 	e.Use(t.midSecureHeaders)
 
 	e.StaticFS("/static", echo.MustSubFS(web.Files, "static"))
-	e.StaticFS("/", echo.MustSubFS(web.Files, "dist"))
+	// e.StaticFS("/", echo.MustSubFS(web.Files, "dist"))
 
 	login := e.Group("/api/v1/login", t.midLoadAndSaveCookie)
 	{
@@ -33,12 +34,18 @@ func EchoRoutes(t *Transport) http.Handler {
 
 		api.GET("/integrations", t.integrationsGetAll)
 		api.GET("/integrations/:provider", t.integrationsGet)
+		api.POST("/sync", t.syncDay)
 
 		// p.POST("logout", t.logout)
 	}
-
-	// TODO make this endpoint protected?
 	e.GET("api/oauth2/:provider/success", t.oauth2Success)
+
+	if t.App.Env == application.Dev {
+		debug := e.Group("/api/v1/debug")
+		{
+			debug.GET("", t.home)
+		}
+	}
 
 	// In case I need a custom error Handler.
 	// e.HTTPErrorHandler

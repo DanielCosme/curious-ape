@@ -27,7 +27,7 @@ func (a *App) fitnessSync(d core.Date) error {
 			habitState = core.HabitStateDone
 		}
 	}
-	_, err = a.HabitUpsert(d, core.HabitkindFitness, habitState)
+	_, err = a.HabitUpsert(d, core.HabitTypeFitness, habitState)
 	return err
 }
 

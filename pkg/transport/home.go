@@ -1,10 +1,11 @@
 package transport
 
 import (
+	"fmt"
 	"github.com/danielcosme/curious-ape/pkg/core"
+	"github.com/danielcosme/curious-ape/pkg/database/gen/models"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"time"
 )
 
 type DaysPayload struct {
@@ -13,16 +14,18 @@ type DaysPayload struct {
 }
 
 type DaySummary struct {
-	ID     int32        `json:"id"`
-	Key    string       `json:"key"`
-	Date   time.Time    `json:"date"`
-	WakeUp HabitSummary `json:"wake_up"`
-	Sleep  HabitSummary `json:"sleep"`
-	Work   HabitSummary `json:"work"`
-	Eat    HabitSummary `json:"eat"`
+	Key     string       `json:"key"`
+	Date    string       `json:"date"`
+	Day     string       `json:"day"`
+	WakeUp  HabitSummary `json:"wake_up"`
+	Fitness HabitSummary `json:"fitness"`
+	Work    HabitSummary `json:"work"`
+	Eat     HabitSummary `json:"eat"`
 }
 
 type HabitSummary struct {
+	State core.HabitState `json:"state"`
+	Type  core.HabitType  `json:"type"`
 }
 
 func (t *Transport) home(c echo.Context) error {
@@ -30,7 +33,44 @@ func (t *Transport) home(c echo.Context) error {
 	if err != nil {
 		return errServer(err)
 	}
-	return c.JSON(http.StatusOK, days)
+	daysPayload := DaysPayload{
+		Month: days[0].Date.Month().String(),
+	}
+	for _, day := range days {
+		daysPayload.Days = append(daysPayload.Days, dayDBToSummary(day))
+	}
+	return c.JSON(http.StatusOK, daysPayload)
 }
 
-// func dayToTranspor(days []*core.DaySummary)
+func dayDBToSummary(day *models.Day) DaySummary {
+	format := core.TimeFormatISO8601(day.Date)
+	ds := DaySummary{
+		Key:     fmt.Sprintf("day_s_%s", format),
+		Date:    format,
+		Day:     day.Date.Format(core.HumanDate),
+		WakeUp:  HabitSummary{State: core.HabitStateNoInfo, Type: core.HabitTypeWakeUp},
+		Fitness: HabitSummary{State: core.HabitStateNoInfo, Type: core.HabitTypeFitness},
+		Work:    HabitSummary{State: core.HabitStateNoInfo, Type: core.HabitTypeDeepWork},
+		Eat:     HabitSummary{State: core.HabitStateNoInfo, Type: core.HabitTypeEatHealthy},
+	}
+	for _, h := range day.R.Habits {
+		switch core.HabitType(h.R.HabitCategory.Kind) {
+		case core.HabitTypeWakeUp:
+			ds.WakeUp = habitDBToTransport(h)
+		case core.HabitTypeFitness:
+			ds.Fitness = habitDBToTransport(h)
+		case core.HabitTypeDeepWork:
+			ds.Work = habitDBToTransport(h)
+		case core.HabitTypeEatHealthy:
+			ds.Eat = habitDBToTransport(h)
+		}
+	}
+	return ds
+}
+
+func habitDBToTransport(h *models.Habit) HabitSummary {
+	return HabitSummary{
+		Type:  core.HabitType(h.R.HabitCategory.Kind),
+		State: core.HabitState(h.State),
+	}
+}

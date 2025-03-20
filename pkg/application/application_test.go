@@ -31,13 +31,13 @@ func TestDay(t *testing.T) {
 	assert.NilError(t, err)
 	assert.Assert(t, day.ID > 0)
 
-	_, err = app.HabitUpsert(date1, core.HabitKindWakeUp, core.HabitStateDone)
+	_, err = app.HabitUpsert(date1, core.HabitTypeWakeUp, core.HabitStateDone)
 	assert.NilError(t, err)
-	_, err = app.HabitUpsert(date1, core.HabitkindFitness, core.HabitStateDone)
+	_, err = app.HabitUpsert(date1, core.HabitTypeFitness, core.HabitStateDone)
 	assert.NilError(t, err)
-	_, err = app.HabitUpsert(date1, core.HabitKindDeepWork, core.HabitStateDone)
+	_, err = app.HabitUpsert(date1, core.HabitTypeDeepWork, core.HabitStateDone)
 	assert.NilError(t, err)
-	_, err = app.HabitUpsert(date1, core.HabitKindEatHealthy, core.HabitStateDone)
+	_, err = app.HabitUpsert(date1, core.HabitTypeEatHealthy, core.HabitStateDone)
 	assert.NilError(t, err)
 
 	date2 := core.NewDate(date1.Time().AddDate(0, 0, 1))

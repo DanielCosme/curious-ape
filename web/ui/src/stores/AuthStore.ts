@@ -11,7 +11,7 @@ export const useAuthStore = defineStore(
         actions: {
             async checkLogin() {
                 // TODO: create an endpoint on the backend to make this more efficient.
-                //      The endpoint would not return a body.
+                //      The endpoint would return maybe the current user.
                 let res = await fetch('http://localhost:4000/api/v1', {
                    credentials: 'include'
                 })

@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"github.com/aarondl/opt/omit"
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/database/gen/models"
 	"github.com/stephenafamo/bob"
@@ -32,9 +31,7 @@ func (h *Habits) Upsert(s *models.HabitSetter) (*models.Habit, error) {
 			if err != nil {
 				return nil, catchDBErr("habits: create", err)
 			}
-
-			s.ID = omit.From(habit.ID)
-			habit, err = models.Habits.Update(s.UpdateMod()).One(context.Background(), h.db)
+			err = habit.Update(context.Background(), h.db, s)
 			if err != nil {
 				return nil, catchDBErr("habits: create", err)
 			}
@@ -84,7 +81,7 @@ func (f HabitParams) BuildQuery() *sqlite.ViewQuery[*models.Habit, models.HabitS
 
 type HabitCategoryParams struct {
 	ID   int32
-	Kind core.HabitKind
+	Kind core.HabitType
 }
 
 func (f HabitCategoryParams) BuildQuery() *sqlite.ViewQuery[*models.HabitCategory, models.HabitCategorySlice] {

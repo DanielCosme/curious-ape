@@ -1,27 +1,28 @@
 <script setup lang="ts">
-import { useDaysStore } from "@/stores/DaysStore.ts";
+
+// TODO: how to get ISO Date from JS Date.
+// `${date1.getFullYear()}-${date1.getMonth()+1}-${date1.getDate()};
+
+import { get_ape } from "@/api/fetch.ts";
 import { onMounted } from "vue";
+import Day_summary_row from "@/components/day_summary_row.vue";
+import { days_summary } from "@/stores/day_summary_store.ts";
 
 
-interface DaySummary {
-  Date: string // TODO: Maybe I can parse this as a JS Date
-  Wake: Habit  // TODO Maybe I can separate this into a different API Call.
-  Fitness: Habit
-  Work: Habit
-  Eat: Habit
-  Score: number
+async function fetchData() {
+  let res = await get_ape("http://localhost:4000/api/v1")
+  days_summary.value = await res.json()
 }
 
-interface Habit {
-
-}
-
+onMounted(async () => {
+  await fetchData()
+})
 </script>
 
 <template>
   <h1>Days</h1>
 
-  <h2>January</h2>
+  <h2>{{ days_summary.month }}</h2>
   <table class="u-full-width">
     <thead>
       <tr>
@@ -35,39 +36,7 @@ interface Habit {
       </tr>
     </thead>
     <tbody>
-
-      <!-- TODO: This <tr> needs to be it's own component -->
-      <tr>
-        <td>Monday, 01</td>
-        <td>
-          <span>O</span>
-          <a href="#">Y</a>
-          <a href="#">N</a>
-          <span>Detail</span>
-        </td>
-        <td>
-          <span>O</span>
-          <a href="#">Y</a>
-          <a href="#">N</a>
-          <span>Detail</span>
-        </td>
-        <td>
-          <span>X</span>
-          <a href="#">Y</a>
-          <a href="#">N</a>
-          <span>Detail</span>
-        </td>
-        <td>
-          <span>X</span>
-          <a href="#">Y</a>
-          <a href="#">N</a>
-          <span>Detail</span>
-        </td>
-        <td>
-          <button class="button-primary">Sync</button>
-        </td>
-        <td>2</td>
-      </tr>
+      <day_summary_row v-for="day in days_summary.days" :key="day.key" :day="day"/>
     </tbody>
   </table>
 </template>

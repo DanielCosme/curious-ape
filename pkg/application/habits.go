@@ -8,7 +8,7 @@ import (
 	"log/slog"
 )
 
-func (a *App) HabitUpsert(date core.Date, hk core.HabitKind, state core.HabitState) (*models.Habit, error) {
+func (a *App) HabitUpsert(date core.Date, hk core.HabitType, state core.HabitState) (*models.Habit, error) {
 	hc, err := a.db.Habits.GetCategory(database.HabitCategoryParams{Kind: hk})
 	if err != nil {
 		return nil, err

@@ -19,13 +19,13 @@ const (
 	HabitStateNoInfo  HabitState = "no_info"
 )
 
-type HabitKind string
+type HabitType string
 
 const (
-	HabitKindEatHealthy HabitKind = "food"
-	HabitKindWakeUp     HabitKind = "wake_up"
-	HabitkindFitness    HabitKind = "fitness"
-	HabitKindDeepWork   HabitKind = "deep_work"
+	HabitTypeEatHealthy HabitType = "food"
+	HabitTypeWakeUp     HabitType = "wake_up"
+	HabitTypeFitness    HabitType = "fitness"
+	HabitTypeDeepWork   HabitType = "deep_work"
 )
 
 type AuthRole string

@@ -4,12 +4,12 @@ type Habit struct {
 	ID    int32
 	Date  Date
 	state HabitState
-	Kind  HabitKind
+	Kind  HabitType
 }
 
 type HabitCategory struct {
 	ID          int32
-	Kind        HabitKind
+	Kind        HabitType
 	Name        string
 	Description string
 }

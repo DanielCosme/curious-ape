@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"github.com/aarondl/opt/omit"
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/database/gen/models"
 	"github.com/stephenafamo/bob"
@@ -29,8 +28,8 @@ func (fls *SleepLogs) Upsert(s *models.SleepLogSetter) (*models.SleepLog, error)
 		if err != nil {
 			return nil, err
 		}
-		s.ID = omit.From(sleepLog.ID)
-		sleepLog, err = models.SleepLogs.Update(s.UpdateMod()).One(context.Background(), fls.db)
+
+		err = sleepLog.Update(context.Background(), fls.db, s)
 		if err == nil {
 			return sleepLog, nil
 		}

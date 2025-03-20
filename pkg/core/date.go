@@ -84,3 +84,7 @@ func DateFromISO8601(s string) (Date, error) {
 	}
 	return NewDate(t), nil
 }
+
+func TimeFormatISO8601(t time.Time) string {
+	return t.Format(ISO8601)
+}

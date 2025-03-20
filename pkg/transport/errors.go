@@ -14,8 +14,6 @@ func errServer(err error) error {
 	return echo.NewHTTPError(http.StatusInternalServerError)
 }
 
-/*
 func errClientError(err error) error {
 	return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 }
-*/
