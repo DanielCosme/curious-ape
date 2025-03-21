@@ -21,7 +21,6 @@ func (t *Transport) loginPost(c echo.Context) error {
 	}
 
 	if !form.Valid() {
-		// TODO(daniel): Implement
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid form"))
 	}
 
@@ -29,7 +28,6 @@ func (t *Transport) loginPost(c echo.Context) error {
 	if err != nil {
 		if errors.Is(err, database.ErrInvalidCredentials) {
 			form.AddNonFieldError("username or password is incorrect")
-			// TODO: Implement
 			return echo.NewHTTPError(http.StatusUnauthorized, err)
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -45,14 +43,11 @@ func (t *Transport) loginPost(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
-/*
 func (t *Transport) logout(c echo.Context) error {
 	if err := t.SessionManager.RenewToken(c.Request().Context()); err != nil {
 		return errServer(err)
 	}
 
 	t.SessionManager.Remove(c.Request().Context(), string(ctxKeyAuthenticatedUserID))
-	t.SessionManager.Put(c.Request().Context(), "flash", "You've been logged out successfully!")
-	return c.Redirect(http.StatusSeeOther, "/")
+	return c.NoContent(http.StatusOK)
 }
-*/

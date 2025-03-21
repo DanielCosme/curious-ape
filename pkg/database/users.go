@@ -20,12 +20,16 @@ func (u *Users) Exists(id int) (bool, error) {
 }
 
 type UserParams struct {
+	ID       int
 	Role     core.AuthRole
 	Username string
 }
 
 func (u *Users) Get(f UserParams) (*models.User, error) {
 	q := models.Users.Query()
+	if f.ID > 0 {
+		q.Apply(models.SelectWhere.Users.ID.EQ(int32(f.ID)))
+	}
 	if f.Role != "" {
 		q.Apply(models.SelectWhere.Users.Role.EQ(string(f.Role)))
 	}

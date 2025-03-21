@@ -47,6 +47,18 @@ func (t *Transport) home(c echo.Context) error {
 	return c.JSON(http.StatusOK, daysPayload)
 }
 
+func (t *Transport) syncDay(c echo.Context) error {
+	day, err := core.DateFromISO8601(c.QueryParam("day"))
+	if err != nil {
+		return errClientError(fmt.Errorf("invalid date param - %w", err))
+	}
+	dayDB, err := t.App.SyncDay(day)
+	if err != nil {
+		return errServer(err)
+	}
+	return c.JSON(http.StatusOK, dayDBToSummary(dayDB))
+}
+
 func dayDBToSummary(day *models.Day) DaySummary {
 	format := core.TimeFormatISO8601(day.Date)
 	ds := DaySummary{

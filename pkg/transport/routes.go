@@ -28,13 +28,18 @@ func EchoRoutes(t *Transport) http.Handler {
 		api.Use(t.midRequireAuth)
 
 		api.GET("", t.home)
-
-		api.GET("/integrations", t.integrationsGetAll)
-		api.GET("/integrations/:provider", t.integrationsGet)
+		api.GET("/user", t.getUser)
+		api.GET("/version", t.getVersion)
+		api.POST("/logout", t.logout)
 		api.POST("/days/sync", t.syncDay)
 		api.POST("/habits/update", t.updateHabit)
+		api.GET("/integrations", t.integrationsGetAll)
+		api.GET("/integrations/:provider", t.integrationsGet)
+	}
 
-		// p.POST("logout", t.logout)
+	apiNoAuth := e.Group("/api/v1")
+	{
+		apiNoAuth.GET("/version", t.getVersion)
 	}
 	e.GET("api/oauth2/:provider/success", t.oauth2Success)
 

@@ -81,8 +81,8 @@ func (t *Transport) midLoadAndSaveCookie(next echo.HandlerFunc) echo.HandlerFunc
 				}
 
 				c.SetCookie(responseCookie)
-				c.Response().Header().Set("Vary", "Cookie")
-				c.Response().Header().Set("Cache-Control", `no-cache="Set-Cookie"`)
+				c.Response().Header().Add("Vary", "Cookie")
+				c.Response().Header().Add("Cache-Control", `no-cache="Set-Cookie"`)
 			}
 		})
 
@@ -96,12 +96,13 @@ func (t *Transport) midAuthenticateFromSession(next echo.HandlerFunc) echo.Handl
 		if id == 0 {
 			return next(c)
 		}
-		exists, err := t.App.UserExists(id)
+		usr, err := t.App.GetUser(id)
 		if err != nil {
 			return err
 		}
-		if exists {
+		if usr != nil {
 			ctx := context.WithValue(c.Request().Context(), ctxKeyIsAuthenticated, true)
+			ctx = context.WithValue(ctx, ctxUser, usr)
 			c.SetRequest(c.Request().WithContext(ctx))
 		}
 		return next(c)

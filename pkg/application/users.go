@@ -64,3 +64,7 @@ func (a *App) Authenticate(username, password string) (int, error) {
 func (a *App) UserExists(id int) (bool, error) {
 	return a.db.Users.Exists(id)
 }
+
+func (a *App) GetUser(id int) (*models.User, error) {
+	return a.db.Users.Get(database.UserParams{ID: id})
+}

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { post_ape } from "@/api/fetch.ts";
 
 export const useAuthStore = defineStore(
    'authStore',
@@ -10,9 +11,7 @@ export const useAuthStore = defineStore(
         getters: {},
         actions: {
             async checkLogin() {
-                // TODO: create an endpoint on the backend to make this more efficient.
-                //      The endpoint would return maybe the current user.
-                let res = await fetch('http://localhost:4000/api/v1', {
+                let res = await fetch('http://localhost:4000/api/v1/user', {
                    credentials: 'include'
                 })
                 if (!res.ok) {
@@ -21,13 +20,17 @@ export const useAuthStore = defineStore(
                         console.log(res.statusText);
                         return
                     }
-                    console.log(res.statusText);
                 }
                 if (res.status === 200) {
                     this.isAuthenticated = true
-                    console.log("User Authenticated");
                 }
             },
+            async logout() {
+                let res = await post_ape('http://localhost:4000/api/v1/logout', null)
+                if (res.ok) {
+                    this.isAuthenticated = false
+                }
+            }
         }
     }
 )

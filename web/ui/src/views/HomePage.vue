@@ -14,8 +14,8 @@ async function fetchData() {
   days_summary.value = await res.json()
 }
 
-onMounted(async () => {
-  await fetchData()
+onMounted( () => {
+  fetchData()
 })
 </script>
 

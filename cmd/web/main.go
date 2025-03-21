@@ -55,16 +55,6 @@ type user struct {
 var version string
 
 func main() {
-	// TODO(daniel): Curious Ape is now SPA (Single Page Application).
-	// 		The backend is built in Go.
-	//		The font-end is built with Vue.
-	/*
-		TODO(daniel):
-			- Remove the web layer.
-			- Remove templ and HTMX.
-			- Add API Generation from API Specification.
-	*/
-
 	// flags & configuration
 	cfg := new(config)
 	v := Version()
