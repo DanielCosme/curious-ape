@@ -17,8 +17,7 @@ func EchoRoutes(t *Transport) http.Handler {
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
 	e.Use(t.midSecureHeaders)
 
-	e.StaticFS("/static", echo.MustSubFS(web.Files, "static"))
-	// e.StaticFS("/", echo.MustSubFS(web.Files, "dist"))
+	e.StaticFS("/", echo.MustSubFS(web.Files, "dist"))
 
 	e.POST("/api/v1/login", t.loginPost, t.midLoadAndSaveCookie)
 

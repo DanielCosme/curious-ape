@@ -1,6 +1,5 @@
 #!/usr/bin/env fish
 
-set root_dir pwd
 set cur_dir (realpath (dirname (status --current-filename)))
 
 set -gx new_version (cat VERSION.txt); or exit
