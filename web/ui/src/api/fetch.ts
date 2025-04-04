@@ -3,7 +3,7 @@ import { useRouter } from "vue-router";
 
 let baseURL = "http://localhost:4000"
 if (process.env.NODE_ENV === "production") {
-    baseURL = "https://danicos.me"
+    baseURL = "https://ape.danicos.me"
 }
 
 export async function get_ape(url: string) :Promise<Response> {

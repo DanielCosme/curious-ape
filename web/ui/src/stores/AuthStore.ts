@@ -3,7 +3,7 @@ import { post_ape } from "@/api/fetch.ts";
 
 let baseURL = "http://localhost:4000"
 if (process.env.NODE_ENV === "production") {
-    baseURL = "https://danicos.me"
+    baseURL = "https://ape.danicos.me"
 }
 
 export const useAuthStore = defineStore(
