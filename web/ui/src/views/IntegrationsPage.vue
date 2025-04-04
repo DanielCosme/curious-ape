@@ -7,7 +7,7 @@ let data = ref({
   integrations: []
 })
 const getIntegrations = async function() {
-  let res = await get_ape("http://localhost:4000/api/v1/integrations")
+  let res = await get_ape("/api/v1/integrations")
   data.value.integrations = await res.json()
 }
 onMounted(async () => {

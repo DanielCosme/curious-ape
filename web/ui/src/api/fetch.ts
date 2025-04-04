@@ -1,6 +1,11 @@
 import { useAuthStore } from "@/stores/AuthStore.ts";
 import { useRouter } from "vue-router";
 
+let baseURL = "http://localhost:4000"
+if (process.env.NODE_ENV === "production") {
+    baseURL = "https://danicos.me"
+}
+
 export async function get_ape(url: string) :Promise<Response> {
     return run(url, null, "get")
 }
@@ -12,7 +17,7 @@ export async function post_ape(url: string, body: any) : Promise<Response> {
 async function run(url: string, body: any, method: string) : Promise<Response> {
     const router = useRouter();
     const authStore = useAuthStore();
-    let res = await fetch(url, {
+    let res = await fetch(baseURL+url, {
         credentials: 'include',
         body: body,
         method: method,

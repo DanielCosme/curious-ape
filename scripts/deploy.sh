@@ -2,6 +2,7 @@
 
 if test "$RELEASE" = true
   ./scripts/push.sh; or exit 1
+  make ci
 
   echo "--- Starting Release ---"
   echo "\

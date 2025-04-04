@@ -28,7 +28,7 @@
   })
 
   const getIntegration = async (name: string) => {
-    let res = await get_ape(`http://localhost:4000/api/v1/integrations/${name.toLowerCase()}`)
+    let res = await get_ape(`/api/v1/integrations/${name.toLowerCase()}`)
     refs.value.integration = await res.json()
   }
 

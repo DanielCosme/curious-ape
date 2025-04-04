@@ -6,7 +6,7 @@ set -gx new_version (cat VERSION.txt); or exit
 
 $cur_dir/build.sh $new_version; or exit 1
 
-docker run curious-ape-ci; or exit 1
+# docker run curious-ape-ci; or exit 1
 
 echo "$DOCKER_HUB_PASSWORD" | docker login -u $DOCKER_HUB_USER --password-stdin; or exit 1
 

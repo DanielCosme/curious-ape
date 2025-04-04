@@ -11,12 +11,12 @@ let props = defineProps<Props>()
 let ds = ref(props.day)
 
 async function sync() {
-  let res = await post_ape(`http://localhost:4000/api/v1/days/sync?day=${ds.value.date}`, null)
+  let res = await post_ape(`/api/v1/days/sync?day=${ds.value.date}`, null)
   ds.value = await res.json()
 }
 
 async function update_habit(ht: HabitType, hs: HabitState) {
-  let res = await post_ape(`http://localhost:4000/api/v1/habits/update?date=${ds.value.date}&type=${ht}&state=${hs}`, null)
+  let res = await post_ape(`/api/v1/habits/update?date=${ds.value.date}&type=${ht}&state=${hs}`, null)
   ds.value = await res.json()
 }
 

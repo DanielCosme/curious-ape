@@ -35,4 +35,6 @@ router.beforeEach((to, from) => {
 
 app.mount('#app')
 
+console.log("env:", process.env.NODE_ENV)
+
 // TODO: Implement a global store cleanup/purge.

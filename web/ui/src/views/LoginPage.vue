@@ -8,8 +8,13 @@ let username = ref('')
 let password = ref('')
 let router = useRouter()
 
+let baseURL = "http://localhost:4000"
+if (process.env.NODE_ENV === "production") {
+  baseURL = "https://danicos.me"
+}
+
 const handleLogin = async function() {
-  let result = await fetch('http://localhost:4000/api/v1/login', {
+  let result = await fetch(`${baseURL}/api/v1/login`, {
     method: 'POST',
     credentials: 'include',
     headers: {

@@ -10,7 +10,7 @@ import { days_summary } from "@/stores/day_summary_store.ts";
 
 
 async function fetchData() {
-  let res = await get_ape("http://localhost:4000/api/v1")
+  let res = await get_ape("/api/v1")
   days_summary.value = await res.json()
 }
 

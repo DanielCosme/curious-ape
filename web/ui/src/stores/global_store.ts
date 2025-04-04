@@ -12,7 +12,7 @@ export const useGlobalStore = defineStore(
         getters: {},
         actions: {
             async fetchVersion() {
-                this.info = await get_ape("http://localhost:4000/api/v1/version")
+                this.info = await get_ape("/api/v1/version")
                     .then(res => res.json())
                     .catch(err => console.log(err));
             }
