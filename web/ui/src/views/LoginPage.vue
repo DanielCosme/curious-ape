@@ -10,7 +10,7 @@ let router = useRouter()
 
 let baseURL = "http://localhost:4000"
 if (process.env.NODE_ENV === "production") {
-  baseURL = "https://danicos.me"
+  baseURL = "https://ape.danicos.me"
 }
 
 const handleLogin = async function() {
