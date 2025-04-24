@@ -1,3 +1,3 @@
-# Curious-Ape
+# Curious Ape
 
-To read more about this project you can [go here](https://danicos.me/portfolio/curious-ape)
+Web application build with no dependencies other than the Go Programming Language and Typescript.
