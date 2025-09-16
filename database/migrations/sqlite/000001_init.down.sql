@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS "day";
+DROP INDEX IF EXISTS day_date_idx;
+
+DROP TABLE IF EXISTS habit;
+DROP TABLE IF EXISTS habit_category;
+
+DROP TABLE IF EXISTS oauth_token;
+DROP TABLE IF EXISTS user;
+
+DROP TABLE IF EXISTS session;
+DROP INDEX IF EXISTS session_expiry_idx;

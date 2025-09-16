@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"github.com/danielcosme/curious-ape/pkg/application"
 	"github.com/danielcosme/curious-ape/pkg/core"
-	"github.com/danielcosme/curious-ape/pkg/database"
+	"github.com/danielcosme/curious-ape/pkg/persistence"
 	"github.com/golang-migrate/migrate/v4"
-	sqlite "github.com/golang-migrate/migrate/v4/database/sqlite"
+	m_sqlite "github.com/golang-migrate/migrate/v4/database/sqlite"
 	"github.com/stephenafamo/bob"
 	"gotest.tools/v3/assert"
 	"log/slog"
@@ -14,7 +14,7 @@ import (
 	"time"
 
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 func TestHabitUpsertManual(t *testing.T) {
@@ -84,7 +84,7 @@ func NewTestApplication(t *testing.T) *application.App {
 		Config: &application.Config{
 			Env: application.Test,
 		},
-		Database: database.New(bob.NewDB(db)),
+		Database: persistence.New(bob.NewDB(db)),
 	}
 	app := application.New(opts)
 	return app
@@ -93,14 +93,14 @@ func NewTestApplication(t *testing.T) *application.App {
 func NewTestDB(t *testing.T) *sql.DB {
 	t.Helper()
 
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	failIfErr(t, err)
 
-	migrationDriver, err := sqlite.WithInstance(db, &sqlite.Config{})
+	migrationDriver, err := m_sqlite.WithInstance(db, &m_sqlite.Config{})
 	failIfErr(t, err)
 
 	migrator, err := migrate.NewWithDatabaseInstance(
-		"file://../../migrations/sqlite",
+		"file://../../database/migrations/sqlite",
 		"ape",
 		migrationDriver,
 	)

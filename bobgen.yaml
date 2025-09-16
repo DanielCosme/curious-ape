@@ -1,10 +1,33 @@
 sqlite:
-  dsn: "ape.db"
-  driver_name:  "github.com/mattn/go-sqlite3"
+  dsn: "./tmp/ape.db"
   except:
     schema_migrations:
     sessions:
-  output: "./pkg/database/gen/models"
 
-no_factory: True
-wipe: True
+plugins:
+  dbinfo:
+    disabled: true
+    pkgname: "dbinfo"
+    destination: "./database/gen/dbinfo"
+  enums:
+    disabled: false
+    pkgname: "enums"
+    destination: "./database/gen/enums"
+  models:
+    disabled: false
+    pkgname: "models"
+    destination: "./database/gen/models"
+  factory:
+    disabled: true
+    pkgname: "factory"
+    destination: "./database/gen/factory"
+  dberrors:
+    disabled: false
+    pkgname: "dberrors"
+    destination: "./database/gen/dberrors"
+  where:
+    disabled: false
+  loaders:
+    disabled: false
+  joins:
+    disabled: false

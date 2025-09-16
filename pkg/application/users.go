@@ -3,9 +3,9 @@ package application
 import (
 	"errors"
 	"github.com/aarondl/opt/omit"
+	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/core"
-	"github.com/danielcosme/curious-ape/pkg/database"
-	"github.com/danielcosme/curious-ape/pkg/database/gen/models"
+	"github.com/danielcosme/curious-ape/pkg/persistence"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -19,8 +19,8 @@ func (a *App) SetPassword(username, password, email string, role core.AuthRole) 
 		return errors.New("username cannot be empty")
 	}
 
-	u, err := a.db.Users.Get(database.UserParams{Role: role, Username: username})
-	if database.IgnoreIfErrNotFound(err) {
+	u, err := a.db.Users.Get(persistence.UserParams{Role: role, Username: username})
+	if persistence.IgnoreIfErrNotFound(err) {
 		return err
 	}
 	if u == nil {
@@ -41,10 +41,10 @@ func (a *App) SetPassword(username, password, email string, role core.AuthRole) 
 
 // Authenticate returns userID if successfully authenticated.
 func (a *App) Authenticate(username, password string) (int, error) {
-	u, err := a.db.Users.Get(database.UserParams{Username: username})
+	u, err := a.db.Users.Get(persistence.UserParams{Username: username})
 	if err != nil {
-		if errors.Is(err, database.ErrNotFound) {
-			return 0, database.ErrInvalidCredentials
+		if errors.Is(err, persistence.ErrNotFound) {
+			return 0, persistence.ErrInvalidCredentials
 		}
 		return 0, err
 	}
@@ -52,7 +52,7 @@ func (a *App) Authenticate(username, password string) (int, error) {
 	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
 	if err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			return 0, database.ErrInvalidCredentials
+			return 0, persistence.ErrInvalidCredentials
 		} else {
 			return 0, err
 		}
@@ -66,5 +66,5 @@ func (a *App) UserExists(id int) (bool, error) {
 }
 
 func (a *App) GetUser(id int) (*models.User, error) {
-	return a.db.Users.Get(database.UserParams{ID: id})
+	return a.db.Users.Get(persistence.UserParams{ID: id})
 }

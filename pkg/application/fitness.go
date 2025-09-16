@@ -3,9 +3,8 @@ package application
 import (
 	"encoding/json"
 	"github.com/aarondl/opt/omit"
-	"github.com/aarondl/opt/omitnull"
+	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/core"
-	"github.com/danielcosme/curious-ape/pkg/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/integrations/google"
 )
 
@@ -69,8 +68,8 @@ func fitnessLogFromGoogle(day *models.Day, session google.Session) (*models.Fitn
 		StartTime: omit.From(google.ParseMillis(session.StartTimeMillis)),
 		EndTime:   omit.From(google.ParseMillis(session.EndTimeMillis)),
 		Origin:    omit.From(core.OriginLogGoogle),
-		Note:      omitnull.From(session.Application.PackageName),
-		Raw:       omitnull.From(string(raw)),
+		Note:      omit.From(session.Application.PackageName),
+		Raw:       omit.From(string(raw)),
 	}
 	return setter, nil
 }

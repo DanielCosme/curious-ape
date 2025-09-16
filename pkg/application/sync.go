@@ -1,8 +1,8 @@
 package application
 
 import (
+	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/core"
-	"github.com/danielcosme/curious-ape/pkg/database/gen/models"
 )
 
 func (a *App) SyncDay(d core.Date) (*models.Day, error) {

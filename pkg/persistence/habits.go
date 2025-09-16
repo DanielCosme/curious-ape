@@ -1,0 +1,102 @@
+package persistence
+
+import (
+	"context"
+	"github.com/danielcosme/curious-ape/database/gen/dberrors"
+	"github.com/danielcosme/curious-ape/database/gen/models"
+	"github.com/danielcosme/curious-ape/pkg/core"
+	"github.com/stephenafamo/bob"
+	"github.com/stephenafamo/bob/dialect/sqlite"
+)
+
+type Habits struct {
+	db bob.DB
+}
+
+func (h *Habits) Get(p HabitParams) (*models.Habit, error) {
+	habit, err := p.BuildQuery().One(context.Background(), h.db)
+	if err != nil {
+		return nil, catchDBErr("habits: get", err)
+	}
+	return habit, nil
+}
+
+func (h *Habits) Upsert(s *models.HabitSetter) (*models.Habit, error) {
+	habit, err := models.Habits.Insert(s).One(context.Background(), h.db)
+	if err != nil {
+		if dberrors.HabitErrors.ErrUniqueSqliteAutoindexHabit1.Is(err) {
+			habit, err = models.Habits.Query(
+				models.SelectWhere.Habits.DayID.EQ(s.DayID.GetOrZero()),
+				models.SelectWhere.Habits.HabitCategoryID.EQ(s.HabitCategoryID.GetOrZero()),
+			).One(context.Background(), h.db)
+			if err != nil {
+				return nil, catchDBErr("habits: upsert", err)
+			}
+
+			// No-op for a non-automated habit for which the update is automated.
+			if !habit.Automated && s.Automated.GetOrZero() {
+				return habit, nil
+			}
+			err = habit.Update(context.Background(), h.db, s)
+			if err != nil {
+				return nil, catchDBErr("habits: upsert", err)
+			}
+		} else {
+			return nil, catchDBErr("habits: create", err)
+		}
+	}
+	ctx := context.Background()
+	if err := habit.LoadDay(ctx, h.db); err != nil {
+		return nil, catchDBErr("habits: create: load habit day", err)
+	}
+	if err := habit.LoadHabitCategory(ctx, h.db); err != nil {
+		return nil, catchDBErr("habits: create: load habit category", err)
+	}
+	return habit, nil
+}
+
+func (h *Habits) GetCategory(p HabitCategoryParams) (*models.HabitCategory, error) {
+	hc, err := p.BuildQuery().One(context.Background(), h.db)
+	if err != nil {
+		return nil, catchDBErr("habit_category: get", err)
+	}
+	return hc, nil
+}
+
+type HabitParams struct {
+	ID         int64
+	DayID      int64
+	CategoryID int64
+}
+
+func (f HabitParams) BuildQuery() *sqlite.ViewQuery[*models.Habit, models.HabitSlice] {
+	q := models.Habits.Query()
+	if f.ID > 0 {
+		q.Apply(models.SelectWhere.Habits.ID.EQ(f.ID))
+	}
+	if f.DayID > 0 {
+		q.Apply(models.SelectWhere.Habits.DayID.EQ(f.DayID))
+	}
+	if f.CategoryID > 0 {
+		q.Apply(models.SelectWhere.Habits.HabitCategoryID.EQ(f.CategoryID))
+	}
+	q.Apply(models.Preload.Habit.Day())
+	q.Apply(models.Preload.Habit.HabitCategory())
+	return q
+}
+
+type HabitCategoryParams struct {
+	ID   int64
+	Kind core.HabitType
+}
+
+func (f HabitCategoryParams) BuildQuery() *sqlite.ViewQuery[*models.HabitCategory, models.HabitCategorySlice] {
+	q := models.HabitCategories.Query()
+	if f.ID > 0 {
+		q.Apply(models.SelectWhere.HabitCategories.ID.EQ(f.ID))
+	}
+	if f.Kind != "" {
+		q.Apply(models.SelectWhere.HabitCategories.Kind.EQ(string(f.Kind)))
+	}
+	return q
+}

@@ -3,12 +3,11 @@ package application
 import (
 	"fmt"
 	"github.com/aarondl/opt/omit"
-	"github.com/aarondl/opt/omitnull"
+	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/core"
-	"github.com/danielcosme/curious-ape/pkg/database"
-	"github.com/danielcosme/curious-ape/pkg/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/integrations/fitbit"
 	"github.com/danielcosme/curious-ape/pkg/integrations/google"
+	"github.com/danielcosme/curious-ape/pkg/persistence"
 	"golang.org/x/oauth2"
 	"net/http"
 	"time"
@@ -64,8 +63,8 @@ func (a *App) IntegrationsGet(provider core.Integration) (IntegrationInfo, error
 		} else {
 			isConnected = true
 			if len(sls) > 0 {
-				minutes := sls[0].MinutesAsleep.GetOrZero()
-				dur := time.Duration(minutes) * time.Minute
+				minutes := sls[0].MinutesAsleep
+				dur := time.Duration(minutes.MustGet()) * time.Minute
 				info = append(info, fmt.Sprintf("Total time asleep last night: %s", dur.String()))
 			}
 		}
@@ -120,12 +119,12 @@ func (a *App) Oauth2Success(provider, code string) error {
 	if err != nil {
 		return err
 	}
-	_, err = a.db.Auths.Upsert(&models.AuthSetter{
+	_, err = a.db.Auths.Upsert(&models.OauthTokenSetter{
 		Provider:     omit.From(provider),
 		AccessToken:  omit.From(token.AccessToken),
-		RefreshToken: omitnull.From(token.RefreshToken),
-		TokenType:    omitnull.From(token.Type()),
-		Expiration:   omitnull.From(token.Expiry),
+		RefreshToken: omit.From(token.RefreshToken),
+		TokenType:    omit.From(token.Type()),
+		Expiration:   omit.From(token.Expiry),
 	})
 	a.Log.Info("Authentication successful", "provider", provider, "code", code)
 	return err
@@ -144,24 +143,24 @@ func (a *App) googleClient() (res google.API, err error) {
 }
 
 func (a *App) integrationsGetHttpClient(integration core.Integration) (*http.Client, error) {
-	o, err := a.db.Auths.Get(database.AuthParams{Provider: integration})
+	o, err := a.db.Auths.Get(persistence.AuthParams{Provider: integration})
 	if err != nil {
 		return nil, err
 	}
 	currentToken := &oauth2.Token{
 		AccessToken:  o.AccessToken,
-		RefreshToken: o.RefreshToken.GetOrZero(),
-		Expiry:       o.Expiration.GetOrZero(),
-		TokenType:    o.TokenType.GetOrZero(),
+		RefreshToken: o.RefreshToken,
+		Expiry:       o.Expiration,
+		TokenType:    o.TokenType,
 	}
 	return a.sync.GetHttpClient(integration, currentToken, func(integration core.Integration, t *oauth2.Token) error {
 		// If token was refreshed we persist the new token info
-		_, err = a.db.Auths.Upsert(&models.AuthSetter{
+		_, err = a.db.Auths.Upsert(&models.OauthTokenSetter{
 			Provider:     omit.From(string(integration)),
 			AccessToken:  omit.From(t.AccessToken),
-			RefreshToken: omitnull.From(t.RefreshToken),
-			TokenType:    omitnull.From(t.Type()),
-			Expiration:   omitnull.From(t.Expiry),
+			RefreshToken: omit.From(t.RefreshToken),
+			TokenType:    omit.From(t.Type()),
+			Expiration:   omit.From(t.Expiry),
 		})
 		return err
 	})

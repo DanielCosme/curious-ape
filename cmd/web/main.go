@@ -11,7 +11,6 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/danielcosme/curious-ape/pkg/database"
 	"github.com/go-co-op/gocron/v2"
 	"github.com/lmittmann/tint"
 	"github.com/stephenafamo/bob"
@@ -19,10 +18,11 @@ import (
 
 	"github.com/danielcosme/curious-ape/pkg/application"
 	"github.com/danielcosme/curious-ape/pkg/core"
+	"github.com/danielcosme/curious-ape/pkg/persistence"
 
 	"github.com/alexedwards/scs/sqlite3store"
-	"github.com/danielcosme/curious-ape/pkg/transport"
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/danielcosme/curious-ape/pkg/api"
+	_ "modernc.org/sqlite"
 
 	"github.com/alexedwards/scs/v2"
 )
@@ -74,13 +74,13 @@ func main() {
 	sLogger.Info("Version: " + v)
 
 	slog.Info("Opening database", "path", cfg.Database.DSN)
-	db, err := sql.Open("sqlite3", cfg.Database.DSN)
+	db, err := sql.Open("sqlite", cfg.Database.DSN)
 	exitIfErr(err)
 	err = db.Ping()
 	exitIfErr(err)
 
 	app := application.New(&application.AppOptions{
-		Database: database.New(bob.NewDB(db)),
+		Database: persistence.New(bob.NewDB(db)),
 		Config: &application.Config{
 			Env:              cfg.Environment,
 			Fitbit:           cfg.Integrations.Fitbit.ToConf(),
@@ -99,7 +99,7 @@ func main() {
 	sessionManager.Lifetime = 48 * time.Hour
 	sessionManager.Cookie.SameSite = http.SameSiteStrictMode
 	sessionManager.Cookie.Name = "ape-session"
-	t := transport.NewTransport(app, sessionManager, v)
+	t := api.NewTransport(app, sessionManager, v)
 
 	app.Log.Info("Launching cron jobs")
 	if err := setUpCronJobs(app); err != nil {
@@ -113,7 +113,7 @@ func main() {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		ErrorLog:     slog.NewLogLogger(logHandler, slog.LevelError),
-		Handler:      transport.EchoRoutes(t),
+		Handler:      api.EchoRoutes(t),
 	}
 	t.App.Log.Info("HTTP server listening", "addr", addr)
 	if err := server.ListenAndServe(); err != nil {

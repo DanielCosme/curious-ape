@@ -2,15 +2,14 @@ package application
 
 import (
 	"github.com/aarondl/opt/omit"
-	"github.com/aarondl/opt/omitnull"
+	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/core"
-	"github.com/danielcosme/curious-ape/pkg/database"
-	"github.com/danielcosme/curious-ape/pkg/database/gen/models"
+	"github.com/danielcosme/curious-ape/pkg/persistence"
 	"time"
 )
 
 func (a *App) deepWorkSync(d core.Date) error {
-	day, err := a.db.Days.GetOrCreate(database.DayParams{Date: d})
+	day, err := a.db.Days.GetOrCreate(persistence.DayParams{Date: d})
 	if err != nil {
 		return err
 	}
@@ -20,16 +19,15 @@ func (a *App) deepWorkSync(d core.Date) error {
 	}
 
 	workLog, err := a.db.DeepWork.Upsert(&models.DeepWorkLogSetter{
-		DayID:       omit.From(day.ID),
-		Date:        omit.From(day.Date),
-		Seconds:     omit.From(int32(summary.TotalDuration.Seconds())),
-		IsAutomated: omitnull.From(true),
-		Origin:      omit.From(core.OriginLogToggl),
+		DayID:   omit.From(day.ID),
+		Date:    omit.From(day.Date),
+		Seconds: omit.From(int64(summary.TotalDuration.Seconds())),
+		Origin:  omit.From(core.OriginLogToggl),
 	})
 	if err != nil {
 		return err
 	}
-	// TODO(daniel) make this better.
+	// TODO: make this better.
 	dur := time.Duration(workLog.Seconds) * time.Second
 	a.Log.Info("Deep Work log added", "date", workLog.Date, "duration", dur.String())
 	habitState := core.HabitStateNotDone
@@ -42,4 +40,8 @@ func (a *App) deepWorkSync(d core.Date) error {
 		return err
 	}
 	return nil
+}
+
+func ref[T any](p T) *T {
+	return &p
 }

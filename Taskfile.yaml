@@ -1,0 +1,87 @@
+# https://taskfile.dev
+
+version: 3
+
+env:
+  APE_ENVIRONMENT: dev
+
+vars:
+  APP_NAME: ape
+  VERSION: v1.0.0
+
+tasks:
+  default:
+    cmds:
+      - task: run
+
+  version:
+    aliases: [v]
+    cmds:
+      - echo {{.VERSION}}
+
+  run:
+    aliases: [r]
+    cmds:
+      - ./tmp/{{.APP_NAME}}
+
+  build:
+    aliases: [b]
+    cmds:
+      - 'go build -ldflags="-X main.version=dev" -o=./tmp/{{.APP_NAME}} ./cmd/web'
+
+  tools:
+    desc: "Install CLI tools"
+    aliases: [deps]
+    cmds:
+      - go install github.com/air-verse/air@latest
+      - go install -tags 'sqlite3' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+      - go get -tool github.com/rakyll/gotest@latest
+      - go get -tool honnef.co/go/tools/cmd/staticcheck@latest
+      - go get -tool github.com/stephenafamo/bob/gen/bobgen-sqlite@latest
+      - go get -tool github.com/a-h/templ/cmd/templ@latest
+
+  db:
+    cmds:
+      - "sqlite3 -box ./tmp/{{.APP_NAME}}.db"
+
+  gen-all:
+    cmds:
+      - task: db-gen-sql
+      # - task: gen-html
+
+  db-gen-sql:
+    deps: [db-migrate-up]
+    cmds:
+      - go tool bobgen-sqlite -c bobgen.yaml
+
+  db-migrate-new:
+    desc: "Generates a new migration file"
+    requires:
+      vars: [NAME]
+    cmds:
+      - migrate create -seq -ext=.sql -dir=./database/migrations/sqlite {{.NAME}}
+
+  db-migrate-up:
+    cmds:
+      - task: db-migrate
+        vars:
+          OP: up
+
+  db-migrate-down:
+    cmds:
+      - task: db-migrate
+        vars:
+          OP: down
+
+  db-migrate-force:
+    requires:
+      vars: [VERSION]
+    cmds:
+      - task: db-migrate
+        vars:
+          OP: force {{.VERSION}}
+
+  db-migrate:
+    internal: true
+    cmds:
+      - migrate -verbose -path "./database/migrations/sqlite" -database "sqlite3://./tmp/{{.APP_NAME}}.db" {{.OP}}

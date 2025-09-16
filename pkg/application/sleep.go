@@ -4,11 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/aarondl/opt/omit"
-	"github.com/aarondl/opt/omitnull"
+	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/core"
-	"github.com/danielcosme/curious-ape/pkg/database"
-	"github.com/danielcosme/curious-ape/pkg/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/integrations/fitbit"
+	"github.com/danielcosme/curious-ape/pkg/persistence"
 	"time"
 )
 
@@ -22,9 +21,9 @@ func (a *App) sleepSync(d core.Date) error {
 		if err != nil {
 			return err
 		}
-		dur := fitbit.ToDuration(int(sl.MinutesAsleep.GetOrZero()))
+		dur := fitbit.ToDuration(int(sl.MinutesAsleep))
 		a.Log.Info("Sleep log added", "date", sl.Date, "duration", dur.String())
-		if sl.IsMainSleep.GetOrZero() {
+		if sl.IsMainSleep {
 			habitState := core.HabitStateNotDone
 			wakeUpTime := time.Date(sl.EndTime.Year(), sl.EndTime.Month(), sl.EndTime.Day(), 6, 0, 0, 0, sl.EndTime.Location())
 			if sl.EndTime.Before(wakeUpTime) {
@@ -45,7 +44,7 @@ func (a *App) sleepLogsGetFromFitbit(dates ...core.Date) (res []*models.SleepLog
 		return
 	}
 	for _, date := range dates {
-		day, err := a.db.Days.GetOrCreate(database.DayParams{Date: date})
+		day, err := a.db.Days.GetOrCreate(persistence.DayParams{Date: date})
 		if err != nil {
 			return res, err
 		}
@@ -74,15 +73,14 @@ func sleepLogFromFitbit(day *models.Day, s fitbit.Sleep) (*models.SleepLogSetter
 		return nil, err
 	}
 	sleepLog := &models.SleepLogSetter{
-		DayID:          omit.From(day.ID),
-		Date:           omit.From(day.Date),
-		StartTime:      omit.From(fitbit.ParseTime(s.StartTime)),
-		EndTime:        omit.From(fitbit.ParseTime(s.EndTime)),
-		IsMainSleep:    omitnull.From(s.IsMainSleep),
-		TotalTimeInBed: omitnull.From(int32(fitbit.ToDuration(s.TimeInBed).Minutes())),
-		MinutesAsleep:  omitnull.From(int32(fitbit.ToDuration(s.MinutesAsleep).Minutes())),
-		Origin:         omit.From(core.OriginLogFitbit),
-		Raw:            omitnull.From(string(raw)),
+		DayID:         omit.From(day.ID),
+		Date:          omit.From(day.Date),
+		StartTime:     omit.From(fitbit.ParseTime(s.StartTime)),
+		EndTime:       omit.From(fitbit.ParseTime(s.EndTime)),
+		IsMainSleep:   omit.From(s.IsMainSleep),
+		MinutesAsleep: omit.From(int64(fitbit.ToDuration(s.MinutesAsleep).Minutes())),
+		Origin:        omit.From(core.OriginLogFitbit),
+		Raw:           omit.From(string(raw)),
 	}
 	return sleepLog, nil
 }

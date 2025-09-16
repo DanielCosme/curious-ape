@@ -4,22 +4,22 @@ import (
 	"errors"
 	"log/slog"
 
-	"github.com/danielcosme/curious-ape/pkg/database"
 	"github.com/danielcosme/curious-ape/pkg/integrations"
+	"github.com/danielcosme/curious-ape/pkg/persistence"
 	"golang.org/x/oauth2"
 )
 
 type App struct {
 	Log  *slog.Logger
 	Env  Environment
-	db   *database.Database
+	db   *persistence.Database
 	sync *integrations.Integrations
 }
 
 type AppOptions struct {
 	Logger   *slog.Logger
 	Config   *Config
-	Database *database.Database
+	Database *persistence.Database
 }
 
 type Config struct {
@@ -44,10 +44,9 @@ func New(opts *AppOptions) *App {
 type Environment string
 
 const (
-	Prod    Environment = "prod"
-	Dev     Environment = "dev"
-	Test    Environment = "test"
-	Staging Environment = "staging"
+	Prod Environment = "prod"
+	Dev  Environment = "dev"
+	Test Environment = "test"
 )
 
 func ParseEnvironment(s string) (Environment, error) {
@@ -56,9 +55,13 @@ func ParseEnvironment(s string) (Environment, error) {
 		return Prod, nil
 	case Dev:
 		return Dev, nil
-	case Staging:
-		return Staging, nil
 	case Test:
+	case "":
+		e := errors.New("empty environment field")
+		slog.Error(e.Error())
+		return "", e
 	}
-	return "", errors.New("Invalid env value: " + s)
+	e := errors.New("ivalid environment value: " + s)
+	slog.Error(e.Error())
+	return "", e
 }

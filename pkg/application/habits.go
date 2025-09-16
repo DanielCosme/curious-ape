@@ -2,10 +2,9 @@ package application
 
 import (
 	"github.com/aarondl/opt/omit"
-	"github.com/aarondl/opt/omitnull"
+	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/core"
-	"github.com/danielcosme/curious-ape/pkg/database"
-	"github.com/danielcosme/curious-ape/pkg/database/gen/models"
+	"github.com/danielcosme/curious-ape/pkg/persistence"
 	"log/slog"
 )
 
@@ -18,11 +17,11 @@ func (a *App) HabitUpsertAutomated(date core.Date, hk core.HabitType, state core
 }
 
 func (a *App) habitUpsert(date core.Date, hk core.HabitType, state core.HabitState, isAutomated bool) (*models.Habit, error) {
-	hc, err := a.db.Habits.GetCategory(database.HabitCategoryParams{Kind: hk})
+	hc, err := a.db.Habits.GetCategory(persistence.HabitCategoryParams{Kind: hk})
 	if err != nil {
 		return nil, err
 	}
-	day, err := a.db.Days.GetOrCreate(database.DayParams{Date: date})
+	day, err := a.db.Days.GetOrCreate(persistence.DayParams{Date: date})
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +29,6 @@ func (a *App) habitUpsert(date core.Date, hk core.HabitType, state core.HabitSta
 		DayID:           omit.From(day.ID),
 		HabitCategoryID: omit.From(hc.ID),
 		State:           omit.From(string(state)),
-		Automated:       omitnull.From(isAutomated),
 	})
 	if err != nil {
 		return nil, err
