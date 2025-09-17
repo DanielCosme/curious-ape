@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func (t *Transport) updateHabit(c echo.Context) error {
+func (api *API) updateHabit(c echo.Context) error {
 	date, err := core.DateFromISO8601(c.QueryParam("date"))
 	if err != nil {
 		return errClientError(err)
@@ -14,11 +14,11 @@ func (t *Transport) updateHabit(c echo.Context) error {
 	habitType := c.QueryParam("type")
 	habitState := c.QueryParam("state")
 
-	_, err = t.App.HabitUpsert(date, core.HabitTypeFromString(habitType), core.HabitState(habitState))
+	_, err = api.App.HabitUpsert(date, core.HabitTypeFromString(habitType), core.HabitState(habitState))
 	if err != nil {
 		return errServer(err)
 	}
-	d, err := t.App.DayGetOrCreate(date)
+	d, err := api.App.DayGetOrCreate(date)
 	if err != nil {
 		return errServer(err)
 	}

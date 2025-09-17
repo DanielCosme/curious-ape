@@ -34,8 +34,8 @@ type HabitSummary struct {
 	Type  core.HabitType  `json:"type"`
 }
 
-func (t *Transport) home(c echo.Context) error {
-	days, err := t.App.DaysMonth(core.NewDateToday())
+func (api *API) home(c echo.Context) error {
+	days, err := api.App.DaysMonth(core.NewDateToday())
 	if err != nil {
 		return errServer(err)
 	}
@@ -44,15 +44,16 @@ func (t *Transport) home(c echo.Context) error {
 	for _, day := range days {
 		daysPayload.Days = append(daysPayload.Days, dayDBToSummary(day))
 	}
+	// TODO: This should return index.html
 	return c.JSON(http.StatusOK, daysPayload)
 }
 
-func (t *Transport) syncDay(c echo.Context) error {
+func (api *API) syncDay(c echo.Context) error {
 	day, err := core.DateFromISO8601(c.QueryParam("day"))
 	if err != nil {
 		return errClientError(fmt.Errorf("invalid date param - %w", err))
 	}
-	dayDB, err := t.App.SyncDay(day)
+	dayDB, err := api.App.SyncDay(day)
 	if err != nil {
 		return errServer(err)
 	}

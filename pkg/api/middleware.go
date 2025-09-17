@@ -2,16 +2,17 @@ package api
 
 import (
 	"context"
-	"github.com/alexedwards/scs/v2"
-	"github.com/danielcosme/curious-ape/pkg/application"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/alexedwards/scs/v2"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
-func midSlogConfig(t *Transport) middleware.RequestLoggerConfig {
+func midSlogConfig(t *API) middleware.RequestLoggerConfig {
 	return middleware.RequestLoggerConfig{
 		LogMethod:   true,
 		LogStatus:   true,
@@ -20,18 +21,17 @@ func midSlogConfig(t *Transport) middleware.RequestLoggerConfig {
 		HandleError: false, // forwards error to the global error handler, so it can decide appropriate status code
 		LogRemoteIP: true,
 		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+			attrs := []slog.Attr{
+				slog.String("uri", v.URI),
+				slog.Int("status", v.Status),
+				slog.String("IP", v.RemoteIP),
+				slog.String("Duration", fmt.Sprintf("%d ms", time.Since(v.StartTime).Milliseconds())),
+			}
 			if v.Error == nil {
-				t.App.Log.LogAttrs(context.Background(), slog.LevelInfo, v.Method,
-					slog.String("uri", v.URI),
-					slog.Int("status", v.Status),
-					slog.String("IP", v.RemoteIP),
-				)
+				t.App.Log.LogAttrs(ctx(c), slog.LevelInfo, v.Method, attrs...)
 			} else {
-				t.App.Log.LogAttrs(context.Background(), slog.LevelError, v.Method,
-					slog.String("uri", v.URI),
-					slog.Int("status", v.Status),
-					slog.String("IP", v.RemoteIP),
-					slog.String("err", v.Error.Error()),
+				t.App.Log.LogAttrs(ctx(c), slog.LevelError, v.Method,
+					append(attrs, slog.String("err", v.Error.Error()))...,
 				)
 			}
 			return nil
@@ -39,17 +39,17 @@ func midSlogConfig(t *Transport) middleware.RequestLoggerConfig {
 	}
 }
 
-func (t *Transport) midLoadAndSaveCookie(next echo.HandlerFunc) echo.HandlerFunc {
+func (api *API) midLoadAndSaveCookie(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
 
 		var token string
-		cookie, err := c.Cookie(t.SessionManager.Cookie.Name)
+		cookie, err := c.Cookie(api.SessionManager.Cookie.Name)
 		if err == nil {
 			token = cookie.Value
 		}
 
-		ctx, err = t.SessionManager.Load(ctx, token)
+		ctx, err = api.SessionManager.Load(ctx, token)
 		if err != nil {
 			return err
 		}
@@ -57,19 +57,19 @@ func (t *Transport) midLoadAndSaveCookie(next echo.HandlerFunc) echo.HandlerFunc
 		c.SetRequest(c.Request().WithContext(ctx))
 
 		c.Response().Before(func() {
-			if t.SessionManager.Status(ctx) != scs.Unmodified {
+			if api.SessionManager.Status(ctx) != scs.Unmodified {
 				responseCookie := &http.Cookie{
-					Name:     t.SessionManager.Cookie.Name,
-					Path:     t.SessionManager.Cookie.Path,
-					Domain:   t.SessionManager.Cookie.Domain,
-					Secure:   t.SessionManager.Cookie.Secure,
-					HttpOnly: t.SessionManager.Cookie.HttpOnly,
-					SameSite: t.SessionManager.Cookie.SameSite,
+					Name:     api.SessionManager.Cookie.Name,
+					Path:     api.SessionManager.Cookie.Path,
+					Domain:   api.SessionManager.Cookie.Domain,
+					Secure:   api.SessionManager.Cookie.Secure,
+					HttpOnly: api.SessionManager.Cookie.HttpOnly,
+					SameSite: api.SessionManager.Cookie.SameSite,
 				}
 
-				switch t.SessionManager.Status(ctx) {
+				switch api.SessionManager.Status(ctx) {
 				case scs.Modified:
-					token, _, err = t.SessionManager.Commit(ctx)
+					token, _, err = api.SessionManager.Commit(ctx)
 					if err != nil {
 						panic(err)
 					}
@@ -90,13 +90,13 @@ func (t *Transport) midLoadAndSaveCookie(next echo.HandlerFunc) echo.HandlerFunc
 	}
 }
 
-func (t *Transport) midAuthenticateFromSession(next echo.HandlerFunc) echo.HandlerFunc {
+func (api *API) midAuthenticateFromSession(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		id := t.SessionManager.GetInt(c.Request().Context(), string(ctxKeyAuthenticatedUserID))
+		id := api.SessionManager.GetInt(c.Request().Context(), string(ctxKeyAuthenticatedUserID))
 		if id == 0 {
 			return next(c)
 		}
-		usr, err := t.App.GetUser(id)
+		usr, err := api.App.GetUser(id)
 		if err != nil {
 			return err
 		}
@@ -109,9 +109,9 @@ func (t *Transport) midAuthenticateFromSession(next echo.HandlerFunc) echo.Handl
 	}
 }
 
-func (t *Transport) midRequireAuth(next echo.HandlerFunc) echo.HandlerFunc {
+func (api *API) midRequireAuth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		if !t.IsAuthenticated(c.Request()) {
+		if !api.IsAuthenticated(c.Request()) {
 			return c.NoContent(http.StatusUnauthorized)
 		}
 
@@ -123,18 +123,13 @@ func (t *Transport) midRequireAuth(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func (t *Transport) midSecureHeaders(next echo.HandlerFunc) echo.HandlerFunc {
+func (api *API) midSecureHeaders(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		// TODO: Figure out secure headers for good.
 		c.Response().Header().Set("Content-Security-Policy",
 			"default-src 'self'; style-src 'self' fonts.googleapis.com; font-src fonts.gstatic.com")
 
-		if t.App.Env == application.Dev {
-			// NOTE(daniel): To make vue/vite work on dev mode
-			c.Response().Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
-			c.Response().Header().Set("Access-Control-Allow-Credentials", "true")
-		} else {
-			c.Response().Header().Set("Access-Control-Allow-Origin", "https://danicos.me")
-		}
+		c.Response().Header().Set("Access-Control-Allow-Origin", "https://danicos.me")
 		c.Response().Header().Set("Referrer-Policy", "origin-when-cross-origin")
 
 		// c.Response().Header().Set("X-Content-Kind-Options", "nosniff")
@@ -142,4 +137,8 @@ func (t *Transport) midSecureHeaders(next echo.HandlerFunc) echo.HandlerFunc {
 		// c.Response().Header().Set("X-XSS-Protection", "0")
 		return next(c)
 	}
+}
+
+func ctx(c echo.Context) context.Context {
+	return c.Request().Context()
 }

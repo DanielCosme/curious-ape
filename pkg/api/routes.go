@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func EchoRoutes(t *Transport) http.Handler {
+func EchoRoutes(t *API) http.Handler {
 	e := echo.New()
 
 	e.Use(middleware.RequestLoggerWithConfig(midSlogConfig(t)))
@@ -16,6 +16,7 @@ func EchoRoutes(t *Transport) http.Handler {
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
 	e.Use(t.midSecureHeaders)
 
+	// TODO: Make this work for the new front-ent
 	// e.StaticFS("/", echo.MustSubFS(web.Files, "dist"))
 
 	e.POST("/api/v1/login", t.loginPost, t.midLoadAndSaveCookie)

@@ -14,7 +14,7 @@ type userLoginForm struct {
 	validator.Validator
 }
 
-func (t *Transport) loginPost(c echo.Context) error {
+func (api *API) loginPost(c echo.Context) error {
 	form := userLoginForm{
 		Username: c.FormValue("username"),
 		Password: c.FormValue("password"),
@@ -24,7 +24,7 @@ func (t *Transport) loginPost(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid form"))
 	}
 
-	id, err := t.App.Authenticate(form.Username, form.Password)
+	id, err := api.App.Authenticate(form.Username, form.Password)
 	if err != nil {
 		if errors.Is(err, persistence.ErrInvalidCredentials) {
 			form.AddNonFieldError("username or password is incorrect")
@@ -34,20 +34,20 @@ func (t *Transport) loginPost(c echo.Context) error {
 		}
 	}
 
-	err = t.SessionManager.RenewToken(c.Request().Context())
+	err = api.SessionManager.RenewToken(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	t.SessionManager.Put(c.Request().Context(), string(ctxKeyAuthenticatedUserID), id)
+	api.SessionManager.Put(c.Request().Context(), string(ctxKeyAuthenticatedUserID), id)
 	return c.NoContent(http.StatusOK)
 }
 
-func (t *Transport) logout(c echo.Context) error {
-	if err := t.SessionManager.RenewToken(c.Request().Context()); err != nil {
+func (api *API) logout(c echo.Context) error {
+	if err := api.SessionManager.RenewToken(c.Request().Context()); err != nil {
 		return errServer(err)
 	}
 
-	t.SessionManager.Remove(c.Request().Context(), string(ctxKeyAuthenticatedUserID))
+	api.SessionManager.Remove(c.Request().Context(), string(ctxKeyAuthenticatedUserID))
 	return c.NoContent(http.StatusOK)
 }

@@ -11,7 +11,7 @@ type User struct {
 	Role string `json:"role"`
 }
 
-func (t *Transport) getUser(c echo.Context) error {
+func (api *API) getUser(c echo.Context) error {
 	u, ok := c.Request().Context().Value(ctxUser).(*models.User)
 	if !ok {
 		return echo.NewHTTPError(http.StatusInternalServerError)
@@ -26,8 +26,8 @@ type Info struct {
 	Version string `json:"version"`
 }
 
-func (t *Transport) getVersion(c echo.Context) error {
+func (api *API) getVersion(c echo.Context) error {
 	return c.JSON(http.StatusOK, Info{
-		Version: t.Version,
+		Version: api.Version,
 	})
 }
