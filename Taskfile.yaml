@@ -7,7 +7,7 @@ env:
 
 vars:
   APP_NAME: ape
-  VERSION: v1.0.0
+  VERSION: v0.9.2
 
 tasks:
   default:
@@ -21,6 +21,7 @@ tasks:
 
   run:
     aliases: [r]
+    deps: [build]
     cmds:
       - ./tmp/{{.APP_NAME}}
 
@@ -28,6 +29,46 @@ tasks:
     aliases: [b]
     cmds:
       - 'go build -ldflags="-X main.version=dev" -o=./tmp/{{.APP_NAME}} ./cmd/web'
+
+  ci:
+    deps: [test, audit]
+
+  audit:
+    cmds:
+      - go mod tidy
+      - go mod verify
+      - go fmt ./...
+      - go vet ./...
+      - go tool staticcheck ./cmd... ./pkg...
+
+  build-docker:
+    env:
+      DOCKER_BUILDKIT: 1
+    cmds:
+      - |
+        sudo docker build \
+        --build-arg="APE_VERSION={{.VERSION}}" \
+        --tag curious-ape \
+        --target ape \
+        .
+      - |
+        sudo docker build \
+        --tag migrate-ape \
+        --target migrate \
+        .
+
+  push:
+    desc: "Push changes to Github creating a new Version"
+    deps: [ci]
+    cmds:
+      - cmd: git diff --exit-code > /dev/null # workig tree cannot be dirty.
+      - test {{.CURRENT_BRANCH}} = 'main'
+      - git tag {{.VERSION}}
+      - git push
+      - git push origin {{.VERSION}}
+    vars:
+      CURRENT_BRANCH:
+        sh: git branch --show-current
 
   tools:
     desc: "Install CLI tools"
@@ -40,6 +81,10 @@ tasks:
       - go get -tool github.com/stephenafamo/bob/gen/bobgen-sqlite@latest
       - go get -tool github.com/a-h/templ/cmd/templ@latest
 
+  test:
+    aliases: [t]
+    cmds:
+      - go tool gotest ./...
   db:
     cmds:
       - "sqlite3 -box ./tmp/{{.APP_NAME}}.db"

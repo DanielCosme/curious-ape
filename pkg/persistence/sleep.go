@@ -7,7 +7,6 @@ import (
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/sqlite"
-	"time"
 )
 
 type SleepLogs struct {
@@ -68,8 +67,4 @@ func (f SleepLogParams) BuildQuery() *sqlite.ViewQuery[*models.SleepLog, models.
 		q.Apply(models.SelectWhere.SleepLogs.IsMainSleep.EQ(*f.IsMainSleep))
 	}
 	return q
-}
-
-func toDuration(i int) time.Duration {
-	return time.Duration(i) * time.Minute
 }

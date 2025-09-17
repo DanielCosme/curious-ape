@@ -41,7 +41,3 @@ func (a *App) deepWorkSync(d core.Date) error {
 	}
 	return nil
 }
-
-func ref[T any](p T) *T {
-	return &p
-}
