@@ -27,6 +27,7 @@ tasks:
 
   build:
     aliases: [b]
+    deps: [gen-html]
     cmds:
       - 'go build -ldflags="-X main.version=dev" -o=./tmp/{{.APP_NAME}} ./cmd/web'
 
@@ -92,7 +93,12 @@ tasks:
   gen-all:
     cmds:
       - task: db-gen-sql
-      # - task: gen-html
+      - task: gen-html
+
+  gen-html:
+    cmds:
+      - go tool templ generate
+      - go tool templ fmt .
 
   db-gen-sql:
     deps: [db-migrate-up]

@@ -55,12 +55,6 @@ type user struct {
 var version string
 
 func main() {
-	// flags & configuration
-	cfg := new(config)
-	v := Version()
-	readConfiguration(cfg)
-
-	// logger configuration
 	logHandler := tint.NewHandler(os.Stdout, &tint.Options{
 		AddSource:   false,
 		Level:       slog.LevelDebug,
@@ -70,6 +64,10 @@ func main() {
 	})
 	sLogger := slog.New(logHandler)
 	slog.SetDefault(sLogger)
+
+	cfg := new(config)
+	v := Version()
+	readConfiguration(cfg)
 
 	sLogger.Info("Version: " + v)
 

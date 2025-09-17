@@ -1,0 +1,28 @@
+package views
+
+type State struct {
+	Version string
+}
+
+templ Layout(s State) {
+	<!DOCTYPE html>
+	<html>
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="description" content=""/>
+			<meta name="author" content=""/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<link rel="stylesheet" href="/static/css/skeleton.css"/>
+			<link href={ staticPath("css/main.css") } rel="stylesheet" type="text/css"/>
+			<link rel="icon" type="image/png" href="/static/images/favicon.png"/>
+			<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
+			<title>Curious Ape</title>
+		</head>
+		<body>
+			<main>
+				{ children... }
+			</main>
+			<footer>{ s.Version }</footer>
+		</body>
+	</html>
+}

@@ -25,9 +25,3 @@ func (api *API) getUser(c echo.Context) error {
 type Info struct {
 	Version string `json:"version"`
 }
-
-func (api *API) getVersion(c echo.Context) error {
-	return c.JSON(http.StatusOK, Info{
-		Version: api.Version,
-	})
-}

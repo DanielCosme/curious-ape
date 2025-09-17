@@ -2,16 +2,22 @@ package api
 
 import (
 	"errors"
+	"net/http"
+
 	"github.com/danielcosme/curious-ape/pkg/persistence"
 	"github.com/danielcosme/curious-ape/pkg/validator"
+	"github.com/danielcosme/curious-ape/views"
 	"github.com/labstack/echo/v4"
-	"net/http"
 )
 
 type userLoginForm struct {
 	Username string
 	Password string
 	validator.Validator
+}
+
+func (api *API) getLogin(c echo.Context) error {
+	return renderOK(c, views.Login(views.State{Version: api.Version}))
 }
 
 func (api *API) loginPost(c echo.Context) error {
