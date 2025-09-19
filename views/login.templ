@@ -3,6 +3,20 @@ package views
 templ Login(s State) {
 	@Layout(s) {
 		<h1>Login</h1>
-		<p>Hello APE</p>
+		<form>
+			<div>
+				<label>
+					Username
+					<input type="text" name="username" placeholder=""/>
+				</label>
+			</div>
+			<div>
+				<label>
+					Password
+					<input type="password" name="password" placeholder=""/>
+				</label>
+			</div>
+			<button type="submit" data-on-click="@post('/login', {contentType: 'form'})">Login</button>
+		</form>
 	}
 }

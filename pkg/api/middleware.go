@@ -41,6 +41,7 @@ func midSlogConfig(t *API) middleware.RequestLoggerConfig {
 
 func (api *API) midLoadAndSaveCookie(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		c.Response().Header().Add("Vary", "Cookie")
 		ctx := c.Request().Context()
 
 		var token string
@@ -48,41 +49,22 @@ func (api *API) midLoadAndSaveCookie(next echo.HandlerFunc) echo.HandlerFunc {
 		if err == nil {
 			token = cookie.Value
 		}
-
 		ctx, err = api.SessionManager.Load(ctx, token)
 		if err != nil {
 			return err
 		}
-
 		c.SetRequest(c.Request().WithContext(ctx))
 
 		c.Response().Before(func() {
-			if api.SessionManager.Status(ctx) != scs.Unmodified {
-				responseCookie := &http.Cookie{
-					Name:     api.SessionManager.Cookie.Name,
-					Path:     api.SessionManager.Cookie.Path,
-					Domain:   api.SessionManager.Cookie.Domain,
-					Secure:   api.SessionManager.Cookie.Secure,
-					HttpOnly: api.SessionManager.Cookie.HttpOnly,
-					SameSite: api.SessionManager.Cookie.SameSite,
+			switch api.SessionManager.Status(ctx) {
+			case scs.Modified:
+				token, expiry, err := api.SessionManager.Commit(ctx)
+				if err != nil {
+					panic(err)
 				}
-
-				switch api.SessionManager.Status(ctx) {
-				case scs.Modified:
-					token, _, err = api.SessionManager.Commit(ctx)
-					if err != nil {
-						panic(err)
-					}
-
-					responseCookie.Value = token
-				case scs.Destroyed:
-					responseCookie.Expires = time.Unix(1, 0)
-					responseCookie.MaxAge = -1
-				}
-
-				c.SetCookie(responseCookie)
-				c.Response().Header().Add("Vary", "Cookie")
-				c.Response().Header().Add("Cache-Control", `no-cache="Set-Cookie"`)
+				api.SessionManager.WriteSessionCookie(ctx, c.Response().Writer, token, expiry)
+			case scs.Destroyed:
+				api.SessionManager.WriteSessionCookie(ctx, c.Response().Writer, "", time.Time{})
 			}
 		})
 
@@ -96,7 +78,7 @@ func (api *API) midAuthenticateFromSession(next echo.HandlerFunc) echo.HandlerFu
 		if id == 0 {
 			return next(c)
 		}
-		usr, err := api.App.GetUser(id)
+		usr, err := api.App.GetUser(int(id))
 		if err != nil {
 			return err
 		}
@@ -112,7 +94,7 @@ func (api *API) midAuthenticateFromSession(next echo.HandlerFunc) echo.HandlerFu
 func (api *API) midRequireAuth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		if !api.IsAuthenticated(c.Request()) {
-			return c.NoContent(http.StatusUnauthorized)
+			return c.Redirect(http.StatusTemporaryRedirect, "/login")
 		}
 
 		// Set the "Cache-Control: no-store" header so that pages require
@@ -126,11 +108,11 @@ func (api *API) midRequireAuth(next echo.HandlerFunc) echo.HandlerFunc {
 func (api *API) midSecureHeaders(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// TODO: Figure out secure headers for good.
-		c.Response().Header().Set("Content-Security-Policy",
-			"default-src 'self'; style-src 'self' fonts.googleapis.com; font-src fonts.gstatic.com")
+		// c.Response().Header().Set("Content-Security-Policy",
+		// 	"default-src 'self'; style-src 'self' fonts.googleapis.com; font-src fonts.gstatic.com")
 
-		c.Response().Header().Set("Access-Control-Allow-Origin", "https://danicos.me")
-		c.Response().Header().Set("Referrer-Policy", "origin-when-cross-origin")
+		// c.Response().Header().Set("Access-Control-Allow-Origin", "https://danicos.me")
+		// c.Response().Header().Set("Referrer-Policy", "origin-when-cross-origin")
 
 		// c.Response().Header().Set("X-Content-Kind-Options", "nosniff")
 		// c.Response().Header().Set("X-Frame-Options", "deny")

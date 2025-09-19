@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/core"
+	"github.com/danielcosme/curious-ape/views"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"sort"
@@ -45,7 +46,14 @@ func (api *API) home(c echo.Context) error {
 		daysPayload.Days = append(daysPayload.Days, dayDBToSummary(day))
 	}
 	// TODO: This should return index.html
-	return c.JSON(http.StatusOK, daysPayload)
+	return renderOK(c, views.Bujo(api.State(), days))
+}
+
+func (api *API) State() views.State {
+	s := views.State{
+		Version: api.Version,
+	}
+	return s
 }
 
 func (api *API) syncDay(c echo.Context) error {

@@ -94,7 +94,7 @@ func main() {
 
 	sessionManager := scs.New()
 	sessionManager.Store = sqlite3store.New(db)
-	sessionManager.Lifetime = 48 * time.Hour
+	sessionManager.Lifetime = time.Hour * 24 * 15
 	sessionManager.Cookie.SameSite = http.SameSiteStrictMode
 	sessionManager.Cookie.Name = "ape-session"
 	t := api.NewTransport(app, sessionManager, v)

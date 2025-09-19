@@ -20,15 +20,15 @@ func EchoRoutes(a *API) http.Handler {
 	e.StaticFS("/static", echo.MustSubFS(views.StaticFS, "static"))
 
 	e.Use(a.midLoadAndSaveCookie)
+	e.Use(a.midAuthenticateFromSession)
 	e.GET("/login", a.getLogin)
 	e.POST("/login", a.loginPost)
 
-	api := e.Group("/api/v1")
+	api := e.Group("")
 	{
-		api.Use(a.midAuthenticateFromSession)
 		api.Use(a.midRequireAuth)
 
-		api.GET("", a.home)
+		api.GET("/", a.home)
 		api.GET("/user", a.getUser)
 		api.POST("/logout", a.logout)
 		api.POST("/days/sync", a.syncDay)

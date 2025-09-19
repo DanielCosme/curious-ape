@@ -17,6 +17,9 @@ type userLoginForm struct {
 }
 
 func (api *API) getLogin(c echo.Context) error {
+	if api.IsAuthenticated(c.Request()) {
+		return c.Redirect(http.StatusFound, "/")
+	}
 	return renderOK(c, views.Login(views.State{Version: api.Version}))
 }
 
@@ -46,7 +49,7 @@ func (api *API) loginPost(c echo.Context) error {
 	}
 
 	api.SessionManager.Put(c.Request().Context(), string(ctxKeyAuthenticatedUserID), id)
-	return c.NoContent(http.StatusOK)
+	return c.Redirect(http.StatusFound, "/")
 }
 
 func (api *API) logout(c echo.Context) error {

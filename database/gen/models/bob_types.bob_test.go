@@ -26,9 +26,6 @@ var _ bob.HookableType = &HabitCategory{}
 // Make sure the type OauthToken runs hooks after queries
 var _ bob.HookableType = &OauthToken{}
 
-// Make sure the type Session runs hooks after queries
-var _ bob.HookableType = &Session{}
-
 // Make sure the type SleepLog runs hooks after queries
 var _ bob.HookableType = &SleepLog{}
 

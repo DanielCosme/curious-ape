@@ -7,5 +7,5 @@ DROP TABLE IF EXISTS habit_category;
 DROP TABLE IF EXISTS oauth_token;
 DROP TABLE IF EXISTS user;
 
-DROP TABLE IF EXISTS session;
-DROP INDEX IF EXISTS session_expiry_idx;
+DROP TABLE IF EXISTS sessions;
+DROP INDEX IF EXISTS sessions_expiry_idx;
