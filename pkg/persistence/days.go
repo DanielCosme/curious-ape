@@ -71,7 +71,7 @@ func dayToCore(d *models.Day) (day core.Day) {
 		slog.Error("dayToCore: day is nil")
 		return
 	}
-	day.ID = int(d.ID)
+	day.ID = uint(d.ID)
 	day.Date = core.NewDate(d.Date)
 	for _, h := range d.R.Habits {
 		day.Habits = append(day.Habits, habitToCore(h))

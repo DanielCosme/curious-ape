@@ -29,7 +29,7 @@ func habitToCore(h *models.Habit) (habit core.Habit) {
 		slog.Error("habitToCore habit is nil")
 		return
 	}
-	habit.ID = int(h.ID)
+	habit.ID = uint(h.ID)
 	habit.Date = core.NewDate(h.R.Day.Date)
 	habit.State = core.HabitState(h.State)
 	habit.Type = core.HabitType(h.R.HabitCategory.Kind)
@@ -42,7 +42,7 @@ func habitCategoryToCore(hc *models.HabitCategory) (c core.HabitCategory) {
 		slog.Error("habitCategoryToCore habit category is nil")
 		return
 	}
-	c.ID = int(hc.ID)
+	c.ID = uint(hc.ID)
 	c.Name = hc.Name
 	c.Kind = core.HabitType(hc.Kind)
 	c.Description = hc.Description

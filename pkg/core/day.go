@@ -11,7 +11,7 @@ func (d *Day) IsZero() bool {
 }
 
 type DayParams struct {
-	ID    int
+	ID    uint
 	Date  Date
 	Dates DateSlice
 	Lite  bool

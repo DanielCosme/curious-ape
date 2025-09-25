@@ -4,7 +4,7 @@ import (
 	"github.com/danielcosme/curious-ape/pkg/core"
 )
 
-func (a *App) DayGetByID(id int) (core.Day, error) {
+func (a *App) DayGetByID(id uint) (core.Day, error) {
 	return a.db.Days.Get(core.DayParams{ID: id})
 }
 

@@ -13,5 +13,5 @@ type HabitRepository interface {
 }
 
 type RepositoryCommon struct {
-	ID int
+	ID uint
 }
