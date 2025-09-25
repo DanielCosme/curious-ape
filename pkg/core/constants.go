@@ -11,37 +11,6 @@ const (
 	Time              = "15:04"
 )
 
-type HabitState string
-
-const (
-	HabitStateDone    HabitState = "done"
-	HabitStateNotDone HabitState = "not_done"
-	HabitStateNoInfo  HabitState = "no_info"
-)
-
-type HabitType string
-
-const (
-	HabitTypeEatHealthy HabitType = "food"
-	HabitTypeWakeUp     HabitType = "wake_up"
-	HabitTypeFitness    HabitType = "fitness"
-	HabitTypeDeepWork   HabitType = "deep_work"
-)
-
-func HabitTypeFromString(s string) HabitType {
-	switch s {
-	case "food":
-		return HabitTypeEatHealthy
-	case "wake_up":
-		return HabitTypeWakeUp
-	case "fitness":
-		return HabitTypeFitness
-	case "deep_work":
-		return HabitTypeDeepWork
-	}
-	return "undefined"
-}
-
 type AuthRole string
 
 const (

@@ -11,10 +11,11 @@ func (api *API) updateHabit(c echo.Context) error {
 	if err != nil {
 		return errClientError(err)
 	}
-	habitType := c.QueryParam("type")
-	habitState := c.QueryParam("state")
 
-	_, err = api.App.HabitUpsert(date, core.HabitTypeFromString(habitType), core.HabitState(habitState))
+	_, err = api.App.HabitUpsert(core.UpsertHabitParams{
+		Date:  date,
+		Type:  core.HabitTypeFromString(c.QueryParam("type")),
+		State: core.HabitState(c.QueryParam("state"))})
 	if err != nil {
 		return errServer(err)
 	}
@@ -22,5 +23,5 @@ func (api *API) updateHabit(c echo.Context) error {
 	if err != nil {
 		return errServer(err)
 	}
-	return c.JSON(http.StatusOK, dayDBToSummary(d))
+	return c.JSON(http.StatusOK, d)
 }

@@ -7,7 +7,6 @@ import (
 	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/integrations/fitbit"
-	"github.com/danielcosme/curious-ape/pkg/persistence"
 	"time"
 )
 
@@ -29,7 +28,11 @@ func (a *App) sleepSync(d core.Date) error {
 			if sl.EndTime.Before(wakeUpTime) {
 				habitState = core.HabitStateDone
 			}
-			_, err := a.HabitUpsertAutomated(d, core.HabitTypeWakeUp, habitState)
+			_, err := a.HabitUpsert(core.UpsertHabitParams{
+				Date:      d,
+				Type:      core.HabitTypeWakeUp,
+				State:     habitState,
+				Automated: true})
 			if err != nil {
 				return err
 			}
@@ -44,11 +47,11 @@ func (a *App) sleepLogsGetFromFitbit(dates ...core.Date) (res []*models.SleepLog
 		return
 	}
 	for _, date := range dates {
-		day, err := a.db.Days.GetOrCreate(persistence.DayParams{Date: date})
+		day, err := a.db.Days.GetOrCreate(core.DayParams{Date: date})
 		if err != nil {
 			return res, err
 		}
-		sleepLogs, err := fitbitClient.Sleep.GetByDate(day.Date)
+		sleepLogs, err := fitbitClient.Sleep.GetByDate(day.Date.Time())
 		if err != nil {
 			return res, err
 		}
@@ -63,9 +66,8 @@ func (a *App) sleepLogsGetFromFitbit(dates ...core.Date) (res []*models.SleepLog
 	return
 }
 
-func sleepLogFromFitbit(day *models.Day, s fitbit.Sleep) (*models.SleepLogSetter, error) {
-	date := core.NewDate(day.Date)
-	if !date.IsEqual(fitbit.ParseDate(s.DateOfSleep)) {
+func sleepLogFromFitbit(day core.Day, s fitbit.Sleep) (*models.SleepLogSetter, error) {
+	if !day.Date.IsEqual(fitbit.ParseDate(s.DateOfSleep)) {
 		return nil, errors.New("sleep log from fitbit: dates do not match with current day")
 	}
 	raw, err := json.Marshal(&s)
@@ -73,8 +75,8 @@ func sleepLogFromFitbit(day *models.Day, s fitbit.Sleep) (*models.SleepLogSetter
 		return nil, err
 	}
 	sleepLog := &models.SleepLogSetter{
-		DayID:         omit.From(day.ID),
-		Date:          omit.From(day.Date),
+		DayID:         omit.From(int64(day.ID)),
+		Date:          omit.From(day.Date.Time()),
 		StartTime:     omit.From(fitbit.ParseTime(s.StartTime)),
 		EndTime:       omit.From(fitbit.ParseTime(s.EndTime)),
 		IsMainSleep:   omit.From(s.IsMainSleep),

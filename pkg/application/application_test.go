@@ -2,6 +2,10 @@ package application_test
 
 import (
 	"database/sql"
+	"log/slog"
+	"testing"
+	"time"
+
 	"github.com/danielcosme/curious-ape/pkg/application"
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/persistence"
@@ -9,9 +13,6 @@ import (
 	m_sqlite "github.com/golang-migrate/migrate/v4/database/sqlite"
 	"github.com/stephenafamo/bob"
 	"gotest.tools/v3/assert"
-	"log/slog"
-	"testing"
-	"time"
 
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "modernc.org/sqlite"
@@ -31,21 +32,41 @@ func TestDay(t *testing.T) {
 	assert.NilError(t, err)
 	assert.Assert(t, day.ID > 0)
 
-	_, err = app.HabitUpsert(date1, core.HabitTypeWakeUp, core.HabitStateDone)
+	params1 := core.UpsertHabitParams{Date: date1, Type: core.HabitTypeWakeUp, State: core.HabitStateDone}
+	habit1, err := app.HabitUpsert(params1)
 	assert.NilError(t, err)
-	_, err = app.HabitUpsert(date1, core.HabitTypeFitness, core.HabitStateDone)
+
+	params2 := core.UpsertHabitParams{Date: date1, Type: core.HabitTypeFitness, State: core.HabitStateDone}
+	habit2, err := app.HabitUpsert(params2)
 	assert.NilError(t, err)
-	_, err = app.HabitUpsert(date1, core.HabitTypeDeepWork, core.HabitStateDone)
+
+	params3 := core.UpsertHabitParams{Date: date1, Type: core.HabitTypeDeepWork, State: core.HabitStateDone}
+	habit3, err := app.HabitUpsert(params3)
 	assert.NilError(t, err)
-	_, err = app.HabitUpsert(date1, core.HabitTypeEatHealthy, core.HabitStateDone)
+
+	params4 := core.UpsertHabitParams{Date: date1, Type: core.HabitTypeEatHealthy, State: core.HabitStateDone}
+	habit4, err := app.HabitUpsert(params4)
 	assert.NilError(t, err)
+	assert.Assert(t, habit4.ID > 0)
+	assert.Assert(t, habit4.Date.IsEqual(date1.Time()))
+	assert.Assert(t, habit4.State == core.HabitStateDone)
+
+	params4.State = core.HabitStateNotDone
+	habit4, err = app.HabitUpsert(params4)
+	assert.NilError(t, err)
+	assert.Assert(t, habit4.State == core.HabitStateNotDone)
 
 	date2 := core.NewDate(date1.Time().AddDate(0, 0, 1))
 	days, err := app.DaysMonth(date2)
 	assert.NilError(t, err)
 	assert.Assert(t, len(days) == 2)
-	assert.Assert(t, len(days[0].R.Habits) == 4)
-	assert.Assert(t, len(days[1].R.Habits) == 0)
+	assert.Assert(t, len(days[0].Habits) == 4)
+	assert.Assert(t, days[0].Habits[0].Date.IsEqual(days[0].Date.Time()))
+	assert.Assert(t, days[0].Habits[0].ID == habit1.ID)
+	assert.Assert(t, days[0].Habits[1].ID == habit2.ID)
+	assert.Assert(t, days[0].Habits[2].ID == habit3.ID)
+	assert.Assert(t, days[0].Habits[3].ID == habit4.ID)
+	assert.Assert(t, len(days[1].Habits) == 0)
 
 	date3 := core.NewDate(date1.Time().AddDate(0, 0, 30))
 	days, err = app.DaysMonth(date3)

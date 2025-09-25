@@ -1,8 +1,8 @@
 package views
 
-import "github.com/danielcosme/curious-ape/database/gen/models"
+import "github.com/danielcosme/curious-ape/pkg/core"
 
-templ Bujo(s State, ds []*models.Day) {
+templ Bujo(s State, ds []core.Day) {
 	@Layout(s) {
 		for _, d := range ds {
 			<p>{ d.Date.String() }</p>

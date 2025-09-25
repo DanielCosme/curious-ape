@@ -20,7 +20,7 @@ func (a *App) SetPassword(username, password, email string, role core.AuthRole) 
 	}
 
 	u, err := a.db.Users.Get(persistence.UserParams{Role: role, Username: username})
-	if persistence.IgnoreIfErrNotFound(err) {
+	if core.IfErrNNotFound(err) {
 		return err
 	}
 	if u == nil {

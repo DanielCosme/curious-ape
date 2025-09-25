@@ -2,6 +2,8 @@ package persistence
 
 import (
 	"context"
+	"log/slog"
+
 	"github.com/aarondl/opt/omit"
 	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/core"
@@ -13,72 +15,74 @@ type Days struct {
 	db bob.DB
 }
 
-func (d *Days) Create(s *models.DaySetter) (*models.Day, error) {
+func (d Days) Create(date core.Date) (day core.Day, err error) {
+	s := &models.DaySetter{Date: omit.From(date.Time())}
 	res, err := models.Days.Insert(s).One(context.Background(), d.db)
-	if err != nil {
-		return nil, catchDBErr("days: create", err)
-	}
-	return res, nil
+	return dayToCore(res), err
 }
 
-func (d *Days) Get(p DayParams) (*models.Day, error) {
-	res, err := p.BuildQuery().One(context.Background(), d.db)
+func (d Days) Get(p core.DayParams) (day core.Day, err error) {
+	res, err := BuildDayQuery(p).One(context.Background(), d.db)
 	if err != nil {
-		return nil, catchDBErr("days: get", err)
+		return day, catchDBErr("days: get", err)
 	}
-	if p.LoadHabits {
-		if err := d.LoadHabitRelations(res); err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
+	err = d.LoadHabitRelations(res)
+	return dayToCore(res), err
 }
 
-func (d *Days) Find(p DayParams) ([]*models.Day, error) {
-	res, err := p.BuildQuery().All(context.Background(), d.db)
-	if err != nil {
-		return nil, catchDBErr("days: find", err)
+func (d Days) GetOrCreate(p core.DayParams) (day core.Day, err error) {
+	day, err = d.Get(p)
+	if core.IfErrNNotFound(err) {
+		return
 	}
+	if day.IsZero() {
+		return d.Create(p.Date)
+	}
+	return
+}
+
+func (d Days) Find(p core.DayParams) (days []core.Day, err error) {
+	res, err := BuildDayQuery(p).All(context.Background(), d.db)
+	if err != nil {
+		return days, catchDBErr("days: find", err)
+	}
+	//TODO:optimize this.
 	for _, day := range res {
-		if p.LoadHabits {
-			if err := d.LoadHabitRelations(day); err != nil {
-				return nil, err
-			}
+		if err = d.LoadHabitRelations(day); err != nil {
+			return
 		}
+		days = append(days, dayToCore(day))
 	}
-	return res, nil
-}
-
-func (d *Days) GetOrCreate(p DayParams) (*models.Day, error) {
-	res, err := d.Get(p)
-	if IgnoreIfErrNotFound(err) {
-		return res, err
-	}
-	if res == nil {
-		res, err = d.Create(&models.DaySetter{Date: omit.From(p.Date.Time())})
-	}
-	return res, err
+	return
 }
 
 func (d *Days) LoadHabitRelations(m *models.Day) error {
+	if err := m.R.Habits.LoadDay(context.Background(), d.db); err != nil {
+		return catchDBErr("days: load: habit relations", err)
+	}
 	if err := m.R.Habits.LoadHabitCategory(context.Background(), d.db); err != nil {
 		return catchDBErr("days: load: habit relations", err)
 	}
 	return nil
 }
 
-type DayParams struct {
-	ID         int64
-	Date       core.Date
-	Dates      core.DateSlice
-	R          []Relation
-	LoadHabits bool
+func dayToCore(d *models.Day) (day core.Day) {
+	if d == nil {
+		slog.Error("dayToCore: day is nil")
+		return
+	}
+	day.ID = int(d.ID)
+	day.Date = core.NewDate(d.Date)
+	for _, h := range d.R.Habits {
+		day.Habits = append(day.Habits, habitToCore(h))
+	}
+	return day
 }
 
-func (f *DayParams) BuildQuery() *sqlite.ViewQuery[*models.Day, models.DaySlice] {
+func BuildDayQuery(f core.DayParams) *sqlite.ViewQuery[*models.Day, models.DaySlice] {
 	q := models.Days.Query()
 	if f.ID > 0 {
-		q.Apply(models.SelectWhere.Days.ID.EQ(f.ID))
+		q.Apply(models.SelectWhere.Days.ID.EQ(int64(f.ID)))
 	}
 	if !f.Date.Time().IsZero() {
 		q.Apply(models.SelectWhere.Days.Date.EQ(f.Date.Time()))
@@ -86,27 +90,13 @@ func (f *DayParams) BuildQuery() *sqlite.ViewQuery[*models.Day, models.DaySlice]
 	if len(f.Dates) > 0 {
 		q.Apply(models.SelectWhere.Days.Date.In(f.Dates.ToTimeSlice()...))
 	}
-	for _, r := range f.R {
-		switch r {
-		case RelationHabit:
-			q.Apply(models.SelectThenLoad.Day.Habits())
-			f.LoadHabits = true
-		case RelationSleep:
-			q.Apply(models.SelectThenLoad.Day.SleepLogs())
-		case RelationFitness:
-			q.Apply(models.SelectThenLoad.Day.FitnessLogs())
-		case RelationWork:
-			q.Apply(models.SelectThenLoad.Day.DeepWorkLogs())
-		}
+	if !f.Lite {
+		q.Apply(
+			models.SelectThenLoad.Day.Habits(),
+			models.SelectThenLoad.Day.SleepLogs(),
+			models.SelectThenLoad.Day.FitnessLogs(),
+			models.SelectThenLoad.Day.DeepWorkLogs(),
+		)
 	}
 	return q
-}
-
-func DayRelations() []Relation {
-	return []Relation{
-		RelationHabit,
-		RelationFitness,
-		RelationSleep,
-		RelationWork,
-	}
 }

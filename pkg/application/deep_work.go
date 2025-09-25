@@ -4,26 +4,24 @@ import (
 	"github.com/aarondl/opt/omit"
 	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/core"
-	"github.com/danielcosme/curious-ape/pkg/persistence"
 	"time"
 )
 
 func (a *App) deepWorkSync(d core.Date) error {
-	day, err := a.db.Days.GetOrCreate(persistence.DayParams{Date: d})
+	day, err := a.db.Days.GetOrCreate(core.DayParams{Date: d})
 	if err != nil {
 		return err
 	}
-	summary, err := a.sync.TogglAPI.Reports.GetDaySummary(day.Date)
+	summary, err := a.sync.TogglAPI.Reports.GetDaySummary(day.Date.Time())
 	if err != nil {
 		return err
 	}
 
 	workLog, err := a.db.DeepWork.Upsert(&models.DeepWorkLogSetter{
-		DayID:   omit.From(day.ID),
-		Date:    omit.From(day.Date),
+		DayID:   omit.From(int64(day.ID)),
+		Date:    omit.From(day.Date.Time()),
 		Seconds: omit.From(int64(summary.TotalDuration.Seconds())),
-		Origin:  omit.From(core.OriginLogToggl),
-	})
+		Origin:  omit.From(core.OriginLogToggl)})
 	if err != nil {
 		return err
 	}
@@ -35,7 +33,11 @@ func (a *App) deepWorkSync(d core.Date) error {
 		habitState = core.HabitStateDone
 	}
 
-	_, err = a.HabitUpsertAutomated(core.NewDate(day.Date), core.HabitTypeDeepWork, habitState)
+	_, err = a.HabitUpsert(core.UpsertHabitParams{
+		Date:      day.Date,
+		Type:      core.HabitTypeDeepWork,
+		State:     habitState,
+		Automated: true})
 	if err != nil {
 		return err
 	}

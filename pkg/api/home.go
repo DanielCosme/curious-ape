@@ -7,7 +7,6 @@ import (
 	"github.com/danielcosme/curious-ape/views"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"sort"
 	"time"
 )
 
@@ -40,11 +39,6 @@ func (api *API) home(c echo.Context) error {
 	if err != nil {
 		return errServer(err)
 	}
-	daysPayload := DaysPayload{Month: days[0].Date.Month().String()}
-	sort.Sort(DaysSliceSort(days))
-	for _, day := range days {
-		daysPayload.Days = append(daysPayload.Days, dayDBToSummary(day))
-	}
 	// TODO: This should return index.html
 	return renderOK(c, views.Bujo(api.State(), days))
 }
@@ -65,7 +59,7 @@ func (api *API) syncDay(c echo.Context) error {
 	if err != nil {
 		return errServer(err)
 	}
-	return c.JSON(http.StatusOK, dayDBToSummary(dayDB))
+	return c.JSON(http.StatusOK, dayDB)
 }
 
 func dayDBToSummary(day *models.Day) DaySummary {
@@ -127,8 +121,8 @@ func habitDBToTransport(h *models.Habit) HabitSummary {
 	}
 }
 
-type DaysSliceSort []*models.Day
+type DaysSliceSort []core.Day
 
 func (a DaysSliceSort) Len() int           { return len(a) }
 func (a DaysSliceSort) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a DaysSliceSort) Less(i, j int) bool { return a[i].Date.After(a[j].Date) }
+func (a DaysSliceSort) Less(i, j int) bool { return a[i].Date.Time().After(a[j].Date.Time()) }

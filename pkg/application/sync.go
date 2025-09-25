@@ -1,21 +1,20 @@
 package application
 
 import (
-	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/core"
 )
 
-func (a *App) SyncDay(d core.Date) (*models.Day, error) {
+func (a *App) SyncDay(date core.Date) (core.Day, error) {
 	errCh := make(chan error)
 
 	go func() {
-		errCh <- a.sleepSync(d)
+		errCh <- a.sleepSync(date)
 	}()
 	go func() {
-		errCh <- a.fitnessSync(d)
+		errCh <- a.fitnessSync(date)
 	}()
 	go func() {
-		errCh <- a.deepWorkSync(d)
+		errCh <- a.deepWorkSync(date)
 	}()
 	for i := 0; i < 3; i++ {
 		if err := <-errCh; err != nil {
@@ -23,5 +22,5 @@ func (a *App) SyncDay(d core.Date) (*models.Day, error) {
 		}
 	}
 
-	return a.DayGetOrCreate(d)
+	return a.DayGetOrCreate(date)
 }

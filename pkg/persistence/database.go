@@ -1,13 +1,14 @@
 package persistence
 
 import (
+	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/stephenafamo/bob"
 )
 
 type Database struct {
 	Users    Users
-	Days     Days
-	Habits   Habits
+	Days     core.DayRepository
+	Habits   core.HabitRepository
 	Sleep    SleepLogs
 	Fitness  FitnessLogs
 	DeepWork DeepWorkLogs

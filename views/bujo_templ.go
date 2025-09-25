@@ -8,9 +8,9 @@ package views
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/danielcosme/curious-ape/database/gen/models"
+import "github.com/danielcosme/curious-ape/pkg/core"
 
-func Bujo(s State, ds []*models.Day) templ.Component {
+func Bujo(s State, ds []core.Day) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

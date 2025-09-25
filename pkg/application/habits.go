@@ -1,41 +1,19 @@
 package application
 
 import (
-	"github.com/aarondl/opt/omit"
-	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/core"
-	"github.com/danielcosme/curious-ape/pkg/persistence"
 	"log/slog"
 )
 
-func (a *App) HabitUpsert(date core.Date, hk core.HabitType, state core.HabitState) (*models.Habit, error) {
-	return a.habitUpsert(date, hk, state, false)
-}
-
-func (a *App) HabitUpsertAutomated(date core.Date, hk core.HabitType, state core.HabitState) (*models.Habit, error) {
-	return a.habitUpsert(date, hk, state, true)
-}
-
-func (a *App) habitUpsert(date core.Date, hk core.HabitType, state core.HabitState, isAutomated bool) (*models.Habit, error) {
-	hc, err := a.db.Habits.GetCategory(persistence.HabitCategoryParams{Kind: hk})
+func (a *App) HabitUpsert(params core.UpsertHabitParams) (habit core.Habit, err error) {
+	habit, err = a.db.Habits.Upsert(params)
 	if err != nil {
-		return nil, err
-	}
-	day, err := a.db.Days.GetOrCreate(persistence.DayParams{Date: date})
-	if err != nil {
-		return nil, err
-	}
-	habit, err := a.db.Habits.Upsert(&models.HabitSetter{
-		DayID:           omit.From(day.ID),
-		HabitCategoryID: omit.From(hc.ID),
-		State:           omit.From(string(state)),
-	})
-	if err != nil {
-		return nil, err
+		return
 	}
 	slog.Info("Habit logged",
-		"name", hc.Name,
+		"type", habit.Type,
 		"state", habit.State,
-		"date", day.Date.Format(core.HumanDateWeekDay))
-	return habit, nil
+		"date", habit.Date.Time().Format(core.HumanDateWeekDay),
+	)
+	return
 }

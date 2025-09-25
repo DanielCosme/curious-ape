@@ -26,7 +26,11 @@ func (a *App) fitnessSync(d core.Date) error {
 			habitState = core.HabitStateDone
 		}
 	}
-	_, err = a.HabitUpsertAutomated(d, core.HabitTypeFitness, habitState)
+	_, err = a.HabitUpsert(core.UpsertHabitParams{
+		Date:      d,
+		Type:      core.HabitTypeFitness,
+		State:     habitState,
+		Automated: true})
 	return err
 }
 
@@ -40,8 +44,7 @@ func (a *App) fitnessLogsFromGoogle(d core.Date) (res []*models.FitnessLogSetter
 		return
 	}
 
-	date := core.NewDate(day.Date)
-	sessions, err := googleClient.Fitness.GetFitnessSessions(date.ToBeginningOfDay(), date.ToEndOfDay())
+	sessions, err := googleClient.Fitness.GetFitnessSessions(day.Date.ToBeginningOfDay(), day.Date.ToEndOfDay())
 	if err != nil {
 		return
 	}
@@ -55,16 +58,16 @@ func (a *App) fitnessLogsFromGoogle(d core.Date) (res []*models.FitnessLogSetter
 	return
 }
 
-func fitnessLogFromGoogle(day *models.Day, session google.Session) (*models.FitnessLogSetter, error) {
+func fitnessLogFromGoogle(day core.Day, session google.Session) (*models.FitnessLogSetter, error) {
 	raw, err := json.Marshal(&session)
 	if err != nil {
 		return nil, err
 	}
 	setter := &models.FitnessLogSetter{
-		DayID:     omit.From(day.ID),
+		DayID:     omit.From(int64(day.ID)),
 		Type:      omit.From("strong"),
 		Title:     omit.From(session.Name),
-		Date:      omit.From(day.Date),
+		Date:      omit.From(day.Date.Time()),
 		StartTime: omit.From(google.ParseMillis(session.StartTimeMillis)),
 		EndTime:   omit.From(google.ParseMillis(session.EndTimeMillis)),
 		Origin:    omit.From(core.OriginLogGoogle),
