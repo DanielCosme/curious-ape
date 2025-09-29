@@ -11,7 +11,6 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/go-co-op/gocron/v2"
 	"github.com/lmittmann/tint"
 	"github.com/stephenafamo/bob"
 	"golang.org/x/oauth2"
@@ -20,11 +19,8 @@ import (
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/persistence"
 
-	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/danielcosme/curious-ape/pkg/api"
 	_ "modernc.org/sqlite"
-
-	"github.com/alexedwards/scs/v2"
 )
 
 type config struct {
@@ -92,17 +88,7 @@ func main() {
 	err = app.SetPassword(cfg.Admin.UserName, cfg.Admin.Password, cfg.Admin.Email, core.AuthRoleAdmin)
 	exitIfErr(err)
 
-	sessionManager := scs.New()
-	sessionManager.Store = sqlite3store.New(db)
-	sessionManager.Lifetime = time.Hour * 24 * 15
-	sessionManager.Cookie.SameSite = http.SameSiteStrictMode
-	sessionManager.Cookie.Name = "ape-session"
-	t := api.NewTransport(app, sessionManager, v)
-
-	app.Log.Info("Launching cron jobs")
-	if err := setUpCronJobs(app); err != nil {
-		logFatal(err)
-	}
+	t := api.NewApi(app, v)
 
 	addr := fmt.Sprintf(":%d", cfg.Port)
 	server := http.Server{
@@ -186,37 +172,4 @@ func (o Oauth2Config) ToConf() *oauth2.Config {
 		RedirectURL: o.RedirectURL,
 		Scopes:      o.Scopes,
 	}
-}
-
-func setUpCronJobs(a *application.App) error {
-	s, err := gocron.NewScheduler()
-	if err != nil {
-		return err
-	}
-
-	_, err = s.NewJob(
-		gocron.DailyJob(1, gocron.NewAtTimes(
-			gocron.NewAtTime(23, 55, 0),
-		)),
-		gocron.NewTask(func() {
-			if _, err := a.SyncDay(core.NewDateToday()); err != nil {
-				a.Log.Error(err.Error())
-			}
-		}),
-		gocron.WithName("Sync DaySummary"),
-	)
-	if err != nil {
-		return err
-	}
-	s.Start()
-
-	for _, j := range s.Jobs() {
-		next, err := j.NextRun()
-		if err != nil {
-			return err
-		}
-		a.Log.Info("Cron job configured", "name", j.Name(), "next_run", next.Format(core.HumanDateWithTime), "Timezone", next.Location().String())
-	}
-
-	return nil
 }

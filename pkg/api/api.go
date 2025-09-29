@@ -1,29 +1,17 @@
 package api
 
 import (
-	"github.com/alexedwards/scs/v2"
 	"github.com/danielcosme/curious-ape/pkg/application"
-	"net/http"
 )
 
 type API struct {
-	App            *application.App
-	Version        string
-	SessionManager *scs.SessionManager
+	App     *application.App
+	Version string
 }
 
-func NewTransport(app *application.App, sm *scs.SessionManager, version string) *API {
+func NewApi(app *application.App, version string) *API {
 	return &API{
-		App:            app,
-		Version:        version,
-		SessionManager: sm,
+		App:     app,
+		Version: version,
 	}
-}
-
-func (api *API) IsAuthenticated(r *http.Request) bool {
-	isAuthenticated, ok := r.Context().Value(ctxKeyIsAuthenticated).(bool)
-	if !ok {
-		return false
-	}
-	return isAuthenticated
 }
