@@ -97,7 +97,7 @@ func main() {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		ErrorLog:     slog.NewLogLogger(logHandler, slog.LevelError),
-		Handler:      api.EchoRoutes(t),
+		Handler:      api.Routes(t),
 	}
 	t.App.Log.Info("HTTP server listening", "addr", addr)
 	if err := server.ListenAndServe(); err != nil {

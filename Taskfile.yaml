@@ -27,7 +27,6 @@ tasks:
 
   build:
     aliases: [b]
-    deps: [gen-html]
     cmds:
       - 'go build -ldflags="-X main.version=dev" -o=./tmp/{{.APP_NAME}} ./cmd/web'
 
@@ -80,7 +79,6 @@ tasks:
       - go get -tool github.com/rakyll/gotest@latest
       - go get -tool honnef.co/go/tools/cmd/staticcheck@latest
       - go get -tool github.com/stephenafamo/bob/gen/bobgen-sqlite@latest
-      - go get -tool github.com/a-h/templ/cmd/templ@latest
 
   test:
     aliases: [t]
@@ -93,12 +91,6 @@ tasks:
   gen-all:
     cmds:
       - task: db-gen-sql
-      - task: gen-html
-
-  gen-html:
-    cmds:
-      - go tool templ generate
-      - go tool templ fmt .
 
   db-gen-sql:
     deps: [db-migrate-up]
