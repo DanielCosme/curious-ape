@@ -5,19 +5,20 @@ import (
 	"log/slog"
 
 	"github.com/danielcosme/curious-ape/pkg/integrations"
+	"github.com/danielcosme/curious-ape/pkg/oak"
 	"github.com/danielcosme/curious-ape/pkg/persistence"
 	"golang.org/x/oauth2"
 )
 
 type App struct {
-	Log  *slog.Logger
+	Log  *oak.Oak
 	Env  Environment
 	db   *persistence.Database
 	sync *integrations.Integrations
 }
 
 type AppOptions struct {
-	Logger   *slog.Logger
+	Logger   *oak.Oak
 	Config   *Config
 	Database *persistence.Database
 }
@@ -32,7 +33,7 @@ type Config struct {
 
 func New(opts *AppOptions) *App {
 	a := &App{
-		Log:  opts.Logger,
+		Log:  opts.Logger.Layer("app"),
 		Env:  opts.Config.Env,
 		db:   opts.Database,
 		sync: integrations.New(opts.Config.TogglWorkspaceID, opts.Config.TogglToken, opts.Config.Fitbit, opts.Config.Google),

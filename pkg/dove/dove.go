@@ -1,7 +1,10 @@
 package dove
 
 import (
+	"fmt"
+	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/danielcosme/curious-ape/pkg/oak"
 )
@@ -10,33 +13,51 @@ import (
 // - Add Middleware.
 // 	- Rate limiter.
 
-// TODO: custom response controller.
-// https://www.alexedwards.net/blog/how-to-use-the-http-responsecontroller-type
-
 // Dove is the main framework Instance.
 type Dove struct {
+	logHandler slog.Handler // Log backend.
+	logLevel   slog.Level
 	middleware []MiddlewareFunc
 	routes     map[string]*endpoint
 }
 
-func New() *Dove {
+func New(logHandler slog.Handler) *Dove {
 	d := &Dove{
-		routes: map[string]*endpoint{},
+		// TODO: make log Level configurable
+		logHandler: logHandler,
+		routes:     map[string]*endpoint{},
 	}
 	return d
 }
 
 func (d *Dove) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+	logger := oak.New(oak.NewQueuedHandler(d.logLevel)).Layer("api")
+	c := NewContext(r, rw, logger)
+
+	c.Log.Info(fmt.Sprintf("%s %s", c.Req.Method, c.Req.URL.Path))
+	defer func() {
+		if queue, ok := c.Log.Handler().(*oak.QueuedHandler); ok {
+			queue.EndTrace()
+			msg := fmt.Sprintf("%d %s", c.Res.StatusCode, http.StatusText(c.Res.StatusCode))
+			duration := time.Since(c.StartTime).String()
+			if c.Res.StatusCode < 400 {
+				c.Log.Info(msg, "duration", duration)
+			} else {
+				c.Log.Error(msg, "duration", duration)
+			}
+			queue.Dequeue(d.logHandler)
+		}
+	}()
+
 	endpoint, ok := d.routes[r.URL.Path]
 	if !ok {
-		oak.Info("not found: " + r.URL.Path)
-		rw.WriteHeader(http.StatusNotFound)
+		c.Res.WriteHeader(http.StatusNotFound)
 		return
 	}
 
 	handler, ok := endpoint.Handlers[r.Method]
 	if !ok {
-		rw.WriteHeader(http.StatusMethodNotAllowed)
+		c.Res.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -44,12 +65,11 @@ func (d *Dove) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		handler = d.middleware[i](handler)
 	}
 
-	doveCtx := Context{
-		Req: r,
-		Res: rw,
+	err := handler(c)
+	if err != nil {
+		c.Log.Error(err.Error())
+		c.Res.WriteHeader(http.StatusInternalServerError)
 	}
-	// TODO: Implement out error handling.
-	_ = handler(doveCtx)
 }
 
 func (d *Dove) Endpoint(path string) *endpoint {

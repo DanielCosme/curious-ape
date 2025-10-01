@@ -1,14 +1,16 @@
 package application_test
 
 import (
+	"context"
 	"database/sql"
-	"log/slog"
+	"os"
 	"testing"
 	"time"
 
 	"github.com/danielcosme/curious-ape/pkg/application"
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/fox"
+	"github.com/danielcosme/curious-ape/pkg/oak"
 	"github.com/danielcosme/curious-ape/pkg/persistence"
 	"github.com/golang-migrate/migrate/v4"
 	m_sqlite "github.com/golang-migrate/migrate/v4/database/sqlite"
@@ -26,6 +28,7 @@ func TestHabitUpsertManual(t *testing.T) {
 func TestDay(t *testing.T) {
 	t.Parallel()
 	app := NewTestApplication(t)
+	ctx := context.Background()
 
 	date1 := core.NewDate(time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC))
 	day, err := app.DayGetOrCreate(date1)
@@ -57,7 +60,7 @@ func TestDay(t *testing.T) {
 	fox.True(t, habit4.State == core.HabitStateNotDone)
 
 	date2 := core.NewDate(date1.Time().AddDate(0, 0, 1))
-	days, err := app.DaysMonth(date2)
+	days, err := app.DaysMonth(ctx, date2)
 	fox.NilErr(t, err)
 	fox.True(t, len(days) == 2)
 	fox.True(t, len(days[0].Habits) == 4)
@@ -69,7 +72,7 @@ func TestDay(t *testing.T) {
 	fox.True(t, len(days[1].Habits) == 0)
 
 	date3 := core.NewDate(date1.Time().AddDate(0, 0, 30))
-	days, err = app.DaysMonth(date3)
+	days, err = app.DaysMonth(ctx, date3)
 	fox.NilErr(t, err)
 	fox.True(t, len(days) == 31)
 }
@@ -101,7 +104,7 @@ func NewTestApplication(t *testing.T) *application.App {
 	t.Cleanup(func() { db.Close() })
 
 	opts := &application.AppOptions{
-		Logger: slog.Default(),
+		Logger: oak.New(oak.TintHandler(os.Stdout, oak.LevelTrace)),
 		Config: &application.Config{
 			Env: application.Test,
 		},

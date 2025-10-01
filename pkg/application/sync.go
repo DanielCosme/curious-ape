@@ -16,7 +16,7 @@ func (a *App) SyncDay(date core.Date) (core.Day, error) {
 	go func() {
 		errCh <- a.deepWorkSync(date)
 	}()
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		if err := <-errCh; err != nil {
 			a.Log.Error(err.Error())
 		}

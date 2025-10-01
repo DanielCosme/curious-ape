@@ -5,23 +5,24 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"os"
 	"runtime/debug"
 	"time"
 
-	"github.com/lmittmann/tint"
 	"github.com/stephenafamo/bob"
 	"golang.org/x/oauth2"
 
 	"github.com/danielcosme/curious-ape/pkg/application"
 	"github.com/danielcosme/curious-ape/pkg/core"
+	"github.com/danielcosme/curious-ape/pkg/oak"
 	"github.com/danielcosme/curious-ape/pkg/persistence"
 
 	"github.com/danielcosme/curious-ape/pkg/api"
 	_ "modernc.org/sqlite"
 )
+
+var version string
 
 type config struct {
 	Port     int `json:"port"`
@@ -48,26 +49,17 @@ type user struct {
 	Email    string `json:"email"`
 }
 
-var version string
-
 func main() {
-	logHandler := tint.NewHandler(os.Stdout, &tint.Options{
-		AddSource:   false,
-		Level:       slog.LevelDebug,
-		ReplaceAttr: nil,
-		TimeFormat:  time.RFC822,
-		NoColor:     false,
-	})
-	sLogger := slog.New(logHandler)
-	slog.SetDefault(sLogger)
+	logger := oak.New(oak.TintHandler(os.Stdout, oak.LevelTrace))
+	oak.SetDefault(logger)
+	logLogger := oak.NewLogLogger(logger, oak.LevelTrace)
 
 	cfg := new(config)
 	v := Version()
 	readConfiguration(cfg)
 
-	sLogger.Info("Version: " + v)
-
-	slog.Info("Opening database", "path", cfg.Database.DSN)
+	oak.Info("Version: " + v)
+	oak.Info("Opening database", "path", cfg.Database.DSN)
 	db, err := sql.Open("sqlite", cfg.Database.DSN)
 	exitIfErr(err)
 	err = db.Ping()
@@ -82,7 +74,7 @@ func main() {
 			TogglToken:       cfg.Integrations.Toggl.Token,
 			TogglWorkspaceID: cfg.Integrations.Toggl.WorkspaceID,
 		},
-		Logger: sLogger,
+		Logger: logger,
 	})
 
 	err = app.SetPassword(cfg.Admin.UserName, cfg.Admin.Password, cfg.Admin.Email, core.AuthRoleAdmin)
@@ -96,10 +88,10 @@ func main() {
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
-		ErrorLog:     slog.NewLogLogger(logHandler, slog.LevelError),
+		ErrorLog:     logLogger,
 		Handler:      api.Routes(t),
 	}
-	t.App.Log.Info("HTTP server listening", "addr", addr)
+	oak.Info("HTTP server listening", "addr", addr)
 	if err := server.ListenAndServe(); err != nil {
 		logFatal(err)
 	}
@@ -117,7 +109,7 @@ func readConfiguration(cfg *config) *config {
 	configPath := "config.json"
 	rawFile, err = os.ReadFile(configPath)
 	exitIfErr(err)
-	slog.Info("Configuration file loaded", "path", configPath)
+	oak.Info("Configuration file loaded", "path", configPath)
 
 	err = json.Unmarshal(rawFile, cfg)
 	exitIfErr(err)
@@ -131,7 +123,7 @@ func exitIfErr(err error) {
 }
 
 func logFatal(err error) {
-	slog.Error("Fatal failure", "err", err.Error(), "stack", string(debug.Stack()))
+	oak.Error("Fatal failure", "err", err.Error(), "stack", string(debug.Stack()))
 	os.Exit(1)
 }
 
@@ -160,7 +152,7 @@ type Oauth2Config struct {
 }
 
 func (o Oauth2Config) ToConf() *oauth2.Config {
-	slog.Info("Loading Oauth2 configuration", "redirect", o.RedirectURL)
+	oak.Info("Loading Oauth2 configuration", "redirect", o.RedirectURL)
 	return &oauth2.Config{
 		ClientID:     o.ClientID,
 		ClientSecret: o.ClientSecret,
