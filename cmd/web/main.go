@@ -123,7 +123,7 @@ func exitIfErr(err error) {
 }
 
 func logFatal(err error) {
-	oak.Error("Fatal failure", "err", err.Error(), "stack", string(debug.Stack()))
+	oak.Fatal("Fatal failure", "err", err.Error(), "stack", string(debug.Stack()))
 	os.Exit(1)
 }
 

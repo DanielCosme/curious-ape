@@ -1,6 +1,7 @@
 package oak
 
 import (
+	"context"
 	"log/slog"
 	"strings"
 )
@@ -21,12 +22,32 @@ func New(backend slog.Handler) *Oak {
 	return o
 }
 
+func (o *Oak) Trace(msg string, args ...any) {
+	o.logger.Log(context.TODO(), LevelTrace, msg, args...)
+}
+
+func (o *Oak) Debug(msg string, args ...any) {
+	o.logger.Debug(msg, o.attrs(args)...)
+}
+
 func (o *Oak) Info(msg string, args ...any) {
 	o.logger.Info(msg, o.attrs(args)...)
 }
 
+func (o *Oak) Notice(msg string, args ...any) {
+	o.logger.Log(context.TODO(), LevelNotice, msg, args...)
+}
+
+func (o *Oak) Warning(msg string, args ...any) {
+	o.logger.Log(context.TODO(), LevelWarning, msg, args...)
+}
+
 func (o *Oak) Error(msg string, args ...any) {
 	o.logger.Error(msg, o.attrs(args)...)
+}
+
+func (o *Oak) Fatal(msg string, args ...any) {
+	o.logger.Log(context.TODO(), LevelFatal, msg, args...)
 }
 
 func (o *Oak) Layer(l string) *Oak {

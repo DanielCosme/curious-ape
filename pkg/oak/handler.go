@@ -10,14 +10,13 @@ import (
 )
 
 const (
-	LevelTrace     = slog.Level(-8) // Things like SQL queries, etc...
-	LevelDebug     = slog.LevelDebug
-	LevelInfo      = slog.LevelInfo
-	LevelNotice    = slog.Level(2)
-	LevelWarning   = slog.LevelWarn
-	LevelError     = slog.LevelError
-	LevelEmergency = slog.Level(12) // Send an email/notice/text
-	LevelFatal     = slog.Level(16) // Panic?
+	LevelTrace   = slog.Level(-8) // Things like SQL queries, etc...
+	LevelDebug   = slog.LevelDebug
+	LevelInfo    = slog.LevelInfo
+	LevelNotice  = slog.Level(2)
+	LevelWarning = slog.LevelWarn
+	LevelError   = slog.LevelError
+	LevelFatal   = slog.Level(12) // Panic?
 )
 
 // NOTE: Slog handler guide
@@ -79,8 +78,27 @@ func TintHandler(out io.Writer, level slog.Leveler) slog.Handler {
 		TimeFormat: time.StampMilli,
 		NoColor:    false,
 		AddSource:  false,
-		//ReplaceAttr: func(groups []string, attr slog.Attr) slog.Attr {
-		//	return attr
-		//},
+		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+			if a.Key == slog.LevelKey && len(groups) == 0 {
+				level, ok := a.Value.Any().(slog.Level)
+				if ok {
+					switch {
+					case level == LevelTrace:
+						return tint.Attr(7, slog.String(a.Key, "TRC")) // White
+					case level == LevelDebug:
+						return tint.Attr(5, slog.String(a.Key, "DBG")) // Magenta
+					case level == LevelNotice:
+						return tint.Attr(4, slog.String(a.Key, "NOT")) // Blue
+					case level == LevelWarning:
+						return tint.Attr(3, slog.String(a.Key, "WRN")) // Yellow
+					case level == LevelError:
+						return tint.Attr(1, slog.String(a.Key, "ERR")) // Red
+					case level == LevelFatal:
+						return tint.Attr(9, slog.String(a.Key, "FTL")) // Bright Red
+					}
+				}
+			}
+			return a
+		},
 	})
 }

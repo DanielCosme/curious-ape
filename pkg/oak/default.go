@@ -20,12 +20,32 @@ func NewLogLogger(l *Oak, level slog.Level) *log.Logger {
 	return slog.NewLogLogger(l.logger.Handler(), level)
 }
 
+func Trace(msg string, args ...any) {
+	slog.Log(context.TODO(), LevelTrace, msg, args...)
+}
+
+func Debug(msg string, args ...any) {
+	slog.Debug(msg, args...)
+}
+
 func Info(msg string, args ...any) {
 	slog.Info(msg, args...)
 }
 
+func Notice(msg string, args ...any) {
+	slog.Log(context.TODO(), LevelNotice, msg, args...)
+}
+
+func Warning(msg string, args ...any) {
+	slog.Log(context.TODO(), LevelWarning, msg, args...)
+}
+
 func Error(msg string, args ...any) {
 	slog.Error(msg, args...)
+}
+
+func Fatal(msg string, args ...any) {
+	slog.Log(context.TODO(), LevelFatal, msg, args...)
 }
 
 func WithContext(ctx context.Context, l *Oak) context.Context {
