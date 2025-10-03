@@ -30,6 +30,9 @@ func (o *Oak) Error(msg string, args ...any) {
 }
 
 func (o *Oak) Layer(l string) *Oak {
+	if l == "" {
+		return o
+	}
 	if o.layers == "" {
 		o.layers = l
 	} else {

@@ -1,14 +1,19 @@
 package application
 
 import (
+	"context"
+	"time"
+
 	"github.com/aarondl/opt/omit"
 	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/core"
-	"time"
+	"github.com/danielcosme/curious-ape/pkg/oak"
 )
 
-func (a *App) deepWorkSync(d core.Date) error {
-	day, err := a.db.Days.GetOrCreate(core.DayParams{Date: d})
+func (a *App) deepWorkSync(ctx context.Context, d core.Date) error {
+	logger := oak.FromContext(ctx)
+
+	day, err := a.dayGetOrCreate(d)
 	if err != nil {
 		return err
 	}
@@ -18,22 +23,25 @@ func (a *App) deepWorkSync(d core.Date) error {
 	}
 
 	workLog, err := a.db.DeepWork.Upsert(&models.DeepWorkLogSetter{
-		DayID:   omit.From(int64(day.ID)),
-		Date:    omit.From(day.Date.Time()),
-		Seconds: omit.From(int64(summary.TotalDuration.Seconds())),
-		Origin:  omit.From(core.OriginLogToggl)})
+		Title:     omit.From("Deep Work"),
+		DayID:     omit.From(int64(day.ID)),
+		Date:      omit.From(day.Date.Time()),
+		Seconds:   omit.From(int64(summary.TotalDuration.Seconds())),
+		StartTime: omit.From(time.Now()),
+		Raw:       omit.From(""),
+		Origin:    omit.From(core.OriginLogToggl)})
 	if err != nil {
 		return err
 	}
 	// TODO: make this better.
 	dur := time.Duration(workLog.Seconds) * time.Second
-	a.Log.Info("Deep Work log added", "date", workLog.Date, "duration", dur.String())
+	logger.Info("Deep Work log added", "date", workLog.Date, "duration", dur.String())
 	habitState := core.HabitStateNotDone
 	if dur > time.Hour*5 {
 		habitState = core.HabitStateDone
 	}
 
-	_, err = a.HabitUpsert(core.UpsertHabitParams{
+	_, err = a.HabitUpsert(ctx, core.UpsertHabitParams{
 		Date:      day.Date,
 		Type:      core.HabitTypeDeepWork,
 		State:     habitState,

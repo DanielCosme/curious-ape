@@ -1,4 +1,4 @@
-package fox
+package test
 
 import "testing"
 
@@ -19,6 +19,6 @@ func False(t *testing.T, b bool) {
 func NilErr(t *testing.T, err error) {
 	t.Helper()
 	if err != nil {
-		t.Errorf("Exptected no error")
+		t.Errorf("Exptected err to be nil, got: %v", err)
 	}
 }

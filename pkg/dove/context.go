@@ -36,11 +36,35 @@ func (c *Context) JSON(status int, payload any) error {
 	if err != nil {
 		return err
 	}
+	c.Res.WriteHeader(status)
 	c.Res.Header().Set("Content-Type", "application/json")
 	_, err = c.Res.Write(bytes)
 	return err
 }
 
+func (c *Context) HTML(body []byte) error {
+	c.Res.Header().Set("Content-Type", "text/html")
+	_, err := c.Res.Write(body)
+	return err
+}
+
+func (c *Context) Render(status int, r Renderer) error {
+	c.Res.Header().Set("Content-Type", "text/html")
+	c.Res.WriteHeader(status)
+	return r.Render(c.Res.Writer)
+}
+
+func (c *Context) RenderOK(r Renderer) error {
+	return c.Render(http.StatusOK, r)
+}
+
 func (c *Context) Ctx() context.Context {
 	return c.Req.Context()
+}
+
+func (c *Context) ParseForm() {
+	err := c.Req.ParseForm()
+	if err != nil {
+		panic(err)
+	}
 }

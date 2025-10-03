@@ -74,7 +74,18 @@ func dayToCore(d *models.Day) (day core.Day) {
 	day.ID = uint(d.ID)
 	day.Date = core.NewDate(d.Date)
 	for _, h := range d.R.Habits {
-		day.Habits = append(day.Habits, habitToCore(h))
+		habit := habitToCore(h)
+		switch habit.Type {
+		case core.HabitTypeWakeUp:
+			day.Habits.Sleep = habit
+		case core.HabitTypeFitness:
+			day.Habits.Fitness = habit
+		case core.HabitTypeDeepWork:
+			day.Habits.DeepWork = habit
+		case core.HabitTypeEatHealthy:
+			day.Habits.Eat = habit
+		}
+		day.Habits.Hs = append(day.Habits.Hs, habit)
 	}
 	return day
 }
@@ -90,13 +101,9 @@ func BuildDayQuery(f core.DayParams) *sqlite.ViewQuery[*models.Day, models.DaySl
 	if len(f.Dates) > 0 {
 		q.Apply(models.SelectWhere.Days.Date.In(f.Dates.ToTimeSlice()...))
 	}
-	if !f.Lite {
-		q.Apply(
-			models.SelectThenLoad.Day.Habits(),
-			models.SelectThenLoad.Day.SleepLogs(),
-			models.SelectThenLoad.Day.FitnessLogs(),
-			models.SelectThenLoad.Day.DeepWorkLogs(),
-		)
-	}
+	q.Apply(models.SelectThenLoad.Day.Habits())
+	// q.Apply(models.SelectThenLoad.Day.SleepLogs())
+	// q.Apply(models.SelectThenLoad.Day.FitnessLogs())
+	// q.Apply(models.SelectThenLoad.Day.DeepWorkLogs())
 	return q
 }

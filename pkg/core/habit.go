@@ -11,10 +11,10 @@ const (
 type HabitType string
 
 const (
-	HabitTypeEatHealthy HabitType = "food"
 	HabitTypeWakeUp     HabitType = "wake_up"
 	HabitTypeFitness    HabitType = "fitness"
 	HabitTypeDeepWork   HabitType = "deep_work"
+	HabitTypeEatHealthy HabitType = "food"
 )
 
 func HabitTypeFromString(s string) HabitType {
@@ -47,9 +47,7 @@ type HabitCategory struct {
 }
 
 type HabitParams struct {
-	ID         int
-	DayID      int
-	CategoryID int
+	ID int
 }
 
 type UpsertHabitParams struct {

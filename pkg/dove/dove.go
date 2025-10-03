@@ -31,10 +31,10 @@ func New(logHandler slog.Handler) *Dove {
 }
 
 func (d *Dove) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	logger := oak.New(oak.NewQueuedHandler(d.logLevel)).Layer("api")
+	logger := oak.New(oak.NewQueuedHandler(d.logLevel)).Layer("web")
 	c := NewContext(r, rw, logger)
 
-	c.Log.Info(fmt.Sprintf("%s %s", c.Req.Method, c.Req.URL.Path))
+	c.Log.Info(fmt.Sprintf("%s %s", c.Req.Method, c.Req.RequestURI))
 	defer func() {
 		if queue, ok := c.Log.Handler().(*oak.QueuedHandler); ok {
 			queue.EndTrace()

@@ -24,6 +24,56 @@ func (h Habits) Get(p core.HabitParams) (habit core.Habit, err error) {
 	return habitToCore(res), nil
 }
 
+func (h Habits) Upsert(p core.UpsertHabitParams) (coreHabit core.Habit, err error) {
+	day, err := BuildDayQuery(core.DayParams{Date: p.Date}).One(context.Background(), h.db)
+	if err != nil {
+		return coreHabit, catchDBErr("habits: upsert", err)
+	}
+	hCategory, err := buildHabitCategoryQuery(core.HabitCategoryParams{Kind: p.Type}).One(context.Background(), h.db)
+	if err != nil {
+		return coreHabit, catchDBErr("habits: upsert", err)
+	}
+	s := &models.HabitSetter{
+		DayID:           omit.From(day.ID),
+		HabitCategoryID: omit.From(hCategory.ID),
+		State:           omit.From(string(p.State)),
+		Automated:       omit.From(p.Automated),
+	}
+	habit, err := models.Habits.Insert(s).One(context.Background(), h.db)
+	if err != nil {
+		if dberrors.HabitErrors.ErrUniqueSqliteAutoindexHabit1.Is(err) {
+			habit, err = models.Habits.Query(
+				models.SelectWhere.Habits.DayID.EQ(s.DayID.GetOrZero()),
+				models.SelectWhere.Habits.HabitCategoryID.EQ(s.HabitCategoryID.GetOrZero()),
+				models.Preload.Habit.Day(),
+				models.Preload.Habit.HabitCategory(),
+			).One(context.Background(), h.db)
+			if err != nil {
+				return coreHabit, catchDBErr("habits: upsert", err)
+			}
+
+			// No-op for a non-automated habit for which the update is automated.
+			if !habit.Automated && s.Automated.GetOrZero() && habit.State != string(core.HabitStateNoInfo) {
+				return habitToCore(habit), nil
+			}
+			err = habit.Update(context.Background(), h.db, s)
+			if err != nil {
+				return coreHabit, catchDBErr("habits: upsert", err)
+			}
+		} else {
+			return coreHabit, catchDBErr("habits: create", err)
+		}
+	}
+	ctx := context.Background()
+	if err := habit.LoadDay(ctx, h.db); err != nil {
+		return coreHabit, catchDBErr("habits: create: load habit day", err)
+	}
+	if err := habit.LoadHabitCategory(ctx, h.db); err != nil {
+		return coreHabit, catchDBErr("habits: create: load habit category", err)
+	}
+	return habitToCore(habit), nil
+}
+
 func habitToCore(h *models.Habit) (habit core.Habit) {
 	if h == nil {
 		slog.Error("habitToCore habit is nil")
@@ -49,65 +99,17 @@ func habitCategoryToCore(hc *models.HabitCategory) (c core.HabitCategory) {
 	return
 }
 
-func (h Habits) Upsert(p core.UpsertHabitParams) (coreHabit core.Habit, err error) {
-	day, err := BuildDayQuery(core.DayParams{Date: p.Date, Lite: true}).One(context.Background(), h.db)
-	if err != nil {
-		return coreHabit, catchDBErr("habits: upsert", err)
-	}
-	hCategory, err := buildHabitCategoryQuery(core.HabitCategoryParams{Kind: p.Type}).One(context.Background(), h.db)
-	if err != nil {
-		return coreHabit, catchDBErr("habits: upsert", err)
-	}
-	s := &models.HabitSetter{
-		DayID:           omit.From(day.ID),
-		HabitCategoryID: omit.From(hCategory.ID),
-		State:           omit.From(string(p.State)),
-		Automated:       omit.From(p.Automated),
-	}
-	habit, err := models.Habits.Insert(s).One(context.Background(), h.db)
-	if err != nil {
-		if dberrors.HabitErrors.ErrUniqueSqliteAutoindexHabit1.Is(err) {
-			habit, err = models.Habits.Query(
-				models.SelectWhere.Habits.DayID.EQ(s.DayID.GetOrZero()),
-				models.SelectWhere.Habits.HabitCategoryID.EQ(s.HabitCategoryID.GetOrZero()),
-			).One(context.Background(), h.db)
-			if err != nil {
-				return coreHabit, catchDBErr("habits: upsert", err)
-			}
-
-			// No-op for a non-automated habit for which the update is automated.
-			if !habit.Automated && s.Automated.GetOrZero() {
-				return habitToCore(habit), nil
-			}
-			err = habit.Update(context.Background(), h.db, s)
-			if err != nil {
-				return coreHabit, catchDBErr("habits: upsert", err)
-			}
-		} else {
-			return coreHabit, catchDBErr("habits: create", err)
-		}
-	}
-	ctx := context.Background()
-	if err := habit.LoadDay(ctx, h.db); err != nil {
-		return coreHabit, catchDBErr("habits: create: load habit day", err)
-	}
-	if err := habit.LoadHabitCategory(ctx, h.db); err != nil {
-		return coreHabit, catchDBErr("habits: create: load habit category", err)
-	}
-	return habitToCore(habit), nil
-}
-
 func buildHabitQuery(f core.HabitParams) *sqlite.ViewQuery[*models.Habit, models.HabitSlice] {
 	q := models.Habits.Query()
 	if f.ID > 0 {
 		q.Apply(models.SelectWhere.Habits.ID.EQ(int64(f.ID)))
 	}
-	if f.DayID > 0 {
-		q.Apply(models.SelectWhere.Habits.DayID.EQ(int64(f.DayID)))
-	}
-	if f.CategoryID > 0 {
-		q.Apply(models.SelectWhere.Habits.HabitCategoryID.EQ(int64(f.CategoryID)))
-	}
+	// if f.DayID > 0 {
+	// 	q.Apply(models.SelectWhere.Habits.DayID.EQ(int64(f.DayID)))
+	// }
+	// if f.CategoryID > 0 {
+	// 	q.Apply(models.SelectWhere.Habits.HabitCategoryID.EQ(int64(f.CategoryID)))
+	// }
 	q.Apply(models.Preload.Habit.Day())
 	q.Apply(models.Preload.Habit.HabitCategory())
 	return q

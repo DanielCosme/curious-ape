@@ -11,7 +11,7 @@ import (
 )
 
 type App struct {
-	Log  *oak.Oak
+	Log  *oak.Oak // Maybe delete the logger.
 	Env  Environment
 	db   *persistence.Database
 	sync *integrations.Integrations

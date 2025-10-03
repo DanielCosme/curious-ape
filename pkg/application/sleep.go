@@ -1,16 +1,21 @@
 package application
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
+	"time"
+
 	"github.com/aarondl/opt/omit"
 	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/integrations/fitbit"
-	"time"
+	"github.com/danielcosme/curious-ape/pkg/oak"
 )
 
-func (a *App) sleepSync(d core.Date) error {
+func (a *App) sleepSync(ctx context.Context, d core.Date) error {
+	logger := oak.FromContext(ctx)
+
 	sls, err := a.sleepLogsGetFromFitbit(d)
 	if err != nil {
 		return err
@@ -21,14 +26,14 @@ func (a *App) sleepSync(d core.Date) error {
 			return err
 		}
 		dur := fitbit.ToDuration(int(sl.MinutesAsleep))
-		a.Log.Info("Sleep log added", "date", sl.Date, "duration", dur.String())
+		logger.Info("Sleep log added", "date", sl.Date, "duration", dur.String())
 		if sl.IsMainSleep {
 			habitState := core.HabitStateNotDone
 			wakeUpTime := time.Date(sl.EndTime.Year(), sl.EndTime.Month(), sl.EndTime.Day(), 6, 0, 0, 0, sl.EndTime.Location())
 			if sl.EndTime.Before(wakeUpTime) {
 				habitState = core.HabitStateDone
 			}
-			_, err := a.HabitUpsert(core.UpsertHabitParams{
+			_, err := a.HabitUpsert(ctx, core.UpsertHabitParams{
 				Date:      d,
 				Type:      core.HabitTypeWakeUp,
 				State:     habitState,
@@ -47,7 +52,7 @@ func (a *App) sleepLogsGetFromFitbit(dates ...core.Date) (res []*models.SleepLog
 		return
 	}
 	for _, date := range dates {
-		day, err := a.db.Days.GetOrCreate(core.DayParams{Date: date})
+		day, err := a.dayGetOrCreate(date)
 		if err != nil {
 			return res, err
 		}

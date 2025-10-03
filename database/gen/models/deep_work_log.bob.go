@@ -28,8 +28,6 @@ type DeepWorkLog struct {
 	Title     string    `db:"title" `
 	Date      time.Time `db:"date" `
 	StartTime time.Time `db:"start_time" `
-	EndTime   time.Time `db:"end_time" `
-	Note      string    `db:"note" `
 	Seconds   int64     `db:"seconds" `
 	Origin    string    `db:"origin" `
 	Raw       string    `db:"raw" `
@@ -55,7 +53,7 @@ type deepWorkLogR struct {
 func buildDeepWorkLogColumns(alias string) deepWorkLogColumns {
 	return deepWorkLogColumns{
 		ColumnsExpr: expr.NewColumnsExpr(
-			"id", "day_id", "title", "date", "start_time", "end_time", "note", "seconds", "origin", "raw",
+			"id", "day_id", "title", "date", "start_time", "seconds", "origin", "raw",
 		).WithParent("deep_work_log"),
 		tableAlias: alias,
 		ID:         sqlite.Quote(alias, "id"),
@@ -63,8 +61,6 @@ func buildDeepWorkLogColumns(alias string) deepWorkLogColumns {
 		Title:      sqlite.Quote(alias, "title"),
 		Date:       sqlite.Quote(alias, "date"),
 		StartTime:  sqlite.Quote(alias, "start_time"),
-		EndTime:    sqlite.Quote(alias, "end_time"),
-		Note:       sqlite.Quote(alias, "note"),
 		Seconds:    sqlite.Quote(alias, "seconds"),
 		Origin:     sqlite.Quote(alias, "origin"),
 		Raw:        sqlite.Quote(alias, "raw"),
@@ -79,8 +75,6 @@ type deepWorkLogColumns struct {
 	Title      sqlite.Expression
 	Date       sqlite.Expression
 	StartTime  sqlite.Expression
-	EndTime    sqlite.Expression
-	Note       sqlite.Expression
 	Seconds    sqlite.Expression
 	Origin     sqlite.Expression
 	Raw        sqlite.Expression
@@ -103,15 +97,13 @@ type DeepWorkLogSetter struct {
 	Title     omit.Val[string]    `db:"title" `
 	Date      omit.Val[time.Time] `db:"date" `
 	StartTime omit.Val[time.Time] `db:"start_time" `
-	EndTime   omit.Val[time.Time] `db:"end_time" `
-	Note      omit.Val[string]    `db:"note" `
 	Seconds   omit.Val[int64]     `db:"seconds" `
 	Origin    omit.Val[string]    `db:"origin" `
 	Raw       omit.Val[string]    `db:"raw" `
 }
 
 func (s DeepWorkLogSetter) SetColumns() []string {
-	vals := make([]string, 0, 10)
+	vals := make([]string, 0, 8)
 	if s.ID.IsValue() {
 		vals = append(vals, "id")
 	}
@@ -126,12 +118,6 @@ func (s DeepWorkLogSetter) SetColumns() []string {
 	}
 	if s.StartTime.IsValue() {
 		vals = append(vals, "start_time")
-	}
-	if s.EndTime.IsValue() {
-		vals = append(vals, "end_time")
-	}
-	if s.Note.IsValue() {
-		vals = append(vals, "note")
 	}
 	if s.Seconds.IsValue() {
 		vals = append(vals, "seconds")
@@ -161,12 +147,6 @@ func (s DeepWorkLogSetter) Overwrite(t *DeepWorkLog) {
 	if s.StartTime.IsValue() {
 		t.StartTime = s.StartTime.MustGet()
 	}
-	if s.EndTime.IsValue() {
-		t.EndTime = s.EndTime.MustGet()
-	}
-	if s.Note.IsValue() {
-		t.Note = s.Note.MustGet()
-	}
 	if s.Seconds.IsValue() {
 		t.Seconds = s.Seconds.MustGet()
 	}
@@ -192,7 +172,7 @@ func (s *DeepWorkLogSetter) Apply(q *dialect.InsertQuery) {
 	}
 
 	q.AppendValues(bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
-		vals := make([]bob.Expression, 0, 10)
+		vals := make([]bob.Expression, 0, 8)
 		if s.ID.IsValue() {
 			vals = append(vals, sqlite.Arg(s.ID.MustGet()))
 		}
@@ -211,14 +191,6 @@ func (s *DeepWorkLogSetter) Apply(q *dialect.InsertQuery) {
 
 		if s.StartTime.IsValue() {
 			vals = append(vals, sqlite.Arg(s.StartTime.MustGet()))
-		}
-
-		if s.EndTime.IsValue() {
-			vals = append(vals, sqlite.Arg(s.EndTime.MustGet()))
-		}
-
-		if s.Note.IsValue() {
-			vals = append(vals, sqlite.Arg(s.Note.MustGet()))
 		}
 
 		if s.Seconds.IsValue() {
@@ -246,7 +218,7 @@ func (s DeepWorkLogSetter) UpdateMod() bob.Mod[*dialect.UpdateQuery] {
 }
 
 func (s DeepWorkLogSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 10)
+	exprs := make([]bob.Expression, 0, 8)
 
 	if s.ID.IsValue() {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
@@ -280,20 +252,6 @@ func (s DeepWorkLogSetter) Expressions(prefix ...string) []bob.Expression {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			sqlite.Quote(append(prefix, "start_time")...),
 			sqlite.Arg(s.StartTime),
-		}})
-	}
-
-	if s.EndTime.IsValue() {
-		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
-			sqlite.Quote(append(prefix, "end_time")...),
-			sqlite.Arg(s.EndTime),
-		}})
-	}
-
-	if s.Note.IsValue() {
-		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
-			sqlite.Quote(append(prefix, "note")...),
-			sqlite.Arg(s.Note),
 		}})
 	}
 
@@ -617,8 +575,6 @@ type deepWorkLogWhere[Q sqlite.Filterable] struct {
 	Title     sqlite.WhereMod[Q, string]
 	Date      sqlite.WhereMod[Q, time.Time]
 	StartTime sqlite.WhereMod[Q, time.Time]
-	EndTime   sqlite.WhereMod[Q, time.Time]
-	Note      sqlite.WhereMod[Q, string]
 	Seconds   sqlite.WhereMod[Q, int64]
 	Origin    sqlite.WhereMod[Q, string]
 	Raw       sqlite.WhereMod[Q, string]
@@ -635,8 +591,6 @@ func buildDeepWorkLogWhere[Q sqlite.Filterable](cols deepWorkLogColumns) deepWor
 		Title:     sqlite.Where[Q, string](cols.Title),
 		Date:      sqlite.Where[Q, time.Time](cols.Date),
 		StartTime: sqlite.Where[Q, time.Time](cols.StartTime),
-		EndTime:   sqlite.Where[Q, time.Time](cols.EndTime),
-		Note:      sqlite.Where[Q, string](cols.Note),
 		Seconds:   sqlite.Where[Q, int64](cols.Seconds),
 		Origin:    sqlite.Where[Q, string](cols.Origin),
 		Raw:       sqlite.Where[Q, string](cols.Raw),

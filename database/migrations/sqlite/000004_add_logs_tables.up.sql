@@ -42,8 +42,8 @@ CREATE TABLE IF NOT EXISTS deep_work_log (
         title               TEXT NOT NULL CHECK (length(origin) > 2),
         "date"              DATE NOT NULL,
         start_time          DATE NOT NULL,
-        end_time            DATE NOT NULL,
-        note                TEXT NOT NULL,
+        -- end_time            DATE NOT NULL,
+        -- note                TEXT NOT NULL,
 
         seconds             INTEGER NOT NULL CHECK (length(seconds) < 60),
 
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS deep_work_log (
         raw                 TEXT NOT NULL,
 
         UNIQUE (day_id, origin),
-        FOREIGN KEY (day_id) REFERENCES "day" (id) ON DELETE CASCADE,
+        FOREIGN KEY (day_id) REFERENCES "day" (id) ON DELETE CASCADE
         CONSTRAINT unique_day_start_time UNIQUE (day_id, start_time)
 );
 

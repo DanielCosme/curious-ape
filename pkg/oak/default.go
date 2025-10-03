@@ -32,7 +32,15 @@ func WithContext(ctx context.Context, l *Oak) context.Context {
 	return context.WithValue(ctx, CtxName, l)
 }
 
-func FromContext(ctx context.Context, layer string) *Oak {
+func FromContextWithLayer(ctx context.Context, layer string) *Oak {
+	return fromContextWithLayer(ctx, layer)
+}
+
+func FromContext(ctx context.Context) *Oak {
+	return fromContextWithLayer(ctx, "")
+}
+
+func fromContextWithLayer(ctx context.Context, layer string) *Oak {
 	v, ok := ctx.Value(CtxName).(*Oak)
 	if !ok {
 		logger := New(TintHandler(os.Stdout, LevelTrace)).Layer(layer)
