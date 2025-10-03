@@ -41,10 +41,7 @@ type DaysQuery = *sqlite.ViewQuery[*Day, DaySlice]
 
 // dayR is where relationships are stored.
 type dayR struct {
-	DeepWorkLogs DeepWorkLogSlice // fk_deep_work_log_0
-	FitnessLogs  FitnessLogSlice  // fk_fitness_log_0
-	Habits       HabitSlice       // fk_habit_0
-	SleepLogs    SleepLogSlice    // fk_sleep_log_0
+	Habits HabitSlice // fk_habit_0
 }
 
 func buildDayColumns(alias string) dayColumns {
@@ -379,44 +376,6 @@ func (o DaySlice) ReloadAll(ctx context.Context, exec bob.Executor) error {
 	return nil
 }
 
-// DeepWorkLogs starts a query for related objects on deep_work_log
-func (o *Day) DeepWorkLogs(mods ...bob.Mod[*dialect.SelectQuery]) DeepWorkLogsQuery {
-	return DeepWorkLogs.Query(append(mods,
-		sm.Where(DeepWorkLogs.Columns.DayID.EQ(sqlite.Arg(o.ID))),
-	)...)
-}
-
-func (os DaySlice) DeepWorkLogs(mods ...bob.Mod[*dialect.SelectQuery]) DeepWorkLogsQuery {
-	PKArgSlice := make([]bob.Expression, len(os))
-	for i, o := range os {
-		PKArgSlice[i] = sqlite.ArgGroup(o.ID)
-	}
-	PKArgExpr := sqlite.Group(PKArgSlice...)
-
-	return DeepWorkLogs.Query(append(mods,
-		sm.Where(sqlite.Group(DeepWorkLogs.Columns.DayID).OP("IN", PKArgExpr)),
-	)...)
-}
-
-// FitnessLogs starts a query for related objects on fitness_log
-func (o *Day) FitnessLogs(mods ...bob.Mod[*dialect.SelectQuery]) FitnessLogsQuery {
-	return FitnessLogs.Query(append(mods,
-		sm.Where(FitnessLogs.Columns.DayID.EQ(sqlite.Arg(o.ID))),
-	)...)
-}
-
-func (os DaySlice) FitnessLogs(mods ...bob.Mod[*dialect.SelectQuery]) FitnessLogsQuery {
-	PKArgSlice := make([]bob.Expression, len(os))
-	for i, o := range os {
-		PKArgSlice[i] = sqlite.ArgGroup(o.ID)
-	}
-	PKArgExpr := sqlite.Group(PKArgSlice...)
-
-	return FitnessLogs.Query(append(mods,
-		sm.Where(sqlite.Group(FitnessLogs.Columns.DayID).OP("IN", PKArgExpr)),
-	)...)
-}
-
 // Habits starts a query for related objects on habit
 func (o *Day) Habits(mods ...bob.Mod[*dialect.SelectQuery]) HabitsQuery {
 	return Habits.Query(append(mods,
@@ -434,161 +393,6 @@ func (os DaySlice) Habits(mods ...bob.Mod[*dialect.SelectQuery]) HabitsQuery {
 	return Habits.Query(append(mods,
 		sm.Where(sqlite.Group(Habits.Columns.DayID).OP("IN", PKArgExpr)),
 	)...)
-}
-
-// SleepLogs starts a query for related objects on sleep_log
-func (o *Day) SleepLogs(mods ...bob.Mod[*dialect.SelectQuery]) SleepLogsQuery {
-	return SleepLogs.Query(append(mods,
-		sm.Where(SleepLogs.Columns.DayID.EQ(sqlite.Arg(o.ID))),
-	)...)
-}
-
-func (os DaySlice) SleepLogs(mods ...bob.Mod[*dialect.SelectQuery]) SleepLogsQuery {
-	PKArgSlice := make([]bob.Expression, len(os))
-	for i, o := range os {
-		PKArgSlice[i] = sqlite.ArgGroup(o.ID)
-	}
-	PKArgExpr := sqlite.Group(PKArgSlice...)
-
-	return SleepLogs.Query(append(mods,
-		sm.Where(sqlite.Group(SleepLogs.Columns.DayID).OP("IN", PKArgExpr)),
-	)...)
-}
-
-func insertDayDeepWorkLogs0(ctx context.Context, exec bob.Executor, deepWorkLogs1 []*DeepWorkLogSetter, day0 *Day) (DeepWorkLogSlice, error) {
-	for i := range deepWorkLogs1 {
-		deepWorkLogs1[i].DayID = omit.From(day0.ID)
-	}
-
-	ret, err := DeepWorkLogs.Insert(bob.ToMods(deepWorkLogs1...)).All(ctx, exec)
-	if err != nil {
-		return ret, fmt.Errorf("insertDayDeepWorkLogs0: %w", err)
-	}
-
-	return ret, nil
-}
-
-func attachDayDeepWorkLogs0(ctx context.Context, exec bob.Executor, count int, deepWorkLogs1 DeepWorkLogSlice, day0 *Day) (DeepWorkLogSlice, error) {
-	setter := &DeepWorkLogSetter{
-		DayID: omit.From(day0.ID),
-	}
-
-	err := deepWorkLogs1.UpdateAll(ctx, exec, *setter)
-	if err != nil {
-		return nil, fmt.Errorf("attachDayDeepWorkLogs0: %w", err)
-	}
-
-	return deepWorkLogs1, nil
-}
-
-func (day0 *Day) InsertDeepWorkLogs(ctx context.Context, exec bob.Executor, related ...*DeepWorkLogSetter) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-
-	deepWorkLogs1, err := insertDayDeepWorkLogs0(ctx, exec, related, day0)
-	if err != nil {
-		return err
-	}
-
-	day0.R.DeepWorkLogs = append(day0.R.DeepWorkLogs, deepWorkLogs1...)
-
-	for _, rel := range deepWorkLogs1 {
-		rel.R.Day = day0
-	}
-	return nil
-}
-
-func (day0 *Day) AttachDeepWorkLogs(ctx context.Context, exec bob.Executor, related ...*DeepWorkLog) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-	deepWorkLogs1 := DeepWorkLogSlice(related)
-
-	_, err = attachDayDeepWorkLogs0(ctx, exec, len(related), deepWorkLogs1, day0)
-	if err != nil {
-		return err
-	}
-
-	day0.R.DeepWorkLogs = append(day0.R.DeepWorkLogs, deepWorkLogs1...)
-
-	for _, rel := range related {
-		rel.R.Day = day0
-	}
-
-	return nil
-}
-
-func insertDayFitnessLogs0(ctx context.Context, exec bob.Executor, fitnessLogs1 []*FitnessLogSetter, day0 *Day) (FitnessLogSlice, error) {
-	for i := range fitnessLogs1 {
-		fitnessLogs1[i].DayID = omit.From(day0.ID)
-	}
-
-	ret, err := FitnessLogs.Insert(bob.ToMods(fitnessLogs1...)).All(ctx, exec)
-	if err != nil {
-		return ret, fmt.Errorf("insertDayFitnessLogs0: %w", err)
-	}
-
-	return ret, nil
-}
-
-func attachDayFitnessLogs0(ctx context.Context, exec bob.Executor, count int, fitnessLogs1 FitnessLogSlice, day0 *Day) (FitnessLogSlice, error) {
-	setter := &FitnessLogSetter{
-		DayID: omit.From(day0.ID),
-	}
-
-	err := fitnessLogs1.UpdateAll(ctx, exec, *setter)
-	if err != nil {
-		return nil, fmt.Errorf("attachDayFitnessLogs0: %w", err)
-	}
-
-	return fitnessLogs1, nil
-}
-
-func (day0 *Day) InsertFitnessLogs(ctx context.Context, exec bob.Executor, related ...*FitnessLogSetter) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-
-	fitnessLogs1, err := insertDayFitnessLogs0(ctx, exec, related, day0)
-	if err != nil {
-		return err
-	}
-
-	day0.R.FitnessLogs = append(day0.R.FitnessLogs, fitnessLogs1...)
-
-	for _, rel := range fitnessLogs1 {
-		rel.R.Day = day0
-	}
-	return nil
-}
-
-func (day0 *Day) AttachFitnessLogs(ctx context.Context, exec bob.Executor, related ...*FitnessLog) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-	fitnessLogs1 := FitnessLogSlice(related)
-
-	_, err = attachDayFitnessLogs0(ctx, exec, len(related), fitnessLogs1, day0)
-	if err != nil {
-		return err
-	}
-
-	day0.R.FitnessLogs = append(day0.R.FitnessLogs, fitnessLogs1...)
-
-	for _, rel := range related {
-		rel.R.Day = day0
-	}
-
-	return nil
 }
 
 func insertDayHabits0(ctx context.Context, exec bob.Executor, habits1 []*HabitSetter, day0 *Day) (HabitSlice, error) {
@@ -659,74 +463,6 @@ func (day0 *Day) AttachHabits(ctx context.Context, exec bob.Executor, related ..
 	return nil
 }
 
-func insertDaySleepLogs0(ctx context.Context, exec bob.Executor, sleepLogs1 []*SleepLogSetter, day0 *Day) (SleepLogSlice, error) {
-	for i := range sleepLogs1 {
-		sleepLogs1[i].DayID = omit.From(day0.ID)
-	}
-
-	ret, err := SleepLogs.Insert(bob.ToMods(sleepLogs1...)).All(ctx, exec)
-	if err != nil {
-		return ret, fmt.Errorf("insertDaySleepLogs0: %w", err)
-	}
-
-	return ret, nil
-}
-
-func attachDaySleepLogs0(ctx context.Context, exec bob.Executor, count int, sleepLogs1 SleepLogSlice, day0 *Day) (SleepLogSlice, error) {
-	setter := &SleepLogSetter{
-		DayID: omit.From(day0.ID),
-	}
-
-	err := sleepLogs1.UpdateAll(ctx, exec, *setter)
-	if err != nil {
-		return nil, fmt.Errorf("attachDaySleepLogs0: %w", err)
-	}
-
-	return sleepLogs1, nil
-}
-
-func (day0 *Day) InsertSleepLogs(ctx context.Context, exec bob.Executor, related ...*SleepLogSetter) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-
-	sleepLogs1, err := insertDaySleepLogs0(ctx, exec, related, day0)
-	if err != nil {
-		return err
-	}
-
-	day0.R.SleepLogs = append(day0.R.SleepLogs, sleepLogs1...)
-
-	for _, rel := range sleepLogs1 {
-		rel.R.Day = day0
-	}
-	return nil
-}
-
-func (day0 *Day) AttachSleepLogs(ctx context.Context, exec bob.Executor, related ...*SleepLog) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-	sleepLogs1 := SleepLogSlice(related)
-
-	_, err = attachDaySleepLogs0(ctx, exec, len(related), sleepLogs1, day0)
-	if err != nil {
-		return err
-	}
-
-	day0.R.SleepLogs = append(day0.R.SleepLogs, sleepLogs1...)
-
-	for _, rel := range related {
-		rel.R.Day = day0
-	}
-
-	return nil
-}
-
 type dayWhere[Q sqlite.Filterable] struct {
 	ID   sqlite.WhereMod[Q, int64]
 	Date sqlite.WhereMod[Q, time.Time]
@@ -749,34 +485,6 @@ func (o *Day) Preload(name string, retrieved any) error {
 	}
 
 	switch name {
-	case "DeepWorkLogs":
-		rels, ok := retrieved.(DeepWorkLogSlice)
-		if !ok {
-			return fmt.Errorf("day cannot load %T as %q", retrieved, name)
-		}
-
-		o.R.DeepWorkLogs = rels
-
-		for _, rel := range rels {
-			if rel != nil {
-				rel.R.Day = o
-			}
-		}
-		return nil
-	case "FitnessLogs":
-		rels, ok := retrieved.(FitnessLogSlice)
-		if !ok {
-			return fmt.Errorf("day cannot load %T as %q", retrieved, name)
-		}
-
-		o.R.FitnessLogs = rels
-
-		for _, rel := range rels {
-			if rel != nil {
-				rel.R.Day = o
-			}
-		}
-		return nil
 	case "Habits":
 		rels, ok := retrieved.(HabitSlice)
 		if !ok {
@@ -784,20 +492,6 @@ func (o *Day) Preload(name string, retrieved any) error {
 		}
 
 		o.R.Habits = rels
-
-		for _, rel := range rels {
-			if rel != nil {
-				rel.R.Day = o
-			}
-		}
-		return nil
-	case "SleepLogs":
-		rels, ok := retrieved.(SleepLogSlice)
-		if !ok {
-			return fmt.Errorf("day cannot load %T as %q", retrieved, name)
-		}
-
-		o.R.SleepLogs = rels
 
 		for _, rel := range rels {
 			if rel != nil {
@@ -817,174 +511,22 @@ func buildDayPreloader() dayPreloader {
 }
 
 type dayThenLoader[Q orm.Loadable] struct {
-	DeepWorkLogs func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
-	FitnessLogs  func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
-	Habits       func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
-	SleepLogs    func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
+	Habits func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
 }
 
 func buildDayThenLoader[Q orm.Loadable]() dayThenLoader[Q] {
-	type DeepWorkLogsLoadInterface interface {
-		LoadDeepWorkLogs(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
-	}
-	type FitnessLogsLoadInterface interface {
-		LoadFitnessLogs(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
-	}
 	type HabitsLoadInterface interface {
 		LoadHabits(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
 	}
-	type SleepLogsLoadInterface interface {
-		LoadSleepLogs(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
-	}
 
 	return dayThenLoader[Q]{
-		DeepWorkLogs: thenLoadBuilder[Q](
-			"DeepWorkLogs",
-			func(ctx context.Context, exec bob.Executor, retrieved DeepWorkLogsLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
-				return retrieved.LoadDeepWorkLogs(ctx, exec, mods...)
-			},
-		),
-		FitnessLogs: thenLoadBuilder[Q](
-			"FitnessLogs",
-			func(ctx context.Context, exec bob.Executor, retrieved FitnessLogsLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
-				return retrieved.LoadFitnessLogs(ctx, exec, mods...)
-			},
-		),
 		Habits: thenLoadBuilder[Q](
 			"Habits",
 			func(ctx context.Context, exec bob.Executor, retrieved HabitsLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
 				return retrieved.LoadHabits(ctx, exec, mods...)
 			},
 		),
-		SleepLogs: thenLoadBuilder[Q](
-			"SleepLogs",
-			func(ctx context.Context, exec bob.Executor, retrieved SleepLogsLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
-				return retrieved.LoadSleepLogs(ctx, exec, mods...)
-			},
-		),
 	}
-}
-
-// LoadDeepWorkLogs loads the day's DeepWorkLogs into the .R struct
-func (o *Day) LoadDeepWorkLogs(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
-	if o == nil {
-		return nil
-	}
-
-	// Reset the relationship
-	o.R.DeepWorkLogs = nil
-
-	related, err := o.DeepWorkLogs(mods...).All(ctx, exec)
-	if err != nil {
-		return err
-	}
-
-	for _, rel := range related {
-		rel.R.Day = o
-	}
-
-	o.R.DeepWorkLogs = related
-	return nil
-}
-
-// LoadDeepWorkLogs loads the day's DeepWorkLogs into the .R struct
-func (os DaySlice) LoadDeepWorkLogs(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
-	if len(os) == 0 {
-		return nil
-	}
-
-	deepWorkLogs, err := os.DeepWorkLogs(mods...).All(ctx, exec)
-	if err != nil {
-		return err
-	}
-
-	for _, o := range os {
-		if o == nil {
-			continue
-		}
-
-		o.R.DeepWorkLogs = nil
-	}
-
-	for _, o := range os {
-		if o == nil {
-			continue
-		}
-
-		for _, rel := range deepWorkLogs {
-
-			if !(o.ID == rel.DayID) {
-				continue
-			}
-
-			rel.R.Day = o
-
-			o.R.DeepWorkLogs = append(o.R.DeepWorkLogs, rel)
-		}
-	}
-
-	return nil
-}
-
-// LoadFitnessLogs loads the day's FitnessLogs into the .R struct
-func (o *Day) LoadFitnessLogs(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
-	if o == nil {
-		return nil
-	}
-
-	// Reset the relationship
-	o.R.FitnessLogs = nil
-
-	related, err := o.FitnessLogs(mods...).All(ctx, exec)
-	if err != nil {
-		return err
-	}
-
-	for _, rel := range related {
-		rel.R.Day = o
-	}
-
-	o.R.FitnessLogs = related
-	return nil
-}
-
-// LoadFitnessLogs loads the day's FitnessLogs into the .R struct
-func (os DaySlice) LoadFitnessLogs(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
-	if len(os) == 0 {
-		return nil
-	}
-
-	fitnessLogs, err := os.FitnessLogs(mods...).All(ctx, exec)
-	if err != nil {
-		return err
-	}
-
-	for _, o := range os {
-		if o == nil {
-			continue
-		}
-
-		o.R.FitnessLogs = nil
-	}
-
-	for _, o := range os {
-		if o == nil {
-			continue
-		}
-
-		for _, rel := range fitnessLogs {
-
-			if !(o.ID == rel.DayID) {
-				continue
-			}
-
-			rel.R.Day = o
-
-			o.R.FitnessLogs = append(o.R.FitnessLogs, rel)
-		}
-	}
-
-	return nil
 }
 
 // LoadHabits loads the day's Habits into the .R struct
@@ -1048,73 +590,9 @@ func (os DaySlice) LoadHabits(ctx context.Context, exec bob.Executor, mods ...bo
 	return nil
 }
 
-// LoadSleepLogs loads the day's SleepLogs into the .R struct
-func (o *Day) LoadSleepLogs(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
-	if o == nil {
-		return nil
-	}
-
-	// Reset the relationship
-	o.R.SleepLogs = nil
-
-	related, err := o.SleepLogs(mods...).All(ctx, exec)
-	if err != nil {
-		return err
-	}
-
-	for _, rel := range related {
-		rel.R.Day = o
-	}
-
-	o.R.SleepLogs = related
-	return nil
-}
-
-// LoadSleepLogs loads the day's SleepLogs into the .R struct
-func (os DaySlice) LoadSleepLogs(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
-	if len(os) == 0 {
-		return nil
-	}
-
-	sleepLogs, err := os.SleepLogs(mods...).All(ctx, exec)
-	if err != nil {
-		return err
-	}
-
-	for _, o := range os {
-		if o == nil {
-			continue
-		}
-
-		o.R.SleepLogs = nil
-	}
-
-	for _, o := range os {
-		if o == nil {
-			continue
-		}
-
-		for _, rel := range sleepLogs {
-
-			if !(o.ID == rel.DayID) {
-				continue
-			}
-
-			rel.R.Day = o
-
-			o.R.SleepLogs = append(o.R.SleepLogs, rel)
-		}
-	}
-
-	return nil
-}
-
 type dayJoins[Q dialect.Joinable] struct {
-	typ          string
-	DeepWorkLogs modAs[Q, deepWorkLogColumns]
-	FitnessLogs  modAs[Q, fitnessLogColumns]
-	Habits       modAs[Q, habitColumns]
-	SleepLogs    modAs[Q, sleepLogColumns]
+	typ    string
+	Habits modAs[Q, habitColumns]
 }
 
 func (j dayJoins[Q]) aliasedAs(alias string) dayJoins[Q] {
@@ -1124,34 +602,6 @@ func (j dayJoins[Q]) aliasedAs(alias string) dayJoins[Q] {
 func buildDayJoins[Q dialect.Joinable](cols dayColumns, typ string) dayJoins[Q] {
 	return dayJoins[Q]{
 		typ: typ,
-		DeepWorkLogs: modAs[Q, deepWorkLogColumns]{
-			c: DeepWorkLogs.Columns,
-			f: func(to deepWorkLogColumns) bob.Mod[Q] {
-				mods := make(mods.QueryMods[Q], 0, 1)
-
-				{
-					mods = append(mods, dialect.Join[Q](typ, DeepWorkLogs.Name().As(to.Alias())).On(
-						to.DayID.EQ(cols.ID),
-					))
-				}
-
-				return mods
-			},
-		},
-		FitnessLogs: modAs[Q, fitnessLogColumns]{
-			c: FitnessLogs.Columns,
-			f: func(to fitnessLogColumns) bob.Mod[Q] {
-				mods := make(mods.QueryMods[Q], 0, 1)
-
-				{
-					mods = append(mods, dialect.Join[Q](typ, FitnessLogs.Name().As(to.Alias())).On(
-						to.DayID.EQ(cols.ID),
-					))
-				}
-
-				return mods
-			},
-		},
 		Habits: modAs[Q, habitColumns]{
 			c: Habits.Columns,
 			f: func(to habitColumns) bob.Mod[Q] {
@@ -1159,20 +609,6 @@ func buildDayJoins[Q dialect.Joinable](cols dayColumns, typ string) dayJoins[Q] 
 
 				{
 					mods = append(mods, dialect.Join[Q](typ, Habits.Name().As(to.Alias())).On(
-						to.DayID.EQ(cols.ID),
-					))
-				}
-
-				return mods
-			},
-		},
-		SleepLogs: modAs[Q, sleepLogColumns]{
-			c: SleepLogs.Columns,
-			f: func(to sleepLogColumns) bob.Mod[Q] {
-				mods := make(mods.QueryMods[Q], 0, 1)
-
-				{
-					mods = append(mods, dialect.Join[Q](typ, SleepLogs.Name().As(to.Alias())).On(
 						to.DayID.EQ(cols.ID),
 					))
 				}

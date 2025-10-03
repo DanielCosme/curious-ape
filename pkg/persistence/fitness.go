@@ -1,19 +1,21 @@
 package persistence
 
 import (
-	"context"
-	"github.com/danielcosme/curious-ape/database/gen/dberrors"
-	"github.com/danielcosme/curious-ape/database/gen/models"
-	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/stephenafamo/bob"
-	"github.com/stephenafamo/bob/dialect/sqlite"
-	"time"
-)
+	/*
+		"context"
+		"github.com/danielcosme/curious-ape/database/gen/dberrors"
+		"github.com/danielcosme/curious-ape/database/gen/models"
+		"github.com/danielcosme/curious-ape/pkg/core"
+		"github.com/stephenafamo/bob/dialect/sqlite"
+		"time"
+	*/)
 
 type FitnessLogs struct {
 	db bob.DB
 }
 
+/*
 func (fls *FitnessLogs) Upsert(s *models.FitnessLogSetter) (*models.FitnessLog, error) {
 	fitnessLog, err := models.FitnessLogs.Insert(s).One(context.Background(), fls.db)
 	if err == nil {
@@ -67,3 +69,4 @@ func (f FitnessLogParams) BuildQuery() *sqlite.ViewQuery[*models.FitnessLog, mod
 	}
 	return q
 }
+*/

@@ -2,43 +2,43 @@ package application
 
 import (
 	"context"
-	"encoding/json"
-
-	"github.com/aarondl/opt/omit"
-	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/core"
-	"github.com/danielcosme/curious-ape/pkg/integrations/google"
 	"github.com/danielcosme/curious-ape/pkg/oak"
 )
 
 func (a *App) fitnessSync(ctx context.Context, d core.Date) error {
 	logger := oak.FromContext(ctx)
+	logger.Notice("Fitness logging not implemented")
 
-	fitnessLogs, err := a.fitnessLogsFromGoogle(d)
-	if err != nil {
-		return err
-	}
-
-	habitState := core.HabitStateNotDone
-	for idx, setter := range fitnessLogs {
-		fl, err := a.db.Fitness.Upsert(setter)
+	/*
+		fitnessLogs, err := a.fitnessLogsFromGoogle(d)
 		if err != nil {
 			return err
 		}
-		logger.Info("Fitness log added", "date", fl.Date, "origin", fl.Origin)
 
-		if idx == 0 {
-			habitState = core.HabitStateDone
+		habitState := core.HabitStateNotDone
+		for idx, setter := range fitnessLogs {
+			fl, err := a.db.Fitness.Upsert(setter)
+			if err != nil {
+				return err
+			}
+			logger.Info("Fitness log added", "date", fl.Date, "origin", fl.Origin)
+
+			if idx == 0 {
+				habitState = core.HabitStateDone
+			}
 		}
-	}
-	_, err = a.HabitUpsert(ctx, core.UpsertHabitParams{
-		Date:      d,
-		Type:      core.HabitTypeFitness,
-		State:     habitState,
-		Automated: true})
-	return err
+		_, err = a.HabitUpsert(ctx, core.UpsertHabitParams{
+			Date:      d,
+			Type:      core.HabitTypeFitness,
+			State:     habitState,
+			Automated: true})
+		return err
+	*/
+	return nil
 }
 
+/*
 func (a *App) fitnessLogsFromGoogle(d core.Date) (res []*models.FitnessLogSetter, err error) {
 	googleClient, err := a.googleClient()
 	if err != nil {
@@ -81,3 +81,4 @@ func fitnessLogFromGoogle(day core.Day, session google.Session) (*models.Fitness
 	}
 	return setter, nil
 }
+*/

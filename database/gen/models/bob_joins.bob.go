@@ -32,11 +32,8 @@ func (j joinSet[Q]) AliasedAs(alias string) joinSet[Q] {
 
 type joins[Q dialect.Joinable] struct {
 	Days            joinSet[dayJoins[Q]]
-	DeepWorkLogs    joinSet[deepWorkLogJoins[Q]]
-	FitnessLogs     joinSet[fitnessLogJoins[Q]]
 	Habits          joinSet[habitJoins[Q]]
 	HabitCategories joinSet[habitCategoryJoins[Q]]
-	SleepLogs       joinSet[sleepLogJoins[Q]]
 }
 
 func buildJoinSet[Q interface{ aliasedAs(string) Q }, C any, F func(C, string) Q](c C, f F) joinSet[Q] {
@@ -50,11 +47,8 @@ func buildJoinSet[Q interface{ aliasedAs(string) Q }, C any, F func(C, string) Q
 func getJoins[Q dialect.Joinable]() joins[Q] {
 	return joins[Q]{
 		Days:            buildJoinSet[dayJoins[Q]](Days.Columns, buildDayJoins),
-		DeepWorkLogs:    buildJoinSet[deepWorkLogJoins[Q]](DeepWorkLogs.Columns, buildDeepWorkLogJoins),
-		FitnessLogs:     buildJoinSet[fitnessLogJoins[Q]](FitnessLogs.Columns, buildFitnessLogJoins),
 		Habits:          buildJoinSet[habitJoins[Q]](Habits.Columns, buildHabitJoins),
 		HabitCategories: buildJoinSet[habitCategoryJoins[Q]](HabitCategories.Columns, buildHabitCategoryJoins),
-		SleepLogs:       buildJoinSet[sleepLogJoins[Q]](SleepLogs.Columns, buildSleepLogJoins),
 	}
 }
 

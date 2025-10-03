@@ -2,50 +2,47 @@ package application
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
-	"time"
-
-	"github.com/aarondl/opt/omit"
-	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/core"
-	"github.com/danielcosme/curious-ape/pkg/integrations/fitbit"
 	"github.com/danielcosme/curious-ape/pkg/oak"
 )
 
 func (a *App) sleepSync(ctx context.Context, d core.Date) error {
 	logger := oak.FromContext(ctx)
+	logger.Notice("Sleep Sync not implemented")
 
-	sls, err := a.sleepLogsGetFromFitbit(d)
-	if err != nil {
-		return err
-	}
-	for _, setter := range sls {
-		sl, err := a.db.Sleep.Upsert(setter)
+	/*
+		sls, err := a.sleepLogsGetFromFitbit(d)
 		if err != nil {
 			return err
 		}
-		dur := fitbit.ToDuration(int(sl.MinutesAsleep))
-		logger.Info("Sleep log added", "date", sl.Date, "duration", dur.String())
-		if sl.IsMainSleep {
-			habitState := core.HabitStateNotDone
-			wakeUpTime := time.Date(sl.EndTime.Year(), sl.EndTime.Month(), sl.EndTime.Day(), 6, 0, 0, 0, sl.EndTime.Location())
-			if sl.EndTime.Before(wakeUpTime) {
-				habitState = core.HabitStateDone
-			}
-			_, err := a.HabitUpsert(ctx, core.UpsertHabitParams{
-				Date:      d,
-				Type:      core.HabitTypeWakeUp,
-				State:     habitState,
-				Automated: true})
+		for _, setter := range sls {
+			sl, err := a.db.Sleep.Upsert(setter)
 			if err != nil {
 				return err
 			}
+			dur := fitbit.ToDuration(int(sl.MinutesAsleep))
+			logger.Info("Sleep log added", "date", sl.Date, "duration", dur.String())
+			if sl.IsMainSleep {
+				habitState := core.HabitStateNotDone
+				wakeUpTime := time.Date(sl.EndTime.Year(), sl.EndTime.Month(), sl.EndTime.Day(), 6, 0, 0, 0, sl.EndTime.Location())
+				if sl.EndTime.Before(wakeUpTime) {
+					habitState = core.HabitStateDone
+				}
+				_, err := a.HabitUpsert(ctx, core.UpsertHabitParams{
+					Date:      d,
+					Type:      core.HabitTypeWakeUp,
+					State:     habitState,
+					Automated: true})
+				if err != nil {
+					return err
+				}
+			}
 		}
-	}
+	*/
 	return nil
 }
 
+/*
 func (a *App) sleepLogsGetFromFitbit(dates ...core.Date) (res []*models.SleepLogSetter, err error) {
 	fitbitClient, err := a.fitbitClient()
 	if err != nil {
@@ -91,3 +88,4 @@ func sleepLogFromFitbit(day core.Day, s fitbit.Sleep) (*models.SleepLogSetter, e
 	}
 	return sleepLog, nil
 }
+*/

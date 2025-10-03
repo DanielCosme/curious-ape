@@ -40,7 +40,7 @@ func Day(day core.Day) ElementRenderer {
 	sync := fmt.Sprintf("@post('/day/sync?%s')", q.Encode())
 	return DIV(
 		SPAN().Text(day.Date.Time().Format(core.HumanDate)),
-		SPAN().Text(" example note "),
+		SPAN().Text(""),
 		habitSpot(day.Habits.Sleep),
 		habitSpot(day.Habits.Fitness),
 		habitSpot(day.Habits.DeepWork),
@@ -62,8 +62,9 @@ func habitSpot(habit core.Habit) ElementRenderer {
 	q.Add("id", strconv.Itoa(int(habit.ID)))
 	flipAction := fmt.Sprintf("@put('/habit/flip?%s')", q.Encode())
 	return SPAN(
+		STYLE().Text("span:hover { background-color: yellow; color: blue; cursor: pointer }"),
 		STRONG().Text(state),
-	).DATASTAR_ON("click", flipAction)
+	).DATASTAR_ON("click", flipAction).STYLE("padding", "0 10px")
 }
 
 func layout(s *State, children ...ElementRenderer) ElementRenderer {
@@ -82,11 +83,11 @@ func layout(s *State, children ...ElementRenderer) ElementRenderer {
 				),
 				NAV(
 					a("/", "Home"),
-					a("/integrations", "Integrations"),
+					// a("/integrations", "Integrations"),
 				),
 				MAIN(children...),
 				FOOTER(
-					P().Text("version-dev"),
+					P().Text(s.Version),
 				),
 			),
 		),

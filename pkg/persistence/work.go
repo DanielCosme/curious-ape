@@ -1,18 +1,20 @@
 package persistence
 
 import (
-	"context"
-	"github.com/danielcosme/curious-ape/database/gen/dberrors"
-	"github.com/danielcosme/curious-ape/database/gen/models"
-	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/stephenafamo/bob"
-	"github.com/stephenafamo/bob/dialect/sqlite"
-)
+	/*
+		"context"
+		"github.com/danielcosme/curious-ape/database/gen/dberrors"
+		"github.com/danielcosme/curious-ape/database/gen/models"
+		"github.com/danielcosme/curious-ape/pkg/core"
+		"github.com/stephenafamo/bob/dialect/sqlite"
+	*/)
 
 type DeepWorkLogs struct {
 	db bob.DB
 }
 
+/*
 func (dw *DeepWorkLogs) Upsert(s *models.DeepWorkLogSetter) (log *models.DeepWorkLog, err error) {
 	workLog, err := models.DeepWorkLogs.Insert(s).One(context.Background(), dw.db)
 	if err == nil {
@@ -63,3 +65,4 @@ func (f DeepWorkLogParams) BuildQuery() *sqlite.ViewQuery[*models.DeepWorkLog, m
 	}
 	return q
 }
+*/

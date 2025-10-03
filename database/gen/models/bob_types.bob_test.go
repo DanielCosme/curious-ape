@@ -11,12 +11,6 @@ var testDB bob.Transactor[bob.Tx]
 // Make sure the type Day runs hooks after queries
 var _ bob.HookableType = &Day{}
 
-// Make sure the type DeepWorkLog runs hooks after queries
-var _ bob.HookableType = &DeepWorkLog{}
-
-// Make sure the type FitnessLog runs hooks after queries
-var _ bob.HookableType = &FitnessLog{}
-
 // Make sure the type Habit runs hooks after queries
 var _ bob.HookableType = &Habit{}
 
@@ -25,9 +19,6 @@ var _ bob.HookableType = &HabitCategory{}
 
 // Make sure the type OauthToken runs hooks after queries
 var _ bob.HookableType = &OauthToken{}
-
-// Make sure the type SleepLog runs hooks after queries
-var _ bob.HookableType = &SleepLog{}
 
 // Make sure the type User runs hooks after queries
 var _ bob.HookableType = &User{}

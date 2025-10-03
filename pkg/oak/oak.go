@@ -23,7 +23,7 @@ func New(backend slog.Handler) *Oak {
 }
 
 func (o *Oak) Trace(msg string, args ...any) {
-	o.logger.Log(context.TODO(), LevelTrace, msg, args...)
+	o.logger.Log(context.TODO(), LevelTrace, msg, o.attrs(args)...)
 }
 
 func (o *Oak) Debug(msg string, args ...any) {
@@ -35,11 +35,11 @@ func (o *Oak) Info(msg string, args ...any) {
 }
 
 func (o *Oak) Notice(msg string, args ...any) {
-	o.logger.Log(context.TODO(), LevelNotice, msg, args...)
+	o.logger.Log(context.TODO(), LevelNotice, msg, o.attrs(args)...)
 }
 
 func (o *Oak) Warning(msg string, args ...any) {
-	o.logger.Log(context.TODO(), LevelWarning, msg, args...)
+	o.logger.Log(context.TODO(), LevelWarning, msg, o.attrs(args)...)
 }
 
 func (o *Oak) Error(msg string, args ...any) {
@@ -47,7 +47,7 @@ func (o *Oak) Error(msg string, args ...any) {
 }
 
 func (o *Oak) Fatal(msg string, args ...any) {
-	o.logger.Log(context.TODO(), LevelFatal, msg, args...)
+	o.logger.Log(context.TODO(), LevelFatal, msg, o.attrs(args)...)
 }
 
 func (o *Oak) Layer(l string) *Oak {

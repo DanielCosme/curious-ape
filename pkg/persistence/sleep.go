@@ -1,18 +1,20 @@
 package persistence
 
 import (
-	"context"
-	"github.com/danielcosme/curious-ape/database/gen/dberrors"
-	"github.com/danielcosme/curious-ape/database/gen/models"
-	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/stephenafamo/bob"
-	"github.com/stephenafamo/bob/dialect/sqlite"
-)
+	/*
+		"context"
+		"github.com/danielcosme/curious-ape/database/gen/dberrors"
+		"github.com/danielcosme/curious-ape/database/gen/models"
+		"github.com/danielcosme/curious-ape/pkg/core"
+		"github.com/stephenafamo/bob/dialect/sqlite"
+	*/)
 
 type SleepLogs struct {
 	db bob.DB
 }
 
+/*
 func (fls *SleepLogs) Upsert(s *models.SleepLogSetter) (*models.SleepLog, error) {
 	sleepLog, err := models.SleepLogs.Insert(s).One(context.Background(), fls.db)
 	if err == nil {
@@ -68,3 +70,4 @@ func (f SleepLogParams) BuildQuery() *sqlite.ViewQuery[*models.SleepLog, models.
 	}
 	return q
 }
+*/
