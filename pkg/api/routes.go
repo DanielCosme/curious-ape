@@ -28,6 +28,7 @@ func Routes(a *API) http.Handler {
 		DELETE(a.Logout)
 
 	d.Endpoint("/api/oauth2/fitbit/success").GET(a.FitbitSuccess)
+	d.Endpoint("/api/oauth2/google/success").GET(a.GoogleSuccess)
 
 	d.Use(a.MiddlewareRequireAuthentication)
 
@@ -43,6 +44,11 @@ func Routes(a *API) http.Handler {
 func (a *API) FitbitSuccess(c *dove.Context) error {
 	c.ParseForm()
 	return a.App.Oauth2Success("fitbit", c.Req.FormValue("code"))
+}
+
+func (a *API) GoogleSuccess(c *dove.Context) error {
+	c.ParseForm()
+	return a.App.Oauth2Success("google", c.Req.FormValue("code"))
 }
 
 func (a *API) IntegrationsGet(c *dove.Context) error {

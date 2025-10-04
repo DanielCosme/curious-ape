@@ -10,6 +10,7 @@ import (
 	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/integrations/fitbit"
+	"github.com/danielcosme/curious-ape/pkg/integrations/google"
 	"github.com/danielcosme/curious-ape/pkg/persistence"
 	"golang.org/x/oauth2"
 
@@ -60,13 +61,16 @@ func (a *App) IntegrationGet(ctx context.Context, provider core.Integration) (In
 
 	switch provider {
 	case core.IntegrationGoogle:
-		// _, err := a.fitnessLogsFromGoogle(today)
-		// if err != nil {
-		// 	authURL = a.sync.GenerateOauth2URI(provider)
-		// 	problem = err.Error()
-		// } else {
-		// 	isConnected = true
-		// }
+		_, err := a.fitnessLogsFromGoogle(today)
+		if err != nil {
+			authURL = a.sync.GenerateOauth2URI(provider)
+			if authURL != "" {
+				status = IntegrationStatusDicsonnected
+			}
+			info = append(info, err.Error())
+		} else {
+			status = IntegrationStatusConnected
+		}
 		res = IntegrationInfo{
 			Name:    "Google",
 			Info:    info,
@@ -153,11 +157,11 @@ func (a *App) fitbitClient() (res fitbit.API, err error) {
 	return
 }
 
-// func (a *App) googleClient() (res google.API, err error) {
-// 	client, err := a.integrationsGetHttpClient(core.IntegrationGoogle)
-// 	res = google.NewAPI(client)
-// 	return
-// }
+func (a *App) googleClient() (res google.API, err error) {
+	client, err := a.integrationsGetHttpClient(core.IntegrationGoogle)
+	res = google.NewAPI(client)
+	return
+}
 
 func (a *App) integrationsGetHttpClient(integration core.Integration) (*http.Client, error) {
 	o, err := a.db.Auths.Get(persistence.AuthParams{Provider: integration})

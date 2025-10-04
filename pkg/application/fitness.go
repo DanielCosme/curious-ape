@@ -2,7 +2,9 @@ package application
 
 import (
 	"context"
+
 	"github.com/danielcosme/curious-ape/pkg/core"
+	"github.com/danielcosme/curious-ape/pkg/integrations/google"
 	"github.com/danielcosme/curious-ape/pkg/oak"
 )
 
@@ -38,8 +40,7 @@ func (a *App) fitnessSync(ctx context.Context, d core.Date) error {
 	return nil
 }
 
-/*
-func (a *App) fitnessLogsFromGoogle(d core.Date) (res []*models.FitnessLogSetter, err error) {
+func (a *App) fitnessLogsFromGoogle(d core.Date) (res []core.FitnessLog, err error) {
 	googleClient, err := a.googleClient()
 	if err != nil {
 		return
@@ -63,22 +64,22 @@ func (a *App) fitnessLogsFromGoogle(d core.Date) (res []*models.FitnessLogSetter
 	return
 }
 
-func fitnessLogFromGoogle(day core.Day, session google.Session) (*models.FitnessLogSetter, error) {
-	raw, err := json.Marshal(&session)
-	if err != nil {
-		return nil, err
-	}
-	setter := &models.FitnessLogSetter{
-		DayID:     omit.From(int64(day.ID)),
-		Type:      omit.From("strong"),
-		Title:     omit.From(session.Name),
-		Date:      omit.From(day.Date.Time()),
-		StartTime: omit.From(google.ParseMillis(session.StartTimeMillis)),
-		EndTime:   omit.From(google.ParseMillis(session.EndTimeMillis)),
-		Origin:    omit.From(core.OriginLogGoogle),
-		Note:      omit.From(session.Application.PackageName),
-		Raw:       omit.From(string(raw)),
-	}
-	return setter, nil
+func fitnessLogFromGoogle(day core.Day, session google.FitnessSession) (fl core.FitnessLog, err error) {
+	// raw, err := json.Marshal(&session)
+	// if err != nil {
+	// 	return
+	// }
+
+	// setter := &models.FitnessLogSetter{
+	// 	DayID:     omit.From(int64(day.ID)),
+	// 	Type:      omit.From("strong"),
+	// 	Title:     omit.From(session.Name),
+	// 	Date:      omit.From(day.Date.Time()),
+	// 	StartTime: omit.From(google.ParseMillis(session.StartTimeMillis)),
+	// 	EndTime:   omit.From(google.ParseMillis(session.EndTimeMillis)),
+	// 	Origin:    omit.From(core.OriginLogGoogle),
+	// 	Note:      omit.From(session.Application.PackageName),
+	// 	Raw:       omit.From(string(raw)),
+	// }
+	return
 }
-*/

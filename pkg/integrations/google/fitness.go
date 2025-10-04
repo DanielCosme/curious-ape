@@ -12,10 +12,10 @@ type FitnessService struct {
 }
 
 type SessionsEnvelope struct {
-	Session        []Session `json:"session,omitempty"`
-	DeletedSession []Session `json:"deletedSession,omitempty"`
-	NextPageToken  string    `json:"nextPageToken,omitempty"`
-	HasMoreData    bool      `json:"hasMoreData,omitempty"`
+	Session        []FitnessSession `json:"session,omitempty"`
+	DeletedSession []FitnessSession `json:"deletedSession,omitempty"`
+	NextPageToken  string           `json:"nextPageToken,omitempty"`
+	HasMoreData    bool             `json:"hasMoreData,omitempty"`
 }
 type Application struct {
 	PackageName string `json:"packageName,omitempty"`
@@ -23,7 +23,7 @@ type Application struct {
 	DetailsURL  string `json:"detailsUrl,omitempty"`
 	Name        string `json:"name,omitempty"`
 }
-type Session struct {
+type FitnessSession struct {
 	ID                 string      `json:"id,omitempty"`
 	Name               string      `json:"name,omitempty"`
 	Description        string      `json:"description,omitempty"`
@@ -35,7 +35,7 @@ type Session struct {
 	Application        Application `json:"application,omitempty"`
 }
 
-func (s *FitnessService) GetFitnessSessions(startTime, endTime time.Time) ([]Session, error) {
+func (s *FitnessService) GetFitnessSessions(startTime, endTime time.Time) ([]FitnessSession, error) {
 	var se *SessionsEnvelope
 	params := url.Values{}
 	params.Set("startTime", formatTime(startTime))
