@@ -1,3 +1,5 @@
 package core
 
-type FitnessLog struct{}
+type FitnessLog struct {
+	TimelineLog
+}

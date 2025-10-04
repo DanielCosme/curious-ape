@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/integrations/fitbit"
@@ -11,37 +12,35 @@ import (
 
 func (a *App) sleepSync(ctx context.Context, d core.Date) error {
 	logger := oak.FromContext(ctx)
-	logger.Notice("Sleep Sync not implemented")
 
-	/*
-		sls, err := a.sleepLogsGetFromFitbit(d)
-		if err != nil {
-			return err
-		}
-		for _, setter := range sls {
-			sl, err := a.db.Sleep.Upsert(setter)
+	sls, err := a.sleepLogsGetFromFitbit(d)
+	if err != nil {
+		return err
+	}
+	for _, sl := range sls {
+		logger.Notice("no sleep log is going to be persisted")
+		// sl, err := a.db.Sleep.Upsert(setter)
+		// if err != nil {
+		// 	return err
+		// }
+		logger.Info("Sleep log added", "date", sl.Date, "duration", sl.TimeAsleep)
+		if sl.IsMainSleep {
+			habitState := core.HabitStateNotDone
+			wakeUpTime := time.Date(sl.EndTime.Year(), sl.EndTime.Month(), sl.EndTime.Day(), 6, 0, 0, 0, sl.EndTime.Location())
+			if sl.EndTime.Before(wakeUpTime) {
+				habitState = core.HabitStateDone
+			}
+			_, err := a.HabitUpsert(ctx, core.UpsertHabitParams{
+				Date:      d,
+				Type:      core.HabitTypeWakeUp,
+				State:     habitState,
+				Note:      sl.EndTime.Format(core.Time),
+				Automated: true})
 			if err != nil {
 				return err
 			}
-			dur := fitbit.ToDuration(int(sl.MinutesAsleep))
-			logger.Info("Sleep log added", "date", sl.Date, "duration", dur.String())
-			if sl.IsMainSleep {
-				habitState := core.HabitStateNotDone
-				wakeUpTime := time.Date(sl.EndTime.Year(), sl.EndTime.Month(), sl.EndTime.Day(), 6, 0, 0, 0, sl.EndTime.Location())
-				if sl.EndTime.Before(wakeUpTime) {
-					habitState = core.HabitStateDone
-				}
-				_, err := a.HabitUpsert(ctx, core.UpsertHabitParams{
-					Date:      d,
-					Type:      core.HabitTypeWakeUp,
-					State:     habitState,
-					Automated: true})
-				if err != nil {
-					return err
-				}
-			}
 		}
-	*/
+	}
 	return nil
 }
 
