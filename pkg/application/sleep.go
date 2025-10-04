@@ -2,7 +2,10 @@ package application
 
 import (
 	"context"
+	"errors"
+
 	"github.com/danielcosme/curious-ape/pkg/core"
+	"github.com/danielcosme/curious-ape/pkg/integrations/fitbit"
 	"github.com/danielcosme/curious-ape/pkg/oak"
 )
 
@@ -42,8 +45,7 @@ func (a *App) sleepSync(ctx context.Context, d core.Date) error {
 	return nil
 }
 
-/*
-func (a *App) sleepLogsGetFromFitbit(dates ...core.Date) (res []*models.SleepLogSetter, err error) {
+func (a *App) sleepLogsGetFromFitbit(dates ...core.Date) (res []core.SleepLog, err error) {
 	fitbitClient, err := a.fitbitClient()
 	if err != nil {
 		return
@@ -68,24 +70,33 @@ func (a *App) sleepLogsGetFromFitbit(dates ...core.Date) (res []*models.SleepLog
 	return
 }
 
-func sleepLogFromFitbit(day core.Day, s fitbit.Sleep) (*models.SleepLogSetter, error) {
+func sleepLogFromFitbit(day core.Day, s fitbit.Sleep) (sl core.SleepLog, err error) {
 	if !day.Date.IsEqual(fitbit.ParseDate(s.DateOfSleep)) {
-		return nil, errors.New("sleep log from fitbit: dates do not match with current day")
+		return sl, errors.New("sleep log from fitbit: dates do not match with current day")
 	}
-	raw, err := json.Marshal(&s)
-	if err != nil {
-		return nil, err
+	/*
+		raw, err := json.Marshal(&s)
+		if err != nil {
+			return nil, err
+		}
+	*/
+
+	title := "Nap"
+	if s.IsMainSleep {
+		title = "Main sleep"
 	}
-	sleepLog := &models.SleepLogSetter{
-		DayID:         omit.From(int64(day.ID)),
-		Date:          omit.From(day.Date.Time()),
-		StartTime:     omit.From(fitbit.ParseTime(s.StartTime)),
-		EndTime:       omit.From(fitbit.ParseTime(s.EndTime)),
-		IsMainSleep:   omit.From(s.IsMainSleep),
-		MinutesAsleep: omit.From(int64(fitbit.ToDuration(s.MinutesAsleep).Minutes())),
-		Origin:        omit.From(core.OriginLogFitbit),
-		Raw:           omit.From(string(raw)),
+	sl = core.SleepLog{
+		Date:        day.Date,
+		IsMainSleep: s.IsMainSleep,
+		TimeAsleep:  fitbit.ToDuration(s.MinutesAsleep),
+		TimeInBed:   fitbit.ToDuration(s.TimeInBed),
+		TimelineLog: core.TimelineLog{
+			Title:     title,
+			StartTime: fitbit.ParseTime(s.StartTime),
+			EndTime:   fitbit.ParseTime(s.EndTime),
+			Type:      core.TimelineTypeSleep,
+			Note:      "From: " + core.OriginLogFitbit,
+		},
 	}
-	return sleepLog, nil
+	return sl, nil
 }
-*/

@@ -3,11 +3,15 @@ package application
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/aarondl/opt/omit"
 	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/core"
+	"github.com/danielcosme/curious-ape/pkg/integrations/fitbit"
+	"github.com/danielcosme/curious-ape/pkg/persistence"
+	"golang.org/x/oauth2"
 
 	/*
 		"net/http"
@@ -23,7 +27,7 @@ type IntegrationStatus string
 
 const IntegrationStatusConnected IntegrationStatus = "connected"
 const IntegrationStatusUnkown IntegrationStatus = "unknown"
-const IntegrationStatusDicsonnedted IntegrationStatus = "disconnected"
+const IntegrationStatusDicsonnected IntegrationStatus = "disconnected"
 const IntegrationStatusNotImplemented IntegrationStatus = "not-implemented"
 
 type IntegrationInfo struct {
@@ -51,7 +55,7 @@ func (a *App) IntegrationGet(ctx context.Context, provider core.Integration) (In
 	var res IntegrationInfo
 	var info []string
 	var authURL string
-	// today := core.NewDateToday()
+	today := core.NewDateToday()
 	status := IntegrationStatusNotImplemented
 
 	switch provider {
@@ -70,18 +74,19 @@ func (a *App) IntegrationGet(ctx context.Context, provider core.Integration) (In
 			Status:  status,
 		}
 	case core.IntegrationFitbit:
-		// sls, err := a.sleepLogsGetFromFitbit(today)
-		// if err != nil {
-		// 	authURL = a.sync.GenerateOauth2URI(provider)
-		// 	problem = err.Error()
-		// } else {
-		// 	isConnected = true
-		// 	if len(sls) > 0 {
-		// 		minutes := sls[0].MinutesAsleep
-		// 		dur := time.Duration(minutes.MustGet()) * time.Minute
-		// 		info = append(info, fmt.Sprintf("Total time asleep last night: %s", dur.String()))
-		// 	}
-		// }
+		sls, err := a.sleepLogsGetFromFitbit(today)
+		if err != nil {
+			authURL = a.sync.GenerateOauth2URI(provider)
+			if authURL != "" {
+				status = IntegrationStatusDicsonnected
+			}
+			info = append(info, err.Error())
+		} else {
+			status = IntegrationStatusConnected
+			if len(sls) > 0 {
+				info = append(info, fmt.Sprintf("Total time asleep last night: %s", sls[0].TimeAsleep.String()))
+			}
+		}
 		res = IntegrationInfo{
 			Name:    "Fitbit",
 			Info:    info,
@@ -142,18 +147,17 @@ func (a *App) Oauth2Success(provider, code string) error {
 	return err
 }
 
-/*
 func (a *App) fitbitClient() (res fitbit.API, err error) {
 	client, err := a.integrationsGetHttpClient(core.IntegrationFitbit)
 	res = fitbit.NewAPI(client)
 	return
 }
 
-func (a *App) googleClient() (res google.API, err error) {
-	client, err := a.integrationsGetHttpClient(core.IntegrationGoogle)
-	res = google.NewAPI(client)
-	return
-}
+// func (a *App) googleClient() (res google.API, err error) {
+// 	client, err := a.integrationsGetHttpClient(core.IntegrationGoogle)
+// 	res = google.NewAPI(client)
+// 	return
+// }
 
 func (a *App) integrationsGetHttpClient(integration core.Integration) (*http.Client, error) {
 	o, err := a.db.Auths.Get(persistence.AuthParams{Provider: integration})
@@ -178,4 +182,3 @@ func (a *App) integrationsGetHttpClient(integration core.Integration) (*http.Cli
 		return err
 	})
 }
-*/

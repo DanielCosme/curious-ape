@@ -20,6 +20,7 @@ type preloaders struct {
 	Day           dayPreloader
 	Habit         habitPreloader
 	HabitCategory habitCategoryPreloader
+	SleepLog      sleepLogPreloader
 }
 
 func getPreloaders() preloaders {
@@ -27,6 +28,7 @@ func getPreloaders() preloaders {
 		Day:           buildDayPreloader(),
 		Habit:         buildHabitPreloader(),
 		HabitCategory: buildHabitCategoryPreloader(),
+		SleepLog:      buildSleepLogPreloader(),
 	}
 }
 
@@ -40,6 +42,7 @@ type thenLoaders[Q orm.Loadable] struct {
 	Day           dayThenLoader[Q]
 	Habit         habitThenLoader[Q]
 	HabitCategory habitCategoryThenLoader[Q]
+	SleepLog      sleepLogThenLoader[Q]
 }
 
 func getThenLoaders[Q orm.Loadable]() thenLoaders[Q] {
@@ -47,6 +50,7 @@ func getThenLoaders[Q orm.Loadable]() thenLoaders[Q] {
 		Day:           buildDayThenLoader[Q](),
 		Habit:         buildHabitThenLoader[Q](),
 		HabitCategory: buildHabitCategoryThenLoader[Q](),
+		SleepLog:      buildSleepLogThenLoader[Q](),
 	}
 }
 

@@ -27,6 +27,8 @@ func Routes(a *API) http.Handler {
 		POST(a.Login).
 		DELETE(a.Logout)
 
+	d.Endpoint("/api/oauth2/fitbit/success").GET(a.FitbitSuccess)
+
 	d.Use(a.MiddlewareRequireAuthentication)
 
 	d.Endpoint("/").GET(a.Home)
@@ -38,9 +40,14 @@ func Routes(a *API) http.Handler {
 	return d
 }
 
+func (a *API) FitbitSuccess(c *dove.Context) error {
+	c.ParseForm()
+	return a.App.Oauth2Success("fitbit", c.Req.FormValue("code"))
+}
+
 func (a *API) IntegrationsGet(c *dove.Context) error {
 	c.ParseForm()
-	provider := c.Req.Form.Get("integration_name")
+	provider := c.Req.Form.Get("name")
 	integrationInfo, err := a.App.IntegrationGet(c.Ctx(), core.Integration(provider))
 	if err != nil {
 		return err

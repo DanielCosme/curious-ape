@@ -34,6 +34,7 @@ type joins[Q dialect.Joinable] struct {
 	Days            joinSet[dayJoins[Q]]
 	Habits          joinSet[habitJoins[Q]]
 	HabitCategories joinSet[habitCategoryJoins[Q]]
+	SleepLogs       joinSet[sleepLogJoins[Q]]
 }
 
 func buildJoinSet[Q interface{ aliasedAs(string) Q }, C any, F func(C, string) Q](c C, f F) joinSet[Q] {
@@ -49,6 +50,7 @@ func getJoins[Q dialect.Joinable]() joins[Q] {
 		Days:            buildJoinSet[dayJoins[Q]](Days.Columns, buildDayJoins),
 		Habits:          buildJoinSet[habitJoins[Q]](Habits.Columns, buildHabitJoins),
 		HabitCategories: buildJoinSet[habitCategoryJoins[Q]](HabitCategories.Columns, buildHabitCategoryJoins),
+		SleepLogs:       buildJoinSet[sleepLogJoins[Q]](SleepLogs.Columns, buildSleepLogJoins),
 	}
 }
 

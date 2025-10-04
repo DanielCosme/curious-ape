@@ -19,11 +19,11 @@ const (
 	AuthRoleGuest AuthRole = "guest"
 )
 
-type OriginLog string
+type LogOrigin string
 
 const (
-	OriginLogManual OriginLog = "manual"
-	OriginLogWebUI  OriginLog = "web_ui"
+	OriginLogManual LogOrigin = "manual"
+	OriginLogWebUI  LogOrigin = "web_ui"
 	OriginLogFitbit           = IntegrationFitbit
 	OriginLogToggl            = IntegrationToggl
 	OriginLogGoogle           = IntegrationGoogle

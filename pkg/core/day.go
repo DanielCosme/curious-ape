@@ -44,4 +44,3 @@ func DayRelationsAll() []DayRelations {
 
 type FitnessLog struct{}
 type DeepWorkLog struct{}
-type SleepLog struct{}

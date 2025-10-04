@@ -54,8 +54,9 @@ func Integrations(s *State) ElementRenderer {
 func Integration(i application.IntegrationInfo) ElementRenderer {
 	integrationName := strings.ToLower(i.Name)
 	q := url.Values{}
-	q.Add("integration_name", integrationName)
+	q.Add("name", integrationName)
 	onLoad := fmt.Sprintf("@get('/integration?%s')", q.Encode())
+
 	return ARTICLE(
 		H3().Text(i.Name),
 		P().Text(fmt.Sprintf("Status: %s", i.Status)),
@@ -66,8 +67,10 @@ func Integration(i application.IntegrationInfo) ElementRenderer {
 				}),
 			),
 		),
-		If(i.Status == application.IntegrationStatusDicsonnedted && i.AuthURL != "",
-			BUTTON().Text("Authenticate"),
+		If(i.Status == application.IntegrationStatusDicsonnected && i.AuthURL != "",
+			A(
+				BUTTON().Text("Authenticate"),
+			).HREF(i.AuthURL).TARGET("_blank"),
 		),
 		// This component should do a GET requet to the server on load of the component of the dom.
 	).ID("itg-"+integrationName).DATASTAR_ON("load", onLoad)
