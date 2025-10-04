@@ -13,7 +13,7 @@ type Response struct {
 	Size        uint64
 	Commited    bool
 	beforeFuncs []func()
-	afterFuncs  []func()
+	// afterFuncs  []func()
 }
 
 func NewResponse(w http.ResponseWriter, l *oak.Oak) *Response {

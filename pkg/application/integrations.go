@@ -2,16 +2,18 @@ package application
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/aarondl/opt/omit"
 	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/core"
-	"github.com/danielcosme/curious-ape/pkg/integrations/fitbit"
-	"github.com/danielcosme/curious-ape/pkg/integrations/google"
+	/*
+		"net/http"
+		"github.com/danielcosme/curious-ape/pkg/integrations/fitbit"
+		"github.com/danielcosme/curious-ape/pkg/integrations/google"
+		"github.com/danielcosme/curious-ape/pkg/persistence"
+		"golang.org/x/oauth2"
+	*/
 	"github.com/danielcosme/curious-ape/pkg/oak"
-	"github.com/danielcosme/curious-ape/pkg/persistence"
-	"golang.org/x/oauth2"
 )
 
 type IntegrationInfo struct {
@@ -136,6 +138,7 @@ func (a *App) Oauth2Success(provider, code string) error {
 	return err
 }
 
+/*
 func (a *App) fitbitClient() (res fitbit.API, err error) {
 	client, err := a.integrationsGetHttpClient(core.IntegrationFitbit)
 	res = fitbit.NewAPI(client)
@@ -171,3 +174,4 @@ func (a *App) integrationsGetHttpClient(integration core.Integration) (*http.Cli
 		return err
 	})
 }
+*/

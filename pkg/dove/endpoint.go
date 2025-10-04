@@ -50,7 +50,7 @@ func (e *endpoint) PATCH(fn HandlerFunc) *endpoint {
 func (e *endpoint) DELETE(fn HandlerFunc) *endpoint {
 	if fn != nil {
 		fn = e.addMiddleware(fn)
-		e.Handlers[http.MethodPatch] = fn
+		e.Handlers[http.MethodDelete] = fn
 	}
 	return e
 }

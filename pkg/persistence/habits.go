@@ -87,17 +87,17 @@ func habitToCore(h *models.Habit) (habit core.Habit) {
 	return
 }
 
-func habitCategoryToCore(hc *models.HabitCategory) (c core.HabitCategory) {
-	if hc == nil {
-		slog.Error("habitCategoryToCore habit category is nil")
-		return
-	}
-	c.ID = uint(hc.ID)
-	c.Name = hc.Name
-	c.Kind = core.HabitType(hc.Kind)
-	c.Description = hc.Description
-	return
-}
+// func habitCategoryToCore(hc *models.HabitCategory) (c core.HabitCategory) {
+// 	if hc == nil {
+// 		slog.Error("habitCategoryToCore habit category is nil")
+// 		return
+// 	}
+// 	c.ID = uint(hc.ID)
+// 	c.Name = hc.Name
+// 	c.Kind = core.HabitType(hc.Kind)
+// 	c.Description = hc.Description
+// 	return
+// }
 
 func buildHabitQuery(f core.HabitParams) *sqlite.ViewQuery[*models.Habit, models.HabitSlice] {
 	q := models.Habits.Query()

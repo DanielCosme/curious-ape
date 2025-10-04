@@ -24,7 +24,8 @@ func Routes(a *API) http.Handler {
 
 	d.Endpoint("/login").
 		GET(a.GetLoginForm).
-		POST(a.Login)
+		POST(a.Login).
+		DELETE(a.Logout)
 
 	d.Use(a.MiddlewareRequireAuthentication)
 
@@ -107,7 +108,7 @@ func (a *API) Logout(c *dove.Context) error {
 		return err
 	}
 	a.Scs.Remove(c.Ctx(), string(ctxKeyAuthenticatedUserID))
-	return nil
+	return c.Redirect("/login")
 }
 
 func State(a *API, r *http.Request) *views.State {

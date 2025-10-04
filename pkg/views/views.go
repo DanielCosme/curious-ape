@@ -104,9 +104,12 @@ func layout(s *State, children ...ElementRenderer) ElementRenderer {
 				NAV().IfChildren(
 					s.Authenticated,
 					a("/", "Home")),
-				MAIN(children...),
+				MAIN(children...).IfChildren(
+					s.Authenticated,
+					BUTTON().Text("Logout").DATASTAR_ON("click", "@delete('/login')"),
+				),
 				FOOTER(
-					P().Text("Version "+s.Version)),
+					P().Text(s.Version)),
 			),
 		),
 	)

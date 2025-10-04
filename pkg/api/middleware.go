@@ -52,11 +52,9 @@ func (a *API) MiddlewareAuthenticateFromSession(next dove.HandlerFunc) dove.Hand
 			return err
 		}
 		logger.Debug("authenticated from session", "username", usr.Username)
-		if usr != nil {
-			ctx := context.WithValue(c.Ctx(), ctxKeyIsAuthenticated, true)
-			ctx = context.WithValue(ctx, ctxUser, usr)
-			c.Req = c.Req.WithContext(ctx)
-		}
+		ctx := context.WithValue(c.Ctx(), ctxKeyIsAuthenticated, true)
+		ctx = context.WithValue(ctx, ctxUser, usr)
+		c.Req = c.Req.WithContext(ctx)
 		return next(c)
 	}
 }
