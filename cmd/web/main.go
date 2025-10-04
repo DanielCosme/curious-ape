@@ -18,6 +18,8 @@ import (
 	"github.com/danielcosme/curious-ape/pkg/oak"
 	"github.com/danielcosme/curious-ape/pkg/persistence"
 
+	"github.com/alexedwards/scs/sqlite3store"
+	"github.com/alexedwards/scs/v2"
 	"github.com/danielcosme/curious-ape/pkg/api"
 	_ "modernc.org/sqlite"
 )
@@ -65,6 +67,12 @@ func main() {
 	err = db.Ping()
 	exitIfErr(err)
 
+	sessionManager := scs.New()
+	sessionManager.Store = sqlite3store.New(db)
+	sessionManager.Lifetime = 48 * time.Hour
+	sessionManager.Cookie.SameSite = http.SameSiteStrictMode
+	sessionManager.Cookie.Name = "curious-ape-session"
+
 	app := application.New(&application.AppOptions{
 		Database: persistence.New(bob.NewDB(db)),
 		Config: &application.Config{
@@ -80,7 +88,7 @@ func main() {
 	err = app.SetPassword(cfg.Admin.UserName, cfg.Admin.Password, cfg.Admin.Email, core.AuthRoleAdmin)
 	exitIfErr(err)
 
-	t := api.NewApi(app, v)
+	t := api.NewApi(app, sessionManager, v)
 
 	addr := fmt.Sprintf(":%d", cfg.Port)
 	server := http.Server{

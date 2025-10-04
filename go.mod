@@ -4,6 +4,8 @@ go 1.25.1
 
 require (
 	github.com/aarondl/opt v0.0.0-20250607033636-982744e1bd65
+	github.com/alexedwards/scs/sqlite3store v0.0.0-20251002162104-209de6e426de
+	github.com/alexedwards/scs/v2 v2.9.0
 	github.com/delaneyj/gostar v0.8.0
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/lmittmann/tint v1.1.2

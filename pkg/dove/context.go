@@ -48,6 +48,12 @@ func (c *Context) HTML(body []byte) error {
 	return err
 }
 
+func (c *Context) Redirect(url string) error {
+	c.Res.Header().Set("Location", url)
+	c.Res.WriteHeader(http.StatusSeeOther)
+	return nil
+}
+
 func (c *Context) Render(status int, r Renderer) error {
 	c.Res.Header().Set("Content-Type", "text/html")
 	c.Res.WriteHeader(status)

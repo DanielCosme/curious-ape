@@ -19,6 +19,24 @@ func Home(s *State) ElementRenderer {
 	return bujoPage(s)
 }
 
+func Login(s *State) ElementRenderer {
+	return layout(s, Group(
+		H1().Text("Login"),
+		FORM(
+			DIV(
+				LABEL(
+					INPUT().TYPE("text").NAME("username").PLACEHOLDER(""),
+				).Text("Username")),
+			DIV(
+				LABEL(
+					INPUT().TYPE("text").NAME("password").PLACEHOLDER(""),
+				).Text("Password")),
+			BUTTON().Text("Login").
+				TYPE("submit").
+				DATASTAR_ON("click", "@post('/login', {contentType: 'form'})")),
+	))
+}
+
 func bujoPage(s *State) ElementRenderer {
 	return layout(s, days(s.Days))
 }
@@ -60,7 +78,7 @@ func habitSpot(habit core.Habit) ElementRenderer {
 
 	q := url.Values{}
 	q.Add("id", strconv.Itoa(int(habit.ID)))
-	flipAction := fmt.Sprintf("@put('/habit/flip?%s')", q.Encode())
+	flipAction := fmt.Sprintf("@put('/habit/flip?%s', {contentType: 'form'})", q.Encode())
 	return SPAN(
 		STYLE().Text("span:hover { background-color: yellow; color: blue; cursor: pointer }"),
 		STRONG().Text(state),
@@ -87,7 +105,7 @@ func layout(s *State, children ...ElementRenderer) ElementRenderer {
 				),
 				MAIN(children...),
 				FOOTER(
-					P().Text(s.Version),
+					P().Text("Version "+s.Version),
 				),
 			),
 		),

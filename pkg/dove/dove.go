@@ -25,6 +25,7 @@ func New(logHandler slog.Handler) *Dove {
 	d := &Dove{
 		// TODO: make log Level configurable
 		logHandler: logHandler,
+		logLevel:   oak.LevelTrace,
 		routes:     map[string]*endpoint{},
 	}
 	return d
@@ -36,6 +37,10 @@ func (d *Dove) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 	c.Log.Info(fmt.Sprintf("%s %s", c.Req.Method, c.Req.RequestURI))
 	defer func() {
+		if !c.Res.Commited {
+			c.Res.WriteHeader(http.StatusOK)
+		}
+
 		if queue, ok := c.Log.Handler().(*oak.QueuedHandler); ok {
 			queue.EndTrace()
 			msg := fmt.Sprintf("%d %s", c.Res.StatusCode, http.StatusText(c.Res.StatusCode))
@@ -67,6 +72,7 @@ func (d *Dove) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 	err := handler(c)
 	if err != nil {
+		// TODO: Improve global error handler.
 		c.Log.Error(err.Error())
 		c.Res.WriteHeader(http.StatusInternalServerError)
 	}

@@ -7,17 +7,23 @@ import (
 )
 
 type Response struct {
-	Writer     http.ResponseWriter
-	Logger     *oak.Oak
-	StatusCode int
-	Size       uint64
-	Commited   bool
+	Writer      http.ResponseWriter
+	Logger      *oak.Oak
+	StatusCode  int
+	Size        uint64
+	Commited    bool
+	beforeFuncs []func()
+	afterFuncs  []func()
 }
 
 func NewResponse(w http.ResponseWriter) *Response {
 	return &Response{
 		Writer: w,
 	}
+}
+
+func (r *Response) Before(fn func()) {
+	r.beforeFuncs = append(r.beforeFuncs, fn)
 }
 
 // Header returns the header map for the writer that will be sent by
@@ -40,6 +46,10 @@ func (r *Response) WriteHeader(statusCode int) {
 		return
 	}
 	r.StatusCode = statusCode
+	for _, fn := range r.beforeFuncs {
+		oak.Info("before func")
+		fn()
+	}
 	r.Writer.WriteHeader(r.StatusCode)
 	r.Commited = true
 }

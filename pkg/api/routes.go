@@ -1,12 +1,15 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/dove"
+	"github.com/danielcosme/curious-ape/pkg/oak"
+	"github.com/danielcosme/curious-ape/pkg/persistence"
 	"github.com/danielcosme/curious-ape/pkg/views"
 )
 
@@ -16,6 +19,14 @@ func Routes(a *API) http.Handler {
 	// e.StaticFS("/static", echo.MustSubFS(views.StaticFS, "static"))
 
 	d.Use(dove.MiddlewarePanicRecover)
+	d.Use(a.MiddlewareLoadCookie)
+	d.Use(a.MiddlewareAuthenticateFromSession)
+
+	d.Endpoint("/login").
+		GET(a.GetLoginForm).
+		POST(a.Login)
+
+	// d.Use(a.MiddlewareRequireAuthentication)
 
 	d.Endpoint("/").GET(a.Home)
 	d.Endpoint("/habit/flip").PUT(a.HabitFlip)
@@ -30,7 +41,8 @@ func (a *API) Home(c *dove.Context) error {
 		return err
 	}
 
-	s := &views.State{Days: days}
+	s := State(a)
+	s.Days = days
 	return c.RenderOK(views.Home(s))
 }
 
@@ -58,6 +70,45 @@ func (a *API) DaySync(c *dove.Context) error {
 	return c.RenderOK(views.Day(day))
 }
 
-func (a *API) State() views.State {
-	return views.State{}
+func (a *API) GetLoginForm(c *dove.Context) error {
+	return c.RenderOK(views.Login(State(a)))
+}
+
+func (a *API) Login(c *dove.Context) error {
+	logger := oak.FromContext(c.Ctx())
+
+	c.ParseForm()
+	username := c.Req.PostFormValue("username")
+	password := c.Req.PostFormValue("password")
+	id, err := a.App.Authenticate(username, password)
+	if err != nil {
+		if errors.Is(err, persistence.ErrInvalidCredentials) {
+			// TODO: send http.StatusUnauthorized
+			return err
+		} else {
+			// TODO: send http.InternalServerError
+			return err
+		}
+	}
+	err = a.Scs.RenewToken(c.Ctx())
+	if err != nil {
+		return err
+	}
+	logger.Info("User authenticated")
+	a.Scs.Put(c.Ctx(), string(ctxKeyAuthenticatedUserID), id)
+	return nil
+}
+
+func (a *API) Logout(c *dove.Context) error {
+	if err := a.Scs.RenewToken(c.Ctx()); err != nil {
+		return err
+	}
+	a.Scs.Remove(c.Ctx(), string(ctxKeyAuthenticatedUserID))
+	return nil
+}
+
+func State(a *API) *views.State {
+	return &views.State{
+		Version: a.Version,
+	}
 }
