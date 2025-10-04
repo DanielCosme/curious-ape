@@ -69,7 +69,7 @@ func main() {
 
 	sessionManager := scs.New()
 	sessionManager.Store = sqlite3store.New(db)
-	sessionManager.Lifetime = 48 * time.Hour
+	sessionManager.Lifetime = 24 * time.Hour * 7 // 7 days
 	sessionManager.Cookie.SameSite = http.SameSiteStrictMode
 	sessionManager.Cookie.Name = "curious-ape-session"
 

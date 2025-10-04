@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 
+	"github.com/danielcosme/curious-ape/pkg/application"
 	"github.com/danielcosme/curious-ape/pkg/core"
 
 	. "github.com/delaneyj/gostar/elements"
@@ -14,6 +16,7 @@ type State struct {
 	Version       string
 	Authenticated bool
 	Days          []core.Day
+	Integrations  []application.IntegrationInfo
 }
 
 func Home(s *State) ElementRenderer {
@@ -38,6 +41,36 @@ func Login(s *State) ElementRenderer {
 				TYPE("submit").
 				DATASTAR_ON("click", "@post('/login', {contentType: 'form'})")),
 	))
+}
+
+func Integrations(s *State) ElementRenderer {
+	return layout(s, DIV(
+		Range(s.Integrations, func(i application.IntegrationInfo) ElementRenderer {
+			return Integration(i)
+		}),
+	))
+}
+
+func Integration(i application.IntegrationInfo) ElementRenderer {
+	integrationName := strings.ToLower(i.Name)
+	q := url.Values{}
+	q.Add("integration_name", integrationName)
+	onLoad := fmt.Sprintf("@get('/integration?%s')", q.Encode())
+	return ARTICLE(
+		H3().Text(i.Name),
+		P().Text(fmt.Sprintf("Status: %s", i.Status)),
+		If(len(i.Info) > 0,
+			UL(
+				Range(i.Info, func(info string) ElementRenderer {
+					return LI().Text(info)
+				}),
+			),
+		),
+		If(i.Status == application.IntegrationStatusDicsonnedted && i.AuthURL != "",
+			BUTTON().Text("Authenticate"),
+		),
+		// This component should do a GET requet to the server on load of the component of the dom.
+	).ID("itg-"+integrationName).DATASTAR_ON("load", onLoad)
 }
 
 func bujoPage(s *State) ElementRenderer {
@@ -103,7 +136,10 @@ func layout(s *State, children ...ElementRenderer) ElementRenderer {
 					H1().Text("Curious Ape")),
 				NAV().IfChildren(
 					s.Authenticated,
-					a("/", "Home")),
+					a("/", "Home"),
+					a("/integrations", "Integrations"),
+					// TODO: Make pages loaded from nav be partially loaded, and not the full page.
+				),
 				MAIN(children...).IfChildren(
 					s.Authenticated,
 					BUTTON().Text("Logout").DATASTAR_ON("click", "@delete('/login')"),

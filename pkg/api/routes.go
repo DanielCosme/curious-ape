@@ -32,8 +32,30 @@ func Routes(a *API) http.Handler {
 	d.Endpoint("/").GET(a.Home)
 	d.Endpoint("/habit/flip").PUT(a.HabitFlip)
 	d.Endpoint("/day/sync").POST(a.DaySync)
+	d.Endpoint("/integration").GET(a.IntegrationsGet)
+	d.Endpoint("/integrations").GET(a.IntegrationsGetList)
 
 	return d
+}
+
+func (a *API) IntegrationsGet(c *dove.Context) error {
+	c.ParseForm()
+	provider := c.Req.Form.Get("integration_name")
+	integrationInfo, err := a.App.IntegrationGet(c.Ctx(), core.Integration(provider))
+	if err != nil {
+		return err
+	}
+	return c.RenderOK(views.Integration(integrationInfo))
+}
+
+func (a *API) IntegrationsGetList(c *dove.Context) error {
+	integrationInfo, err := a.App.IntegrationsGetList()
+	if err != nil {
+		return err
+	}
+	state := State(a, c.Req)
+	state.Integrations = integrationInfo
+	return c.RenderOK(views.Integrations(state))
 }
 
 func (a *API) Home(c *dove.Context) error {
