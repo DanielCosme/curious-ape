@@ -2,11 +2,9 @@
 
 set cur_dir (realpath (dirname (status --current-filename)))
 
-set -gx new_version (cat VERSION.txt); or exit
+set -gx new_version (t version --silent); or exit
 
-$cur_dir/build.sh $new_version; or exit 1
-
-# docker run curious-ape-ci; or exit 1
+t build-docker; or exit
 
 echo "$DOCKER_HUB_PASSWORD" | docker login -u $DOCKER_HUB_USER --password-stdin; or exit 1
 
