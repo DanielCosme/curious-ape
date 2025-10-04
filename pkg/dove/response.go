@@ -16,9 +16,10 @@ type Response struct {
 	afterFuncs  []func()
 }
 
-func NewResponse(w http.ResponseWriter) *Response {
+func NewResponse(w http.ResponseWriter, l *oak.Oak) *Response {
 	return &Response{
 		Writer: w,
+		Logger: l,
 	}
 }
 
@@ -47,7 +48,6 @@ func (r *Response) WriteHeader(statusCode int) {
 	}
 	r.StatusCode = statusCode
 	for _, fn := range r.beforeFuncs {
-		oak.Info("before func")
 		fn()
 	}
 	r.Writer.WriteHeader(r.StatusCode)

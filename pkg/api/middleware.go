@@ -63,11 +63,7 @@ func (a *API) MiddlewareAuthenticateFromSession(next dove.HandlerFunc) dove.Hand
 
 func (a *API) MiddlewareRequireAuthentication(next dove.HandlerFunc) dove.HandlerFunc {
 	return func(c *dove.Context) error {
-		isAuthenticated, ok := c.Ctx().Value(ctxKeyIsAuthenticated).(bool)
-		if !ok {
-			return c.Redirect("/login")
-		}
-		if !isAuthenticated {
+		if !a.IsAuthenticated(c.Req) {
 			return c.Redirect("/login")
 		}
 		// Set the "Cache-Control: no-store" header so that pages require

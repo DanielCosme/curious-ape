@@ -23,7 +23,7 @@ type Context struct {
 func NewContext(req *http.Request, rw http.ResponseWriter, logger *oak.Oak) *Context {
 	c := &Context{
 		Req:       req,
-		Res:       NewResponse(rw),
+		Res:       NewResponse(rw, logger),
 		StartTime: time.Now(),
 		Log:       logger,
 	}

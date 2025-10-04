@@ -66,10 +66,6 @@ func (d *Dove) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for i := len(d.middleware) - 1; i >= 0; i-- {
-		handler = d.middleware[i](handler)
-	}
-
 	err := handler(c)
 	if err != nil {
 		// TODO: Improve global error handler.
@@ -80,6 +76,7 @@ func (d *Dove) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 func (d *Dove) Endpoint(path string) *endpoint {
 	e := Endpoint(path)
+	e.middleware = d.middleware
 	d.routes[path] = e
 	return e
 }

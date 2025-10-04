@@ -26,7 +26,7 @@ func Routes(a *API) http.Handler {
 		GET(a.GetLoginForm).
 		POST(a.Login)
 
-	// d.Use(a.MiddlewareRequireAuthentication)
+	d.Use(a.MiddlewareRequireAuthentication)
 
 	d.Endpoint("/").GET(a.Home)
 	d.Endpoint("/habit/flip").PUT(a.HabitFlip)
@@ -41,7 +41,7 @@ func (a *API) Home(c *dove.Context) error {
 		return err
 	}
 
-	s := State(a)
+	s := State(a, c.Req)
 	s.Days = days
 	return c.RenderOK(views.Home(s))
 }
@@ -71,7 +71,10 @@ func (a *API) DaySync(c *dove.Context) error {
 }
 
 func (a *API) GetLoginForm(c *dove.Context) error {
-	return c.RenderOK(views.Login(State(a)))
+	if a.IsAuthenticated(c.Req) {
+		return c.Redirect("/")
+	}
+	return c.RenderOK(views.Login(State(a, c.Req)))
 }
 
 func (a *API) Login(c *dove.Context) error {
@@ -96,7 +99,7 @@ func (a *API) Login(c *dove.Context) error {
 	}
 	logger.Info("User authenticated")
 	a.Scs.Put(c.Ctx(), string(ctxKeyAuthenticatedUserID), id)
-	return nil
+	return c.Redirect("/")
 }
 
 func (a *API) Logout(c *dove.Context) error {
@@ -107,8 +110,9 @@ func (a *API) Logout(c *dove.Context) error {
 	return nil
 }
 
-func State(a *API) *views.State {
+func State(a *API, r *http.Request) *views.State {
 	return &views.State{
-		Version: a.Version,
+		Version:       a.Version,
+		Authenticated: a.IsAuthenticated(r),
 	}
 }

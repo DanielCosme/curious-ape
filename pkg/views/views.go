@@ -11,8 +11,9 @@ import (
 )
 
 type State struct {
-	Version string
-	Days    []core.Day
+	Version       string
+	Authenticated bool
+	Days          []core.Day
 }
 
 func Home(s *State) ElementRenderer {
@@ -24,13 +25,15 @@ func Login(s *State) ElementRenderer {
 		H1().Text("Login"),
 		FORM(
 			DIV(
-				LABEL(
-					INPUT().TYPE("text").NAME("username").PLACEHOLDER(""),
-				).Text("Username")),
+				LABEL().Text("Username").Children(
+					INPUT().TYPE("text").NAME("username").PLACEHOLDER("").STYLE("display", "block"),
+				).STYLE("display", "block"),
+			),
 			DIV(
-				LABEL(
-					INPUT().TYPE("text").NAME("password").PLACEHOLDER(""),
-				).Text("Password")),
+				LABEL().Text("Password").Children(
+					INPUT().TYPE("text").NAME("password").PLACEHOLDER("").STYLE("display", "block"),
+				).STYLE("display", "block"),
+			),
 			BUTTON().Text("Login").
 				TYPE("submit").
 				DATASTAR_ON("click", "@post('/login', {contentType: 'form'})")),
@@ -78,7 +81,7 @@ func habitSpot(habit core.Habit) ElementRenderer {
 
 	q := url.Values{}
 	q.Add("id", strconv.Itoa(int(habit.ID)))
-	flipAction := fmt.Sprintf("@put('/habit/flip?%s', {contentType: 'form'})", q.Encode())
+	flipAction := fmt.Sprintf("@put('/habit/flip?%s')", q.Encode())
 	return SPAN(
 		STYLE().Text("span:hover { background-color: yellow; color: blue; cursor: pointer }"),
 		STRONG().Text(state),
@@ -88,25 +91,22 @@ func habitSpot(habit core.Habit) ElementRenderer {
 func layout(s *State, children ...ElementRenderer) ElementRenderer {
 	return Group(
 		Text("<!DOCTYPE html>"),
-		HEAD(
-			META().CHARSET("UTF-8"),
-			META().NAME("viewport").CONTENT("width=device-width, initial-scale=1.0"),
-			SCRIPT().TYPE("module").SRC("https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.5/bundles/datastar.js"),
-			TITLE().Text("Curious APE"),
-		),
 		HTML(
+			HEAD(
+				META().CHARSET("UTF-8"),
+				META().NAME("viewport").CONTENT("width=device-width, initial-scale=1.0"),
+				SCRIPT().TYPE("module").SRC("https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.5/bundles/datastar.js"),
+				TITLE().Text("Curious APE"),
+			),
 			BODY(
 				HEADER(
-					H1().Text("Curious Ape"),
-				),
-				NAV(
-					a("/", "Home"),
-					// a("/integrations", "Integrations"),
-				),
+					H1().Text("Curious Ape")),
+				NAV().IfChildren(
+					s.Authenticated,
+					a("/", "Home")),
 				MAIN(children...),
 				FOOTER(
-					P().Text("Version "+s.Version),
-				),
+					P().Text("Version "+s.Version)),
 			),
 		),
 	)
