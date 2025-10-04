@@ -46,6 +46,7 @@ func bujoPage(s *State) ElementRenderer {
 
 func days(days []core.Day) ElementRenderer {
 	return DIV(
+		STYLE().Text("span:hover { background-color: yellow; color: blue; cursor: pointer }"),
 		H2().Text(days[0].Date.Time().Month().String()),
 		DIV(
 			Range(days, func(d core.Day) ElementRenderer {
@@ -83,7 +84,6 @@ func habitSpot(habit core.Habit) ElementRenderer {
 	q.Add("id", strconv.Itoa(int(habit.ID)))
 	flipAction := fmt.Sprintf("@put('/habit/flip?%s')", q.Encode())
 	return SPAN(
-		STYLE().Text("span:hover { background-color: yellow; color: blue; cursor: pointer }"),
 		STRONG().Text(state),
 	).DATASTAR_ON("click", flipAction).STYLE("padding", "0 10px")
 }

@@ -7,12 +7,16 @@ env:
 
 vars:
   APP_NAME: ape
-  VERSION: v0.10.0
+  VERSION: v0.10.1
 
 tasks:
   default:
     cmds:
       - task: run
+
+  tag:
+    cmds:
+      - git tag {{.VERSION}}
 
   version:
     aliases: [v]
