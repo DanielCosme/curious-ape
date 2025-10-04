@@ -121,6 +121,7 @@ func habitSpot(habit core.Habit) ElementRenderer {
 	flipAction := fmt.Sprintf("@put('/habit/flip?%s')", q.Encode())
 	return SPAN(
 		STRONG().Text(state),
+		If(habit.Note != "", Text(" "+habit.Note)),
 	).DATASTAR_ON("click", flipAction).STYLE("padding", "0 10px")
 }
 

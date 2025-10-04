@@ -36,6 +36,7 @@ type Habit struct {
 	Date      Date
 	State     HabitState
 	Type      HabitType
+	Note      string
 	Automated bool
 }
 
@@ -54,6 +55,7 @@ type UpsertHabitParams struct {
 	Date      Date
 	Type      HabitType
 	State     HabitState
+	Note      string
 	Automated bool
 }
 

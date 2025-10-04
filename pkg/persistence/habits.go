@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/aarondl/opt/omit"
+	"github.com/aarondl/opt/omitnull"
 	"github.com/danielcosme/curious-ape/database/gen/dberrors"
 	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/core"
@@ -37,6 +38,7 @@ func (h Habits) Upsert(p core.UpsertHabitParams) (coreHabit core.Habit, err erro
 		DayID:           omit.From(day.ID),
 		HabitCategoryID: omit.From(hCategory.ID),
 		State:           omit.From(string(p.State)),
+		NOTE:            omitnull.From(p.Note),
 		Automated:       omit.From(p.Automated),
 	}
 	habit, err := models.Habits.Insert(s).One(context.Background(), h.db)
@@ -83,6 +85,7 @@ func habitToCore(h *models.Habit) (habit core.Habit) {
 	habit.Date = core.NewDate(h.R.Day.Date)
 	habit.State = core.HabitState(h.State)
 	habit.Type = core.HabitType(h.R.HabitCategory.Kind)
+	habit.Note = h.NOTE.GetOrZero()
 	habit.Automated = h.Automated
 	return
 }

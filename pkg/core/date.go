@@ -88,3 +88,9 @@ func DateFromISO8601(s string) (Date, error) {
 func TimeFormatISO8601(t time.Time) string {
 	return t.Format(ISO8601)
 }
+
+func DurationToString(d time.Duration) string {
+	h := d / time.Hour
+	m := (d % time.Hour) / time.Minute
+	return fmt.Sprintf("%dh%dm", h, m)
+}
