@@ -25,8 +25,12 @@ func (h Habits) Get(p core.HabitParams) (habit core.Habit, err error) {
 	return habitToCore(res), nil
 }
 
-func (h Habits) Upsert(p core.UpsertHabitParams) (coreHabit core.Habit, err error) {
-	day, err := BuildDayQuery(core.DayParams{Date: p.Date}).One(context.Background(), h.db)
+func getDay(date core.Date, exec bob.Executor) (*models.Day, error) {
+	return BuildDayQuery(core.DayParams{Date: date}).One(context.Background(), exec)
+}
+
+func (h Habits) Upsert(p core.HabitUpsertParams) (coreHabit core.Habit, err error) {
+	day, err := getDay(p.Date, h.db)
 	if err != nil {
 		return coreHabit, catchDBErr("habits: upsert", err)
 	}

@@ -51,7 +51,7 @@ type HabitParams struct {
 	ID int
 }
 
-type UpsertHabitParams struct {
+type HabitUpsertParams struct {
 	Date      Date
 	Type      HabitType
 	State     HabitState

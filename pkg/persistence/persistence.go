@@ -9,7 +9,7 @@ type Database struct {
 	Users    Users
 	Days     core.DayRepository
 	Habits   core.HabitRepository
-	Sleep    SleepLogs
+	Sleep    core.SleepLogRepository
 	Fitness  FitnessLogs
 	DeepWork DeepWorkLogs
 	Auths    Auths

@@ -17,7 +17,7 @@ func (a *App) fitnessSync(ctx context.Context, d core.Date) error {
 		return err
 	}
 
-	habitParams := core.UpsertHabitParams{
+	habitParams := core.HabitUpsertParams{
 		Date:      d,
 		Type:      core.HabitTypeFitness,
 		State:     core.HabitStateNotDone,

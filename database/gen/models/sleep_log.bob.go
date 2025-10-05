@@ -31,9 +31,10 @@ type SleepLog struct {
 	EndTime        time.Time        `db:"end_time" `
 	IsMainSleep    null.Val[bool]   `db:"is_main_sleep" `
 	TotalTimeInBed null.Val[int64]  `db:"total_time_in_bed" `
-	MinutesAsleep  null.Val[int64]  `db:"minutes_asleep" `
+	TimeAsleep     null.Val[int64]  `db:"time_asleep" `
 	Origin         string           `db:"origin" `
 	Raw            null.Val[string] `db:"raw" `
+	NOTE           null.Val[string] `db:"NOTE" `
 
 	R sleepLogR `db:"-" `
 }
@@ -56,7 +57,7 @@ type sleepLogR struct {
 func buildSleepLogColumns(alias string) sleepLogColumns {
 	return sleepLogColumns{
 		ColumnsExpr: expr.NewColumnsExpr(
-			"id", "day_id", "start_time", "end_time", "is_main_sleep", "total_time_in_bed", "minutes_asleep", "origin", "raw",
+			"id", "day_id", "start_time", "end_time", "is_main_sleep", "total_time_in_bed", "time_asleep", "origin", "raw", "NOTE",
 		).WithParent("sleep_log"),
 		tableAlias:     alias,
 		ID:             sqlite.Quote(alias, "id"),
@@ -65,9 +66,10 @@ func buildSleepLogColumns(alias string) sleepLogColumns {
 		EndTime:        sqlite.Quote(alias, "end_time"),
 		IsMainSleep:    sqlite.Quote(alias, "is_main_sleep"),
 		TotalTimeInBed: sqlite.Quote(alias, "total_time_in_bed"),
-		MinutesAsleep:  sqlite.Quote(alias, "minutes_asleep"),
+		TimeAsleep:     sqlite.Quote(alias, "time_asleep"),
 		Origin:         sqlite.Quote(alias, "origin"),
 		Raw:            sqlite.Quote(alias, "raw"),
+		NOTE:           sqlite.Quote(alias, "NOTE"),
 	}
 }
 
@@ -80,9 +82,10 @@ type sleepLogColumns struct {
 	EndTime        sqlite.Expression
 	IsMainSleep    sqlite.Expression
 	TotalTimeInBed sqlite.Expression
-	MinutesAsleep  sqlite.Expression
+	TimeAsleep     sqlite.Expression
 	Origin         sqlite.Expression
 	Raw            sqlite.Expression
+	NOTE           sqlite.Expression
 }
 
 func (c sleepLogColumns) Alias() string {
@@ -103,13 +106,14 @@ type SleepLogSetter struct {
 	EndTime        omit.Val[time.Time]  `db:"end_time" `
 	IsMainSleep    omitnull.Val[bool]   `db:"is_main_sleep" `
 	TotalTimeInBed omitnull.Val[int64]  `db:"total_time_in_bed" `
-	MinutesAsleep  omitnull.Val[int64]  `db:"minutes_asleep" `
+	TimeAsleep     omitnull.Val[int64]  `db:"time_asleep" `
 	Origin         omit.Val[string]     `db:"origin" `
 	Raw            omitnull.Val[string] `db:"raw" `
+	NOTE           omitnull.Val[string] `db:"NOTE" `
 }
 
 func (s SleepLogSetter) SetColumns() []string {
-	vals := make([]string, 0, 9)
+	vals := make([]string, 0, 10)
 	if s.ID.IsValue() {
 		vals = append(vals, "id")
 	}
@@ -128,14 +132,17 @@ func (s SleepLogSetter) SetColumns() []string {
 	if !s.TotalTimeInBed.IsUnset() {
 		vals = append(vals, "total_time_in_bed")
 	}
-	if !s.MinutesAsleep.IsUnset() {
-		vals = append(vals, "minutes_asleep")
+	if !s.TimeAsleep.IsUnset() {
+		vals = append(vals, "time_asleep")
 	}
 	if s.Origin.IsValue() {
 		vals = append(vals, "origin")
 	}
 	if !s.Raw.IsUnset() {
 		vals = append(vals, "raw")
+	}
+	if !s.NOTE.IsUnset() {
+		vals = append(vals, "NOTE")
 	}
 	return vals
 }
@@ -159,14 +166,17 @@ func (s SleepLogSetter) Overwrite(t *SleepLog) {
 	if !s.TotalTimeInBed.IsUnset() {
 		t.TotalTimeInBed = s.TotalTimeInBed.MustGetNull()
 	}
-	if !s.MinutesAsleep.IsUnset() {
-		t.MinutesAsleep = s.MinutesAsleep.MustGetNull()
+	if !s.TimeAsleep.IsUnset() {
+		t.TimeAsleep = s.TimeAsleep.MustGetNull()
 	}
 	if s.Origin.IsValue() {
 		t.Origin = s.Origin.MustGet()
 	}
 	if !s.Raw.IsUnset() {
 		t.Raw = s.Raw.MustGetNull()
+	}
+	if !s.NOTE.IsUnset() {
+		t.NOTE = s.NOTE.MustGetNull()
 	}
 }
 
@@ -184,7 +194,7 @@ func (s *SleepLogSetter) Apply(q *dialect.InsertQuery) {
 	}
 
 	q.AppendValues(bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
-		vals := make([]bob.Expression, 0, 9)
+		vals := make([]bob.Expression, 0, 10)
 		if s.ID.IsValue() {
 			vals = append(vals, sqlite.Arg(s.ID.MustGet()))
 		}
@@ -209,8 +219,8 @@ func (s *SleepLogSetter) Apply(q *dialect.InsertQuery) {
 			vals = append(vals, sqlite.Arg(s.TotalTimeInBed.MustGetNull()))
 		}
 
-		if !s.MinutesAsleep.IsUnset() {
-			vals = append(vals, sqlite.Arg(s.MinutesAsleep.MustGetNull()))
+		if !s.TimeAsleep.IsUnset() {
+			vals = append(vals, sqlite.Arg(s.TimeAsleep.MustGetNull()))
 		}
 
 		if s.Origin.IsValue() {
@@ -219,6 +229,10 @@ func (s *SleepLogSetter) Apply(q *dialect.InsertQuery) {
 
 		if !s.Raw.IsUnset() {
 			vals = append(vals, sqlite.Arg(s.Raw.MustGetNull()))
+		}
+
+		if !s.NOTE.IsUnset() {
+			vals = append(vals, sqlite.Arg(s.NOTE.MustGetNull()))
 		}
 
 		if len(vals) == 0 {
@@ -234,7 +248,7 @@ func (s SleepLogSetter) UpdateMod() bob.Mod[*dialect.UpdateQuery] {
 }
 
 func (s SleepLogSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 9)
+	exprs := make([]bob.Expression, 0, 10)
 
 	if s.ID.IsValue() {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
@@ -278,10 +292,10 @@ func (s SleepLogSetter) Expressions(prefix ...string) []bob.Expression {
 		}})
 	}
 
-	if !s.MinutesAsleep.IsUnset() {
+	if !s.TimeAsleep.IsUnset() {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
-			sqlite.Quote(append(prefix, "minutes_asleep")...),
-			sqlite.Arg(s.MinutesAsleep),
+			sqlite.Quote(append(prefix, "time_asleep")...),
+			sqlite.Arg(s.TimeAsleep),
 		}})
 	}
 
@@ -296,6 +310,13 @@ func (s SleepLogSetter) Expressions(prefix ...string) []bob.Expression {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			sqlite.Quote(append(prefix, "raw")...),
 			sqlite.Arg(s.Raw),
+		}})
+	}
+
+	if !s.NOTE.IsUnset() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			sqlite.Quote(append(prefix, "NOTE")...),
+			sqlite.Arg(s.NOTE),
 		}})
 	}
 
@@ -599,9 +620,10 @@ type sleepLogWhere[Q sqlite.Filterable] struct {
 	EndTime        sqlite.WhereMod[Q, time.Time]
 	IsMainSleep    sqlite.WhereNullMod[Q, bool]
 	TotalTimeInBed sqlite.WhereNullMod[Q, int64]
-	MinutesAsleep  sqlite.WhereNullMod[Q, int64]
+	TimeAsleep     sqlite.WhereNullMod[Q, int64]
 	Origin         sqlite.WhereMod[Q, string]
 	Raw            sqlite.WhereNullMod[Q, string]
+	NOTE           sqlite.WhereNullMod[Q, string]
 }
 
 func (sleepLogWhere[Q]) AliasedAs(alias string) sleepLogWhere[Q] {
@@ -616,9 +638,10 @@ func buildSleepLogWhere[Q sqlite.Filterable](cols sleepLogColumns) sleepLogWhere
 		EndTime:        sqlite.Where[Q, time.Time](cols.EndTime),
 		IsMainSleep:    sqlite.WhereNull[Q, bool](cols.IsMainSleep),
 		TotalTimeInBed: sqlite.WhereNull[Q, int64](cols.TotalTimeInBed),
-		MinutesAsleep:  sqlite.WhereNull[Q, int64](cols.MinutesAsleep),
+		TimeAsleep:     sqlite.WhereNull[Q, int64](cols.TimeAsleep),
 		Origin:         sqlite.Where[Q, string](cols.Origin),
 		Raw:            sqlite.WhereNull[Q, string](cols.Raw),
+		NOTE:           sqlite.WhereNull[Q, string](cols.NOTE),
 	}
 }
 

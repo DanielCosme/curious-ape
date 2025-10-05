@@ -38,7 +38,7 @@ func (a *App) deepWorkSync(ctx context.Context, d core.Date) error {
 		habitState = core.HabitStateDone
 	}
 
-	_, err = a.HabitUpsert(ctx, core.UpsertHabitParams{
+	_, err = a.HabitUpsert(ctx, core.HabitUpsertParams{
 		Date:      day.Date,
 		Type:      core.HabitTypeDeepWork,
 		State:     habitState,

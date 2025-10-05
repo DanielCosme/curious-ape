@@ -35,19 +35,19 @@ func TestDay(t *testing.T) {
 	test.NilErr(t, err)
 	test.True(t, day.ID > 0)
 
-	params1 := core.UpsertHabitParams{Date: date1, Type: core.HabitTypeWakeUp, State: core.HabitStateDone}
+	params1 := core.HabitUpsertParams{Date: date1, Type: core.HabitTypeWakeUp, State: core.HabitStateDone}
 	habit1, err := app.HabitUpsert(ctx, params1)
 	test.NilErr(t, err)
 
-	params2 := core.UpsertHabitParams{Date: date1, Type: core.HabitTypeFitness, State: core.HabitStateDone}
+	params2 := core.HabitUpsertParams{Date: date1, Type: core.HabitTypeFitness, State: core.HabitStateDone}
 	habit2, err := app.HabitUpsert(ctx, params2)
 	test.NilErr(t, err)
 
-	params3 := core.UpsertHabitParams{Date: date1, Type: core.HabitTypeDeepWork, State: core.HabitStateDone}
+	params3 := core.HabitUpsertParams{Date: date1, Type: core.HabitTypeDeepWork, State: core.HabitStateDone}
 	habit3, err := app.HabitUpsert(ctx, params3)
 	test.NilErr(t, err)
 
-	params4 := core.UpsertHabitParams{Date: date1, Type: core.HabitTypeEatHealthy, State: core.HabitStateDone}
+	params4 := core.HabitUpsertParams{Date: date1, Type: core.HabitTypeEatHealthy, State: core.HabitStateDone}
 	habit4, err := app.HabitUpsert(ctx, params4)
 	test.NilErr(t, err)
 	test.True(t, habit4.ID > 0)
