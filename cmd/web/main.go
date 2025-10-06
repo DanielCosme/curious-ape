@@ -10,9 +10,13 @@ import (
 	"runtime/debug"
 	"time"
 
+	"github.com/aarondl/opt/omit"
 	"github.com/stephenafamo/bob"
 	"golang.org/x/oauth2"
 
+	"context"
+
+	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/application"
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/oak"
@@ -73,8 +77,9 @@ func main() {
 	sessionManager.Cookie.SameSite = http.SameSiteStrictMode
 	sessionManager.Cookie.Name = "curious-ape-session"
 
+	bobDB := bob.NewDB(db)
 	app := application.New(&application.AppOptions{
-		Database: persistence.New(bob.NewDB(db)),
+		Database: persistence.New(bobDB),
 		Config: &application.Config{
 			Env:              cfg.Environment,
 			Fitbit:           cfg.Integrations.Fitbit.ToConf(),
@@ -88,8 +93,10 @@ func main() {
 	err = app.SetPassword(cfg.Admin.UserName, cfg.Admin.Password, cfg.Admin.Email, core.AuthRoleAdmin)
 	exitIfErr(err)
 
-	t := api.NewApi(app, sessionManager, v)
+	err = runDataMigration(bobDB)
+	exitIfErr(err)
 
+	t := api.NewApi(app, sessionManager, v)
 	addr := fmt.Sprintf(":%d", cfg.Port)
 	server := http.Server{
 		Addr:         addr,
@@ -172,4 +179,38 @@ func (o Oauth2Config) ToConf() *oauth2.Config {
 		RedirectURL: o.RedirectURL,
 		Scopes:      o.Scopes,
 	}
+}
+
+func runDataMigration(db bob.DB) error {
+	oak.Info("running data migration")
+	ctx := context.Background()
+
+	q := models.Days.Query()
+	q.Apply(models.SelectThenLoad.Day.FitnessLogs())
+	days, err := q.All(ctx, db)
+
+	if err != nil {
+		return err
+	}
+	for _, d := range days {
+		for _, fl := range d.R.FitnessLogs {
+			oak.Info("migrating fitness log", "date", d.Date)
+			setter := &models.FitnessLogSetter{
+				StartTime: omit.From(core.TimeUTC(fl.StartTime)),
+				EndTime:   omit.From(core.TimeUTC(fl.EndTime)),
+			}
+			fl.Update(ctx, db, setter)
+		}
+
+		oak.Info("migrating day", "date", d.Date.String())
+		date := core.NewDate(d.Date)
+		setter := &models.DaySetter{
+			Date: omit.From(date.Time()),
+		}
+		err = d.Update(ctx, db, setter)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

@@ -13,20 +13,16 @@ type DateSlice []Date
 
 func NewDate(t time.Time) Date {
 	return Date{
-		time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.Local),
+		time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC),
 	}
 }
 
-func (d Date) MarshalJSON() ([]byte, error) {
-	s := fmt.Sprintf("%q", d.String())
-	return []byte(s), nil
+func TimeUTC(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), time.UTC)
 }
 
 func NewDateToday() Date {
-	t := time.Now().Local()
-	return Date{
-		time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.Local),
-	}
+	return NewDate(time.Now())
 }
 
 func (d Date) IsEqual(t time.Time) bool {
@@ -67,6 +63,11 @@ func (d Date) ToEndOfDay() time.Time {
 func (d Date) ToBeginningOfDay() time.Time {
 	t := d.Time()
 	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+}
+
+func (d Date) MarshalJSON() ([]byte, error) {
+	s := fmt.Sprintf("%q", d.String())
+	return []byte(s), nil
 }
 
 func (ds DateSlice) ToTimeSlice() []time.Time {

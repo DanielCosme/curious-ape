@@ -5,11 +5,15 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"log/slog"
 	"net/http"
+
+	"github.com/danielcosme/curious-ape/pkg/oak"
 )
 
 const BaseURL = "https://api.track.toggl.com"
+
+// NOTE: timestamp format:
+// 1984-01-30T09:08:04+00:00
 
 // in case of 4xx error - don't try another request with the same payload, inspect the response body, most of the time it has a readable message.
 // in case of 5xx error - have a random delay before the next request.
@@ -53,17 +57,12 @@ func (c *Client) Call(method, path string, reqBody, resPayload any) error {
 	}
 	if res.StatusCode >= 400 {
 		return c.catchTogglErr(body)
-
-	}
-	if !json.Valid(body) {
-		slog.Error(string(body))
-		return errors.New("toggl response body is not valid json")
 	}
 
 	return json.Unmarshal(body, resPayload)
 }
 
 func (c *Client) catchTogglErr(body []byte) error {
-	slog.Error(string(body))
+	oak.Error(string(body))
 	return errors.New("toggl api error")
 }

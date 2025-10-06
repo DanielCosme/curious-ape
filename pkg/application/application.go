@@ -32,11 +32,12 @@ type Config struct {
 }
 
 func New(opts *AppOptions) *App {
+	sync, _ := integrations.New(opts.Config.TogglWorkspaceID, opts.Config.TogglToken, opts.Config.Fitbit, opts.Config.Google)
 	a := &App{
 		Log:  opts.Logger.Layer("app"),
 		Env:  opts.Config.Env,
 		db:   opts.Database,
-		sync: integrations.New(opts.Config.TogglWorkspaceID, opts.Config.TogglToken, opts.Config.Fitbit, opts.Config.Google),
+		sync: sync,
 	}
 	a.Log.Info("Application initialized", "Environment", a.Env)
 	return a

@@ -5,6 +5,8 @@ import (
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/danielcosme/curious-ape/pkg/core"
 )
 
 type FitnessService struct {
@@ -53,5 +55,6 @@ func formatTime(t time.Time) string {
 
 func ParseMillis(s string) time.Time {
 	millis, _ := strconv.Atoi(s)
-	return time.UnixMilli(int64(millis))
+	t := time.UnixMilli(int64(millis))
+	return core.TimeUTC(t)
 }

@@ -11,17 +11,9 @@ import (
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/integrations/fitbit"
 	"github.com/danielcosme/curious-ape/pkg/integrations/google"
+	"github.com/danielcosme/curious-ape/pkg/oak"
 	"github.com/danielcosme/curious-ape/pkg/persistence"
 	"golang.org/x/oauth2"
-
-	/*
-		"net/http"
-		"github.com/danielcosme/curious-ape/pkg/integrations/fitbit"
-		"github.com/danielcosme/curious-ape/pkg/integrations/google"
-		"github.com/danielcosme/curious-ape/pkg/persistence"
-		"golang.org/x/oauth2"
-	*/
-	"github.com/danielcosme/curious-ape/pkg/oak"
 )
 
 type IntegrationStatus string
@@ -113,15 +105,25 @@ func (a *App) IntegrationGet(ctx context.Context, provider core.Integration) (In
 					info = append(info, fmt.Sprintf("Workspace: %s - ID: %d", w.Name, w.ID))
 				}
 			} else {
-				a.Log.Error(err.Error())
+				logger.Error(err.Error())
 			}
 
 			summary, err := a.sync.TogglAPI.Reports.GetDaySummary(time.Now())
 			if err != nil {
-				a.Log.Error(err.Error())
+				logger.Error(err.Error())
 			} else {
 				info = append(info, fmt.Sprintf("Total time worked so far: %s", summary.TotalDuration))
 			}
+
+			entries, err := a.sync.TogglAPI.TimeEntries.GetDayEntries(time.Now())
+			if err != nil {
+				logger.Error(err.Error())
+			} else {
+				for _, e := range entries {
+					logger.Info(e.Description, "start", e.Start.String(), "end", e.Stop.String())
+				}
+			}
+
 		}
 		res = IntegrationInfo{
 			Name:   "Toggl",

@@ -3,9 +3,11 @@ package integrations
 import (
 	"context"
 	"errors"
-	"github.com/danielcosme/curious-ape/pkg/integrations/toggl"
 	"log/slog"
 	"net/http"
+
+	"github.com/danielcosme/curious-ape/pkg/integrations/toggl"
+	"github.com/danielcosme/curious-ape/pkg/oak"
 
 	"github.com/danielcosme/curious-ape/pkg/core"
 
@@ -19,11 +21,10 @@ type Integrations struct {
 	list     []core.Integration
 }
 
-func New(togglWorkspaceID int, togglToken string, fitbit, google *oauth2.Config) *Integrations {
+func New(togglWorkspaceID int, togglToken string, fitbit, google *oauth2.Config) (*Integrations, error) {
 	i := &Integrations{
-		TogglAPI: toggl.NewApi(togglWorkspaceID, togglToken),
-		fitbit:   fitbit,
-		google:   google,
+		fitbit: fitbit,
+		google: google,
 	}
 	if i.fitbit != nil {
 		i.list = append(i.list, core.IntegrationFitbit)
@@ -31,10 +32,19 @@ func New(togglWorkspaceID int, togglToken string, fitbit, google *oauth2.Config)
 	if i.google != nil {
 		i.list = append(i.list, core.IntegrationGoogle)
 	}
-	if togglToken != "" {
+	if togglToken != "" && togglWorkspaceID > 0 {
+		a, err := toggl.NewApi(togglWorkspaceID, togglToken)
+		if err != nil {
+			oak.Error("Failed to initialize Toggl API", "error", err.Error())
+			return i, err
+		}
+		oak.Info("Toggl API client timezone: " + a.ClientTimezone().String())
+		i.TogglAPI = a
 		i.list = append(i.list, core.IntegrationToggl)
+	} else {
+		oak.Warning("Toggl integration not configured")
 	}
-	return i
+	return i, nil
 }
 
 func (i *Integrations) IntegrationsList() []core.Integration {
