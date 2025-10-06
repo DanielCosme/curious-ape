@@ -8,11 +8,15 @@ type DayRepository interface {
 
 type HabitRepository interface {
 	Get(HabitParams) (Habit, error)
-	Upsert(HabitUpsertParams) (Habit, error)
+	Upsert(Habit) (Habit, error)
 }
 
 type SleepLogRepository interface {
-	Upsert(SleepLogUpsertParams) (SleepLog, error)
+	Upsert(SleepLog) (SleepLog, error)
+}
+
+type FitnessLogRepository interface {
+	Upsert(FitnessLog) (FitnessLog, error)
 }
 
 type RepositoryCommon struct {

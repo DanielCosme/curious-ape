@@ -10,7 +10,7 @@ type Database struct {
 	Days     core.DayRepository
 	Habits   core.HabitRepository
 	Sleep    core.SleepLogRepository
-	Fitness  FitnessLogs
+	Fitness  core.FitnessLogRepository
 	DeepWork DeepWorkLogs
 	Auths    Auths
 	executor bob.DB
@@ -19,10 +19,10 @@ type Database struct {
 func New(executor bob.DB) *Database {
 	return &Database{
 		Users:    Users{db: executor},
-		Days:     Days{db: executor},
-		Habits:   Habits{db: executor},
-		Sleep:    SleepLogs{db: executor},
-		Fitness:  FitnessLogs{db: executor},
+		Days:     &Days{db: executor},
+		Habits:   &Habits{db: executor},
+		Sleep:    &SleepLogs{db: executor},
+		Fitness:  &FitnessLogs{db: executor},
 		DeepWork: DeepWorkLogs{db: executor},
 		Auths:    Auths{db: executor},
 		executor: executor,

@@ -17,7 +17,7 @@ type Habits struct {
 	db bob.DB
 }
 
-func (h Habits) Get(p core.HabitParams) (habit core.Habit, err error) {
+func (h *Habits) Get(p core.HabitParams) (habit core.Habit, err error) {
 	res, err := buildHabitQuery(p).One(context.Background(), h.db)
 	if err != nil {
 		return habit, catchDBErr("habits: get", err)
@@ -25,11 +25,7 @@ func (h Habits) Get(p core.HabitParams) (habit core.Habit, err error) {
 	return habitToCore(res), nil
 }
 
-func getDay(date core.Date, exec bob.Executor) (*models.Day, error) {
-	return BuildDayQuery(core.DayParams{Date: date}).One(context.Background(), exec)
-}
-
-func (h Habits) Upsert(p core.HabitUpsertParams) (coreHabit core.Habit, err error) {
+func (h *Habits) Upsert(p core.Habit) (coreHabit core.Habit, err error) {
 	day, err := getDay(p.Date, h.db)
 	if err != nil {
 		return coreHabit, catchDBErr("habits: upsert", err)

@@ -35,6 +35,7 @@ type SleepLog struct {
 	Origin         string           `db:"origin" `
 	Raw            null.Val[string] `db:"raw" `
 	NOTE           null.Val[string] `db:"NOTE" `
+	Title          string           `db:"title" `
 
 	R sleepLogR `db:"-" `
 }
@@ -57,7 +58,7 @@ type sleepLogR struct {
 func buildSleepLogColumns(alias string) sleepLogColumns {
 	return sleepLogColumns{
 		ColumnsExpr: expr.NewColumnsExpr(
-			"id", "day_id", "start_time", "end_time", "is_main_sleep", "total_time_in_bed", "time_asleep", "origin", "raw", "NOTE",
+			"id", "day_id", "start_time", "end_time", "is_main_sleep", "total_time_in_bed", "time_asleep", "origin", "raw", "NOTE", "title",
 		).WithParent("sleep_log"),
 		tableAlias:     alias,
 		ID:             sqlite.Quote(alias, "id"),
@@ -70,6 +71,7 @@ func buildSleepLogColumns(alias string) sleepLogColumns {
 		Origin:         sqlite.Quote(alias, "origin"),
 		Raw:            sqlite.Quote(alias, "raw"),
 		NOTE:           sqlite.Quote(alias, "NOTE"),
+		Title:          sqlite.Quote(alias, "title"),
 	}
 }
 
@@ -86,6 +88,7 @@ type sleepLogColumns struct {
 	Origin         sqlite.Expression
 	Raw            sqlite.Expression
 	NOTE           sqlite.Expression
+	Title          sqlite.Expression
 }
 
 func (c sleepLogColumns) Alias() string {
@@ -110,10 +113,11 @@ type SleepLogSetter struct {
 	Origin         omit.Val[string]     `db:"origin" `
 	Raw            omitnull.Val[string] `db:"raw" `
 	NOTE           omitnull.Val[string] `db:"NOTE" `
+	Title          omit.Val[string]     `db:"title" `
 }
 
 func (s SleepLogSetter) SetColumns() []string {
-	vals := make([]string, 0, 10)
+	vals := make([]string, 0, 11)
 	if s.ID.IsValue() {
 		vals = append(vals, "id")
 	}
@@ -143,6 +147,9 @@ func (s SleepLogSetter) SetColumns() []string {
 	}
 	if !s.NOTE.IsUnset() {
 		vals = append(vals, "NOTE")
+	}
+	if s.Title.IsValue() {
+		vals = append(vals, "title")
 	}
 	return vals
 }
@@ -178,6 +185,9 @@ func (s SleepLogSetter) Overwrite(t *SleepLog) {
 	if !s.NOTE.IsUnset() {
 		t.NOTE = s.NOTE.MustGetNull()
 	}
+	if s.Title.IsValue() {
+		t.Title = s.Title.MustGet()
+	}
 }
 
 func (s *SleepLogSetter) Apply(q *dialect.InsertQuery) {
@@ -194,7 +204,7 @@ func (s *SleepLogSetter) Apply(q *dialect.InsertQuery) {
 	}
 
 	q.AppendValues(bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
-		vals := make([]bob.Expression, 0, 10)
+		vals := make([]bob.Expression, 0, 11)
 		if s.ID.IsValue() {
 			vals = append(vals, sqlite.Arg(s.ID.MustGet()))
 		}
@@ -235,6 +245,10 @@ func (s *SleepLogSetter) Apply(q *dialect.InsertQuery) {
 			vals = append(vals, sqlite.Arg(s.NOTE.MustGetNull()))
 		}
 
+		if s.Title.IsValue() {
+			vals = append(vals, sqlite.Arg(s.Title.MustGet()))
+		}
+
 		if len(vals) == 0 {
 			vals = append(vals, sqlite.Arg(nil))
 		}
@@ -248,7 +262,7 @@ func (s SleepLogSetter) UpdateMod() bob.Mod[*dialect.UpdateQuery] {
 }
 
 func (s SleepLogSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 10)
+	exprs := make([]bob.Expression, 0, 11)
 
 	if s.ID.IsValue() {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
@@ -317,6 +331,13 @@ func (s SleepLogSetter) Expressions(prefix ...string) []bob.Expression {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			sqlite.Quote(append(prefix, "NOTE")...),
 			sqlite.Arg(s.NOTE),
+		}})
+	}
+
+	if s.Title.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			sqlite.Quote(append(prefix, "title")...),
+			sqlite.Arg(s.Title),
 		}})
 	}
 
@@ -624,6 +645,7 @@ type sleepLogWhere[Q sqlite.Filterable] struct {
 	Origin         sqlite.WhereMod[Q, string]
 	Raw            sqlite.WhereNullMod[Q, string]
 	NOTE           sqlite.WhereNullMod[Q, string]
+	Title          sqlite.WhereMod[Q, string]
 }
 
 func (sleepLogWhere[Q]) AliasedAs(alias string) sleepLogWhere[Q] {
@@ -642,6 +664,7 @@ func buildSleepLogWhere[Q sqlite.Filterable](cols sleepLogColumns) sleepLogWhere
 		Origin:         sqlite.Where[Q, string](cols.Origin),
 		Raw:            sqlite.WhereNull[Q, string](cols.Raw),
 		NOTE:           sqlite.WhereNull[Q, string](cols.NOTE),
+		Title:          sqlite.Where[Q, string](cols.Title),
 	}
 }
 

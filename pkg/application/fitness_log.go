@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/danielcosme/curious-ape/pkg/core"
@@ -17,23 +18,22 @@ func (a *App) fitnessSync(ctx context.Context, d core.Date) error {
 		return err
 	}
 
-	habitParams := core.HabitUpsertParams{
+	habitParams := core.Habit{
 		Date:      d,
 		Type:      core.HabitTypeFitness,
 		State:     core.HabitStateNotDone,
 		Automated: true,
 	}
 	for idx, fl := range fitnessLogs {
-		// fl, err := a.db.Fitness.Upsert(setter)
-		// if err != nil {
-		// 	return err
-		// }
-		// logger.Info("Fitness log added", "date", fl.Date, "origin", fl.Origin)
+		fl, err := a.db.Fitness.Upsert(fl)
+		if err != nil {
+			return err
+		}
+		logger.Info("Fitness log added", "date", fl.Date, "origin", fl.Origin)
 
 		if idx == 0 {
 			habitParams.State = core.HabitStateDone
 
-			logger.Notice("no fitness log is going to be created")
 			duration := core.DurationToString(fl.EndTime.Sub(fl.StartTime))
 			habitParams.Note = fmt.Sprintf("%s - %s (%s)", fl.StartTime.Format(core.Time), fl.EndTime.Format(core.Time), duration)
 		}
@@ -67,24 +67,19 @@ func (a *App) fitnessLogsFromGoogle(d core.Date) (res []core.FitnessLog, err err
 }
 
 func fitnessLogFromGoogle(day core.Day, session google.FitnessSession) (fl core.FitnessLog, err error) {
-	// raw, err := json.Marshal(&session)
-	// if err != nil {
-	// 	return
-	// }
+	raw, err := json.Marshal(&session)
+	if err != nil {
+		return
+	}
 
+	fl.Date = day.Date
+	fl.Title = session.Name
 	fl.StartTime = google.ParseMillis(session.StartTimeMillis)
 	fl.EndTime = google.ParseMillis(session.EndTimeMillis)
-
-	// setter := &models.FitnessLogSetter{
-	// 	DayID:     omit.From(int64(day.ID)),
-	// 	Type:      omit.From("strong"),
-	// 	Title:     omit.From(session.Name),
-	// 	Date:      omit.From(day.Date.Time()),
-	// 	StartTime: omit.From(google.ParseMillis(session.StartTimeMillis)),
-	// 	EndTime:   omit.From(google.ParseMillis(session.EndTimeMillis)),
-	// 	Origin:    omit.From(core.OriginLogGoogle),
-	// 	Note:      omit.From(session.Application.PackageName),
-	// 	Raw:       omit.From(string(raw)),
-	// }
+	fl.Note = session.Application.PackageName
+	// TODO: find a way to discern type, right now is hardcoded to Strength
+	fl.Type = core.FitnessLogTypeStrength
+	fl.Origin = core.LogOriginGoogle
+	fl.Raw = raw
 	return
 }

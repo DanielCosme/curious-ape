@@ -41,8 +41,9 @@ type DaysQuery = *sqlite.ViewQuery[*Day, DaySlice]
 
 // dayR is where relationships are stored.
 type dayR struct {
-	Habits    HabitSlice    // fk_habit_0
-	SleepLogs SleepLogSlice // fk_sleep_log_0
+	FitnessLogs FitnessLogSlice // fk_fitness_log_0
+	Habits      HabitSlice      // fk_habit_0
+	SleepLogs   SleepLogSlice   // fk_sleep_log_0
 }
 
 func buildDayColumns(alias string) dayColumns {
@@ -377,6 +378,25 @@ func (o DaySlice) ReloadAll(ctx context.Context, exec bob.Executor) error {
 	return nil
 }
 
+// FitnessLogs starts a query for related objects on fitness_log
+func (o *Day) FitnessLogs(mods ...bob.Mod[*dialect.SelectQuery]) FitnessLogsQuery {
+	return FitnessLogs.Query(append(mods,
+		sm.Where(FitnessLogs.Columns.DayID.EQ(sqlite.Arg(o.ID))),
+	)...)
+}
+
+func (os DaySlice) FitnessLogs(mods ...bob.Mod[*dialect.SelectQuery]) FitnessLogsQuery {
+	PKArgSlice := make([]bob.Expression, len(os))
+	for i, o := range os {
+		PKArgSlice[i] = sqlite.ArgGroup(o.ID)
+	}
+	PKArgExpr := sqlite.Group(PKArgSlice...)
+
+	return FitnessLogs.Query(append(mods,
+		sm.Where(sqlite.Group(FitnessLogs.Columns.DayID).OP("IN", PKArgExpr)),
+	)...)
+}
+
 // Habits starts a query for related objects on habit
 func (o *Day) Habits(mods ...bob.Mod[*dialect.SelectQuery]) HabitsQuery {
 	return Habits.Query(append(mods,
@@ -413,6 +433,74 @@ func (os DaySlice) SleepLogs(mods ...bob.Mod[*dialect.SelectQuery]) SleepLogsQue
 	return SleepLogs.Query(append(mods,
 		sm.Where(sqlite.Group(SleepLogs.Columns.DayID).OP("IN", PKArgExpr)),
 	)...)
+}
+
+func insertDayFitnessLogs0(ctx context.Context, exec bob.Executor, fitnessLogs1 []*FitnessLogSetter, day0 *Day) (FitnessLogSlice, error) {
+	for i := range fitnessLogs1 {
+		fitnessLogs1[i].DayID = omit.From(day0.ID)
+	}
+
+	ret, err := FitnessLogs.Insert(bob.ToMods(fitnessLogs1...)).All(ctx, exec)
+	if err != nil {
+		return ret, fmt.Errorf("insertDayFitnessLogs0: %w", err)
+	}
+
+	return ret, nil
+}
+
+func attachDayFitnessLogs0(ctx context.Context, exec bob.Executor, count int, fitnessLogs1 FitnessLogSlice, day0 *Day) (FitnessLogSlice, error) {
+	setter := &FitnessLogSetter{
+		DayID: omit.From(day0.ID),
+	}
+
+	err := fitnessLogs1.UpdateAll(ctx, exec, *setter)
+	if err != nil {
+		return nil, fmt.Errorf("attachDayFitnessLogs0: %w", err)
+	}
+
+	return fitnessLogs1, nil
+}
+
+func (day0 *Day) InsertFitnessLogs(ctx context.Context, exec bob.Executor, related ...*FitnessLogSetter) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+
+	fitnessLogs1, err := insertDayFitnessLogs0(ctx, exec, related, day0)
+	if err != nil {
+		return err
+	}
+
+	day0.R.FitnessLogs = append(day0.R.FitnessLogs, fitnessLogs1...)
+
+	for _, rel := range fitnessLogs1 {
+		rel.R.Day = day0
+	}
+	return nil
+}
+
+func (day0 *Day) AttachFitnessLogs(ctx context.Context, exec bob.Executor, related ...*FitnessLog) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	fitnessLogs1 := FitnessLogSlice(related)
+
+	_, err = attachDayFitnessLogs0(ctx, exec, len(related), fitnessLogs1, day0)
+	if err != nil {
+		return err
+	}
+
+	day0.R.FitnessLogs = append(day0.R.FitnessLogs, fitnessLogs1...)
+
+	for _, rel := range related {
+		rel.R.Day = day0
+	}
+
+	return nil
 }
 
 func insertDayHabits0(ctx context.Context, exec bob.Executor, habits1 []*HabitSetter, day0 *Day) (HabitSlice, error) {
@@ -573,6 +661,20 @@ func (o *Day) Preload(name string, retrieved any) error {
 	}
 
 	switch name {
+	case "FitnessLogs":
+		rels, ok := retrieved.(FitnessLogSlice)
+		if !ok {
+			return fmt.Errorf("day cannot load %T as %q", retrieved, name)
+		}
+
+		o.R.FitnessLogs = rels
+
+		for _, rel := range rels {
+			if rel != nil {
+				rel.R.Day = o
+			}
+		}
+		return nil
 	case "Habits":
 		rels, ok := retrieved.(HabitSlice)
 		if !ok {
@@ -613,11 +715,15 @@ func buildDayPreloader() dayPreloader {
 }
 
 type dayThenLoader[Q orm.Loadable] struct {
-	Habits    func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
-	SleepLogs func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
+	FitnessLogs func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
+	Habits      func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
+	SleepLogs   func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
 }
 
 func buildDayThenLoader[Q orm.Loadable]() dayThenLoader[Q] {
+	type FitnessLogsLoadInterface interface {
+		LoadFitnessLogs(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
+	}
 	type HabitsLoadInterface interface {
 		LoadHabits(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
 	}
@@ -626,6 +732,12 @@ func buildDayThenLoader[Q orm.Loadable]() dayThenLoader[Q] {
 	}
 
 	return dayThenLoader[Q]{
+		FitnessLogs: thenLoadBuilder[Q](
+			"FitnessLogs",
+			func(ctx context.Context, exec bob.Executor, retrieved FitnessLogsLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
+				return retrieved.LoadFitnessLogs(ctx, exec, mods...)
+			},
+		),
 		Habits: thenLoadBuilder[Q](
 			"Habits",
 			func(ctx context.Context, exec bob.Executor, retrieved HabitsLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
@@ -639,6 +751,67 @@ func buildDayThenLoader[Q orm.Loadable]() dayThenLoader[Q] {
 			},
 		),
 	}
+}
+
+// LoadFitnessLogs loads the day's FitnessLogs into the .R struct
+func (o *Day) LoadFitnessLogs(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if o == nil {
+		return nil
+	}
+
+	// Reset the relationship
+	o.R.FitnessLogs = nil
+
+	related, err := o.FitnessLogs(mods...).All(ctx, exec)
+	if err != nil {
+		return err
+	}
+
+	for _, rel := range related {
+		rel.R.Day = o
+	}
+
+	o.R.FitnessLogs = related
+	return nil
+}
+
+// LoadFitnessLogs loads the day's FitnessLogs into the .R struct
+func (os DaySlice) LoadFitnessLogs(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if len(os) == 0 {
+		return nil
+	}
+
+	fitnessLogs, err := os.FitnessLogs(mods...).All(ctx, exec)
+	if err != nil {
+		return err
+	}
+
+	for _, o := range os {
+		if o == nil {
+			continue
+		}
+
+		o.R.FitnessLogs = nil
+	}
+
+	for _, o := range os {
+		if o == nil {
+			continue
+		}
+
+		for _, rel := range fitnessLogs {
+
+			if !(o.ID == rel.DayID) {
+				continue
+			}
+
+			rel.R.Day = o
+
+			o.R.FitnessLogs = append(o.R.FitnessLogs, rel)
+		}
+	}
+
+	return nil
 }
 
 // LoadHabits loads the day's Habits into the .R struct
@@ -764,9 +937,10 @@ func (os DaySlice) LoadSleepLogs(ctx context.Context, exec bob.Executor, mods ..
 }
 
 type dayJoins[Q dialect.Joinable] struct {
-	typ       string
-	Habits    modAs[Q, habitColumns]
-	SleepLogs modAs[Q, sleepLogColumns]
+	typ         string
+	FitnessLogs modAs[Q, fitnessLogColumns]
+	Habits      modAs[Q, habitColumns]
+	SleepLogs   modAs[Q, sleepLogColumns]
 }
 
 func (j dayJoins[Q]) aliasedAs(alias string) dayJoins[Q] {
@@ -776,6 +950,20 @@ func (j dayJoins[Q]) aliasedAs(alias string) dayJoins[Q] {
 func buildDayJoins[Q dialect.Joinable](cols dayColumns, typ string) dayJoins[Q] {
 	return dayJoins[Q]{
 		typ: typ,
+		FitnessLogs: modAs[Q, fitnessLogColumns]{
+			c: FitnessLogs.Columns,
+			f: func(to fitnessLogColumns) bob.Mod[Q] {
+				mods := make(mods.QueryMods[Q], 0, 1)
+
+				{
+					mods = append(mods, dialect.Join[Q](typ, FitnessLogs.Name().As(to.Alias())).On(
+						to.DayID.EQ(cols.ID),
+					))
+				}
+
+				return mods
+			},
+		},
 		Habits: modAs[Q, habitColumns]{
 			c: Habits.Columns,
 			f: func(to habitColumns) bob.Mod[Q] {

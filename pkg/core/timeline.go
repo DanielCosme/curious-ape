@@ -16,6 +16,6 @@ type TimelineLog struct {
 	Title     string
 	StartTime time.Time
 	EndTime   time.Time
-	Type      TimelineType
 	Note      string
+	Type      TimelineType
 }

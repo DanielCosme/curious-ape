@@ -15,13 +15,13 @@ type Days struct {
 	db bob.DB
 }
 
-func (d Days) Create(date core.Date) (day core.Day, err error) {
+func (d *Days) Create(date core.Date) (day core.Day, err error) {
 	s := &models.DaySetter{Date: omit.From(date.Time())}
 	res, err := models.Days.Insert(s).One(context.Background(), d.db)
 	return dayToCore(res), err
 }
 
-func (d Days) Get(p core.DayParams) (day core.Day, err error) {
+func (d *Days) Get(p core.DayParams) (day core.Day, err error) {
 	res, err := BuildDayQuery(p).One(context.Background(), d.db)
 	if err != nil {
 		return day, catchDBErr("days: get", err)
@@ -30,7 +30,7 @@ func (d Days) Get(p core.DayParams) (day core.Day, err error) {
 	return dayToCore(res), err
 }
 
-func (d Days) GetOrCreate(p core.DayParams) (day core.Day, err error) {
+func (d *Days) GetOrCreate(p core.DayParams) (day core.Day, err error) {
 	day, err = d.Get(p)
 	if core.IfErrNNotFound(err) {
 		return
@@ -41,7 +41,7 @@ func (d Days) GetOrCreate(p core.DayParams) (day core.Day, err error) {
 	return
 }
 
-func (d Days) Find(p core.DayParams) (days []core.Day, err error) {
+func (d *Days) Find(p core.DayParams) (days []core.Day, err error) {
 	res, err := BuildDayQuery(p).All(context.Background(), d.db)
 	if err != nil {
 		return days, catchDBErr("days: find", err)
@@ -106,4 +106,8 @@ func BuildDayQuery(f core.DayParams) *sqlite.ViewQuery[*models.Day, models.DaySl
 	// q.Apply(models.SelectThenLoad.Day.FitnessLogs())
 	// q.Apply(models.SelectThenLoad.Day.DeepWorkLogs())
 	return q
+}
+
+func getDay(date core.Date, exec bob.Executor) (*models.Day, error) {
+	return BuildDayQuery(core.DayParams{Date: date}).One(context.Background(), exec)
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/danielcosme/curious-ape/pkg/oak"
 )
 
-func (a *App) HabitUpsert(ctx context.Context, params core.HabitUpsertParams) (habit core.Habit, err error) {
+func (a *App) HabitUpsert(ctx context.Context, params core.Habit) (habit core.Habit, err error) {
 	logger := oak.FromContext(ctx)
 
 	habit, err = a.db.Habits.Upsert(params)
@@ -32,7 +32,7 @@ func (a *App) HabitFlip(id int) (habit core.Habit, err error) {
 		state = core.HabitStateDone
 	}
 	habit.State = state
-	return a.db.Habits.Upsert(core.HabitUpsertParams{
+	return a.db.Habits.Upsert(core.Habit{
 		Date:  habit.Date,
 		Type:  habit.Type,
 		State: habit.State,

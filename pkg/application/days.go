@@ -48,10 +48,10 @@ func (a *App) dayGetOrCreate(d core.Date) (day core.Day, err error) {
 		if err != nil {
 			return
 		}
-		_, e1 := a.db.Habits.Upsert(core.HabitUpsertParams{Date: day.Date, State: core.HabitStateNoInfo, Type: core.HabitTypeWakeUp})
-		_, e2 := a.db.Habits.Upsert(core.HabitUpsertParams{Date: day.Date, State: core.HabitStateNoInfo, Type: core.HabitTypeFitness})
-		_, e3 := a.db.Habits.Upsert(core.HabitUpsertParams{Date: day.Date, State: core.HabitStateNoInfo, Type: core.HabitTypeDeepWork})
-		_, e4 := a.db.Habits.Upsert(core.HabitUpsertParams{Date: day.Date, State: core.HabitStateNoInfo, Type: core.HabitTypeEatHealthy})
+		_, e1 := a.db.Habits.Upsert(core.Habit{Date: day.Date, State: core.HabitStateNoInfo, Type: core.HabitTypeWakeUp})
+		_, e2 := a.db.Habits.Upsert(core.Habit{Date: day.Date, State: core.HabitStateNoInfo, Type: core.HabitTypeFitness})
+		_, e3 := a.db.Habits.Upsert(core.Habit{Date: day.Date, State: core.HabitStateNoInfo, Type: core.HabitTypeDeepWork})
+		_, e4 := a.db.Habits.Upsert(core.Habit{Date: day.Date, State: core.HabitStateNoInfo, Type: core.HabitTypeEatHealthy})
 		err = errors.Join(e1, e2, e3, e4)
 		if err != nil {
 			return

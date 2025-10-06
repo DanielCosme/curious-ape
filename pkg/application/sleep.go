@@ -30,7 +30,7 @@ func (a *App) sleepSync(ctx context.Context, d core.Date) error {
 			if sl.EndTime.Before(wakeUpTime) {
 				habitState = core.HabitStateDone
 			}
-			_, err := a.HabitUpsert(ctx, core.HabitUpsertParams{
+			_, err := a.HabitUpsert(ctx, core.Habit{
 				Date:      d,
 				Type:      core.HabitTypeWakeUp,
 				State:     habitState,
@@ -44,7 +44,7 @@ func (a *App) sleepSync(ctx context.Context, d core.Date) error {
 	return nil
 }
 
-func (a *App) sleepLogsGetFromFitbit(dates ...core.Date) (res []core.SleepLogUpsertParams, err error) {
+func (a *App) sleepLogsGetFromFitbit(dates ...core.Date) (res []core.SleepLog, err error) {
 	fitbitClient, err := a.fitbitClient()
 	if err != nil {
 		return
@@ -69,7 +69,7 @@ func (a *App) sleepLogsGetFromFitbit(dates ...core.Date) (res []core.SleepLogUps
 	return
 }
 
-func sleepLogFromFitbit(day core.Day, s fitbit.Sleep) (sl core.SleepLogUpsertParams, err error) {
+func sleepLogFromFitbit(day core.Day, s fitbit.Sleep) (sl core.SleepLog, err error) {
 	if !day.Date.IsEqual(fitbit.ParseDate(s.DateOfSleep)) {
 		return sl, errors.New("sleep log from fitbit: dates do not match with current day")
 	}
@@ -82,19 +82,19 @@ func sleepLogFromFitbit(day core.Day, s fitbit.Sleep) (sl core.SleepLogUpsertPar
 	if s.IsMainSleep {
 		title = "Main sleep"
 	}
-	sl = core.SleepLogUpsertParams{
+	sl = core.SleepLog{
 		Date:        day.Date,
 		IsMainSleep: s.IsMainSleep,
 		TimeAsleep:  fitbit.ToDuration(s.MinutesAsleep),
 		TimeInBed:   fitbit.ToDuration(s.TimeInBed),
-		Origin:      core.OriginLogFitbit,
-		Raw:         string(raw),
+		Origin:      core.LogOriginFitbit,
+		Raw:         raw,
 		TimelineLog: core.TimelineLog{
 			Title:     title,
 			StartTime: fitbit.ParseTime(s.StartTime),
 			EndTime:   fitbit.ParseTime(s.EndTime),
 			Type:      core.TimelineTypeSleep,
-			Note:      "From: " + core.OriginLogFitbit,
+			Note:      "Origin: " + core.LogOriginFitbit,
 		},
 	}
 	return sl, nil

@@ -7,12 +7,20 @@ env:
 
 vars:
   APP_NAME: ape
-  VERSION: v0.14.0
+  VERSION: v0.15.0
 
 tasks:
   default:
     cmds:
       - task: run
+
+  deploy:
+    cmds:
+      - ./scripts/release.sh
+      - ./scripts/deploy.sh
+      - task: tag
+      - git push
+      - git push origin {{.VERSION}}
 
   tag:
     cmds:

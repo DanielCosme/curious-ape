@@ -51,14 +51,6 @@ type HabitParams struct {
 	ID int
 }
 
-type HabitUpsertParams struct {
-	Date      Date
-	Type      HabitType
-	State     HabitState
-	Note      string
-	Automated bool
-}
-
 type HabitCategoryParams struct {
 	ID   int
 	Kind HabitType

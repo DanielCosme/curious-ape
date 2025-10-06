@@ -1,0 +1,1 @@
+ALTER TABLE sleep_log ADD COLUMN title TEXT NOT NULL DEFAULT "";

@@ -22,11 +22,11 @@ const (
 type LogOrigin string
 
 const (
-	OriginLogManual LogOrigin = "manual"
-	OriginLogWebUI  LogOrigin = "web_ui"
-	OriginLogFitbit           = IntegrationFitbit
-	OriginLogToggl            = IntegrationToggl
-	OriginLogGoogle           = IntegrationGoogle
+	LogOriginManual LogOrigin = "manual"
+	LogOriginWebUI  LogOrigin = "web_ui"
+	LogOriginFitbit           = IntegrationFitbit
+	LogOriginToggl            = IntegrationToggl
+	LogOriginGoogle           = IntegrationGoogle
 )
 
 type Integration string
