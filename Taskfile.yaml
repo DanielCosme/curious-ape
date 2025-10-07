@@ -7,7 +7,7 @@ env:
 
 vars:
   APP_NAME: ape
-  VERSION: v0.15.1
+  VERSION: v0.16.0
 
 tasks:
   default:
@@ -15,12 +15,26 @@ tasks:
       - task: run
 
   deploy:
+    deps: [push]
     cmds:
       - ./scripts/release.sh
       - ./scripts/deploy.sh
       - task: tag
       - git push
       - git push origin {{.VERSION}}
+
+  push:
+    desc: "Push changes to Github creating a new Version"
+    deps: [ci]
+    cmds:
+      - cmd: git diff --exit-code > /dev/null # workig tree cannot be dirty.
+      - test {{.CURRENT_BRANCH}} = 'main'
+      - git tag {{.VERSION}}
+      - git push
+      - git push origin {{.VERSION}}
+    vars:
+      CURRENT_BRANCH:
+        sh: git branch --show-current
 
   tag:
     cmds:
@@ -68,19 +82,6 @@ tasks:
         --tag migrate-ape \
         --target migrate \
         .
-
-  push:
-    desc: "Push changes to Github creating a new Version"
-    deps: [ci]
-    cmds:
-      - cmd: git diff --exit-code > /dev/null # workig tree cannot be dirty.
-      - test {{.CURRENT_BRANCH}} = 'main'
-      - git tag {{.VERSION}}
-      - git push
-      - git push origin {{.VERSION}}
-    vars:
-      CURRENT_BRANCH:
-        sh: git branch --show-current
 
   tools:
     desc: "Install CLI tools"

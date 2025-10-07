@@ -28,7 +28,7 @@ func (fls *FitnessLogs) Upsert(params core.FitnessLog) (fl core.FitnessLog, err 
 		StartTime: omit.From(params.StartTime),
 		EndTime:   omit.From(params.EndTime),
 		Note:      omit.From(params.Note),
-		Type:      omit.From(string(params.Type)),
+		Type:      omit.From(string(params.FitnessType)),
 		Origin:    omit.From(string(params.Origin)),
 		Raw:       omitnull.From(string(params.Raw)),
 	}
@@ -65,7 +65,8 @@ func fitnessLogToCore(day *models.Day, bobFl *models.FitnessLog) (fl core.Fitnes
 	fl.StartTime = bobFl.StartTime
 	fl.EndTime = bobFl.EndTime
 	fl.Note = bobFl.Note
-	fl.Type = core.FitnessLogType(bobFl.Type)
+	fl.Type = core.TimelineTypeFitness
+	fl.FitnessType = core.FitnessLogType(bobFl.Type)
 	fl.Origin = core.LogOrigin(bobFl.Origin)
 	return
 }

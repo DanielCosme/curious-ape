@@ -18,6 +18,7 @@ var Preload = getPreloaders()
 
 type preloaders struct {
 	Day           dayPreloader
+	DeepWorkLog   deepWorkLogPreloader
 	FitnessLog    fitnessLogPreloader
 	Habit         habitPreloader
 	HabitCategory habitCategoryPreloader
@@ -27,6 +28,7 @@ type preloaders struct {
 func getPreloaders() preloaders {
 	return preloaders{
 		Day:           buildDayPreloader(),
+		DeepWorkLog:   buildDeepWorkLogPreloader(),
 		FitnessLog:    buildFitnessLogPreloader(),
 		Habit:         buildHabitPreloader(),
 		HabitCategory: buildHabitCategoryPreloader(),
@@ -42,6 +44,7 @@ var (
 
 type thenLoaders[Q orm.Loadable] struct {
 	Day           dayThenLoader[Q]
+	DeepWorkLog   deepWorkLogThenLoader[Q]
 	FitnessLog    fitnessLogThenLoader[Q]
 	Habit         habitThenLoader[Q]
 	HabitCategory habitCategoryThenLoader[Q]
@@ -51,6 +54,7 @@ type thenLoaders[Q orm.Loadable] struct {
 func getThenLoaders[Q orm.Loadable]() thenLoaders[Q] {
 	return thenLoaders[Q]{
 		Day:           buildDayThenLoader[Q](),
+		DeepWorkLog:   buildDeepWorkLogThenLoader[Q](),
 		FitnessLog:    buildFitnessLogThenLoader[Q](),
 		Habit:         buildHabitThenLoader[Q](),
 		HabitCategory: buildHabitCategoryThenLoader[Q](),

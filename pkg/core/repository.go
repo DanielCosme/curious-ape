@@ -19,6 +19,10 @@ type FitnessLogRepository interface {
 	Upsert(FitnessLog) (FitnessLog, error)
 }
 
+type DeepWorkLogRepository interface {
+	Upsert(DeepWorkLog) (DeepWorkLog, error)
+}
+
 type RepositoryCommon struct {
 	ID uint
 }

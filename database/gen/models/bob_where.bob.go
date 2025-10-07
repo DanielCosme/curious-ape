@@ -18,6 +18,7 @@ var (
 
 func Where[Q sqlite.Filterable]() struct {
 	Days            dayWhere[Q]
+	DeepWorkLogs    deepWorkLogWhere[Q]
 	FitnessLogs     fitnessLogWhere[Q]
 	Habits          habitWhere[Q]
 	HabitCategories habitCategoryWhere[Q]
@@ -27,6 +28,7 @@ func Where[Q sqlite.Filterable]() struct {
 } {
 	return struct {
 		Days            dayWhere[Q]
+		DeepWorkLogs    deepWorkLogWhere[Q]
 		FitnessLogs     fitnessLogWhere[Q]
 		Habits          habitWhere[Q]
 		HabitCategories habitCategoryWhere[Q]
@@ -35,6 +37,7 @@ func Where[Q sqlite.Filterable]() struct {
 		Users           userWhere[Q]
 	}{
 		Days:            buildDayWhere[Q](Days.Columns),
+		DeepWorkLogs:    buildDeepWorkLogWhere[Q](DeepWorkLogs.Columns),
 		FitnessLogs:     buildFitnessLogWhere[Q](FitnessLogs.Columns),
 		Habits:          buildHabitWhere[Q](Habits.Columns),
 		HabitCategories: buildHabitCategoryWhere[Q](HabitCategories.Columns),

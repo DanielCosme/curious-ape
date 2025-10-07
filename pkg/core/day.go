@@ -41,5 +41,3 @@ func DayRelationsAll() []DayRelations {
 		DayRelationSleepLogs,
 	}
 }
-
-type DeepWorkLog struct{}

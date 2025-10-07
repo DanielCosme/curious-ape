@@ -6,6 +6,8 @@ type TimelineType uint
 
 const (
 	TimelineTypeSleep TimelineType = iota + 1
+	TimelineTypeFitness
+	TimelineTypeDeepWork
 )
 
 type Timeliner interface {

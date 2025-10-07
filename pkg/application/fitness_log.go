@@ -78,7 +78,8 @@ func fitnessLogFromGoogle(day core.Day, session google.FitnessSession) (fl core.
 	fl.EndTime = google.ParseMillis(session.EndTimeMillis)
 	fl.Note = session.Application.PackageName
 	// TODO: find a way to discern type, right now is hardcoded to Strength
-	fl.Type = core.FitnessLogTypeStrength
+	fl.FitnessType = core.FitnessLogTypeStrength
+	fl.Type = core.TimelineTypeFitness
 	fl.Origin = core.LogOriginGoogle
 	fl.Raw = raw
 	return

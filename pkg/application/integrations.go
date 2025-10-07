@@ -114,16 +114,6 @@ func (a *App) IntegrationGet(ctx context.Context, provider core.Integration) (In
 			} else {
 				info = append(info, fmt.Sprintf("Total time worked so far: %s", summary.TotalDuration))
 			}
-
-			entries, err := a.sync.TogglAPI.TimeEntries.GetDayEntries(time.Now())
-			if err != nil {
-				logger.Error(err.Error())
-			} else {
-				for _, e := range entries {
-					logger.Info(e.Description, "start", e.Start.String(), "end", e.Stop.String())
-				}
-			}
-
 		}
 		res = IntegrationInfo{
 			Name:   "Toggl",

@@ -10,8 +10,8 @@ const (
 type FitnessLog struct {
 	RepositoryCommon
 	TimelineLog
-	Date   Date
-	Type   FitnessLogType
-	Origin LogOrigin
-	Raw    []byte
+	Date        Date
+	FitnessType FitnessLogType
+	Origin      LogOrigin
+	Raw         []byte
 }
