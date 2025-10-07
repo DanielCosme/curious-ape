@@ -36,7 +36,7 @@ type TimeEntry struct {
 func (te *TimeEntries) GetDayEntries(date time.Time) (tes []TimeEntry, err error) {
 	query := url.Values{}
 	query.Add("start_date", date.Format("2006-01-02"))
-	query.Add("end_date", date.AddDate(0, 0, 1).Format("2006-01-02"))
+	query.Add("end_date", date.AddDate(0, 0, 2).Format("2006-01-02"))
 	path := "/api/v9/me/time_entries?" + query.Encode()
 	err = te.client.Call(http.MethodGet, path, nil, &tes)
 	if err == nil {

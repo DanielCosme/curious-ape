@@ -22,15 +22,24 @@ func (a *App) deepWorkSync(ctx context.Context, d core.Date) error {
 		return err
 	}
 
+	logger.Info("Deep work lgos for: "+day.Date.Time().Format(core.HumanDateWeekDay), "entries", len(entries))
 	var totalDuration time.Duration
 	for _, entry := range entries {
+		if entry.Stop.Before(d.ToBeginningOfDay()) {
+			logger.Info("skipping Toggl entry because it has not stopped")
+			continue
+		}
+		if entry.Start.Before(d.ToBeginningOfDay()) {
+			logger.Info("skipping Toggl entry because it started before the desired day")
+			continue
+		}
+		if entry.Start.After(d.ToEndOfDay()) {
+			logger.Info("skipping Toggl entry because it is beyond the current day")
+			continue
+		}
 		raw, err := json.Marshal(entry)
 		if err != nil {
 			return err
-		}
-		if entry.Stop.Before(d.Time()) {
-			logger.Trace("skipping Toggl entry because it has not stopped")
-			continue
 		}
 		params := core.DeepWorkLog{
 			Date: day.Date,

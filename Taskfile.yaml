@@ -7,7 +7,7 @@ env:
 
 vars:
   APP_NAME: ape
-  VERSION: v0.16.0
+  VERSION: v0.16.1
 
 tasks:
   default:
@@ -15,13 +15,11 @@ tasks:
       - task: run
 
   deploy:
-    deps: [push]
     cmds:
+      - task: ci
+      - task: push
       - ./scripts/release.sh
       - ./scripts/deploy.sh
-      - task: tag
-      - git push
-      - git push origin {{.VERSION}}
 
   push:
     desc: "Push changes to Github creating a new Version"
@@ -29,7 +27,7 @@ tasks:
     cmds:
       - cmd: git diff --exit-code > /dev/null # workig tree cannot be dirty.
       - test {{.CURRENT_BRANCH}} = 'main'
-      - git tag {{.VERSION}}
+      - task: tag
       - git push
       - git push origin {{.VERSION}}
     vars:
