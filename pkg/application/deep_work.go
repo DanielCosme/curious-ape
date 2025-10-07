@@ -22,7 +22,7 @@ func (a *App) deepWorkSync(ctx context.Context, d core.Date) error {
 		return err
 	}
 
-	logger.Info("Deep work lgos for: "+day.Date.Time().Format(core.HumanDateWeekDay), "entries", len(entries))
+	logger.Info("Deep work logs for: "+day.Date.Time().Format(core.HumanDateWeekDay), "entries", len(entries))
 	var totalDuration time.Duration
 	for _, entry := range entries {
 		if entry.Stop.Before(d.ToBeginningOfDay()) {
@@ -57,7 +57,7 @@ func (a *App) deepWorkSync(ctx context.Context, d core.Date) error {
 		}
 		duration := log.EndTime.Sub(log.StartTime)
 		t := fmt.Sprintf("%s-%s (%s)", log.StartTime.Format(core.Time), log.EndTime.Format(core.Time), duration)
-		logger.Info("Deep work log created: " + t)
+		logger.Info("Deep work log added: " + t)
 		totalDuration += duration
 	}
 

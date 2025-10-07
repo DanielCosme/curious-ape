@@ -133,6 +133,7 @@ func layout(s *State, children ...ElementRenderer) ElementRenderer {
 				META().CHARSET("UTF-8"),
 				META().NAME("viewport").CONTENT("width=device-width, initial-scale=1.0"),
 				SCRIPT().TYPE("module").SRC("https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.5/bundles/datastar.js"),
+				LINK().REL("stylesheet").HREF("/assets/css/main.css"),
 				TITLE().Text("Curious APE"),
 			),
 			BODY(

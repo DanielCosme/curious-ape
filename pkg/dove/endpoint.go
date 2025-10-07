@@ -11,6 +11,7 @@ type endpoint struct {
 func Endpoint(path string) *endpoint {
 	e := endpoint{
 		Handlers: map[string]HandlerFunc{},
+		Path:     path,
 	}
 	return &e
 }

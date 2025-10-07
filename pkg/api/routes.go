@@ -2,10 +2,14 @@ package api
 
 import (
 	"errors"
+	"mime"
 	"net/http"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/danielcosme/curious-ape/assets"
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/dove"
 	"github.com/danielcosme/curious-ape/pkg/oak"
@@ -19,6 +23,9 @@ func Routes(a *API) http.Handler {
 	// e.StaticFS("/static", echo.MustSubFS(views.StaticFS, "static"))
 
 	d.Use(dove.MiddlewarePanicRecover)
+
+	d.Prefix("/assets").GET(ServeStaticAssets)
+
 	d.Use(a.MiddlewareLoadCookie)
 	d.Use(a.MiddlewareAuthenticateFromSession)
 
@@ -39,6 +46,23 @@ func Routes(a *API) http.Handler {
 	d.Endpoint("/integrations").GET(a.IntegrationsGetList)
 
 	return d
+}
+
+func ServeStaticAssets(c *dove.Context) error {
+	path, found := strings.CutPrefix(c.Req.URL.Path, "/assets/")
+	if !found {
+		c.Res.WriteHeader(http.StatusNotFound)
+		return errors.New(c.Req.URL.Path + " " + "not found")
+	}
+	data, err := assets.Assets.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	mimeType := mime.TypeByExtension(filepath.Ext(path))
+	c.Res.Header().Add("Content-Type", mimeType)
+	_, err = c.Res.Write(data)
+	return err
 }
 
 func (a *API) FitbitSuccess(c *dove.Context) error {

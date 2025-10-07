@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/danielcosme/curious-ape/pkg/oak"
@@ -19,6 +20,7 @@ type Dove struct {
 	logLevel   slog.Level
 	middleware []MiddlewareFunc
 	routes     map[string]*endpoint
+	prefixed   []*endpoint
 }
 
 func New(logHandler slog.Handler) *Dove {
@@ -54,10 +56,20 @@ func (d *Dove) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	endpoint, ok := d.routes[r.URL.Path]
-	if !ok {
-		c.Res.WriteHeader(http.StatusNotFound)
-		return
+	var endpoint *endpoint
+	for _, e := range d.prefixed {
+		if strings.HasPrefix(r.URL.Path, e.Path) {
+			endpoint = e
+			break
+		}
+	}
+	if endpoint == nil {
+		var ok bool
+		endpoint, ok = d.routes[r.URL.Path]
+		if !ok {
+			c.Res.WriteHeader(http.StatusNotFound)
+			return
+		}
 	}
 
 	handler, ok := endpoint.Handlers[r.Method]
@@ -83,4 +95,11 @@ func (d *Dove) Endpoint(path string) *endpoint {
 
 func (d *Dove) Use(ms ...MiddlewareFunc) {
 	d.middleware = append(d.middleware, ms...)
+}
+
+func (d *Dove) Prefix(prefix string) *endpoint {
+	e := Endpoint(prefix)
+	e.middleware = d.middleware
+	d.prefixed = append(d.prefixed, e)
+	return e
 }
