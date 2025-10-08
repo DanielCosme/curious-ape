@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/danielcosme/curious-ape/pkg/application"
 	"github.com/danielcosme/curious-ape/pkg/core"
@@ -26,14 +27,18 @@ func Home(s *State) ElementRenderer {
 func DeepWork(s *State) ElementRenderer {
 	p := Group(
 		Range(s.Days, func(day core.Day) ElementRenderer {
+			// TODO: Do this better.
+			var duration time.Duration
+			logs := []ElementRenderer{}
+			for _, wl := range day.DeepWorkLogs {
+				duration += wl.EndTime.Sub(wl.StartTime)
+				logs = append(logs, SECTION(
+					SPAN().Text(fmt.Sprintf("%s-%s", wl.StartTime.Format(core.Time), wl.EndTime.Format(core.Time))),
+					SPAN().Text(fmt.Sprintf("  Duration: %s", core.DurationToString(wl.EndTime.Sub(wl.StartTime)))),
+				))
+			}
 			return DIV(
-				H4().Text(day.Date.Time().Format(core.HumanDate)+"                       "),
-				Range(day.DeepWorkLogs, func(wl core.DeepWorkLog) ElementRenderer {
-					return SECTION(
-						SPAN().Text(fmt.Sprintf("%s-%s", wl.StartTime.Format(core.Time), wl.EndTime.Format(core.Time))),
-						SPAN().Text(fmt.Sprintf("  Duration: %s", core.DurationToString(wl.EndTime.Sub(wl.StartTime)))),
-					)
-				}),
+				append([]ElementRenderer{H4().Text(day.Date.Time().Format(core.HumanDate)).Text("   " + core.DurationToString(duration))}, logs...)...,
 			)
 		}),
 	)
