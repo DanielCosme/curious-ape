@@ -47,10 +47,10 @@ func (dw *DeepWorkLogs) Upsert(params core.DeepWorkLog) (log core.DeepWorkLog, e
 		}
 	}
 
-	return coreToDeepWorkLog(day, bobLog), catchDBErr("work: upsert", err)
+	return deepWorkLogToCore(day, bobLog), catchDBErr("work: upsert", err)
 }
 
-func coreToDeepWorkLog(day *models.Day, bob *models.DeepWorkLog) (log core.DeepWorkLog) {
+func deepWorkLogToCore(day *models.Day, bob *models.DeepWorkLog) (log core.DeepWorkLog) {
 	log.ID = uint(bob.ID)
 	log.Date = core.NewDate(day.Date)
 	log.Title = bob.Title

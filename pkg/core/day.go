@@ -11,9 +11,11 @@ const (
 
 type Day struct {
 	RepositoryCommon
-	Date      Date
-	Habits    DayHabits
-	SleepLogs []SleepLog
+	Date         Date
+	Habits       DayHabits
+	SleepLogs    []SleepLog
+	FitnessLogs  []FitnessLog
+	DeepWorkLogs []DeepWorkLog
 }
 
 type DayHabits struct {
@@ -32,7 +34,15 @@ type DayParams struct {
 	ID    uint
 	Date  Date
 	Dates DateSlice
+	Order OrderParam
 }
+
+type OrderParam int
+
+const (
+	ASC OrderParam = iota
+	DESC
+)
 
 func DayRelationsAll() []DayRelations {
 	return []DayRelations{
@@ -42,3 +52,10 @@ func DayRelationsAll() []DayRelations {
 		DayRelationSleepLogs,
 	}
 }
+
+type DaySliceSortDESC []Day
+
+// NOTE: Sorts DESC
+func (ds DaySliceSortDESC) Less(i, j int) bool { return ds[i].Date.Time().After(ds[j].Date.Time()) }
+func (ds DaySliceSortDESC) Swap(i, j int)      { ds[i], ds[j] = ds[j], ds[i] }
+func (ds DaySliceSortDESC) Len() int           { return len(ds) }

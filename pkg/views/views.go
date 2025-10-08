@@ -23,6 +23,41 @@ func Home(s *State) ElementRenderer {
 	return bujoPage(s)
 }
 
+func DeepWork(s *State) ElementRenderer {
+	p := Group(
+		Range(s.Days, func(day core.Day) ElementRenderer {
+			return DIV(
+				H4().Text(day.Date.Time().Format(core.HumanDate)+"                       "),
+				Range(day.DeepWorkLogs, func(wl core.DeepWorkLog) ElementRenderer {
+					return SECTION(
+						SPAN().Text(fmt.Sprintf("%s-%s", wl.StartTime.Format(core.Time), wl.EndTime.Format(core.Time))),
+						SPAN().Text(fmt.Sprintf("  Duration: %s", core.DurationToString(wl.EndTime.Sub(wl.StartTime)))),
+					)
+				}),
+			)
+		}),
+	)
+	return layout(s, p)
+}
+
+func Fitness(s *State) ElementRenderer {
+	p := Group(
+		Range(s.Days, func(day core.Day) ElementRenderer {
+			return DIV(
+				Range(day.FitnessLogs, func(fl core.FitnessLog) ElementRenderer {
+					return SECTION(
+						H4().Text(fl.Title),
+						SPAN().Text(fl.Date.Time().Format(core.HumanDate)+"                       "),
+						SPAN().Text(fmt.Sprintf("%s-%s", fl.StartTime.Format(core.Time), fl.EndTime.Format(core.Time))),
+						SPAN().Text(fmt.Sprintf("  Duration: %s", core.DurationToString(fl.EndTime.Sub(fl.StartTime)))),
+					)
+				}),
+			)
+		}),
+	)
+	return layout(s, p)
+}
+
 func Sleep(s *State) ElementRenderer {
 	p := Group(
 		Range(s.Days, func(day core.Day) ElementRenderer {
@@ -160,6 +195,8 @@ func layout(s *State, children ...ElementRenderer) ElementRenderer {
 					s.Authenticated,
 					a("/", "Home"),
 					a("/sleep", " Sleep "),
+					a("/fitness", " Fitness "),
+					a("/deep_work", " Deep-Work "),
 					a("/integrations", "Integrations"),
 					// TODO: Make pages loaded from nav be partially loaded, and not the full page.
 				),

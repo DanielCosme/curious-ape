@@ -45,8 +45,30 @@ func Routes(a *API) http.Handler {
 	d.Endpoint("/integration").GET(a.IntegrationsGet)
 	d.Endpoint("/integrations").GET(a.IntegrationsGetList)
 	d.Endpoint("/sleep").GET(a.Sleep)
+	d.Endpoint("/fitness").GET(a.Fitness)
+	d.Endpoint("/deep_work").GET(a.DeepWork)
 
 	return d
+}
+
+func (a *API) DeepWork(c *dove.Context) error {
+	days, err := a.App.DaysMonth(c.Ctx(), core.NewDate(time.Now()))
+	if err != nil {
+		return err
+	}
+	state := State(a, c.Req)
+	state.Days = days
+	return c.RenderOK(views.DeepWork(state))
+}
+
+func (a *API) Fitness(c *dove.Context) error {
+	days, err := a.App.DaysMonth(c.Ctx(), core.NewDate(time.Now()))
+	if err != nil {
+		return err
+	}
+	state := State(a, c.Req)
+	state.Days = days
+	return c.RenderOK(views.Fitness(state))
 }
 
 func (a *API) Sleep(c *dove.Context) error {
@@ -110,6 +132,11 @@ func (a *API) Home(c *dove.Context) error {
 	days, err := a.App.DaysMonth(c.Ctx(), core.NewDate(time.Now()))
 	if err != nil {
 		return err
+	}
+
+	l := oak.FromContext(c.Ctx())
+	for _, day := range days {
+		l.Info(day.Date.String())
 	}
 
 	s := State(a, c.Req)

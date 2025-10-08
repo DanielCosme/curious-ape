@@ -3,12 +3,14 @@ package persistence
 import (
 	"context"
 	"log/slog"
+	"sort"
 
 	"github.com/aarondl/opt/omit"
 	"github.com/danielcosme/curious-ape/database/gen/models"
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/sqlite"
+	"github.com/stephenafamo/bob/dialect/sqlite/sm"
 )
 
 type Days struct {
@@ -53,6 +55,10 @@ func (d *Days) Find(p core.DayParams) (days []core.Day, err error) {
 		}
 		days = append(days, dayToCore(day))
 	}
+	if p.Order == core.DESC {
+		// NOTE: we sort it here because for some reason the bob mod for DESC does not work.
+		sort.Sort(core.DaySliceSortDESC(days))
+	}
 	return
 }
 
@@ -90,6 +96,12 @@ func dayToCore(d *models.Day) (day core.Day) {
 	for _, sl := range d.R.SleepLogs {
 		day.SleepLogs = append(day.SleepLogs, sleepLogToCore(d, sl))
 	}
+	for _, fl := range d.R.FitnessLogs {
+		day.FitnessLogs = append(day.FitnessLogs, fitnessLogToCore(d, fl))
+	}
+	for _, wl := range d.R.DeepWorkLogs {
+		day.DeepWorkLogs = append(day.DeepWorkLogs, deepWorkLogToCore(d, wl))
+	}
 	return day
 }
 
@@ -106,8 +118,12 @@ func BuildDayQuery(f core.DayParams) *sqlite.ViewQuery[*models.Day, models.DaySl
 	}
 	q.Apply(models.SelectThenLoad.Day.Habits())
 	q.Apply(models.SelectThenLoad.Day.SleepLogs())
-	// q.Apply(models.SelectThenLoad.Day.FitnessLogs())
-	// q.Apply(models.SelectThenLoad.Day.DeepWorkLogs())
+	q.Apply(models.SelectThenLoad.Day.FitnessLogs())
+	q.Apply(models.SelectThenLoad.Day.DeepWorkLogs())
+	if f.Order == core.DESC {
+		// NOTE: This is not working, unsure why.
+		q.Apply(sm.OrderBy(models.Days.Columns.Date).Desc())
+	}
 	return q
 }
 
