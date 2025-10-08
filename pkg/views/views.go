@@ -71,7 +71,7 @@ func Sleep(s *State) ElementRenderer {
 					return SECTION(
 						SPAN().Text(sl.Date.Time().Format(core.HumanDate)+"                       "),
 						SPAN().Text(fmt.Sprintf("%s-%s", sl.StartTime.Format(core.Time), sl.EndTime.Format(core.Time))),
-						SPAN().Text(fmt.Sprintf("  Duration: %s", core.DurationToString(sl.EndTime.Sub(sl.StartTime)))),
+						SPAN().Text(fmt.Sprintf("  Duration: %s", core.DurationToString(sl.TimeAsleep))),
 					)
 				}),
 			)
