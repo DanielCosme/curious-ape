@@ -23,6 +23,23 @@ func Home(s *State) ElementRenderer {
 	return bujoPage(s)
 }
 
+func Sleep(s *State) ElementRenderer {
+	p := Group(
+		Range(s.Days, func(day core.Day) ElementRenderer {
+			return DIV(
+				Range(day.SleepLogs, func(sl core.SleepLog) ElementRenderer {
+					return SECTION(
+						SPAN().Text(sl.Date.Time().Format(core.HumanDate)+"                       "),
+						SPAN().Text(fmt.Sprintf("%s-%s", sl.StartTime.Format(core.Time), sl.EndTime.Format(core.Time))),
+						SPAN().Text(fmt.Sprintf("  Duration: %s", core.DurationToString(sl.EndTime.Sub(sl.StartTime)))),
+					)
+				}),
+			)
+		}),
+	)
+	return layout(s, p)
+}
+
 func Login(s *State) ElementRenderer {
 	return layout(s, Group(
 		H1().Text("Login"),
@@ -142,6 +159,7 @@ func layout(s *State, children ...ElementRenderer) ElementRenderer {
 				NAV().IfChildren(
 					s.Authenticated,
 					a("/", "Home"),
+					a("/sleep", " Sleep "),
 					a("/integrations", "Integrations"),
 					// TODO: Make pages loaded from nav be partially loaded, and not the full page.
 				),

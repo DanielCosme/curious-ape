@@ -11,8 +11,9 @@ const (
 
 type Day struct {
 	RepositoryCommon
-	Date   Date
-	Habits DayHabits
+	Date      Date
+	Habits    DayHabits
+	SleepLogs []SleepLog
 }
 
 type DayHabits struct {

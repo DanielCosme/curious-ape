@@ -44,8 +44,19 @@ func Routes(a *API) http.Handler {
 	d.Endpoint("/day/sync").POST(a.DaySync)
 	d.Endpoint("/integration").GET(a.IntegrationsGet)
 	d.Endpoint("/integrations").GET(a.IntegrationsGetList)
+	d.Endpoint("/sleep").GET(a.Sleep)
 
 	return d
+}
+
+func (a *API) Sleep(c *dove.Context) error {
+	days, err := a.App.DaysMonth(c.Ctx(), core.NewDate(time.Now()))
+	if err != nil {
+		return err
+	}
+	state := State(a, c.Req)
+	state.Days = days
+	return c.RenderOK(views.Sleep(state))
 }
 
 func ServeStaticAssets(c *dove.Context) error {

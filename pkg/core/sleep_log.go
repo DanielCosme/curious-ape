@@ -1,6 +1,8 @@
 package core
 
-import "time"
+import (
+	"time"
+)
 
 type SleepLog struct {
 	RepositoryCommon
