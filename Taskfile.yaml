@@ -7,7 +7,7 @@ env:
 
 vars:
   APP_NAME: ape
-  VERSION: v0.18.0
+  VERSION: v0.18.1
 
 tasks:
   default:

@@ -134,11 +134,6 @@ func (a *API) Home(c *dove.Context) error {
 		return err
 	}
 
-	l := oak.FromContext(c.Ctx())
-	for _, day := range days {
-		l.Info(day.Date.String())
-	}
-
 	s := State(a, c.Req)
 	s.Days = days
 	return c.RenderOK(views.Home(s))

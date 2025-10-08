@@ -52,10 +52,3 @@ func DayRelationsAll() []DayRelations {
 		DayRelationSleepLogs,
 	}
 }
-
-type DaySliceSortDESC []Day
-
-// NOTE: Sorts DESC
-func (ds DaySliceSortDESC) Less(i, j int) bool { return ds[i].Date.Time().After(ds[j].Date.Time()) }
-func (ds DaySliceSortDESC) Swap(i, j int)      { ds[i], ds[j] = ds[j], ds[i] }
-func (ds DaySliceSortDESC) Len() int           { return len(ds) }

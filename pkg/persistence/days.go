@@ -3,7 +3,6 @@ package persistence
 import (
 	"context"
 	"log/slog"
-	"sort"
 
 	"github.com/aarondl/opt/omit"
 	"github.com/danielcosme/curious-ape/database/gen/models"
@@ -54,10 +53,6 @@ func (d *Days) Find(p core.DayParams) (days []core.Day, err error) {
 			return
 		}
 		days = append(days, dayToCore(day))
-	}
-	if p.Order == core.DESC {
-		// NOTE: we sort it here because for some reason the bob mod for DESC does not work.
-		sort.Sort(core.DaySliceSortDESC(days))
 	}
 	return
 }
@@ -121,7 +116,6 @@ func BuildDayQuery(f core.DayParams) *sqlite.ViewQuery[*models.Day, models.DaySl
 	q.Apply(models.SelectThenLoad.Day.FitnessLogs())
 	q.Apply(models.SelectThenLoad.Day.DeepWorkLogs())
 	if f.Order == core.DESC {
-		// NOTE: This is not working, unsure why.
 		q.Apply(sm.OrderBy(models.Days.Columns.Date).Desc())
 	}
 	return q
