@@ -6,7 +6,10 @@ set -gx new_version (t version --silent); or exit
 
 t build-docker; or exit
 
-echo "$DOCKER_HUB_PASSWORD" | docker login -u $DOCKER_HUB_USER --password-stdin; or exit 1
+docker login
+if test $status -ne 0
+  echo "$DOCKER_HUB_PASSWORD" | docker login -u $DOCKER_HUB_USER --password-stdin; or exit 1
+end
 
 docker image tag curious-ape "danielcosme/curious-ape:latest"; or exit 1
 docker image tag curious-ape "danielcosme/curious-ape:$new_version"; or exit 1

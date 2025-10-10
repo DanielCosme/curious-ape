@@ -114,7 +114,11 @@ func BuildDayQuery(f core.DayParams) *sqlite.ViewQuery[*models.Day, models.DaySl
 	q.Apply(models.SelectThenLoad.Day.Habits())
 	q.Apply(models.SelectThenLoad.Day.SleepLogs())
 	q.Apply(models.SelectThenLoad.Day.FitnessLogs())
-	q.Apply(models.SelectThenLoad.Day.DeepWorkLogs())
+	q.Apply(
+		models.SelectThenLoad.Day.DeepWorkLogs(
+			sm.OrderBy(models.DeepWorkLogs.Columns.StartTime).Desc(),
+		),
+	)
 	if f.Order == core.DESC {
 		q.Apply(sm.OrderBy(models.Days.Columns.Date).Desc())
 	}
