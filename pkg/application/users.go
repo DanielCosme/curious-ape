@@ -24,7 +24,7 @@ func (a *App) SetPassword(username, password, email string, role core.AuthRole) 
 		return err
 	}
 	if u == nil {
-		hash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+		hash, err := bcrypt.GenerateFromPassword([]byte(password), 10)
 		if err != nil {
 			return err
 		}

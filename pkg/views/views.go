@@ -33,6 +33,7 @@ func DeepWork(s *State) ElementRenderer {
 			for _, wl := range day.DeepWorkLogs {
 				duration += wl.EndTime.Sub(wl.StartTime)
 				logs = append(logs, SECTION(
+					SPAN().Text(wl.Title),
 					SPAN().Text(fmt.Sprintf("%s-%s", wl.StartTime.Format(core.Time), wl.EndTime.Format(core.Time))),
 					SPAN().Text(fmt.Sprintf("  Duration: %s", core.DurationToString(wl.EndTime.Sub(wl.StartTime)))),
 				))
