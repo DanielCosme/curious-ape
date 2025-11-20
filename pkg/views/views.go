@@ -88,12 +88,12 @@ func Login(s *State) ElementRenderer {
 			DIV(
 				LABEL().Text("Username").Children(
 					INPUT().TYPE("text").NAME("username").PLACEHOLDER("").STYLE("display", "block"),
-				).STYLE("display", "block"),
+				).STYLE("display", "block").FOR("username"),
 			),
 			DIV(
 				LABEL().Text("Password").Children(
 					INPUT().TYPE("text").NAME("password").PLACEHOLDER("").STYLE("display", "block"),
-				).STYLE("display", "block"),
+				).STYLE("display", "block").FOR("password"),
 			),
 			BUTTON().Text("Login").
 				TYPE("submit").
