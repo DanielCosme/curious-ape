@@ -33,3 +33,4 @@ config.json
 /deployment
 .vscode
 dist/
+**/secrets/
