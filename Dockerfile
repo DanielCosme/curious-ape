@@ -3,6 +3,24 @@ ENV GOCACHE=/root/.cache/go-build
 ENV CGO_ENABLED=1
 ARG APE_VERSION=unknown
 
+FROM base-builder AS echo-builder
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=/go/pkg/mod go mod download
+RUN go mod verify
+COPY . .
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg/mod \
+    go build -ldflags="-s -extldflags=-static -X main.version=1.0" -o=./bin/echo ./cmd/echo
+
+FROM alpine:latest AS echo
+RUN apk add --no-cache tzdata
+RUN apk add gcompat
+ENV TZ=America/Toronto
+WORKDIR /app
+COPY --from=echo-builder /app/bin/echo /app/bin/echo
+CMD ["/app/bin/echo"]
+
 FROM base-builder AS ape-builder
 WORKDIR /app
 COPY go.mod go.sum ./

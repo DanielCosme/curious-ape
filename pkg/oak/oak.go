@@ -3,6 +3,7 @@ package oak
 import (
 	"context"
 	"log/slog"
+	"os"
 	"strings"
 )
 
@@ -20,6 +21,10 @@ func New(backend slog.Handler) *Oak {
 		logger: slog.New(backend),
 	}
 	return o
+}
+
+func NewDefault() *Oak {
+	return New(TintHandler(os.Stdout, LevelTrace))
 }
 
 func (o *Oak) Trace(msg string, args ...any) {

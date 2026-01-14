@@ -7,9 +7,11 @@ require (
 	github.com/alexedwards/scs/sqlite3store v0.0.0-20251002162104-209de6e426de
 	github.com/alexedwards/scs/v2 v2.9.0
 	github.com/delaneyj/gostar v0.8.0
+	github.com/fatih/color v1.18.0
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/lmittmann/tint v1.1.2
-	github.com/stephenafamo/bob v0.41.1
+	github.com/magefile/mage v1.15.0
+	github.com/stephenafamo/bob v0.42.0
 	golang.org/x/crypto v0.42.0
 	golang.org/x/oauth2 v0.31.0
 	modernc.org/sqlite v1.39.0
@@ -25,7 +27,6 @@ require (
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
-	github.com/fatih/color v1.16.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.0.0-alpha.1 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
@@ -47,7 +48,7 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
 	github.com/qdm12/reprint v0.0.0-20200326205758-722754a53494 // indirect
-	github.com/rakyll/gotest v0.0.6 // indirect
+	github.com/rakyll/gotest v0.0.7 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/samber/lo v1.38.1 // indirect
@@ -66,7 +67,7 @@ require (
 	golang.org/x/exp/typeparams v0.0.0-20231108232855-2478ac86f678 // indirect
 	golang.org/x/mod v0.28.0 // indirect
 	golang.org/x/sync v0.17.0 // indirect
-	golang.org/x/sys v0.36.0 // indirect
+	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/tools v0.37.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	honnef.co/go/tools v0.6.1 // indirect
@@ -77,6 +78,7 @@ require (
 )
 
 tool (
+	github.com/magefile/mage
 	github.com/rakyll/gotest
 	github.com/stephenafamo/bob/gen/bobgen-sqlite
 	honnef.co/go/tools/cmd/staticcheck

@@ -24,6 +24,9 @@ type Dove struct {
 }
 
 func New(logHandler slog.Handler) *Dove {
+	if logHandler == nil {
+		logHandler = slog.DiscardHandler
+	}
 	d := &Dove{
 		// TODO: make log Level configurable
 		logHandler: logHandler,

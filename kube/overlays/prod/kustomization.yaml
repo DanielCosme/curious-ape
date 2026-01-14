@@ -4,6 +4,7 @@ namespace: curious-ape
 resources:
   - ../../base
   - env.yaml
+  - HTTPRoute.yaml
 
 secretGenerator:
   - name: ape-litestream

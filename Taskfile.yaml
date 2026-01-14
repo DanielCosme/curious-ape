@@ -10,9 +10,9 @@ vars:
   VERSION: v0.18.6
 
 tasks:
-  default:
-    cmds:
-      - task: run
+  # default:
+  #   cmds:
+  #     - task: run
 
   deploy:
     cmds:
@@ -33,25 +33,25 @@ tasks:
       CURRENT_BRANCH:
         sh: git branch --show-current
 
-  tag:
-    cmds:
-      - git tag {{.VERSION}}
+  # tag:
+  #   cmds:
+  #     - git tag {{.VERSION}}
 
-  version:
-    aliases: [v]
-    cmds:
-      - echo {{.VERSION}}
+  # version:
+  #   aliases: [v]
+  #   cmds:
+  #     - echo {{.VERSION}}
 
-  run:
-    aliases: [r]
-    deps: [build]
-    cmds:
-      - ./tmp/{{.APP_NAME}}
+  # run:
+  #   aliases: [r]
+  #   deps: [build]
+  #   cmds:
+  #     - ./tmp/{{.APP_NAME}}
 
-  build:
-    aliases: [b]
-    cmds:
-      - 'go build -ldflags="-X main.version={{.VERSION}}-dev" -o=./tmp/{{.APP_NAME}} ./cmd/web'
+  # build:
+  #   aliases: [b]
+  #   cmds:
+  #     - 'go build -ldflags="-X main.version={{.VERSION}}-dev" -o=./tmp/{{.APP_NAME}} ./cmd/web'
 
   ci:
     deps: [test, audit]
@@ -71,6 +71,12 @@ tasks:
       - |
         sudo docker build \
         --build-arg="APE_VERSION={{.VERSION}}" \
+        --tag ape-echo \
+        --target echo \
+        .
+      - |
+        sudo docker build \
+        --build-arg="APE_VERSION={{.VERSION}}" \
         --tag curious-ape \
         --target ape \
         .
@@ -80,15 +86,16 @@ tasks:
         --target migrate \
         .
 
-  tools:
-    desc: "Install CLI tools"
-    aliases: [deps]
-    cmds:
-      - go install github.com/air-verse/air@latest
-      - go install -tags 'sqlite3' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-      - go get -tool github.com/rakyll/gotest@latest
-      - go get -tool honnef.co/go/tools/cmd/staticcheck@latest
-      - go get -tool github.com/stephenafamo/bob/gen/bobgen-sqlite@latest
+  # tools:
+  #   desc: "Install CLI tools"
+  #   aliases: [deps]
+  #   cmds:
+  #     - go install github.com/air-verse/air@latest
+  #     - go install -tags 'sqlite3' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+  #     - go get -tool github.com/rakyll/gotest@latest
+  #     - go get -tool honnef.co/go/tools/cmd/staticcheck@latest
+  #     - go get -tool github.com/stephenafamo/bob/gen/bobgen-sqlite@v0.42.0
+  #     - go get -tool github.com/magefile/mage@latest
 
   test:
     aliases: [t]

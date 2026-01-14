@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -17,6 +16,7 @@ import (
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/oak"
 	"github.com/danielcosme/curious-ape/pkg/persistence"
+	"github.com/danielcosme/curious-ape/pkg/root"
 
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
@@ -112,9 +112,9 @@ func readConfiguration(cfg *config) *config {
 	var err error
 	var rawFile []byte
 
-	env, err := application.ParseEnvironment(os.Getenv("APE_ENVIRONMENT"))
+	env, err := application.ParseEnvironment(os.Getenv(root.ENVIRONMENT))
 	if err != nil {
-		logFatal(errors.New("environment variable APE_ENVIRONMENT is empty"))
+		logFatal(fmt.Errorf("environment variable %s is empty", root.ENVIRONMENT))
 	}
 	cfg.Environment = env
 	configPath := "config.json"
