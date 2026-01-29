@@ -1,31 +1,26 @@
-//go:build mage
-
 package main
 
 // NOTE: Mage https://github.com/magefile/mage
 import (
-	"fmt"
-	// "os"
-	// "os/exec"
-	"github.com/magefile/mage/sh"
-	// Mage other packages
-	"github.com/magefile/mage/mg" // mg contains helpful utility functions, like Deps
-	// "github.com/magefile/mage/mage"
-	// "github.com/magefile/mage/parse"
-	// "github.com/magefile/mage/target"
+	/*
+		Mage other packages
+		"github.com/magefile/mage/mage"
+		"github.com/magefile/mage/parse"
+		"github.com/magefile/mage/target"
+	*/
 
-	"github.com/danielcosme/curious-ape/pkg/root"
+	"fmt"
+
+	"github.com/magefile/mage/mg" // mg contains helpful utility functions, like Deps
+	"github.com/magefile/mage/sh"
+
+	"github.com/danielcosme/curious-ape/pkg/config"
 	"github.com/danielcosme/curious-ape/pkg/target"
 )
 
 const tmpDir = "./tmp"
 
-var Env = map[string]string{
-	root.ENVIRONMENT: "dev",
-}
-
 var Default = Run
-
 var Aliases = map[string]any{
 	"v": Version,
 	"r": Run,
@@ -34,9 +29,19 @@ var Aliases = map[string]any{
 
 var r target.Runner
 var binOutput string
+var dbLocation string
 
 func init() {
-	binOutput = fmt.Sprintf("%s/%s", tmpDir, root.APP)
+	binOutput = fmt.Sprintf("%s/%s", tmpDir, config.APP)
+	dbLocation = binOutput + ".db"
+
+	Env := map[string]string{
+		config.ENVIRONMENT: "dev",
+		"PROD_OUTPUT":      fmt.Sprintf("%s/%s", config.DEPLOYMENT_DIR, config.APP),
+		"DEV_OUTPUT":       binOutput,
+		"SECRETS_PATH":     config.DEPLOYMENT_DIR + "/secrets",
+		"ENC_SECRETS_PATH": config.DEPLOYMENT_DIR + "/enc",
+	}
 	r = target.NewRunner(Env, nil)
 }
 
@@ -47,16 +52,60 @@ func Run() error {
 
 // Builds Binary
 func Build() error {
-	c := target.New("go")
-	versionFlag := fmt.Sprintf("-X main.version=%s-dev", root.VERSION)
-	c.Args("build", "-ldflags", versionFlag, "-o="+binOutput, "./cmd/web")
+	c := target.New("./scripts/build.fish")
 	return r.RunV("build", c)
+}
+
+// Builds production static Binary
+func Build_prod() error {
+	c := target.NewA("./scripts/build.fish", "prod")
+	return r.RunV("build", c)
+}
+
+func Install() error {
+	mg.SerialDeps(Build_prod, Decrypt)
+
+	installDir := tmpDir + "/deployment"
+	host := fmt.Sprintf("%s@%s", config.PROD_ADMIN, config.PROD_HOST)
+	ts := []target.Target{
+		target.NewA("mkdir", "-p", installDir),
+		target.NewA("mv", config.DEPLOYMENT_DIR+"/ape", installDir+"/ape"),
+		target.NewA("cp", config.DEPLOYMENT_DIR+"/curious-ape.service", installDir+"/curious-ape.service"),
+		target.NewA("cp", config.DEPLOYMENT_DIR+"/secrets/config.json", installDir+"/config.json"),
+		target.NewA("cp", config.DEPLOYMENT_DIR+"/litestream/litestream", installDir+"/litestream"),
+		target.NewA("cp", config.DEPLOYMENT_DIR+"/litestream/etc/litestream.service", installDir+"/litestream.service"),
+		target.NewA("cp", config.DEPLOYMENT_DIR+"/secrets/litestream.yaml", installDir+"/litestream.yaml"),
+		target.NewA("cp", "./scripts/install.fish", installDir+"/install.fish"),
+		target.NewA("cp", config.DEPLOYMENT_DIR+"/envfile", installDir+"/envfile"),
+		target.NewA("rm", "-r", config.DEPLOYMENT_DIR+"/secrets"),
+
+		target.NewA("rsync", "--compress", "--recursive", installDir, host+":/tmp"),
+		target.NewA("ssh", host, "/tmp/deployment/install.fish"),
+		target.NewA("rm", "-r", installDir),
+	}
+	return runSteps("install server", ts)
+}
+
+// Encrypts all secrets.
+func Encrypt() error {
+	ts := []target.Target{
+		target.NewA("./scripts/enc_dec.fish", "enc"),
+	}
+	return runSteps("encrypt secrets", ts)
+}
+
+// Decrypts all secrets.
+func Decrypt() error {
+	ts := []target.Target{
+		target.NewA("./scripts/enc_dec.fish", "dec"),
+	}
+	return runSteps("decrypt secrets", ts)
 }
 
 // Install development environment tools
 func Tools() {
 	ts := []target.Target{
-		target.NewA("go", "install", "github.com/air-verse/air@latesta"),
+		target.NewA("go", "install", "github.com/air-verse/air@latest"),
 		target.NewA("go", "install", "-tags", "'sqlite3'", "github.com/golang-migrate/migrate/v4/cmd/migrate@latest"),
 		target.NewA("go", "get", "-tool", "github.com/rakyll/gotest@latest"),
 		target.NewA("go", "get", "-tool", "honnef.co/go/tools/cmd/staticcheck@latest"),
@@ -66,21 +115,73 @@ func Tools() {
 	runSteps("tools", ts)
 }
 
+func Logs_Prod() error {
+	host := fmt.Sprintf("%s@%s", config.PROD_ADMIN, config.PROD_HOST)
+	t := target.NewA("ssh", host, "sudo", "journalctl", "--lines", "40", "-fu", "curious-ape.service")
+	return r.RunV("logs prod", t)
+}
+
+func Audit() error {
+	ts := []target.Target{
+		target.NewA("go", "mod", "tidy"),
+		target.NewA("go", "mod", "verify"),
+		target.NewA("go", "fmt", "./..."),
+		target.NewA("go", "vet", "./..."),
+		target.NewA("go", "tool", "staticcheck", "-checks='inherit,-ST1001'", "./cmd...", "./pkg..."),
+	}
+	return runSteps("audit", ts)
+}
+
+func Ci() {
+	mg.SerialDeps(Test, Audit)
+}
+
+// Push Pushes repositoy to Github and creates new Version
+func Push() error {
+	mg.SerialDeps(Ci, Encrypt)
+
+	diff := target.NewA("git", "diff", "--exit-code").SetMsg("working tree cannot be dirty")
+	diff.Silent = true
+
+	branch, err := sh.Output("git", "branch", "--show-current")
+	assert(err)
+	ts := []target.Target{
+		diff,
+		target.NewA("test", branch, "=", "main").SetMsg("branch has to be main"),
+	}
+	err = runSteps("push", ts)
+	assert(err)
+
+	err = Tag()
+	assert(err)
+
+	ts = []target.Target{
+		target.NewA("git", "push"),
+		target.NewA("git", "push", "origin", config.VERSION),
+	}
+	return runSteps("push", ts)
+}
+
 func Test() error {
 	return r.RunV("test", target.NewA("go", "tool", "gotest", "./..."))
 }
 
 func Tag() error {
-	return r.RunV("tag", target.NewA("git", "tag", root.VERSION))
+	return r.RunV("tag", target.NewA("git", "tag", config.VERSION))
 }
 
 func Version() error {
-	return sh.RunV("echo", root.VERSION)
+	return sh.RunV("echo", config.VERSION)
 }
 
 func runSteps(target string, ts []target.Target) error {
+	var err error
 	for _, t := range ts {
-		err := r.RunV(target, t)
+		if t.Silent {
+			err = r.Run(target, t)
+		} else {
+			err = r.RunV(target, t)
+		}
 		assert(err)
 	}
 	return nil
@@ -91,37 +192,3 @@ func assert(err error) {
 		panic(err)
 	}
 }
-
-// A custom install step if you need your bin someplace other than go/bin
-// func Install() error {
-// 	mg.Deps(Build)
-// 	fmt.Println("Installing...")
-// 	return os.Rename("./MyApp", "/usr/bin/MyApp")
-// }
-//
-// // Manage your deps, or running package managers.
-// func InstallDeps() error {
-// 	fmt.Println("Installing Deps...")
-// 	cmd := exec.Command("go", "get", "github.com/stretchr/piglatin")
-// 	return cmd.Run()
-// }
-//
-// // Clean up after yourself
-// func Clean() {
-// 	fmt.Println("Cleaning...")
-// 	os.RemoveAll("MyApp")
-// }
-
-/*
-type Build mg.Namespace
-
-// Builds the site using hugo.
-func (Build) Site() error {
-  return nil
-}
-
-// Builds the pdf docs.
-func (Build) Docs() {}
-
-$ mage build:site
-*/

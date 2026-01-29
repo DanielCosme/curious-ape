@@ -1,0 +1,21 @@
+[Unit]
+Description=Curious Ape: Automatic habit tracking
+After=ape-litestream.service
+Requires=ape-litestream.service
+
+StartLimitIntervalSec=600
+StartLimitBurst=5
+
+[Service]
+EnvironmentFile=/opt/curious-ape/envfile
+ExecStart=/opt/curious-ape/ape
+StateDirectory=curious-ape
+WorkingDirectory=/opt/curious-ape
+Restart=on-failure
+RestartSec=5
+Type=exec
+
+User=daniel
+Group=daniel
+[Install]
+WantedBy=multi-user.target

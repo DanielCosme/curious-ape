@@ -20,11 +20,6 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-func TestHabitUpsertManual(t *testing.T) {
-	t.Parallel()
-	_ = NewTestApplication(t)
-}
-
 func TestDay(t *testing.T) {
 	t.Parallel()
 	app := NewTestApplication(t)

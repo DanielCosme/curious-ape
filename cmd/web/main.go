@@ -13,10 +13,10 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/danielcosme/curious-ape/pkg/application"
+	root "github.com/danielcosme/curious-ape/pkg/config"
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/oak"
 	"github.com/danielcosme/curious-ape/pkg/persistence"
-	"github.com/danielcosme/curious-ape/pkg/root"
 
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"

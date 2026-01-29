@@ -1,0 +1,15 @@
+[Unit]
+Description=Curious-Ape Database replication via Litestream
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStartPre=/opt/curious-ape/litestream restore -if-db-not-exists -if-replica-exists -config /opt/curious-ape/litestream.yaml /var/lib/curious-ape/ape.db
+ExecStart=/opt/curious-ape/litestream replicate -config /opt/curious-ape/litestream.yaml
+Restart=always
+Type=exec
+
+User=daniel
+Group=daniel
+[Install]
+WantedBy=multi-user.target
