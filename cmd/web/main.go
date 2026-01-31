@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -91,6 +92,13 @@ func main() {
 
 	err = runDataMigration(bobDB)
 	exitIfErr(err)
+
+	go func() {
+		ticker := time.NewTicker(time.Hour * 6)
+		for {
+			app.DaySync(context.Background(), core.NewDate(<-ticker.C))
+		}
+	}()
 
 	t := api.NewApi(app, sessionManager, v)
 	addr := fmt.Sprintf(":%d", cfg.Port)

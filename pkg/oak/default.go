@@ -64,7 +64,7 @@ func fromContextWithLayer(ctx context.Context, layer string) *Oak {
 	v, ok := ctx.Value(CtxName).(*Oak)
 	if !ok {
 		logger := New(TintHandler(os.Stdout, LevelTrace)).Layer(layer)
-		logger.Error("no logger found in context, new one created")
+		logger.Warning("no logger found in context, new one created")
 		return logger
 	}
 	return v.Layer(layer)
