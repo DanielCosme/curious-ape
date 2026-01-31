@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -22,6 +23,9 @@ import (
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
 	"github.com/danielcosme/curious-ape/pkg/api"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/sqlite"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "modernc.org/sqlite"
 )
 
@@ -68,6 +72,25 @@ func main() {
 	err = db.Ping()
 	exitIfErr(err)
 
+	// Run database migrations
+	migrationDriver, err := sqlite.WithInstance(db, &sqlite.Config{})
+	exitIfErr(err)
+	migrator, err := migrate.NewWithDatabaseInstance(
+		"file://./database/migrations/sqlite",
+		"ape",
+		migrationDriver,
+	)
+	exitIfErr(err)
+	err = migrator.Up()
+	if err != nil {
+		if errors.Is(err, migrate.ErrNoChange) {
+			v, dirty, _ := migrator.Version()
+			oak.Info("Migrations up to date", "version", v, "dirty", dirty)
+		} else {
+			exitIfErr(err)
+		}
+	}
+
 	sessionManager := scs.New()
 	sessionManager.Store = sqlite3store.New(db)
 	sessionManager.Lifetime = 24 * time.Hour * 7 // 7 days
@@ -78,9 +101,9 @@ func main() {
 	app := application.New(&application.AppOptions{
 		Database: persistence.New(bobDB),
 		Config: &application.Config{
-			Env:              cfg.Environment,
-			Fitbit:           cfg.Integrations.Fitbit.ToConf(),
-			Google:           cfg.Integrations.Google.ToConf(),
+			Env:    cfg.Environment,
+			Fitbit: cfg.Integrations.Fitbit.ToConf(),
+			// Google:           cfg.Integrations.Google.ToConf(),
 			TogglToken:       cfg.Integrations.Toggl.Token,
 			TogglWorkspaceID: cfg.Integrations.Toggl.WorkspaceID,
 		},
