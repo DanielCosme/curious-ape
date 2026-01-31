@@ -14,6 +14,7 @@ import (
 	"github.com/stephenafamo/bob"
 	"golang.org/x/oauth2"
 
+	"github.com/danielcosme/curious-ape/database/migrations"
 	"github.com/danielcosme/curious-ape/pkg/application"
 	root "github.com/danielcosme/curious-ape/pkg/config"
 	"github.com/danielcosme/curious-ape/pkg/core"
@@ -26,6 +27,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/sqlite"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 	_ "modernc.org/sqlite"
 )
 
@@ -64,6 +66,7 @@ func main() {
 	cfg := new(config)
 	v := Version()
 	readConfiguration(cfg)
+	oak.Info("Environment: " + string(cfg.Environment))
 
 	oak.Info("Version: " + v)
 	oak.Info("Opening database", "path", cfg.Database.DSN)
@@ -72,14 +75,12 @@ func main() {
 	err = db.Ping()
 	exitIfErr(err)
 
-	// Run database migrations
+	// database migrations
+	migrationsSource, err := iofs.New(migrations.Migrations, "sqlite")
+	exitIfErr(err)
 	migrationDriver, err := sqlite.WithInstance(db, &sqlite.Config{})
 	exitIfErr(err)
-	migrator, err := migrate.NewWithDatabaseInstance(
-		"file://./database/migrations/sqlite",
-		"ape",
-		migrationDriver,
-	)
+	migrator, err := migrate.NewWithInstance("iofs", migrationsSource, "sqlite", migrationDriver)
 	exitIfErr(err)
 	err = migrator.Up()
 	if err != nil {
