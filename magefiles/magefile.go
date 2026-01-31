@@ -30,6 +30,7 @@ var Aliases = map[string]any{
 var r target.Runner
 var binOutput string
 var dbLocation string
+var prodHost string
 
 func init() {
 	binOutput = fmt.Sprintf("%s/%s", tmpDir, config.APP)
@@ -43,6 +44,8 @@ func init() {
 		"ENC_SECRETS_PATH": config.DEPLOYMENT_DIR + "/enc",
 	}
 	r = target.NewRunner(Env, nil)
+
+	prodHost = fmt.Sprintf("%s@%s", config.PROD_ADMIN, config.PROD_HOST)
 }
 
 func Run() error {
@@ -62,11 +65,17 @@ func Build_prod() error {
 	return r.RunV("build", c)
 }
 
+func Deploy() error {
+	mg.SerialDeps(Install)
+
+	enc := target.NewA("ssh", prodHost, "sudo", "systemctl", "restart", "curious-ape")
+	return r.RunV("deploy", enc)
+}
+
 func Install() error {
 	mg.SerialDeps(Build_prod, Decrypt)
 
 	installDir := tmpDir + "/deployment"
-	host := fmt.Sprintf("%s@%s", config.PROD_ADMIN, config.PROD_HOST)
 	ts := []target.Target{
 		target.NewA("mkdir", "-p", installDir),
 		target.NewA("mv", config.DEPLOYMENT_DIR+"/ape", installDir+"/ape"),
@@ -79,8 +88,8 @@ func Install() error {
 		target.NewA("cp", config.DEPLOYMENT_DIR+"/envfile", installDir+"/envfile"),
 		target.NewA("rm", "-r", config.DEPLOYMENT_DIR+"/secrets"),
 
-		target.NewA("rsync", "--compress", "--recursive", installDir, host+":/tmp"),
-		target.NewA("ssh", host, "/tmp/deployment/install.fish"),
+		target.NewA("rsync", "--compress", "--recursive", installDir, prodHost+":/tmp"),
+		target.NewA("ssh", prodHost, "/tmp/deployment/install.fish"),
 		target.NewA("rm", "-r", installDir),
 	}
 	return runSteps("install server", ts)
@@ -88,18 +97,14 @@ func Install() error {
 
 // Encrypts all secrets.
 func Encrypt() error {
-	ts := []target.Target{
-		target.NewA("./scripts/enc_dec.fish", "enc"),
-	}
-	return runSteps("encrypt secrets", ts)
+	enc := target.NewA("./scripts/enc_dec.fish", "enc")
+	return r.RunV("encryp secrets", enc)
 }
 
 // Decrypts all secrets.
 func Decrypt() error {
-	ts := []target.Target{
-		target.NewA("./scripts/enc_dec.fish", "dec"),
-	}
-	return runSteps("decrypt secrets", ts)
+	dec := target.NewA("./scripts/enc_dec.fish", "dec")
+	return r.RunV("decrypt secrets", dec)
 }
 
 // Install development environment tools
@@ -116,8 +121,7 @@ func Tools() {
 }
 
 func Logs_Prod() error {
-	host := fmt.Sprintf("%s@%s", config.PROD_ADMIN, config.PROD_HOST)
-	t := target.NewA("ssh", host, "sudo", "journalctl", "--lines", "40", "-fu", "curious-ape.service")
+	t := target.NewA("ssh", prodHost, "sudo", "journalctl", "--lines", "40", "-fu", "curious-ape.service")
 	return r.RunV("logs prod", t)
 }
 
