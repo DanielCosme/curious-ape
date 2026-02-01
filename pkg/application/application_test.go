@@ -103,7 +103,7 @@ func NewTestApplication(t *testing.T) *application.App {
 	t.Cleanup(func() { db.Close() })
 
 	opts := &application.AppOptions{
-		Logger: oak.New(oak.TintHandler(os.Stdout, oak.LevelTrace)),
+		Logger: oak.New(oak.TintHandler(os.Stdout, oak.LevelTrace, true)),
 		Config: &application.Config{
 			Env: application.Test,
 		},

@@ -59,7 +59,7 @@ type user struct {
 }
 
 func main() {
-	logger := oak.New(oak.TintHandler(os.Stdout, oak.LevelTrace))
+	logger := oak.New(oak.TintHandler(os.Stdout, oak.LevelTrace, false))
 	oak.SetDefault(logger)
 	logLogger := oak.NewLogLogger(logger, oak.LevelTrace)
 

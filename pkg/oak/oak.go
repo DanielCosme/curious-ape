@@ -24,7 +24,7 @@ func New(backend slog.Handler) *Oak {
 }
 
 func NewDefault() *Oak {
-	return New(TintHandler(os.Stdout, LevelTrace))
+	return New(TintHandler(os.Stdout, LevelTrace, true))
 }
 
 func (o *Oak) Trace(msg string, args ...any) {

@@ -72,28 +72,31 @@ func (h *QueuedHandler) Dequeue(backend slog.Handler) {
 	h.traceStarted = false
 }
 
-func TintHandler(out io.Writer, level slog.Leveler) slog.Handler {
+func TintHandler(out io.Writer, level slog.Leveler, withTimeKey bool) slog.Handler {
 	return tint.NewHandler(out, &tint.Options{
 		Level:      level,
 		TimeFormat: time.StampMilli,
 		NoColor:    false,
 		AddSource:  false,
 		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+			if withTimeKey == false && a.Key == slog.TimeKey && len(groups) == 0 {
+				return slog.Attr{}
+			}
 			if a.Key == slog.LevelKey && len(groups) == 0 {
 				level, ok := a.Value.Any().(slog.Level)
 				if ok {
-					switch {
-					case level == LevelTrace:
+					switch level {
+					case LevelTrace:
 						return tint.Attr(7, slog.String(a.Key, "TRC")) // White
-					case level == LevelDebug:
+					case LevelDebug:
 						return tint.Attr(5, slog.String(a.Key, "DBG")) // Magenta
-					case level == LevelNotice:
+					case LevelNotice:
 						return tint.Attr(4, slog.String(a.Key, "NOT")) // Blue
-					case level == LevelWarning:
+					case LevelWarning:
 						return tint.Attr(3, slog.String(a.Key, "WRN")) // Yellow
-					case level == LevelError:
+					case LevelError:
 						return tint.Attr(1, slog.String(a.Key, "ERR")) // Red
-					case level == LevelFatal:
+					case LevelFatal:
 						return tint.Attr(9, slog.String(a.Key, "FTL")) // Bright Red
 					}
 				}

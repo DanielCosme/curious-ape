@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	logger := slog.New(TintHandler(os.Stdout, LevelTrace))
+	logger := slog.New(TintHandler(os.Stdout, LevelTrace, true))
 	slog.SetDefault(logger)
 }
 
@@ -63,7 +63,7 @@ func FromContext(ctx context.Context) *Oak {
 func fromContextWithLayer(ctx context.Context, layer string) *Oak {
 	v, ok := ctx.Value(CtxName).(*Oak)
 	if !ok {
-		logger := New(TintHandler(os.Stdout, LevelTrace)).Layer(layer)
+		logger := New(TintHandler(os.Stdout, LevelTrace, false)).Layer(layer)
 		logger.Warning("no logger found in context, new one created")
 		return logger
 	}
