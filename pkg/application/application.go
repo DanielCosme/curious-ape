@@ -33,7 +33,7 @@ type Config struct {
 }
 
 func New(opts *AppOptions) *App {
-	sync, _ := integrations.New(opts.Config.TogglWorkspaceID, opts.Config.TogglToken, opts.Config.HevyAPIKey, opts.Config.Fitbit, opts.Config.Google)
+	sync := integrations.New(opts.Config.TogglWorkspaceID, opts.Config.TogglToken, opts.Config.HevyAPIKey, opts.Config.Fitbit, opts.Config.Google)
 	a := &App{
 		Log:  opts.Logger.Layer("app"),
 		Env:  opts.Config.Env,

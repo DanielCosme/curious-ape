@@ -23,7 +23,7 @@ type Integrations struct {
 	list     []core.Integration
 }
 
-func New(togglWorkspaceID int, togglToken, hevyAPIKey string, fitbit, google *oauth2.Config) (*Integrations, error) {
+func New(togglWorkspaceID int, togglToken, hevyAPIKey string, fitbit, google *oauth2.Config) *Integrations {
 	i := &Integrations{
 		fitbit: fitbit,
 		google: google,
@@ -32,25 +32,26 @@ func New(togglWorkspaceID int, togglToken, hevyAPIKey string, fitbit, google *oa
 		i.list = append(i.list, core.IntegrationFitbit)
 	}
 	if i.google != nil {
-		i.list = append(i.list, core.IntegrationGoogle)
-	}
-	if togglToken != "" && togglWorkspaceID > 0 {
-		a, err := toggl.NewApi(togglWorkspaceID, togglToken)
-		if err != nil {
-			oak.Error("Failed to initialize Toggl API", "error", err.Error())
-			return i, err
-		}
-		oak.Info("Toggl API client timezone: " + a.ClientTimezone().String())
-		i.TogglAPI = a
-		i.list = append(i.list, core.IntegrationToggl)
-	} else {
-		oak.Warning("Toggl integration not configured")
+		// NOTE: Google deactivated.
+		// i.list = append(i.list, core.IntegrationGoogle)
 	}
 	if hevyAPIKey != "" {
 		i.Hevy = hevy.New(hevyAPIKey)
 		i.list = append(i.list, core.IntegrationHevy)
 	}
-	return i, nil
+	if togglToken != "" && togglWorkspaceID > 0 {
+		a, err := toggl.NewApi(togglWorkspaceID, togglToken)
+		if err != nil {
+			oak.Error("Failed to initialize Toggl API", "error", err.Error())
+		} else {
+			oak.Info("Toggl API client timezone: " + a.ClientTimezone().String())
+			i.TogglAPI = a
+			i.list = append(i.list, core.IntegrationToggl)
+		}
+	} else {
+		oak.Warning("Toggl integration not configured")
+	}
+	return i
 }
 
 func (i *Integrations) IntegrationsList() []core.Integration {

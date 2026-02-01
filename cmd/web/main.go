@@ -78,7 +78,7 @@ func main() {
 	err = db.Ping()
 	exitIfErr(err)
 
-	// database migrations
+	// Database migrations
 	migrationsSource, err := iofs.New(migrations.Migrations, "sqlite")
 	exitIfErr(err)
 	migrationDriver, err := sqlite.WithInstance(db, &sqlite.Config{})
@@ -105,9 +105,9 @@ func main() {
 	app := application.New(&application.AppOptions{
 		Database: persistence.New(bobDB),
 		Config: &application.Config{
-			Env:    cfg.Environment,
-			Fitbit: cfg.Integrations.Fitbit.ToConf(),
-			// Google:           cfg.Integrations.Google.ToConf(),
+			Env:              cfg.Environment,
+			Fitbit:           cfg.Integrations.Fitbit.ToConf(),
+			Google:           cfg.Integrations.Google.ToConf(),
 			HevyAPIKey:       cfg.Integrations.Hevy.ApiKey,
 			TogglToken:       cfg.Integrations.Toggl.Token,
 			TogglWorkspaceID: cfg.Integrations.Toggl.WorkspaceID,

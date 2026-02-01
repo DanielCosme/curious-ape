@@ -1,11 +1,7 @@
 package config
 
 const (
-	APP     = "ape"
-	VERSION = "v0.21.1"
-)
-
-const (
+	APP_NAME            = "ape"
 	ENVIRONMENT         = "APE_ENVIRONMENT"
 	MIGRATIONS_LOCATION = "database/migrations/sqlite"
 	DEPLOYMENT_DIR      = "deployment"

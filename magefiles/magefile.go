@@ -33,12 +33,12 @@ var dbLocation string
 var prodHost string
 
 func init() {
-	binOutput = fmt.Sprintf("%s/%s", tmpDir, config.APP)
+	binOutput = fmt.Sprintf("%s/%s", tmpDir, config.APP_NAME)
 	dbLocation = binOutput + ".db"
 
 	Env := map[string]string{
 		config.ENVIRONMENT: "dev",
-		"PROD_OUTPUT":      fmt.Sprintf("%s/%s", config.DEPLOYMENT_DIR, config.APP),
+		"PROD_OUTPUT":      fmt.Sprintf("%s/%s", config.DEPLOYMENT_DIR, config.APP_NAME),
 		"DEV_OUTPUT":       binOutput,
 		"SECRETS_PATH":     config.DEPLOYMENT_DIR + "/secrets",
 		"ENC_SECRETS_PATH": config.DEPLOYMENT_DIR + "/enc",
