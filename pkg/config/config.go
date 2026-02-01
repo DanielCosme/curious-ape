@@ -2,7 +2,7 @@ package config
 
 const (
 	APP     = "ape"
-	VERSION = "v0.20.0"
+	VERSION = "v0.21.0"
 )
 
 const (

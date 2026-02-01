@@ -27,6 +27,7 @@ const (
 	LogOriginFitbit           = IntegrationFitbit
 	LogOriginToggl            = IntegrationToggl
 	LogOriginGoogle           = IntegrationGoogle
+	LogOriginHevy             = IntegrationHevy
 )
 
 type Integration string
@@ -35,6 +36,7 @@ const (
 	IntegrationFitbit = "fitbit"
 	IntegrationGoogle = "google"
 	IntegrationToggl  = "toggl"
+	IntegrationHevy   = "hevy"
 )
 
 func ToUpperFist(s string) string {

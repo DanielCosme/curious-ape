@@ -20,7 +20,7 @@ type IntegrationStatus string
 
 const IntegrationStatusConnected IntegrationStatus = "connected"
 const IntegrationStatusUnkown IntegrationStatus = "unknown"
-const IntegrationStatusDicsonnected IntegrationStatus = "disconnected"
+const IntegrationStatusDisconnected IntegrationStatus = "disconnected"
 const IntegrationStatusNotImplemented IntegrationStatus = "not-implemented"
 
 type IntegrationInfo struct {
@@ -52,12 +52,26 @@ func (a *App) IntegrationGet(ctx context.Context, provider core.Integration) (In
 	status := IntegrationStatusNotImplemented
 
 	switch provider {
+	case core.IntegrationHevy:
+		count, err := a.sync.Hevy.Workouts.Count()
+		if err != nil {
+			status = IntegrationStatusDisconnected
+			info = append(info, err.Error())
+		} else {
+			status = IntegrationStatusConnected
+			info = append(info, fmt.Sprintf("Number of workouts: %d", count))
+		}
+		res = IntegrationInfo{
+			Name:   "Hevy",
+			Info:   info,
+			Status: status,
+		}
 	case core.IntegrationGoogle:
 		_, err := a.fitnessLogsFromGoogle(today)
 		if err != nil {
 			authURL = a.sync.GenerateOauth2URI(provider)
 			if authURL != "" {
-				status = IntegrationStatusDicsonnected
+				status = IntegrationStatusDisconnected
 			}
 			info = append(info, err.Error())
 		} else {
@@ -74,7 +88,7 @@ func (a *App) IntegrationGet(ctx context.Context, provider core.Integration) (In
 		if err != nil {
 			authURL = a.sync.GenerateOauth2URI(provider)
 			if authURL != "" {
-				status = IntegrationStatusDicsonnected
+				status = IntegrationStatusDisconnected
 			}
 			info = append(info, err.Error())
 		} else {

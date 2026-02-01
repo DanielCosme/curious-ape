@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/danielcosme/curious-ape/pkg/integrations/hevy"
 	"github.com/danielcosme/curious-ape/pkg/integrations/toggl"
 	"github.com/danielcosme/curious-ape/pkg/oak"
 
@@ -16,12 +17,13 @@ import (
 
 type Integrations struct {
 	TogglAPI *toggl.API
+	Hevy     *hevy.API
 	fitbit   *oauth2.Config
 	google   *oauth2.Config
 	list     []core.Integration
 }
 
-func New(togglWorkspaceID int, togglToken string, fitbit, google *oauth2.Config) (*Integrations, error) {
+func New(togglWorkspaceID int, togglToken, hevyAPIKey string, fitbit, google *oauth2.Config) (*Integrations, error) {
 	i := &Integrations{
 		fitbit: fitbit,
 		google: google,
@@ -43,6 +45,10 @@ func New(togglWorkspaceID int, togglToken string, fitbit, google *oauth2.Config)
 		i.list = append(i.list, core.IntegrationToggl)
 	} else {
 		oak.Warning("Toggl integration not configured")
+	}
+	if hevyAPIKey != "" {
+		i.Hevy = hevy.New(hevyAPIKey)
+		i.list = append(i.list, core.IntegrationHevy)
 	}
 	return i, nil
 }

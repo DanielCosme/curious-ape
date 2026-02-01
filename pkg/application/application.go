@@ -28,11 +28,12 @@ type Config struct {
 	Google           *oauth2.Config
 	TogglToken       string
 	TogglWorkspaceID int
+	HevyAPIKey       string
 	Env              Environment
 }
 
 func New(opts *AppOptions) *App {
-	sync, _ := integrations.New(opts.Config.TogglWorkspaceID, opts.Config.TogglToken, opts.Config.Fitbit, opts.Config.Google)
+	sync, _ := integrations.New(opts.Config.TogglWorkspaceID, opts.Config.TogglToken, opts.Config.HevyAPIKey, opts.Config.Fitbit, opts.Config.Google)
 	a := &App{
 		Log:  opts.Logger.Layer("app"),
 		Env:  opts.Config.Env,

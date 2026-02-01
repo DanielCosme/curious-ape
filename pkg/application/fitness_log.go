@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
+	"time"
 
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/integrations/google"
@@ -13,7 +15,7 @@ import (
 func (a *App) fitnessSync(ctx context.Context, d core.Date) error {
 	logger := oak.FromContext(ctx)
 
-	fitnessLogs, err := a.fitnessLogsFromGoogle(d)
+	fitnessLogs, err := a.fitnessLogsFromHevy(ctx, d)
 	if err != nil {
 		return err
 	}
@@ -40,6 +42,64 @@ func (a *App) fitnessSync(ctx context.Context, d core.Date) error {
 	}
 	_, err = a.HabitUpsert(ctx, habitParams)
 	return err
+}
+
+func (a *App) fitnessLogsFromHevy(ctx context.Context, d core.Date) (res []core.FitnessLog, err error) {
+	logger := oak.FromContext(ctx)
+
+	if d.Time().Before(core.NewDate(time.Now()).Time()) {
+		//NOTE: no-op if the desired log is not for the current day. TODO: support this in the future (their API is funny).
+		logger.Warning("fitness log to sync is not today", "date", d.String())
+		return res, nil
+	}
+
+	day, err := a.dayGetOrCreate(d)
+	if err != nil {
+		return nil, err
+	}
+	events, err := a.sync.Hevy.WorkoutEvents.Get(d.Time())
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Info("Fitness log for: "+day.Date.Time().Format(core.HumanDateWeekDay), "entries", len(events))
+	if len(events) > 1 {
+		for _, e := range events {
+			logger.Warning("worout", "type", e.Type, "tittle", e.Workout.Title)
+		}
+		return nil, fmt.Errorf("sync hevy: expected only one fitness log, got: %d", len(events))
+	}
+	event := events[0]
+	if event.Type != "updated" {
+		return res, fmt.Errorf("unkouwn event type: %s", event.Type)
+	}
+
+	raw, err := json.Marshal(event.Workout)
+	if err != nil {
+		return res, err
+	}
+	title := event.Workout.Title
+	fitnessLogType := core.FitnessLogTypeOther
+	if strings.Contains(strings.ToLower(title), "lower") || strings.Contains(strings.ToLower(title), "upper") {
+		fitnessLogType = core.FitnessLogTypeStrength
+	}
+
+	normalizeTime := func(t time.Time, loc *time.Location) time.Time {
+		return core.TimeUTC(t.In(loc))
+	}
+	location, _ := time.LoadLocation("America/Toronto")
+	fl := core.FitnessLog{
+		Date: day.Date,
+		TimelineLog: core.TimelineLog{
+			Title:     event.Workout.Title,
+			StartTime: normalizeTime(event.Workout.StartTime, location),
+			EndTime:   normalizeTime(event.Workout.EndTime, location),
+		},
+		FitnessType: fitnessLogType,
+		Origin:      core.LogOriginHevy,
+		Raw:         raw,
+	}
+	return append(res, fl), nil
 }
 
 func (a *App) fitnessLogsFromGoogle(d core.Date) (res []core.FitnessLog, err error) {

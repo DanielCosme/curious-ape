@@ -45,6 +45,9 @@ type config struct {
 			Token       string `json:"api_token"`
 			WorkspaceID int    `json:"workspace_id"`
 		} `json:"toggl"`
+		Hevy struct {
+			ApiKey string `json:"api_key"`
+		} `json:"hevy"`
 	} `json:"integrations"`
 	Environment application.Environment
 	Admin       user `json:"admin"`
@@ -105,6 +108,7 @@ func main() {
 			Env:    cfg.Environment,
 			Fitbit: cfg.Integrations.Fitbit.ToConf(),
 			// Google:           cfg.Integrations.Google.ToConf(),
+			HevyAPIKey:       cfg.Integrations.Hevy.ApiKey,
 			TogglToken:       cfg.Integrations.Toggl.Token,
 			TogglWorkspaceID: cfg.Integrations.Toggl.WorkspaceID,
 		},

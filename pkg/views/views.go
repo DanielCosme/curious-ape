@@ -125,7 +125,7 @@ func Integration(i application.IntegrationInfo) ElementRenderer {
 				}),
 			),
 		),
-		If(i.Status == application.IntegrationStatusDicsonnected && i.AuthURL != "",
+		If(i.Status == application.IntegrationStatusDisconnected && i.AuthURL != "",
 			A(
 				BUTTON().Text("Authenticate"),
 			).HREF(i.AuthURL).TARGET("_blank"),
