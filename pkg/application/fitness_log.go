@@ -50,7 +50,7 @@ func (a *App) fitnessLogsFromHevy(ctx context.Context, d core.Date) (res []core.
 	if d.Time().Before(core.NewDate(time.Now()).Time()) {
 		//NOTE: no-op if the desired log is not for the current day. TODO: support this in the future (their API is funny).
 		logger.Warning("fitness log to sync is not today", "date", d.String())
-		return res, nil
+		return res, fmt.Errorf("fitness log to sync is not today: %s", d.String())
 	}
 
 	day, err := a.dayGetOrCreate(d)
