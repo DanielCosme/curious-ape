@@ -63,43 +63,41 @@ func (a *App) fitnessLogsFromHevy(ctx context.Context, d core.Date) (res []core.
 	}
 
 	logger.Info("Fitness log for: "+day.Date.Time().Format(core.HumanDateWeekDay), "entries", len(events))
-	if len(events) > 1 {
-		for _, e := range events {
-			logger.Warning("worout", "type", e.Type, "tittle", e.Workout.Title)
+	for _, event := range events {
+		if event.Type != "updated" {
+			return res, fmt.Errorf("unkouwn event type: %s", event.Type)
 		}
-		return nil, fmt.Errorf("sync hevy: expected only one fitness log, got: %d", len(events))
-	}
-	event := events[0]
-	if event.Type != "updated" {
-		return res, fmt.Errorf("unkouwn event type: %s", event.Type)
-	}
 
-	raw, err := json.Marshal(event.Workout)
-	if err != nil {
-		return res, err
-	}
-	title := event.Workout.Title
-	fitnessLogType := core.FitnessLogTypeOther
-	if strings.Contains(strings.ToLower(title), "lower") || strings.Contains(strings.ToLower(title), "upper") {
-		fitnessLogType = core.FitnessLogTypeStrength
-	}
+		raw, err := json.Marshal(event.Workout)
+		if err != nil {
+			return res, err
+		}
+		fitnessLogType := core.FitnessLogTypeOther
+		title := strings.ToLower(event.Workout.Title)
+		if strings.Contains(title, "lower") || strings.Contains(title, "upper") {
+			fitnessLogType = core.FitnessLogTypeStrength
+		} else if strings.Contains(title, "cardio") {
+			fitnessLogType = core.FitnessLogTypeCardio
+		}
 
-	normalizeTime := func(t time.Time, loc *time.Location) time.Time {
-		return core.TimeUTC(t.In(loc))
+		normalizeTime := func(t time.Time, loc *time.Location) time.Time {
+			return core.TimeUTC(t.In(loc))
+		}
+		location, _ := time.LoadLocation("America/Toronto")
+		fl := core.FitnessLog{
+			Date: day.Date,
+			TimelineLog: core.TimelineLog{
+				Title:     event.Workout.Title,
+				StartTime: normalizeTime(event.Workout.StartTime, location),
+				EndTime:   normalizeTime(event.Workout.EndTime, location),
+			},
+			FitnessType: fitnessLogType,
+			Origin:      core.LogOriginHevy,
+			Raw:         raw,
+		}
+		res = append(res, fl)
 	}
-	location, _ := time.LoadLocation("America/Toronto")
-	fl := core.FitnessLog{
-		Date: day.Date,
-		TimelineLog: core.TimelineLog{
-			Title:     event.Workout.Title,
-			StartTime: normalizeTime(event.Workout.StartTime, location),
-			EndTime:   normalizeTime(event.Workout.EndTime, location),
-		},
-		FitnessType: fitnessLogType,
-		Origin:      core.LogOriginHevy,
-		Raw:         raw,
-	}
-	return append(res, fl), nil
+	return res, nil
 }
 
 func (a *App) fitnessLogsFromGoogle(d core.Date) (res []core.FitnessLog, err error) {

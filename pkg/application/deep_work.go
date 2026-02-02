@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -12,6 +13,10 @@ import (
 
 func (a *App) deepWorkSync(ctx context.Context, d core.Date) error {
 	logger := oak.FromContext(ctx)
+
+	if a.sync.TogglAPI == nil {
+		return errors.New("Toggl API struct is nil")
+	}
 
 	day, err := a.dayGetOrCreate(d)
 	if err != nil {
