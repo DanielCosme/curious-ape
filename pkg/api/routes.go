@@ -128,8 +128,14 @@ func (a *API) IntegrationsGetList(c *dove.Context) error {
 	return c.RenderOK(views.Integrations(state))
 }
 
-func (a *API) Home(c *dove.Context) error {
-	days, err := a.App.DaysMonth(c.Ctx(), core.NewDate(time.Now()))
+func (a *API) Home(c *dove.Context) (err error) {
+	c.ParseForm()
+	date := core.NewDate(time.Now())
+	if c.Req.Form.Get("date") != "" {
+		date, err = core.NewDateFromISO8601(c.Req.Form.Get("date"))
+	}
+
+	days, err := a.App.DaysMonth(c.Ctx(), date)
 	if err != nil {
 		return err
 	}
@@ -155,7 +161,7 @@ func (a *API) HabitFlip(c *dove.Context) error {
 
 func (a *API) DaySync(c *dove.Context) error {
 	c.ParseForm()
-	date, _ := core.DateFromISO8601(c.Req.Form.Get("date"))
+	date, _ := core.NewDateFromISO8601(c.Req.Form.Get("date"))
 	day, err := a.App.DaySync(c.Ctx(), date)
 	if err != nil {
 		return err

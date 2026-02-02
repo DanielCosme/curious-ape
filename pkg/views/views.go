@@ -147,6 +147,8 @@ func days(days []core.Day) ElementRenderer {
 				return Day(d)
 			}),
 		),
+		BUTTON().Text("Previous Month"),
+		BUTTON().Text("Next Month"),
 	)
 }
 

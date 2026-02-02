@@ -78,7 +78,7 @@ func (ds DateSlice) ToTimeSlice() []time.Time {
 	return res
 }
 
-func DateFromISO8601(s string) (Date, error) {
+func NewDateFromISO8601(s string) (Date, error) {
 	t, err := time.Parse(ISO8601, s)
 	if err != nil {
 		return Date{}, err
