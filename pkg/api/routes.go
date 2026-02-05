@@ -14,7 +14,7 @@ import (
 	"github.com/danielcosme/curious-ape/pkg/dove"
 	"github.com/danielcosme/curious-ape/pkg/oak"
 	"github.com/danielcosme/curious-ape/pkg/persistence"
-	"github.com/danielcosme/curious-ape/pkg/views"
+	"github.com/danielcosme/curious-ape/pkg/ui"
 )
 
 func Routes(a *API) http.Handler {
@@ -42,7 +42,7 @@ func Routes(a *API) http.Handler {
 	d.Endpoint("/").GET(a.Home)
 	d.Endpoint("/habit/flip").PUT(a.HabitFlip)
 	d.Endpoint("/day/sync").POST(a.DaySync)
-	d.Endpoint("/integration").GET(a.IntegrationsGet)
+	d.Endpoint("/integration").GET(a.IntegrationGet)
 	d.Endpoint("/integrations").GET(a.IntegrationsGetList)
 	d.Endpoint("/sleep").GET(a.Sleep)
 	d.Endpoint("/fitness").GET(a.Fitness)
@@ -58,7 +58,7 @@ func (a *API) DeepWork(c *dove.Context) error {
 	}
 	state := State(a, c.Req)
 	state.Days = days
-	return c.RenderOK(views.DeepWork(state))
+	return c.RenderOK(ui.DeepWork(state))
 }
 
 func (a *API) Fitness(c *dove.Context) error {
@@ -68,7 +68,7 @@ func (a *API) Fitness(c *dove.Context) error {
 	}
 	state := State(a, c.Req)
 	state.Days = days
-	return c.RenderOK(views.Fitness(state))
+	return c.RenderOK(ui.Fitness(state))
 }
 
 func (a *API) Sleep(c *dove.Context) error {
@@ -78,7 +78,7 @@ func (a *API) Sleep(c *dove.Context) error {
 	}
 	state := State(a, c.Req)
 	state.Days = days
-	return c.RenderOK(views.Sleep(state))
+	return c.RenderOK(ui.Sleep(state))
 }
 
 func ServeStaticAssets(c *dove.Context) error {
@@ -108,14 +108,14 @@ func (a *API) GoogleSuccess(c *dove.Context) error {
 	return a.App.Oauth2Success(core.IntegrationGoogle, c.Req.FormValue("code"))
 }
 
-func (a *API) IntegrationsGet(c *dove.Context) error {
+func (a *API) IntegrationGet(c *dove.Context) error {
 	c.ParseForm()
 	provider := c.Req.Form.Get("name")
 	integrationInfo, err := a.App.IntegrationGet(c.Ctx(), core.Integration(provider))
 	if err != nil {
 		return err
 	}
-	return c.RenderOK(views.Integration(integrationInfo))
+	return c.RenderOK(ui.Integration(integrationInfo))
 }
 
 func (a *API) IntegrationsGetList(c *dove.Context) error {
@@ -125,7 +125,7 @@ func (a *API) IntegrationsGetList(c *dove.Context) error {
 	}
 	state := State(a, c.Req)
 	state.Integrations = integrationInfo
-	return c.RenderOK(views.Integrations(state))
+	return c.RenderOK(ui.Integrations(state))
 }
 
 func (a *API) Home(c *dove.Context) (err error) {
@@ -142,7 +142,7 @@ func (a *API) Home(c *dove.Context) (err error) {
 
 	s := State(a, c.Req)
 	s.Days = days
-	return c.RenderOK(views.Home(s))
+	return c.RenderOK(ui.Home(s))
 }
 
 func (a *API) HabitFlip(c *dove.Context) error {
@@ -156,7 +156,7 @@ func (a *API) HabitFlip(c *dove.Context) error {
 	if err != nil {
 		return err
 	}
-	return c.RenderOK(views.Day(day))
+	return c.RenderOK(ui.Day(day))
 }
 
 func (a *API) DaySync(c *dove.Context) error {
@@ -166,14 +166,14 @@ func (a *API) DaySync(c *dove.Context) error {
 	if err != nil {
 		return err
 	}
-	return c.RenderOK(views.Day(day))
+	return c.RenderOK(ui.Day(day))
 }
 
 func (a *API) GetLoginForm(c *dove.Context) error {
 	if a.IsAuthenticated(c.Req) {
 		return c.Redirect("/")
 	}
-	return c.RenderOK(views.Login(State(a, c.Req)))
+	return c.RenderOK(ui.Login(State(a, c.Req)))
 }
 
 func (a *API) Login(c *dove.Context) error {
@@ -209,8 +209,8 @@ func (a *API) Logout(c *dove.Context) error {
 	return c.Redirect("/login")
 }
 
-func State(a *API, r *http.Request) *views.State {
-	return &views.State{
+func State(a *API, r *http.Request) *ui.State {
+	return &ui.State{
 		Version:       a.Version,
 		Authenticated: a.IsAuthenticated(r),
 	}
