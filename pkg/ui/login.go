@@ -7,7 +7,6 @@ import (
 )
 
 func Login(s *State) Node {
-	h1 := H1(Text("Login"))
 	form := Form(
 		FieldSet(
 			Legend(Text("Login")),
@@ -25,5 +24,5 @@ func Login(s *State) Node {
 			),
 		),
 	)
-	return layout("login", s, h1, form)
+	return layout("Login", s, form)
 }

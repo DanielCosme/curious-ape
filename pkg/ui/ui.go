@@ -8,6 +8,11 @@ import (
 	"github.com/danielcosme/curious-ape/pkg/core"
 )
 
+// Clases
+const (
+	cLayout = "layout"
+)
+
 type State struct {
 	Version       string
 	Authenticated bool

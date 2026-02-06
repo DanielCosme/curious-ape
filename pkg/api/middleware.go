@@ -71,3 +71,11 @@ func (a *API) MiddlewareRequireAuthentication(next dove.HandlerFunc) dove.Handle
 		return next(c)
 	}
 }
+
+func DevMiddleware(next dove.HandlerFunc) dove.HandlerFunc {
+	return func(c *dove.Context) error {
+		// Don't cache in development.
+		c.Res.Header().Add("Cache-Control", "no-store")
+		return next(c)
+	}
+}

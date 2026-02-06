@@ -1,0 +1,171 @@
+@font-face {
+  font-family: "Overlock";
+  src: local("Overlock"), url("../fonts/Overlock-Regular.ttf");
+}
+
+@font-face {
+  font-family: "Overlock";
+  src: local("Overlock Bold"), url("../fonts/Overlock-Bold.ttf");
+  font-weight: bold;
+}
+
+:root {
+  --clr-accent-300: hsl(67 90% 32%);
+  --clr-accent-400: hsl(67 81.5% 25.5%);
+  --clr-neutral-100: hsl(0 0% 100%);
+  --clr-neutral-800: hsl(0 0% 20%);
+
+  --clr-base: black;
+  --clr-base-inverse: grey;
+  --clr-background-base: floralwhite;
+  --clr-background-dark: hsl(158 24.4% 8.8%);
+
+  --fs-400: 1.125rem;
+  --fs-500: 1.3125rem;
+  --fs-600: 1.5rem;
+  --fs-700: 2.25rem;
+  --fs-800: 3rem;
+
+  --ff-base: system-ui, sans-serif;
+  --ff-accent: Overlock, serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  color: var(--clr-neutral-800);
+  font-size: var(--fs-400);
+  font-family: var(--ff-base);
+  line-height: 1.6;
+
+  background-color: var(--clr-background-base);
+  min-height: 100vh;
+}
+
+.layout {
+  margin: 0 auto;
+  max-width: 1200px;
+  display: grid;
+  gap: var(--fs-400);
+  grid-template-columns: 1fr 5fr;
+  grid-template-rows: var(--fs-800) 1fr var(--fs-600);
+  grid-template-areas:
+    "header main"
+    "aside  main"
+    "footer main"
+  ;
+
+}
+
+main {
+  grid-area: main;
+}
+
+header {
+  grid-area: header;
+}
+
+aside {
+  grid-area: aside;
+}
+
+footer {
+  grid-area: footer;
+}
+
+nav {
+  display: grid;
+
+  >a {
+    padding: 0.5rem 0px 0.5rem 0.5rem;
+  }
+}
+
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.1;
+  text-overflow: clip;
+}
+
+h1,
+h2 {
+  color: var(--clr-accent-400);
+  font-family: var(--ff-accent);
+}
+
+h1 {
+  font-size: var(--fs-800);
+  text-align: left;
+  padding-left: 0.5rem;
+  white-space: nowrap;
+  /*
+  overflow: hidden;
+ */
+}
+
+h2 {
+  font-size: var(--fs-700);
+  padding: 10px 0;
+}
+
+h3 {
+  font-size: var(--fs-600);
+}
+
+input,
+button,
+textarea,
+select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+a {
+  color: var(--clr-accent-400);
+}
+
+a:hover,
+a:focus-visible {
+  color: var(--clr-background-base);
+  background-color: var(--clr-accent-300);
+}
+
+.button {
+  font: inherit;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: var(--clr-accent-300);
+  border: 0;
+  padding: 0.75em 1.5em;
+}
+
+.button:hover,
+.button:focus-visible {
+  background: var(--clr-neutral-800);
+  color: var(--clr-accent-300);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.element-with-padding>* {
+  margin-block: 0;
+}
+
+.element-with-padding>p {
+  margin-block: 1em;
+}
+
+.element-with-padding> :first-child {
+  margin-block-start: 0;
+}
+
+.element-with-padding> :last-child {
+  margin-block-end: 0;
+}

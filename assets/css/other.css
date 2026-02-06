@@ -1,0 +1,70 @@
+/*
+  Reset for images
+  img {
+    display: block;
+    max-inline-size: 100%;
+  }
+
+  Organize your classes by what they are doing
+  - layout
+  - components
+  - utilities
+*/
+
+/*
+  Brief core:
+    grid-template-areas creates named regions visually
+    grid-area places elements into those named regions
+*/
+.grid-areas {
+  display: grid;
+  gap: 12px;
+  grid-template-areas:
+    "area-one area-two"
+    "area-three area-four";
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr, 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 0.2fr;
+  /*
+    fr: fraction of the leftover space.
+  */
+}
+
+.grid-item {
+  /* span across 3 grid cells */
+  grid-column: span 3;
+  /*
+  When elements are inside a Grid, they live within their cells. By default, they will take up all the space of their cell.
+  We can use align-items and justify-items to change that.
+    align-items: controls how they are aligned on the vertical axis
+    justify-items: controls how they are aligned on the horizontal axis
+
+  We can also control how the the grid is aligned, with all the content grouped together. We use align-content and justify-content to change that.
+
+    align-content: controls how the grid is aligned within it’s parent on the vertical axis
+    justify-content: controls how the grid is aligned within it’s parent on the horizontal axis
+
+  For all of these, you will most often pick from the following values.
+    stretch: the default
+    start
+    end
+    center
+  */
+}
+
+/*
+Forms pseudo clases
+  :focus-visible { ... }
+  :focus-within { ... }
+  :valid { ... }
+  :invalid { ... }
+  :user-valid { ... }
+  :user-invalid { ... }
+  :checked { ... }
+  :required { ... }
+  :optional { ... }
+*/

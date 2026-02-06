@@ -19,7 +19,11 @@ func layout(title string, s *State, nodes ...Node) Node {
 			Link(Rel("stylesheet"), Href("/assets/css/main.css")),
 		},
 		Body: []Node{
+			Class(cLayout),
 			Header(
+				H1(Text(title)),
+			),
+			Aside(
 				If(s.Authenticated, Nav(
 					// TODO: Make pages from nav be partially loaded, and not the full page.
 					a("/", "Home "),
@@ -30,10 +34,9 @@ func layout(title string, s *State, nodes ...Node) Node {
 				)),
 			),
 			Main(
-				H1(Text(title)),
 				Group(nodes),
 				If(s.Authenticated,
-					Button(Text("Logout"), ds.On("click", "@delete('/login')")),
+					Button(Text("Logout"), Class("button"), ds.On("click", "@delete('/login')")),
 				)),
 			Footer(
 				P(Text(s.Version)),

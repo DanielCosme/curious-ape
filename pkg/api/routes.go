@@ -4,12 +4,14 @@ import (
 	"errors"
 	"mime"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/danielcosme/curious-ape/assets"
+	"github.com/danielcosme/curious-ape/pkg/application"
 	"github.com/danielcosme/curious-ape/pkg/core"
 	"github.com/danielcosme/curious-ape/pkg/dove"
 	"github.com/danielcosme/curious-ape/pkg/oak"
@@ -24,7 +26,11 @@ func Routes(a *API) http.Handler {
 
 	d.Use(dove.MiddlewarePanicRecover)
 
-	d.Prefix("/assets").GET(ServeStaticAssets)
+	if a.App.Env == application.Dev {
+		d.Use(DevMiddleware)
+	}
+
+	d.Prefix("/assets").GET(a.ServeStaticAssets)
 
 	d.Use(a.MiddlewareLoadCookie)
 	d.Use(a.MiddlewareAuthenticateFromSession)
@@ -81,13 +87,18 @@ func (a *API) Sleep(c *dove.Context) error {
 	return c.RenderOK(ui.Sleep(state))
 }
 
-func ServeStaticAssets(c *dove.Context) error {
+func (a *API) ServeStaticAssets(c *dove.Context) (err error) {
 	path, found := strings.CutPrefix(c.Req.URL.Path, "/assets/")
 	if !found {
 		c.Res.WriteHeader(http.StatusNotFound)
 		return errors.New(c.Req.URL.Path + " " + "not found")
 	}
-	data, err := assets.Assets.ReadFile(path)
+	var data []byte
+	if a.App.Env == application.Dev {
+		data, err = os.ReadFile("./assets/" + path)
+	} else {
+		data, err = assets.Assets.ReadFile(path)
+	}
 	if err != nil {
 		return err
 	}
