@@ -14,7 +14,7 @@ func Sleep(s *State) Node {
 		return Div(
 			Map(day.SleepLogs, func(sl core.SleepLog) Node {
 				return Section(
-					H4(Text(sl.Date.Time().Format(core.HumanDate))),
+					H3(Text(sl.Date.Time().Format(core.HumanDate))),
 					P(Text(fmt.Sprintf("Wake up: %s", sl.EndTime.Format(core.Time)))),
 					P(Text(fmt.Sprintf("  Duration: %s", core.DurationToString(sl.TimeAsleep)))),
 				)
