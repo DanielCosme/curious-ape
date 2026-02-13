@@ -8,8 +8,11 @@ jobs:
       - name: Clone Repository
         run: "git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY > /dev/null 2>&1"
 
+      - name: "Add go binaries to Path"
+        run: echo "$HOME/go/bin" >> $GITHUB_PATH
+
       - name: Ensure Task Runner is installed
-        run: "go install github.com/magefile/mage@latest"
+        run: go install github.com/magefile/mage@latest
 
       - name: Install Tools
         working-directory: ./curious-ape
