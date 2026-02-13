@@ -2,7 +2,7 @@ name: Test and Audit
 on: [push]
 
 jobs:
-  text-and-audit:
+  test-and-audit:
     runs-on: arch-linux
     steps:
       - name: Clone Repository
@@ -17,6 +17,10 @@ jobs:
       - name: Install Tools
         working-directory: ./curious-ape
         run: mage tools
+
+      - name: Generate Database Models
+        working-directory: ./curious-ape
+        run: mage db:gen
 
       - name: Test
         working-directory: ./curious-ape
