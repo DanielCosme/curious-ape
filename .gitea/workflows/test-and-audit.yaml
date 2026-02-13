@@ -18,6 +18,10 @@ jobs:
         working-directory: ./curious-ape
         run: mage tools
 
+      - name: Prepare Database
+        working-directory: ./curious-ape
+        run: "mkdir -p ./tmp && mage db:up"
+
       - name: Generate Database Models
         working-directory: ./curious-ape
         run: mage db:gen
