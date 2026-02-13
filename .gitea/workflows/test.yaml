@@ -6,6 +6,19 @@ jobs:
     runs-on: arch-linux
     steps:
       - name: Clone Repository
-        run: "git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
+        run: "git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY > /dev/null 2>&1"
 
-      - run: "ls -la && pwd"
+      - name: Ensure Task Runner is installed
+        run: "go install github.com/magefile/mage@latest"
+
+      - name: Install Tools
+        working-directory: ./curious-ape
+        run: mage tools
+
+      - name: Test
+        working-directory: ./curious-ape
+        run: mage test
+
+      - name: Audit
+        working-directory: ./curious-ape
+        run: mage audit
