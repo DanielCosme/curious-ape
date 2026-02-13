@@ -20,7 +20,7 @@ jobs:
 
       - name: Prepare Database
         working-directory: ./curious-ape
-        run: "mkdir -p ./tmp && mage db:up"
+        run: "mkdir -p ./tmp && mage migrate:up"
 
       - name: Generate Database Models
         working-directory: ./curious-ape
