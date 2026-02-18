@@ -1,5 +1,8 @@
-name: Test and Audit
+name: CI Pipeline
 on: [push]
+
+env:
+  AGE_KEY: /var/lib/act_runner/.age.txt
 
 jobs:
   test-and-audit:
@@ -33,3 +36,17 @@ jobs:
       - name: Audit
         working-directory: ./curious-ape
         run: mage audit
+
+  deploy:
+    needs: test-and-audit
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+    runs-on: arch-linux
+    steps:
+      - name: Clone Repository
+        run: "git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY > /dev/null 2>&1"
+
+      - name: "Add go binaries to Path"
+        run: echo "$HOME/go/bin" >> $GITHUB_PATH
+
+      - name: Deploy
+        run: mage deploy
