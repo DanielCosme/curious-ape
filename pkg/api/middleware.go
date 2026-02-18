@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/alexedwards/scs/v2"
-	"github.com/danielcosme/curious-ape/pkg/dove"
-	"github.com/danielcosme/curious-ape/pkg/oak"
+	"git.danicos.dev/daniel/curious-ape/pkg/dove"
+	"git.danicos.dev/daniel/curious-ape/pkg/oak"
 )
 
 func (a *API) MiddlewareLoadCookie(next dove.HandlerFunc) dove.HandlerFunc {

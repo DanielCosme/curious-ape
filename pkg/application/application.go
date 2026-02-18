@@ -4,9 +4,9 @@ import (
 	"errors"
 	"log/slog"
 
-	"github.com/danielcosme/curious-ape/pkg/integrations"
-	"github.com/danielcosme/curious-ape/pkg/oak"
-	"github.com/danielcosme/curious-ape/pkg/persistence"
+	"git.danicos.dev/daniel/curious-ape/pkg/integrations"
+	"git.danicos.dev/daniel/curious-ape/pkg/oak"
+	"git.danicos.dev/daniel/curious-ape/pkg/persistence"
 	"golang.org/x/oauth2"
 )
 

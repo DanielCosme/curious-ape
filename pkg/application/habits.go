@@ -3,8 +3,8 @@ package application
 import (
 	"context"
 
-	"github.com/danielcosme/curious-ape/pkg/core"
-	"github.com/danielcosme/curious-ape/pkg/oak"
+	"git.danicos.dev/daniel/curious-ape/pkg/core"
+	"git.danicos.dev/daniel/curious-ape/pkg/oak"
 )
 
 func (a *App) HabitUpsert(ctx context.Context, params core.Habit) (habit core.Habit, err error) {

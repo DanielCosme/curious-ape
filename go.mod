@@ -1,4 +1,4 @@
-module github.com/danielcosme/curious-ape
+module git.danicos.dev/daniel/curious-ape
 
 go 1.25.1
 

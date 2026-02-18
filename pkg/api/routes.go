@@ -10,13 +10,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/danielcosme/curious-ape/assets"
-	"github.com/danielcosme/curious-ape/pkg/application"
-	"github.com/danielcosme/curious-ape/pkg/core"
-	"github.com/danielcosme/curious-ape/pkg/dove"
-	"github.com/danielcosme/curious-ape/pkg/oak"
-	"github.com/danielcosme/curious-ape/pkg/persistence"
-	"github.com/danielcosme/curious-ape/pkg/ui"
+	"git.danicos.dev/daniel/curious-ape/assets"
+	"git.danicos.dev/daniel/curious-ape/pkg/application"
+	"git.danicos.dev/daniel/curious-ape/pkg/core"
+	"git.danicos.dev/daniel/curious-ape/pkg/dove"
+	"git.danicos.dev/daniel/curious-ape/pkg/oak"
+	"git.danicos.dev/daniel/curious-ape/pkg/persistence"
+	"git.danicos.dev/daniel/curious-ape/pkg/ui"
 )
 
 func Routes(a *API) http.Handler {

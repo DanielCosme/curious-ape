@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/danielcosme/curious-ape/pkg/core"
+	"git.danicos.dev/daniel/curious-ape/pkg/core"
 )
 
 func (a *App) DayGetByID(id uint) (core.Day, error) {

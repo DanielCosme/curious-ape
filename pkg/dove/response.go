@@ -3,7 +3,7 @@ package dove
 import (
 	"net/http"
 
-	"github.com/danielcosme/curious-ape/pkg/oak"
+	"git.danicos.dev/daniel/curious-ape/pkg/oak"
 )
 
 type Response struct {

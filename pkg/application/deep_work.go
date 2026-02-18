@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/danielcosme/curious-ape/pkg/core"
-	"github.com/danielcosme/curious-ape/pkg/oak"
+	"git.danicos.dev/daniel/curious-ape/pkg/core"
+	"git.danicos.dev/daniel/curious-ape/pkg/oak"
 )
 
 func (a *App) deepWorkSync(ctx context.Context, d core.Date) error {

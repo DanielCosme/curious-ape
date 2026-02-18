@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/danielcosme/curious-ape/pkg/core"
+	"git.danicos.dev/daniel/curious-ape/pkg/core"
 )
 
 var (
