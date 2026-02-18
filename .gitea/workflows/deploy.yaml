@@ -3,8 +3,6 @@ on:
   workflow_run:
     workflows: ["Test and Audit"]
     types: [completed]
-  push:
-    branches: ["main"]
     tags:
       - "v*"
 
