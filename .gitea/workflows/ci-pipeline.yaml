@@ -1,7 +1,7 @@
 name: CI Pipeline
 on:
   push:
-    branches: [main]
+    branches-ignore: [main]
 
 env:
   AGE_KEY: /var/lib/act_runner/.age.txt
@@ -9,7 +9,6 @@ env:
 jobs:
   test-and-audit:
     runs-on: arch-linux
-    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
     steps:
       - name: Clone Repository
         run: "git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY > /dev/null 2>&1"
