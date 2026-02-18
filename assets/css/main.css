@@ -58,29 +58,28 @@ body {
     "footer main"
   ;
 
-}
+  main {
+    grid-area: main;
+  }
 
-main {
-  grid-area: main;
-}
+  header {
+    grid-area: header;
+  }
 
-header {
-  grid-area: header;
-}
+  aside {
+    grid-area: aside;
+  }
 
-aside {
-  grid-area: aside;
-}
+  footer {
+    grid-area: footer;
+  }
 
-footer {
-  grid-area: footer;
-}
+  nav {
+    display: grid;
 
-nav {
-  display: grid;
-
-  >a {
-    padding: 0.5rem 0px 0.5rem 0.5rem;
+    >a {
+      padding: 0.5rem 0px 0.5rem 0.5rem;
+    }
   }
 }
 
@@ -169,6 +168,26 @@ a:focus-visible {
   margin-block-start: 0;
 }
 
-.element-with-padding> :last-child {
-  margin-block-end: 0;
+.habit-spot:hover {
+  color: var(--clr-background-base);
+  background-color: var(--clr-accent-400);
+  cursor: pointer;
+}
+
+.habit-spot {
+  padding: 0 10px;
+}
+
+.day {
+  margin-bottom: 1rem;
+}
+
+.days-container {}
+
+.days-list {}
+
+.month-navigation {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
 }

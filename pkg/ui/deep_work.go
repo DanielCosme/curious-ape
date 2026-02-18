@@ -12,6 +12,9 @@ import (
 
 func DeepWork(s *State) Node {
 	return layout("Deep Work", s, Map(s.Days, func(day core.Day) Node {
+		if len(day.DeepWorkLogs) == 0 {
+			return nil
+		}
 		var duration time.Duration
 		nodes := []Node{}
 		for _, wl := range day.DeepWorkLogs {

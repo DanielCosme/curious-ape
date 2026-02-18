@@ -1,0 +1,21 @@
+name: Deploy
+on:
+  workflow_run:
+    workflows: ["Test and Audit"]
+    types: [completed]
+  push:
+    branches: ["main"]
+    tags:
+      - "v*"
+
+env:
+  AGE_KEY: /var/lib/act_runner/.age.txt
+jobs:
+  deploy:
+    runs-on: arch-linux
+    steps:
+      - name: Clone Repository
+        run: "git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY > /dev/null 2>&1"
+
+      - name: Deploy
+        run: mage deploy

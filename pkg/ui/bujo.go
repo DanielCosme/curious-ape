@@ -12,6 +12,13 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
+// Habit state symbols
+const (
+	habitDone    = "O"
+	habitNotDone = "X"
+	habitNoInfo  = "_"
+)
+
 func Home(s *State) Node {
 	return bujoPage(s)
 }
@@ -21,16 +28,24 @@ func bujoPage(s *State) Node {
 }
 
 func days(days []core.Day) Node {
+	if len(days) == 0 {
+		return Div(Text("No days available"))
+	}
+
 	return Div(
-		StyleEl(Text("span:hover { background-color: yellow; color: blue; cursor: pointer }")),
+		Class("days-container"),
 		H2(Text(days[0].Date.Time().Month().String())),
 		Div(
+			Class("days-list"),
 			Map(days, func(d core.Day) Node {
 				return Day(d)
 			}),
 		),
-		Button(Text("Previous Month"), Disabled()),
-		Button(Text("Next Month"), Disabled()),
+		Div(
+			Class("month-navigation"),
+			Button(Text("Previous Month"), Disabled()),
+			Button(Text("Next Month"), Disabled()),
+		),
 	)
 }
 
@@ -39,6 +54,7 @@ func Day(day core.Day) Node {
 	q.Add("date", day.Date.String())
 	sync := fmt.Sprintf("@post('/day/sync?%s')", q.Encode())
 	return Div(
+		Class("day"),
 		Span(Text(day.Date.Time().Format(core.HumanDate))),
 		Span(Text("")),
 		habitSpot(day.Habits.Sleep),
@@ -51,21 +67,21 @@ func Day(day core.Day) Node {
 }
 
 func habitSpot(habit core.Habit) Node {
-	state := "_"
+	state := habitNoInfo
 	switch habit.State {
 	case core.HabitStateDone:
-		state = "O"
+		state = habitDone
 	case core.HabitStateNotDone:
-		state = "X"
+		state = habitNotDone
 	}
 
 	q := url.Values{}
 	q.Add("id", strconv.Itoa(int(habit.ID)))
 	flipAction := fmt.Sprintf("@put('/habit/flip?%s')", q.Encode())
 	return Span(
+		Class("habit-spot"),
 		Strong(Text(state)),
 		If(habit.Note != "", Text(" "+habit.Note)),
 		ds.On("click", flipAction),
-		Style("padding: 0 10px;"),
 	)
 }

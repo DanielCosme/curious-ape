@@ -11,6 +11,9 @@ import (
 
 func Fitness(s *State) Node {
 	return layout("Fitness", s, Map(s.Days, func(day core.Day) Node {
+		if len(day.FitnessLogs) == 0 {
+			return nil
+		}
 		return Div(
 			Map(day.FitnessLogs, func(fl core.FitnessLog) Node {
 				return Section(
