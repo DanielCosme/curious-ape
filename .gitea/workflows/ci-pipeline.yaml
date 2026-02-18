@@ -48,6 +48,9 @@ jobs:
       - name: "Add go binaries to Path"
         run: echo "$HOME/go/bin" >> $GITHUB_PATH
 
+      - name: "Ensure age is installed"
+        run: "go install filippo.io/age/cmd/...@latest"
+
       - name: Deploy
         working-directory: ./curious-ape
         run: mage deploy
