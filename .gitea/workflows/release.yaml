@@ -1,7 +1,7 @@
-name: CI Pipeline
+name: Release
 on:
   push:
-    branches: [main]
+    tags: ["v*"]
 
 env:
   AGE_KEY: /var/lib/act_runner/.age.txt
@@ -9,7 +9,6 @@ env:
 jobs:
   test-and-audit:
     runs-on: arch-linux
-    if: github.ref_type != 'tag' && startsWith(github.ref_name, 'v')
     steps:
       - name: Clone Repository
         run: "git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY > /dev/null 2>&1"
@@ -39,3 +38,24 @@ jobs:
       - name: Audit
         working-directory: ./curious-ape
         run: mage audit
+
+  deploy:
+    needs: test-and-audit
+    runs-on: arch-linux
+    steps:
+      - name: Clone Repository
+        run: "git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY > /dev/null 2>&1"
+
+      - name: "Add go binaries to Path"
+        run: echo "$HOME/go/bin" >> $GITHUB_PATH
+
+      - name: Ensure age is installed
+        run: "go install filippo.io/age/cmd/...@latest"
+
+      - name: Add server to known_hosts
+        run: ssh-keyscan -H ape-0 > ~/.ssh/known_hosts
+
+      - name: Deploy
+        working-directory: ./curious-ape
+        run: mage deploy
+
