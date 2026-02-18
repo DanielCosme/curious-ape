@@ -160,7 +160,8 @@ func Push() error {
 	assert(err)
 
 	ts = []target.Target{
-		target.NewA("git", "push", "--follow-tags"),
+		// NOTE: not pushing to origin (GitHub)
+		target.NewA("git", "push", "apex", "--follow-tags"),
 	}
 	return runSteps("push", ts)
 }

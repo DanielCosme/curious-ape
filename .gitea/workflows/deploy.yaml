@@ -3,13 +3,12 @@ on:
   workflow_run:
     workflows: ["Test and Audit"]
     types: [completed]
-    tags:
-      - "v*"
 
 env:
   AGE_KEY: /var/lib/act_runner/.age.txt
 jobs:
   deploy:
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: arch-linux
     steps:
       - name: Clone Repository
