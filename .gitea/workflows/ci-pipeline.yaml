@@ -49,4 +49,5 @@ jobs:
         run: echo "$HOME/go/bin" >> $GITHUB_PATH
 
       - name: Deploy
+        working-directory: ./curious-ape
         run: mage deploy
