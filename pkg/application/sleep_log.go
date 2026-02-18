@@ -6,9 +6,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/danielcosme/curious-ape/pkg/core"
-	"github.com/danielcosme/curious-ape/pkg/integrations/fitbit"
-	"github.com/danielcosme/curious-ape/pkg/oak"
+	"git.danicos.dev/daniel/curious-ape/pkg/core"
+	"git.danicos.dev/daniel/curious-ape/pkg/integrations/fitbit"
+	"git.danicos.dev/daniel/curious-ape/pkg/oak"
 )
 
 func (a *App) sleepSync(ctx context.Context, d core.Date) error {

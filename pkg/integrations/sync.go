@@ -6,11 +6,11 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/danielcosme/curious-ape/pkg/integrations/hevy"
-	"github.com/danielcosme/curious-ape/pkg/integrations/toggl"
-	"github.com/danielcosme/curious-ape/pkg/oak"
+	"git.danicos.dev/daniel/curious-ape/pkg/integrations/hevy"
+	"git.danicos.dev/daniel/curious-ape/pkg/integrations/toggl"
+	"git.danicos.dev/daniel/curious-ape/pkg/oak"
 
-	"github.com/danielcosme/curious-ape/pkg/core"
+	"git.danicos.dev/daniel/curious-ape/pkg/core"
 
 	"golang.org/x/oauth2"
 )

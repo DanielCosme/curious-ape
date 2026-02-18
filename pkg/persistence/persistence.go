@@ -1,7 +1,7 @@
 package persistence
 
 import (
-	"github.com/danielcosme/curious-ape/pkg/core"
+	"git.danicos.dev/daniel/curious-ape/pkg/core"
 	"github.com/stephenafamo/bob"
 )
 

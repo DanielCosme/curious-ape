@@ -6,9 +6,9 @@ import (
 
 	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
-	"github.com/danielcosme/curious-ape/database/gen/dberrors"
-	"github.com/danielcosme/curious-ape/database/gen/models"
-	"github.com/danielcosme/curious-ape/pkg/core"
+	"git.danicos.dev/daniel/curious-ape/database/gen/dberrors"
+	"git.danicos.dev/daniel/curious-ape/database/gen/models"
+	"git.danicos.dev/daniel/curious-ape/pkg/core"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/sqlite"
 )

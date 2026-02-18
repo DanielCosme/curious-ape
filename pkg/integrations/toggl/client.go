@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/danielcosme/curious-ape/pkg/oak"
+	"git.danicos.dev/daniel/curious-ape/pkg/oak"
 )
 
 const BaseURL = "https://api.track.toggl.com"

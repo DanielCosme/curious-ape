@@ -7,12 +7,12 @@ import (
 	"time"
 
 	"github.com/aarondl/opt/omit"
-	"github.com/danielcosme/curious-ape/database/gen/models"
-	"github.com/danielcosme/curious-ape/pkg/core"
-	"github.com/danielcosme/curious-ape/pkg/integrations/fitbit"
-	"github.com/danielcosme/curious-ape/pkg/integrations/google"
-	"github.com/danielcosme/curious-ape/pkg/oak"
-	"github.com/danielcosme/curious-ape/pkg/persistence"
+	"git.danicos.dev/daniel/curious-ape/database/gen/models"
+	"git.danicos.dev/daniel/curious-ape/pkg/core"
+	"git.danicos.dev/daniel/curious-ape/pkg/integrations/fitbit"
+	"git.danicos.dev/daniel/curious-ape/pkg/integrations/google"
+	"git.danicos.dev/daniel/curious-ape/pkg/oak"
+	"git.danicos.dev/daniel/curious-ape/pkg/persistence"
 	"golang.org/x/oauth2"
 )
 

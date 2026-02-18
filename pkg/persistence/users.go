@@ -2,8 +2,8 @@ package persistence
 
 import (
 	"context"
-	"github.com/danielcosme/curious-ape/database/gen/models"
-	"github.com/danielcosme/curious-ape/pkg/core"
+	"git.danicos.dev/daniel/curious-ape/database/gen/models"
+	"git.danicos.dev/daniel/curious-ape/pkg/core"
 	"github.com/stephenafamo/bob"
 )
 

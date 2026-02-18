@@ -3,9 +3,6 @@ on:
   push:
     branches-ignore: [main]
 
-env:
-  AGE_KEY: /var/lib/act_runner/.age.txt
-
 jobs:
   test-and-audit:
     runs-on: arch-linux

@@ -3,8 +3,8 @@ package persistence
 import (
 	"database/sql"
 	"github.com/aarondl/opt/omit"
-	"github.com/danielcosme/curious-ape/database/gen/models"
-	"github.com/danielcosme/curious-ape/pkg/test"
+	"git.danicos.dev/daniel/curious-ape/database/gen/models"
+	"git.danicos.dev/daniel/curious-ape/pkg/test"
 	"github.com/golang-migrate/migrate/v4"
 	m_sqlite "github.com/golang-migrate/migrate/v4/database/sqlite"
 	_ "github.com/golang-migrate/migrate/v4/source/file"

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/danielcosme/curious-ape/pkg/oak"
+	"git.danicos.dev/daniel/curious-ape/pkg/oak"
 )
 
 // HandlerFunc defines a function to serve HTTP requests.

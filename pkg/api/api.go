@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/alexedwards/scs/v2"
-	"github.com/danielcosme/curious-ape/pkg/application"
+	"git.danicos.dev/daniel/curious-ape/pkg/application"
 )
 
 type ContextKey string
