@@ -140,7 +140,7 @@ func Ci() {
 	mg.SerialDeps(Test, Audit)
 }
 
-// Push Pushes repositoy to Github and creates new Version
+// Push Pushes repository to GitHub and creates new Version
 func Push() error {
 	mg.SerialDeps(Ci)
 
@@ -160,8 +160,7 @@ func Push() error {
 	assert(err)
 
 	ts = []target.Target{
-		target.NewA("git", "push"),
-		target.NewA("git", "push", "origin", config.VERSION),
+		target.NewA("git", "push", "--follow-tags"),
 	}
 	return runSteps("push", ts)
 }
