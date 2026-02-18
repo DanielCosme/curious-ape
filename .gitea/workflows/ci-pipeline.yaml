@@ -9,7 +9,7 @@ env:
 jobs:
   test-and-audit:
     runs-on: arch-linux
-    if: github.ref_type != 'tag' && startsWith(github.ref_name, 'v')
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
     steps:
       - name: Clone Repository
         run: "git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY > /dev/null 2>&1"
