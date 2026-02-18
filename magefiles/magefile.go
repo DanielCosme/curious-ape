@@ -142,8 +142,6 @@ func Ci() {
 
 // Push Pushes repository to GitHub and creates new Version
 func Push() error {
-	mg.SerialDeps(Ci)
-
 	diff := target.NewA("git", "diff", "--exit-code").SetMsg("working tree cannot be dirty")
 	diff.Silent = true
 
