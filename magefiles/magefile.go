@@ -161,7 +161,7 @@ func Push() error {
 
 	ts = []target.Target{
 		// NOTE: not pushing to origin (GitHub)
-		target.NewA("git", "push", "apex", "--follow-tags"),
+		target.NewA("git", "push", "apex", "main", "--tags"),
 	}
 	return runSteps("push", ts)
 }
