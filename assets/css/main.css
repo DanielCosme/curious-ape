@@ -1,11 +1,11 @@
 @font-face {
   font-family: "Overlock";
-  src: local("Overlock"), url("../fonts/Overlock-Regular.ttf");
+  src: local("Overlock"), url("/assets/Overlock-Regular.ttf");
 }
 
 @font-face {
   font-family: "Overlock";
-  src: local("Overlock Bold"), url("../fonts/Overlock-Bold.ttf");
+  src: local("Overlock Bold"), url("/assets/fonts/Overlock-Bold.ttf");
   font-weight: bold;
 }
 
