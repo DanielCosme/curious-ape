@@ -56,7 +56,6 @@ func Day(day core.Day) Node {
 	return Div(
 		Class("day"),
 		Span(Text(day.Date.Time().Format(core.HumanDate))),
-		Span(Text("")),
 		habitSpot(day.Habits.Sleep),
 		habitSpot(day.Habits.Fitness),
 		habitSpot(day.Habits.DeepWork),

@@ -174,20 +174,32 @@ a:focus-visible {
   cursor: pointer;
 }
 
-.habit-spot {
-  padding: 0 10px;
-}
-
 .day {
-  margin-bottom: 1rem;
-}
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 0.3fr;
+  border-bottom: 0.1rem solid var(--clr-background-dark);
+  margin: 1rem;
 
-.days-container {}
+  >.habit-spot {
+    place-items: center;
+    text-align: center;
+  }
 
-.days-list {}
+  >button {
+    font: inherit;
+    background: var(--clr-accent-400);
+    border: 0;
+    border-radius: 8px;
+    margin-bottom: 2px;
+  }
 
-.month-navigation {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
+  >button:hover {
+    background-color: var(--clr-accent-400);
+  }
+
+  >button:hover,
+  >button:focus-visible {
+    background: var(--clr-background-dark);
+    color: var(--clr-accent-400);
+  }
 }

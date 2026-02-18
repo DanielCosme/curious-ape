@@ -29,7 +29,7 @@ func (DB) Gen() error {
 
 type Migrate mg.Namespace
 
-// Creates new migration file takes 1 param <name>
+// Creates new migration file takes 1 parameter <name>
 func (Migrate) New(name string) error {
 	migrate := target.New("migrate")
 	migrate.Args("create", "-seq", "-ext=.sql", "-dir="+config.MIGRATIONS_LOCATION, name)
