@@ -8,7 +8,10 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
 	"runtime/debug"
+	"strings"
+	"syscall"
 	"time"
 
 	"github.com/stephenafamo/bob"
@@ -21,9 +24,9 @@ import (
 	"git.danicos.dev/daniel/curious-ape/pkg/oak"
 	"git.danicos.dev/daniel/curious-ape/pkg/persistence"
 
+	"git.danicos.dev/daniel/curious-ape/pkg/api"
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
-	"git.danicos.dev/daniel/curious-ape/pkg/api"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/sqlite"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -100,6 +103,10 @@ func main() {
 	sessionManager.Lifetime = 24 * time.Hour * 7 // 7 days
 	sessionManager.Cookie.SameSite = http.SameSiteStrictMode
 	sessionManager.Cookie.Name = "curious-ape-session"
+	if cfg.Environment == application.Prod {
+		sessionManager.Cookie.HttpOnly = true
+		sessionManager.Cookie.Secure = true
+	}
 
 	bobDB := bob.NewDB(db)
 	app := application.New(&application.AppOptions{
@@ -138,9 +145,21 @@ func main() {
 		ErrorLog:     logLogger,
 		Handler:      api.Routes(t),
 	}
+
+	// Handle graceful shutdown on signals
+	go func() {
+		ch := make(chan os.Signal, 1)
+		signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
+		<-ch
+		oak.Info("TERMINATION Signal recerived: Shutting down")
+		server.Shutdown(context.Background())
+	}()
+
 	oak.Info("HTTP server listening", "addr", addr)
 	if err := server.ListenAndServe(); err != nil {
-		logFatal(err)
+		if !strings.Contains(err.Error(), "http: Server closed") {
+			logFatal(err)
+		}
 	}
 }
 
