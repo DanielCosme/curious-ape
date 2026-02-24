@@ -11,7 +11,7 @@ jobs:
     runs-on: arch-linux
     steps:
       - name: Clone Repository
-        run: "git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY > /dev/null 2>&1"
+        run: "git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
 
       - name: "Add go binaries to Path"
         run: echo "$HOME/go/bin" >> $GITHUB_PATH
@@ -58,4 +58,3 @@ jobs:
       - name: Deploy
         working-directory: ./curious-ape
         run: mage deploy
-
