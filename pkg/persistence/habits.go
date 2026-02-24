@@ -2,13 +2,13 @@ package persistence
 
 import (
 	"context"
-	"log/slog"
 
-	"github.com/aarondl/opt/omit"
-	"github.com/aarondl/opt/omitnull"
 	"git.danicos.dev/daniel/curious-ape/database/gen/dberrors"
 	"git.danicos.dev/daniel/curious-ape/database/gen/models"
 	"git.danicos.dev/daniel/curious-ape/pkg/core"
+	"git.danicos.dev/daniel/curious-ape/pkg/oak"
+	"github.com/aarondl/opt/omit"
+	"github.com/aarondl/opt/omitnull"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/sqlite"
 )
@@ -78,7 +78,7 @@ func (h *Habits) Upsert(p core.Habit) (coreHabit core.Habit, err error) {
 
 func habitToCore(h *models.Habit) (habit core.Habit) {
 	if h == nil {
-		slog.Error("habitToCore habit is nil")
+		oak.Error("habitToCore: habit is nil")
 		return
 	}
 	habit.ID = uint(h.ID)
@@ -90,31 +90,21 @@ func habitToCore(h *models.Habit) (habit core.Habit) {
 	return
 }
 
-// func habitCategoryToCore(hc *models.HabitCategory) (c core.HabitCategory) {
-// 	if hc == nil {
-// 		slog.Error("habitCategoryToCore habit category is nil")
-// 		return
-// 	}
-// 	c.ID = uint(hc.ID)
-// 	c.Name = hc.Name
-// 	c.Kind = core.HabitType(hc.Kind)
-// 	c.Description = hc.Description
-// 	return
-// }
-
 func buildHabitQuery(f core.HabitParams) *sqlite.ViewQuery[*models.Habit, models.HabitSlice] {
 	q := models.Habits.Query()
+	q.Apply(models.Preload.Habit.Day())
+	q.Apply(models.Preload.Habit.HabitCategory())
 	if f.ID > 0 {
 		q.Apply(models.SelectWhere.Habits.ID.EQ(int64(f.ID)))
 	}
-	// if f.DayID > 0 {
-	// 	q.Apply(models.SelectWhere.Habits.DayID.EQ(int64(f.DayID)))
-	// }
-	// if f.CategoryID > 0 {
-	// 	q.Apply(models.SelectWhere.Habits.HabitCategoryID.EQ(int64(f.CategoryID)))
-	// }
-	q.Apply(models.Preload.Habit.Day())
-	q.Apply(models.Preload.Habit.HabitCategory())
+	/*
+		if f.DayID > 0 {
+			q.Apply(models.SelectWhere.Habits.DayID.EQ(int64(f.DayID)))
+		}
+		if f.CategoryID > 0 {
+			q.Apply(models.SelectWhere.Habits.HabitCategoryID.EQ(int64(f.CategoryID)))
+		}
+	*/
 	return q
 }
 
@@ -128,3 +118,18 @@ func buildHabitCategoryQuery(f core.HabitCategoryParams) *sqlite.ViewQuery[*mode
 	}
 	return q
 }
+
+/*
+func habitCategoryToCore(hc *models.HabitCategory) (c core.HabitCategory) {
+	if hc == nil {
+		oak.Error("habitCategoryToCore habit category is nil")
+		return
+	}
+	c.ID = uint(hc.ID)
+	c.Name = hc.Name
+	c.Kind = core.HabitType(hc.Kind)
+	c.Description = hc.Description
+	// Now we are missing the habits.
+	return
+}
+*/

@@ -17,6 +17,14 @@ func (a *App) DayGetOrCreate(date core.Date) (core.Day, error) {
 
 // DaysMonth will return all the Days of the current Month.
 func (a *App) DaysMonth(ctx context.Context, today core.Date) ([]core.Day, error) {
+	return a.daysMonth(ctx, today, core.DESC)
+}
+
+func (a *App) DaysMonthASC(ctx context.Context, today core.Date) ([]core.Day, error) {
+	return a.daysMonth(ctx, today, core.ASC)
+}
+
+func (a *App) daysMonth(ctx context.Context, today core.Date, order core.OrderParam) ([]core.Day, error) {
 	day, err := a.db.Days.Get(core.DayParams{Date: today})
 	if core.IfErrNNotFound(err) {
 		return nil, err
@@ -31,7 +39,7 @@ func (a *App) DaysMonth(ctx context.Context, today core.Date) ([]core.Day, error
 		}
 	}
 
-	return a.db.Days.Find(core.DayParams{Dates: daysOfTheMonth, Order: core.DESC})
+	return a.db.Days.Find(core.DayParams{Dates: daysOfTheMonth, Order: order})
 }
 
 func (a *App) dayGetOrCreate(d core.Date) (day core.Day, err error) {

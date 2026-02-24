@@ -27,6 +27,7 @@ func layout(title string, s *State, nodes ...Node) Node {
 				If(s.Authenticated, Nav(
 					// TODO: Make pages from nav be partially loaded, and not the full page.
 					a("/", "Home "),
+					a("/habits", "Habits"),
 					a("/sleep", "Sleep "),
 					a("/fitness", "Fitness"),
 					a("/deep_work", "Deep-Work "),

@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/aarondl/opt/omit"
-	"github.com/aarondl/opt/omitnull"
 	"git.danicos.dev/daniel/curious-ape/database/gen/dberrors"
 	"git.danicos.dev/daniel/curious-ape/database/gen/models"
 	"git.danicos.dev/daniel/curious-ape/pkg/core"
+	"github.com/aarondl/opt/omit"
+	"github.com/aarondl/opt/omitnull"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/sqlite"
 )

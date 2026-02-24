@@ -4,9 +4,9 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/aarondl/opt/omit"
 	"git.danicos.dev/daniel/curious-ape/database/gen/models"
 	"git.danicos.dev/daniel/curious-ape/pkg/core"
+	"github.com/aarondl/opt/omit"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/sqlite"
 	"github.com/stephenafamo/bob/dialect/sqlite/sm"

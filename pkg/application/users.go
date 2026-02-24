@@ -2,10 +2,10 @@ package application
 
 import (
 	"errors"
-	"github.com/aarondl/opt/omit"
 	"git.danicos.dev/daniel/curious-ape/database/gen/models"
 	"git.danicos.dev/daniel/curious-ape/pkg/core"
 	"git.danicos.dev/daniel/curious-ape/pkg/persistence"
+	"github.com/aarondl/opt/omit"
 
 	"golang.org/x/crypto/bcrypt"
 )

@@ -72,6 +72,8 @@ body {
 
   footer {
     grid-area: footer;
+    position: fixed;
+    bottom: 0;
   }
 
   nav {
@@ -202,4 +204,44 @@ a:focus-visible {
   >button:focus-visible {
     background: var(--clr-background-dark);
   }
+}
+
+.habits-grid {
+  display: grid;
+  gap: 1px;
+  margin: 1rem 0;
+}
+
+.grid-header {
+  background-color: var(--clr-accent-400);
+  color: var(--clr-background-base);
+  padding: 0.5rem;
+  text-align: center;
+  font-weight: bold;
+}
+
+.habit-category {
+  background-color: var(--clr-accent-300);
+  color: var(--clr-neutral-800);
+  padding: 0.5rem;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+}
+
+.habit-cell {
+  aspect-ratio: 1;
+  border: 1px solid var(--clr-background-dark);
+}
+
+.habit-done {
+  background-color: seagreen;
+}
+
+.habit-not_done {
+  background-color: crimson;
+}
+
+.habit-no_info {
+  background-color: var(--clr-neutral-100);
 }

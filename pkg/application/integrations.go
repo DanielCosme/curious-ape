@@ -6,13 +6,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/aarondl/opt/omit"
 	"git.danicos.dev/daniel/curious-ape/database/gen/models"
 	"git.danicos.dev/daniel/curious-ape/pkg/core"
 	"git.danicos.dev/daniel/curious-ape/pkg/integrations/fitbit"
 	"git.danicos.dev/daniel/curious-ape/pkg/integrations/google"
 	"git.danicos.dev/daniel/curious-ape/pkg/oak"
 	"git.danicos.dev/daniel/curious-ape/pkg/persistence"
+	"github.com/aarondl/opt/omit"
 	"golang.org/x/oauth2"
 )
 

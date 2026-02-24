@@ -50,6 +50,7 @@ func Routes(a *API) http.Handler {
 	d.Endpoint("/day/sync").POST(a.DaySync)
 	d.Endpoint("/integration").GET(a.IntegrationGet)
 	d.Endpoint("/integrations").GET(a.IntegrationsGetList)
+	d.Endpoint("/habits").GET(a.Habits)
 	d.Endpoint("/sleep").GET(a.Sleep)
 	d.Endpoint("/fitness").GET(a.Fitness)
 	d.Endpoint("/deep_work").GET(a.DeepWork)
@@ -75,6 +76,16 @@ func (a *API) Fitness(c *dove.Context) error {
 	state := State(a, c.Req)
 	state.Days = days
 	return c.RenderOK(ui.Fitness(state))
+}
+
+func (a *API) Habits(c *dove.Context) error {
+	days, err := a.App.DaysMonthASC(c.Ctx(), core.NewDate(time.Now()))
+	if err != nil {
+		return err
+	}
+	state := State(a, c.Req)
+	state.Days = days
+	return c.RenderOK(ui.Habits(state))
 }
 
 func (a *API) Sleep(c *dove.Context) error {

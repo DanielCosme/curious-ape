@@ -3,8 +3,8 @@ package api
 import (
 	"net/http"
 
-	"github.com/alexedwards/scs/v2"
 	"git.danicos.dev/daniel/curious-ape/pkg/application"
+	"github.com/alexedwards/scs/v2"
 )
 
 type ContextKey string
