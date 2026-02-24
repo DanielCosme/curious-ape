@@ -235,11 +235,11 @@ a:focus-visible {
 }
 
 .habit-done {
-  background-color: seagreen;
+  background-color: yellowgreen;
 }
 
 .habit-not_done {
-  background-color: crimson;
+  background-color: indianred;
 }
 
 .habit-no_info {
