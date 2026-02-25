@@ -20,31 +20,35 @@ func Habits(s *State) Node {
 		{"Eat Healthy", core.HabitTypeEatHealthy},
 	}
 
-	daysCount := len(s.Days)
-	gridStyle := fmt.Sprintf("grid-template-columns: 120px repeat(%d, 1fr);", daysCount)
+	finalNodes := []Node{}
+	for _, days := range s.DaysYear {
+		daysCount := len(days)
+		gridStyle := fmt.Sprintf("grid-template-columns: 120px repeat(%d, 1fr);", daysCount)
 
-	var nodes []Node
-	nodes = append(nodes, Div(Class("grid-header"), Text("Category")))
-	for _, day := range s.Days {
-		nodes = append(nodes, Div(Class("grid-header"), Text(day.Date.Time().Format("02"))))
-	}
-	for _, cat := range categories {
-		nodes = append(nodes, Div(Class("habit-category"), Text(cat.name)))
-		for _, day := range s.Days {
-			state := getHabitState(day, cat.typ)
-			class := "habit-cell habit-" + string(state)
-			nodes = append(nodes, Div(Class(class)))
+		var nodes []Node
+		nodes = append(nodes, Div(Class("grid-header"), Text("Category")))
+		for _, day := range days {
+			nodes = append(nodes, Div(Class("grid-header"), Text(day.Date.Time().Format("02"))))
 		}
+		for _, cat := range categories {
+			nodes = append(nodes, Div(Class("habit-category"), Text(cat.name)))
+			for _, day := range days {
+				state := getHabitState(day, cat.typ)
+				class := "habit-cell habit-" + string(state)
+				nodes = append(nodes, Div(Class(class)))
+			}
+		}
+
+		gridAttrs := []Node{Class("habits-grid"), Style(gridStyle)}
+		allNodes := append(gridAttrs, nodes...)
+
+		node := Div(
+			H2(Text(days[0].Date.Time().Month().String())),
+			Div(allNodes...),
+		)
+		finalNodes = append(finalNodes, node)
 	}
-
-	gridAttrs := []Node{Class("habits-grid"), Style(gridStyle)}
-	allNodes := append(gridAttrs, nodes...)
-
-	node := Div(
-		H2(Text(s.Days[0].Date.Time().Month().String())),
-		Div(allNodes...),
-	)
-	return layout("Habits", s, node)
+	return layout("Habits", s, Group(finalNodes))
 }
 
 func getHabitState(day core.Day, typ core.HabitType) core.HabitState {

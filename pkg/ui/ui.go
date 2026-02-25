@@ -16,6 +16,7 @@ const (
 type State struct {
 	Version       string
 	Authenticated bool
+	DaysYear      [][]core.Day
 	Days          []core.Day
 	Integrations  []application.IntegrationInfo
 }

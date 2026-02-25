@@ -52,7 +52,15 @@ func (d Date) RangeMonth() DateSlice {
 
 	dates = append(dates, d)
 	return dates
+}
 
+// Months return all months of the year until the current date.
+func (d Date) Months() []time.Month {
+	months := []time.Month{}
+	for i := d.time.Month(); i > 0; i -= 1 {
+		months = append(months, i)
+	}
+	return months
 }
 
 func (d Date) ToEndOfDay() time.Time {

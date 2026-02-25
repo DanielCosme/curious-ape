@@ -79,12 +79,20 @@ func (a *API) Fitness(c *dove.Context) error {
 }
 
 func (a *API) Habits(c *dove.Context) error {
-	days, err := a.App.DaysMonthASC(c.Ctx(), core.NewDate(time.Now()))
-	if err != nil {
-		return err
-	}
 	state := State(a, c.Req)
-	state.Days = days
+	today := core.NewDate(time.Now())
+	for _, month := range today.Months() {
+		t := time.Date(today.Time().Year(), month+1, -1, 0, 0, 0, 0, time.UTC)
+		d := core.NewDate(t)
+		if month == today.Time().Month() {
+			d = today
+		}
+		days, err := a.App.DaysMonthASC(c.Ctx(), d)
+		if err != nil {
+			return err
+		}
+		state.DaysYear = append(state.DaysYear, days)
+	}
 	return c.RenderOK(ui.Habits(state))
 }
 
