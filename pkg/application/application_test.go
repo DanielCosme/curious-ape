@@ -25,7 +25,7 @@ func TestDay(t *testing.T) {
 	app := NewTestApplication(t)
 	ctx := context.Background()
 
-	date1 := core.NewDate(time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC))
+	date1 := core.NewDate(time.Now()).FirstDayOfTheMonth()
 	day, err := app.DayGetOrCreate(date1)
 	test.NilErr(t, err)
 	test.True(t, day.ID > 0)
