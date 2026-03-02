@@ -28,13 +28,13 @@ func Habits(s *State) Node {
 		var nodes []Node
 		nodes = append(nodes, Div(Class("grid-header"), Text("Category")))
 		for _, day := range days {
-			nodes = append(nodes, Div(Class("grid-header"), Text(day.Date.Time().Format("02"))))
+			nodes = append(nodes, Div(Class("habit-grid-item grid-header"), Text(day.Date.Time().Format("02"))))
 		}
 		for _, cat := range categories {
 			nodes = append(nodes, Div(Class("habit-category"), Text(cat.name)))
 			for _, day := range days {
 				state := getHabitState(day, cat.typ)
-				class := "habit-cell habit-" + string(state)
+				class := "habit-grid-item habit-cell habit-" + string(state)
 				nodes = append(nodes, Div(Class(class)))
 			}
 		}
