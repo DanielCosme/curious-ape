@@ -10,6 +10,7 @@ import (
 )
 
 func Sleep(s *State) Node {
+	next, prev := GetNextPrevButtons(s.Days[0], "sleep")
 	return layout("Sleep", s, Map(s.Days, func(day core.Day) Node {
 		if len(day.SleepLogs) == 0 {
 			return nil
@@ -24,5 +25,11 @@ func Sleep(s *State) Node {
 				)
 			}),
 		)
-	}))
+	}),
+		Div(
+			Class("month-navigation"),
+			next,
+			prev,
+		),
+	)
 }

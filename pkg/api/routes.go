@@ -59,7 +59,7 @@ func Routes(a *API) http.Handler {
 }
 
 func (a *API) DeepWork(c *dove.Context) error {
-	days, err := a.App.DaysMonth(c.Ctx(), core.NewDate(time.Now()))
+	days, err := a.App.DaysMonth(c.Ctx(), getDateParam(c))
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func (a *API) DeepWork(c *dove.Context) error {
 }
 
 func (a *API) Fitness(c *dove.Context) error {
-	days, err := a.App.DaysMonth(c.Ctx(), core.NewDate(time.Now()))
+	days, err := a.App.DaysMonth(c.Ctx(), getDateParam(c))
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (a *API) Habits(c *dove.Context) error {
 }
 
 func (a *API) Sleep(c *dove.Context) error {
-	days, err := a.App.DaysMonth(c.Ctx(), core.NewDate(time.Now()))
+	days, err := a.App.DaysMonth(c.Ctx(), getDateParam(c))
 	if err != nil {
 		return err
 	}
@@ -159,13 +159,7 @@ func (a *API) IntegrationsGetList(c *dove.Context) error {
 }
 
 func (a *API) Home(c *dove.Context) (err error) {
-	c.ParseForm()
-	date := core.NewDate(time.Now())
-	if c.Req.Form.Get("date") != "" {
-		date, err = core.NewDateFromISO8601(c.Req.Form.Get("date"))
-	}
-
-	days, err := a.App.DaysMonth(c.Ctx(), date)
+	days, err := a.App.DaysMonth(c.Ctx(), getDateParam(c))
 	if err != nil {
 		return err
 	}
@@ -173,6 +167,20 @@ func (a *API) Home(c *dove.Context) (err error) {
 	s := State(a, c.Req)
 	s.Days = days
 	return c.RenderOK(ui.Home(s))
+}
+
+func getDateParam(c *dove.Context) core.Date {
+	var err error
+	c.ParseForm()
+	date := core.NewDate(time.Now())
+	if c.Req.Form.Get("date") != "" {
+		date, err = core.NewDateFromISO8601(c.Req.Form.Get("date"))
+		if err != nil {
+			c.Log.Fatal("cannot parse date", "err", err)
+			panic(err)
+		}
+	}
+	return date
 }
 
 func (a *API) HabitFlip(c *dove.Context) error {

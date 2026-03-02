@@ -41,6 +41,11 @@ func (d Date) FirstDayOfTheMonth() Date {
 	return NewDate(time.Date(d.Time().Year(), d.Time().Month(), 1, 0, 0, 0, 0, d.time.Location()))
 }
 
+func (d Date) LastDayOfTheMonth() Date {
+	beginning := d.FirstDayOfTheMonth().Time()
+	return NewDate(beginning.AddDate(0, 1, -1))
+}
+
 func (d Date) RangeMonth() DateSlice {
 	var dates []Date
 	beginning := d.FirstDayOfTheMonth().Time()

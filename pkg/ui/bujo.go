@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"time"
 
 	"git.danicos.dev/daniel/curious-ape/pkg/core"
 	. "maragu.dev/gomponents"
@@ -32,6 +33,7 @@ func days(days []core.Day) Node {
 		return Div(Text("No days available"))
 	}
 
+	next, prev := GetNextPrevButtons(days[0], "")
 	return Div(
 		Class("days-container"),
 		H2(Text(days[0].Date.Time().Month().String())),
@@ -43,10 +45,39 @@ func days(days []core.Day) Node {
 		),
 		Div(
 			Class("month-navigation"),
-			Button(Text("Previous Month"), Disabled()),
-			Button(Text("Next Month"), Disabled()),
+			next,
+			prev,
 		),
 	)
+}
+
+func GetNextPrevButtons(day core.Day, route string) (prev, next Node) {
+	p, n := GetNextPrev(day, route)
+	prev = Button(Text("Previous Month"), ds.On("click", p))
+	next = Button(Text("Next Month"), ds.On("click", n))
+	return
+}
+
+func GetNextPrev(day core.Day, route string) (prev, next string) {
+	p, n := GetNextAndPreviousMonth(day)
+	prev = fmt.Sprintf("@get('/%s?date=%s')", route, p)
+	next = fmt.Sprintf("@get('/%s?date=%s')", route, n)
+	return
+}
+
+func GetNextAndPreviousMonth(day core.Day) (prev, next string) {
+	t := day.Date.FirstDayOfTheMonth().Time()
+	previousMonth := t.AddDate(0, -1, 0)
+	nextMonth := t.AddDate(0, 1, 0)
+	now := time.Now()
+	if previousMonth.Month() == now.Month() {
+		previousMonth = now
+	} else if nextMonth.Month() == now.Month() {
+		nextMonth = now
+	}
+	prev = core.TimeFormatISO8601(previousMonth)
+	next = core.TimeFormatISO8601(nextMonth)
+	return
 }
 
 func Day(day core.Day) Node {

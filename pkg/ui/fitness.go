@@ -5,15 +5,18 @@ import (
 
 	"git.danicos.dev/daniel/curious-ape/pkg/core"
 	. "maragu.dev/gomponents"
+	// ds "maragu.dev/gomponents-datastar"
 
 	. "maragu.dev/gomponents/html"
 )
 
 func Fitness(s *State) Node {
+	next, prev := GetNextPrevButtons(s.Days[0], "fitness")
 	return layout("Fitness", s, Map(s.Days, func(day core.Day) Node {
 		if len(day.FitnessLogs) == 0 {
 			return nil
 		}
+
 		return Div(
 			Map(day.FitnessLogs, func(fl core.FitnessLog) Node {
 				return Section(
@@ -24,5 +27,11 @@ func Fitness(s *State) Node {
 				)
 			}),
 		)
-	}))
+	}),
+		Div(
+			Class("month-navigation"),
+			next,
+			prev,
+		),
+	)
 }

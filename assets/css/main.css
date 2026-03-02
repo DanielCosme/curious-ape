@@ -47,7 +47,7 @@ body {
 
 .layout {
   margin: 0 auto;
-  max-width: 1500px;
+  max-width: 1600px;
   display: grid;
   gap: var(--fs-400);
   grid-template-columns: 1fr 5fr;

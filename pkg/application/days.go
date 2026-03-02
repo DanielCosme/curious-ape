@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"git.danicos.dev/daniel/curious-ape/pkg/core"
+	"time"
 )
 
 func (a *App) DayGetByID(id uint) (core.Day, error) {
@@ -16,21 +17,24 @@ func (a *App) DayGetOrCreate(date core.Date) (core.Day, error) {
 }
 
 // DaysMonth will return all the Days of the current Month.
-func (a *App) DaysMonth(ctx context.Context, today core.Date) ([]core.Day, error) {
-	return a.daysMonth(ctx, today, core.DESC)
+func (a *App) DaysMonth(ctx context.Context, date core.Date) ([]core.Day, error) {
+	return a.daysMonth(ctx, date, core.DESC)
 }
 
-func (a *App) DaysMonthASC(ctx context.Context, today core.Date) ([]core.Day, error) {
-	return a.daysMonth(ctx, today, core.ASC)
+func (a *App) DaysMonthASC(ctx context.Context, date core.Date) ([]core.Day, error) {
+	return a.daysMonth(ctx, date, core.ASC)
 }
 
-func (a *App) daysMonth(ctx context.Context, today core.Date, order core.OrderParam) ([]core.Day, error) {
-	day, err := a.db.Days.Get(core.DayParams{Date: today})
+func (a *App) daysMonth(ctx context.Context, date core.Date, order core.OrderParam) ([]core.Day, error) {
+	if time.Now().Month() != date.Time().Month() {
+		date = date.LastDayOfTheMonth()
+	}
+	day, err := a.db.Days.Get(core.DayParams{Date: date})
 	if core.IfErrNNotFound(err) {
 		return nil, err
 	}
 
-	daysOfTheMonth := today.RangeMonth()
+	daysOfTheMonth := date.RangeMonth()
 	if day.IsZero() {
 		for _, date := range daysOfTheMonth {
 			if _, err := a.dayGetOrCreate(date); err != nil {
