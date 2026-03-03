@@ -1,6 +1,7 @@
 package ui
 
 import (
+	lucide "github.com/eduardolat/gomponents-lucide"
 	. "maragu.dev/gomponents"
 	ds "maragu.dev/gomponents-datastar"
 	. "maragu.dev/gomponents/components"
@@ -26,12 +27,12 @@ func layout(title string, s *State, nodes ...Node) Node {
 			Aside(
 				If(s.Authenticated, Nav(
 					// TODO: Make pages from nav be partially loaded, and not the full page.
-					a("/", "Home "),
-					a("/habits", "Habits"),
-					a("/sleep", "Sleep "),
-					a("/fitness", "Fitness"),
-					a("/deep_work", "Deep-Work "),
-					a("/integrations", "Integrations"),
+					navItem(lucide.House(), "/", "Home "),
+					navItem(lucide.SquareCheckBig(), "/habits", "Habits"),
+					navItem(lucide.Bed(), "/sleep", "Sleep "),
+					navItem(lucide.Dumbbell(), "/fitness", "Fitness"),
+					navItem(lucide.MonitorCog(), "/deep_work", "Deep-Work "),
+					navItem(lucide.Workflow(), "/integrations", "Integrations"),
 				)),
 			),
 			Main(
@@ -44,4 +45,10 @@ func layout(title string, s *State, nodes ...Node) Node {
 			),
 		},
 	})
+}
+
+func navItem(icon Node, path, name string) Node {
+	return A(
+		icon, Href(path), Text(name),
+	)
 }

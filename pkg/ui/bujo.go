@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"git.danicos.dev/daniel/curious-ape/pkg/core"
+	lucide "github.com/eduardolat/gomponents-lucide"
 	. "maragu.dev/gomponents"
 
 	ds "maragu.dev/gomponents-datastar"
@@ -87,30 +88,38 @@ func Day(day core.Day) Node {
 	return Div(
 		Class("day"),
 		Span(Text(day.Date.Time().Format(core.HumanDate))),
-		habitSpot(day.Habits.Sleep),
-		habitSpot(day.Habits.Fitness),
-		habitSpot(day.Habits.DeepWork),
-		habitSpot(day.Habits.Eat),
+		habitSpot(lucide.Bed(), day.Habits.Sleep),
+		habitSpot(lucide.Dumbbell(), day.Habits.Fitness),
+		habitSpot(lucide.UserCog(), day.Habits.DeepWork),
+		habitSpot(lucide.Beef(), day.Habits.Eat),
 		Button(Text("sync"), ds.On("click", sync)),
 		ID(fmt.Sprintf("day-%d", day.ID)),
 	)
 }
 
-func habitSpot(habit core.Habit) Node {
-	state := habitNoInfo
-	switch habit.State {
-	case core.HabitStateDone:
-		state = habitDone
-	case core.HabitStateNotDone:
-		state = habitNotDone
-	}
-
+func habitSpot(icon Node, habit core.Habit) Node {
 	q := url.Values{}
 	q.Add("id", strconv.Itoa(int(habit.ID)))
 	flipAction := fmt.Sprintf("@put('/habit/flip?%s')", q.Encode())
+
+	var className string
+	switch habit.State {
+	case core.HabitStateDone:
+		className = "habit-spot-done"
+	case core.HabitStateNotDone:
+		className = "habit-spot-not-done"
+	default:
+		className = ""
+	}
+
+	classes := "habit-spot"
+	if className != "" {
+		classes += " " + className
+	}
+
 	return Span(
-		Class("habit-spot"),
-		Strong(Text(state)),
+		Class(classes),
+		icon,
 		If(habit.Note != "", Text(" "+habit.Note)),
 		ds.On("click", flipAction),
 	)
