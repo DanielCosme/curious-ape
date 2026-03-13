@@ -176,6 +176,10 @@ func Version() error {
 	return sh.RunV("echo", config.VERSION)
 }
 
+func Registry() error {
+	return sh.RunV("echo", config.REGISTRY)
+}
+
 func runSteps(target string, ts []target.Target) error {
 	var err error
 	for _, t := range ts {

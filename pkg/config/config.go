@@ -8,4 +8,5 @@ const (
 	PROD_HOST           = "ape-0" // Tailscale hostname (SSH in the server only works with VPN)
 	PROD_USER           = "daniel"
 	PROD_ADMIN          = "arch"
+	REGISTRY            = "danicos.dev"
 )
