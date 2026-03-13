@@ -159,7 +159,7 @@ func Push() error {
 
 	ts = []target.Target{
 		// NOTE: not pushing to origin (GitHub)
-		target.NewA("git", "push", "apex", "main", "--tags"),
+		target.NewA("git", "push", "gitea", "main", "--tags"),
 	}
 	return runSteps("push", ts)
 }

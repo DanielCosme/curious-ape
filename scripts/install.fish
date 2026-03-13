@@ -1,6 +1,6 @@
 #!/bin/env fish
 
-# Assumes the script is running from /tmp/deployment
+# Assumes the script is running from /tmp/deployment in the server.
 echo Installing
 sudo rm -r /opt/curious-ape 2>/dev/null
 sudo mkdir /opt/curious-ape
