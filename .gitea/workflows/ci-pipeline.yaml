@@ -8,7 +8,7 @@ jobs:
     runs-on: daniel-act-runner
     steps:
       - name: Clone Repository
-        run: "git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY > /dev/null 2>&1"
+        run: "git clone danicos.dev/daniel/curious-ape"
 
       - name: "Add go binaries to Path"
         run: echo "$HOME/go/bin" >> $GITHUB_PATH
