@@ -192,7 +192,7 @@ a:focus-visible {
 
 .day {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 0.3fr;
+  grid-template-columns: 0.3fr 0.3fr repeat(4, 1fr) 0.3fr;
   border-bottom: 0.1rem solid var(--clr-background-dark);
   margin: 1rem;
 
@@ -264,4 +264,13 @@ a:focus-visible {
 
 .habit-no_info {
   background-color: var(--clr-neutral-100);
+}
+
+.day-score {
+  font-weight: bold;
+}
+
+.month-score {
+  font-weight: bold;
+  margin-left: 1rem;
 }

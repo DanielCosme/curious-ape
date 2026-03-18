@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
-	"time"
 
 	"git.danicos.dev/daniel/curious-ape/pkg/core"
 	lucide "github.com/eduardolat/gomponents-lucide"
@@ -52,42 +51,29 @@ func days(days []core.Day) Node {
 	)
 }
 
-func GetNextPrevButtons(day core.Day, route string) (prev, next Node) {
-	p, n := GetNextPrev(day, route)
-	prev = Button(Text("Previous Month"), ds.On("click", p))
-	next = Button(Text("Next Month"), ds.On("click", n))
-	return
-}
-
-func GetNextPrev(day core.Day, route string) (prev, next string) {
-	p, n := GetNextAndPreviousMonth(day)
-	prev = fmt.Sprintf("@get('/%s?date=%s')", route, p)
-	next = fmt.Sprintf("@get('/%s?date=%s')", route, n)
-	return
-}
-
-func GetNextAndPreviousMonth(day core.Day) (prev, next string) {
-	t := day.Date.FirstDayOfTheMonth().Time()
-	previousMonth := t.AddDate(0, -1, 0)
-	nextMonth := t.AddDate(0, 1, 0)
-	now := time.Now()
-	if previousMonth.Month() == now.Month() {
-		previousMonth = now
-	} else if nextMonth.Month() == now.Month() {
-		nextMonth = now
-	}
-	prev = core.TimeFormatISO8601(previousMonth)
-	next = core.TimeFormatISO8601(nextMonth)
-	return
-}
-
 func Day(day core.Day) Node {
 	q := url.Values{}
 	q.Add("date", day.Date.String())
 	sync := fmt.Sprintf("@post('/day/sync?%s')", q.Encode())
+	var color string
+	switch day.Habits.Score {
+	case 0:
+		color = "red"
+	case 1:
+		color = "orangered"
+	case 2:
+		color = "goldenrod"
+	case 3:
+		color = "yellowgreen"
+	case 4:
+		color = "rebeccapurple"
+	default:
+		color = "white"
+	}
 	return Div(
 		Class("day"),
 		Span(Text(day.Date.Time().Format(core.HumanDate))),
+		Span(Style(fmt.Sprintf("color: %s", color)), Class("day-score"), Text(fmt.Sprintf("Score: %d", day.Habits.Score))),
 		habitSpot(lucide.Bed(), day.Habits.Sleep),
 		habitSpot(lucide.Dumbbell(), day.Habits.Fitness),
 		habitSpot(lucide.UserCog(), day.Habits.DeepWork),

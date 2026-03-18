@@ -86,6 +86,9 @@ func dayToCore(d *models.Day) (day core.Day) {
 		case core.HabitTypeEatHealthy:
 			day.Habits.Eat = habit
 		}
+		if h.State == string(core.HabitStateDone) {
+			day.Habits.Score += 1
+		}
 		day.Habits.Hs = append(day.Habits.Hs, habit)
 	}
 	for _, sl := range d.R.SleepLogs {

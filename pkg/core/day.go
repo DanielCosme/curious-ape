@@ -19,6 +19,7 @@ type Day struct {
 }
 
 type DayHabits struct {
+	Score    int
 	Hs       []Habit
 	Sleep    Habit
 	Fitness  Habit

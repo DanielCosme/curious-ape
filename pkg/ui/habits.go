@@ -22,12 +22,14 @@ func Habits(s *State) Node {
 
 	finalNodes := []Node{}
 	for _, days := range s.DaysYear {
+		var monthScore int
 		daysCount := len(days)
 		gridStyle := fmt.Sprintf("grid-template-columns: 120px repeat(%d, 1fr);", daysCount)
 
 		var nodes []Node
 		nodes = append(nodes, Div(Class("grid-header"), Text("Category")))
 		for _, day := range days {
+			monthScore += day.Habits.Score
 			nodes = append(nodes, Div(Class("habit-grid-item grid-header"), Text(day.Date.Time().Format("02"))))
 		}
 		for _, cat := range categories {
@@ -42,8 +44,11 @@ func Habits(s *State) Node {
 		gridAttrs := []Node{Class("habits-grid"), Style(gridStyle)}
 		allNodes := append(gridAttrs, nodes...)
 
+		maxScore := daysCount * 4
+		percentage := (float32(monthScore) * float32(100)) / float32(maxScore)
 		node := Div(
-			H2(Text(days[0].Date.Time().Month().String())),
+			H2(Style("display: inline-block"), Text(days[0].Date.Time().Month().String())),
+			Span(Class("month-score"), Text(fmt.Sprintf("%.0f%% %d/%d", percentage, monthScore, maxScore))),
 			Div(allNodes...),
 		)
 		finalNodes = append(finalNodes, node)

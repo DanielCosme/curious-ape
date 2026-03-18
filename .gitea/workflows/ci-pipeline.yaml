@@ -1,7 +1,7 @@
 name: CI Pipeline
 on:
   push:
-    # branches-ignore: [main]
+    branches-ignore: [main]
 
 jobs:
   test-and-audit:
