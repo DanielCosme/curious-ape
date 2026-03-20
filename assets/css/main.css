@@ -1,276 +1,283 @@
 :root {
-  --clr-accent-300: hsl(67 90% 32%);
-  --clr-accent-400: hsl(67 81.5% 25.5%);
-  --clr-neutral-100: hsl(0 0% 100%);
-  --clr-neutral-800: hsl(0 0% 20%);
+	--clr-accent-300: hsl(67 90% 32%);
+	--clr-accent-400: hsl(67 81.5% 25.5%);
+	--clr-neutral-100: hsl(0 0% 100%);
+	--clr-neutral-800: hsl(0 0% 20%);
 
-  --clr-base: black;
-  --clr-base-inverse: grey;
-  --clr-background-base: floralwhite;
-  --clr-background-dark: hsl(158 24.4% 8.8%);
+	--clr-base: black;
+	--clr-base-inverse: grey;
+	--clr-background-base: floralwhite;
+	--clr-background-dark: hsl(158 24.4% 8.8%);
 
-  --fs-400: 1.125rem;
-  --fs-500: 1.3125rem;
-  --fs-600: 1.5rem;
-  --fs-700: 2.25rem;
-  --fs-800: 3rem;
+	--fs-400: 1.125rem;
+	--fs-500: 1.3125rem;
+	--fs-600: 1.5rem;
+	--fs-700: 2.25rem;
+	--fs-800: 3rem;
 
-  --ff-base: system-ui, sans-serif;
-  --ff-accent: serif;
+	--ff-base: system-ui, sans-serif;
+	--ff-accent: serif;
 }
 
 * {
-  box-sizing: border-box;
-  margin: 0;
+	box-sizing: border-box;
+	margin: 0;
 }
 
 body {
-  color: var(--clr-neutral-800);
-  font-size: var(--fs-400);
-  font-family: var(--ff-base);
-  line-height: 1.6;
+	color: var(--clr-neutral-800);
+	font-size: var(--fs-400);
+	font-family: var(--ff-base);
+	line-height: 1.6;
 
-  background-color: var(--clr-background-base);
-  min-height: 100vh;
+	background-color: var(--clr-background-base);
+	min-height: 100vh;
 }
 
 .layout {
-  margin: 0 auto;
-  max-width: 1800px;
-  display: grid;
-  gap: var(--fs-400);
-  grid-template-columns: 1fr 5fr;
-  grid-template-rows: var(--fs-800) 1fr var(--fs-600);
-  grid-template-areas:
-    "header main"
-    "aside  main"
-    "footer main"
-  ;
+	margin: 0 auto;
+	max-width: 1800px;
+	display: grid;
+	gap: var(--fs-400);
+	grid-template-columns: 1fr 5fr;
+	grid-template-rows: var(--fs-800) 1fr var(--fs-600);
+	grid-template-areas:
+		"header main"
+		"aside  main"
+		"footer main";
 
-  main {
-    grid-area: main;
-  }
+	main {
+		grid-area: main;
+	}
 
-  header {
-    grid-area: header;
-  }
+	header {
+		grid-area: header;
+	}
 
-  aside {
-    grid-area: aside;
-  }
+	aside {
+		grid-area: aside;
+	}
 
-  footer {
-    grid-area: footer;
-    position: fixed;
-    bottom: 0;
-  }
+	footer {
+		grid-area: footer;
+		position: fixed;
+		bottom: 0;
+	}
 
-  nav {
-    display: grid;
+	nav {
+		display: grid;
 
-    >a {
-      padding: 0.5rem 0px 0.5rem 0.5rem;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      padding-right: 1rem;
+		> a {
+			padding: 0.5rem 0px 0.5rem 0.5rem;
+			text-decoration: none;
+			display: flex;
+			align-items: center;
+			padding-right: 1rem;
 
-      >svg {
-        margin-right: 1rem
-      }
-    }
-  }
+			> svg {
+				margin-right: 1rem;
+			}
+		}
+	}
 }
 
 h1,
 h2,
 h3,
 h4 {
-  line-height: 1.1;
-  text-overflow: clip;
+	line-height: 1.1;
+	text-overflow: clip;
 }
 
 h1,
 h2 {
-  color: var(--clr-accent-400);
-  font-family: var(--ff-accent);
+	color: var(--clr-accent-400);
+	font-family: var(--ff-accent);
 }
 
 h1 {
-  font-size: var(--fs-800);
-  text-align: left;
-  padding-left: 0.5rem;
-  white-space: nowrap;
-  /*
+	font-size: var(--fs-800);
+	text-align: left;
+	padding-left: 0.5rem;
+	white-space: nowrap;
+	/*
   overflow: hidden;
  */
 }
 
 h2 {
-  font-size: var(--fs-700);
-  padding: 10px 0;
+	font-size: var(--fs-700);
+	padding: 10px 0;
 }
 
 h3 {
-  color: var(--clr-accent-300);
-  font-size: var(--fs-600);
-  font-family: var(--ff-accent);
-  font-weight: 800;
+	color: var(--clr-accent-300);
+	font-size: var(--fs-600);
+	font-family: var(--ff-accent);
+	font-weight: 800;
 }
 
 input,
 button,
 textarea,
 select {
-  font-family: inherit;
-  font-size: inherit;
+	font-family: inherit;
+	font-size: inherit;
 }
 
 a {
-  color: var(--clr-accent-400);
+	color: var(--clr-accent-400);
 }
 
 a:hover,
 a:focus-visible {
-  color: var(--clr-background-base);
-  background-color: var(--clr-accent-300);
+	color: var(--clr-background-base);
+	background-color: var(--clr-accent-300);
 }
 
 .button {
-  font: inherit;
-  font-weight: 700;
-  text-transform: uppercase;
-  background: var(--clr-accent-300);
-  border: 0;
-  padding: 0.75em 1.5em;
+	font: inherit;
+	font-weight: 700;
+	text-transform: uppercase;
+	background: var(--clr-accent-300);
+	border: 0;
+	padding: 0.75em 1.5em;
 }
 
 .button:hover,
 .button:focus-visible {
-  background: var(--clr-neutral-800);
-  color: var(--clr-accent-300);
+	background: var(--clr-neutral-800);
+	color: var(--clr-accent-300);
 }
 
 .text-center {
-  text-align: center;
+	text-align: center;
 }
 
-.element-with-padding>* {
-  margin-block: 0;
+.element-with-padding > * {
+	margin-block: 0;
 }
 
-.element-with-padding>p {
-  margin-block: 1em;
+.element-with-padding > p {
+	margin-block: 1em;
 }
 
-.element-with-padding> :first-child {
-  margin-block-start: 0;
+.element-with-padding > :first-child {
+	margin-block-start: 0;
+}
+
+.flex {
+	display: flex;
+	align-items: center;
 }
 
 .habit-spot {
-  display: flex;
-  align-items: center;
+	display: flex;
+	align-items: center;
 
-  >svg {
-    margin-right: 1rem;
-  }
+	> svg {
+		margin-right: 1rem;
+	}
 }
 
 .habit-spot:hover {
-  color: var(--clr-background-base);
-  background-color: var(--clr-accent-400);
-  cursor: pointer;
+	color: var(--clr-background-base);
+	background-color: var(--clr-accent-400);
+	cursor: pointer;
 }
 
 .habit-spot-done {
-  color: green;
+	color: green;
 }
 
 .habit-spot-not-done {
-  color: red;
+	color: red;
 }
 
 .day {
-  display: grid;
-  grid-template-columns: 0.3fr 0.3fr repeat(4, 1fr) 0.3fr;
-  border-bottom: 0.1rem solid var(--clr-background-dark);
-  margin: 1rem;
+	display: grid;
+	grid-template-columns: 0.3fr 0.3fr repeat(4, 1fr) 0.3fr;
+	border-bottom: 0.1rem solid var(--clr-background-dark);
+	margin: 1rem;
 
-  >.habit-spot {
-    place-items: center;
-    text-align: center;
-  }
+	> .habit-spot {
+		place-items: center;
+		text-align: center;
+	}
 
-  >button {
-    font: inherit;
-    background: var(--clr-accent-400);
-    border: 0;
-    border-radius: 8px;
-    margin-bottom: 2px;
-    color: var(--clr-background-base)
-  }
+	> button {
+		font: inherit;
+		background: var(--clr-accent-400);
+		border: 0;
+		border-radius: 8px;
+		margin-bottom: 2px;
+		color: var(--clr-background-base);
+	}
 
-  >button:hover {
-    background-color: var(--clr-accent-400);
-  }
+	> button:hover {
+		background-color: var(--clr-accent-400);
+	}
 
-  >button:hover,
-  >button:focus-visible {
-    background: var(--clr-background-dark);
-  }
+	> button:hover,
+	> button:focus-visible {
+		background: var(--clr-background-dark);
+	}
 }
 
 .habits-grid {
-  display: grid;
-  gap: 1px;
-  margin: 1rem 0;
-  max-width: min-content;
+	display: grid;
+	gap: 1px;
+	margin: 1rem 0;
+	max-width: min-content;
 }
 
 .grid-header {
-  background-color: var(--clr-accent-400);
-  color: var(--clr-background-base);
-  padding: 0.5rem;
-  text-align: center;
-  font-weight: bold;
+	background-color: var(--clr-accent-400);
+	color: var(--clr-background-base);
+	padding: 0.5rem;
+	text-align: center;
+	font-weight: bold;
 }
 
 .habit-category {
-  background-color: var(--clr-accent-300);
-  color: var(--clr-neutral-800);
-  padding: 0.5rem;
-  text-align: center;
-  align-items: center;
-  justify-content: center;
+	background-color: var(--clr-accent-300);
+	color: var(--clr-neutral-800);
+	padding: 0.5rem;
+	text-align: center;
+	align-items: center;
+	justify-content: center;
 }
 
 .habit-cell {
-  aspect-ratio: 1;
-  border: 1px solid var(--clr-background-dark);
+	aspect-ratio: 1;
+	border: 1px solid var(--clr-background-dark);
 }
 
 .habit-grid-item {
-  max-width: 3rem;
-  max-height: 3rem;
+	max-width: 3rem;
+	max-height: 3rem;
 }
 
 .habit-done {
-  background-color: yellowgreen;
+	background-color: yellowgreen;
 }
 
 .habit-not_done {
-  background-color: indianred;
+	background-color: indianred;
 }
 
 .habit-no_info {
-  background-color: var(--clr-neutral-100);
+	background-color: var(--clr-neutral-100);
 }
 
 .day-score {
-  font-weight: bold;
+	font-weight: bold;
+	> svg {
+		margin-right: 0.5rem;
+	}
 }
 
 .month-score {
-  font-weight: bold;
-  margin-left: 1rem;
+	font-weight: bold;
+	margin-left: 1rem;
 }

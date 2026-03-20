@@ -17,10 +17,8 @@ podman build \
 podman tag curious-ape $REGISTRY/daniel/curious-ape:latest
 podman tag curious-ape $REGISTRY/daniel/curious-ape:$APE_VERSION
 
-podman login --get-login https://$REGISTRY
-if [ $? -ne 0 ]; then
+podman login --get-login https://$REGISTRY ||
   podman login https://$REGISTRY -u $REGISTRY_USER --password-stdin <<< "$REGISTRY_PASSWORD"
-fi
 
 podman push $REGISTRY/daniel/curious-ape:latest
 podman push $REGISTRY/daniel/curious-ape:$APE_VERSION
