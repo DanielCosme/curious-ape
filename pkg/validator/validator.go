@@ -2,6 +2,7 @@ package validator
 
 import (
 	"regexp"
+	"slices"
 	"strings"
 	"unicode/utf8"
 )
@@ -70,10 +71,5 @@ func Matches(value string, rx *regexp.Regexp) bool {
 
 // PermittedInt() returns true if a value is in a list of permitted integers.
 func PermittedInt(value int, permittedValues ...int) bool {
-	for i := range permittedValues {
-		if value == permittedValues[i] {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(permittedValues, value)
 }

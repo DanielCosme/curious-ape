@@ -34,7 +34,7 @@ type FitnessSession struct {
 	ModifiedTimeMillis string      `json:"modifiedTimeMillis,omitempty"`
 	ActivityType       int         `json:"activityType,omitempty"`
 	ActiveTimeMillis   string      `json:"activeTimeMillis,omitempty"`
-	Application        Application `json:"application,omitempty"`
+	Application        Application `json:"application"`
 }
 
 func (s *FitnessService) GetFitnessSessions(startTime, endTime time.Time) ([]FitnessSession, error) {

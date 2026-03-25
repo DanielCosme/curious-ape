@@ -15,7 +15,7 @@ type Client struct {
 	*http.Client
 }
 
-func (c *Client) Call(method string, path string, urlParams url.Values, i interface{}) error {
+func (c *Client) Call(method string, path string, urlParams url.Values, i any) error {
 	reqURL := BaseURL + path
 	if urlParams != nil {
 		reqURL = fmt.Sprintf("%s?%s", reqURL, urlParams.Encode())
