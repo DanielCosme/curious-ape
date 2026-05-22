@@ -81,7 +81,6 @@ func main() {
 	err = db.Ping()
 	exitIfErr(err)
 
-	// TODO: remove me. this is a dummy note for a dummy commit.
 	// Database migrations
 	migrationsSource, err := iofs.New(migrations.Migrations, "sqlite")
 	exitIfErr(err)
