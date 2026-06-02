@@ -11,7 +11,8 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/lmittmann/tint v1.1.2
 	github.com/magefile/mage v1.17.2
-	github.com/stephenafamo/bob v0.42.0
+	github.com/stephenafamo/bob v0.45.0
+	github.com/stephenafamo/scan v0.7.0
 	golang.org/x/crypto v0.46.0
 	golang.org/x/oauth2 v0.31.0
 	maragu.dev/gomponents v1.2.0
@@ -165,8 +166,7 @@ require (
 	github.com/snowflakedb/gosnowflake v1.6.19 // indirect
 	github.com/spf13/cast v1.7.0 // indirect
 	github.com/spiffe/go-spiffe/v2 v2.5.0 // indirect
-	github.com/stephenafamo/scan v0.7.0 // indirect
-	github.com/stephenafamo/sqlparser v0.0.0-20250521201114-5cfed001272d // indirect
+	github.com/stephenafamo/sqlparser v0.0.0-20260122161205-e324475bd1fc // indirect
 	github.com/urfave/cli/v2 v2.23.7 // indirect
 	github.com/volatiletech/inflect v0.0.1 // indirect
 	github.com/volatiletech/strmangle v0.0.6 // indirect
