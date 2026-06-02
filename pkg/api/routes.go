@@ -54,18 +54,44 @@ func Routes(a *API) http.Handler {
 	d.Endpoint("/sleep").GET(a.Sleep)
 	d.Endpoint("/fitness").GET(a.Fitness)
 	d.Endpoint("/deep_work").GET(a.DeepWork)
-	d.Endpoint("/deadlines").GET(a.Deadlines)
-	/*
-		 TODO
-			- GET new deadline form (html)
-			- POST new deadline
-	*/
+	d.Endpoint("/deadlines").GET(a.DeadlinesList)
+	d.Endpoint("/deadline").
+		GET(a.DeadlinesGetForm).
+		POST(a.DeadlinesPostForm)
 
 	return d
 }
 
-func (a *API) Deadlines(c *dove.Context) error {
+func (a *API) DeadlinesList(c *dove.Context) error {
 	state := State(a, c.Req)
+	return c.RenderOK(ui.Deadlines(state))
+}
+
+func (a *API) DeadlinesGetForm(c *dove.Context) error {
+	state := State(a, c.Req)
+	return c.RenderOK(ui.DeadlineForm(state))
+}
+
+func (a *API) DeadlinesPostForm(c *dove.Context) error {
+	c.ParseForm()
+	state := State(a, c.Req)
+
+	var recurring bool
+	if c.Req.PostForm.Get("recurrent") == "on" {
+		recurring = true
+	}
+	date, _ := core.NewDateFromISO8601(c.Req.PostForm.Get("end_date"))
+	_, err := a.App.DeadlineCreate(c.Ctx(), core.Deadline{
+		Title:     c.Req.PostForm.Get("title"),
+		StartDate: core.NewDateToday(),
+		EndDate:   date,
+		Recurring: recurring,
+	})
+	if err != nil {
+		state.Deadlines.Err = err
+		return c.RenderOK(ui.DeadlineForm(state))
+	}
+
 	return c.RenderOK(ui.Deadlines(state))
 }
 

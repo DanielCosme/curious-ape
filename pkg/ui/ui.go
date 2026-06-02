@@ -20,6 +20,12 @@ type State struct {
 	DaysYear      [][]core.Day
 	Days          []core.Day
 	Integrations  []application.IntegrationInfo
+	Deadlines     DeadlineState
+}
+
+type DeadlineState struct {
+	Err      error
+	Deadline core.Deadline
 }
 
 func a(path, name string) Node {
