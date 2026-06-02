@@ -54,8 +54,19 @@ func Routes(a *API) http.Handler {
 	d.Endpoint("/sleep").GET(a.Sleep)
 	d.Endpoint("/fitness").GET(a.Fitness)
 	d.Endpoint("/deep_work").GET(a.DeepWork)
+	d.Endpoint("/deadlines").GET(a.Deadlines)
+	/*
+		 TODO
+			- GET new deadline form (html)
+			- POST new deadline
+	*/
 
 	return d
+}
+
+func (a *API) Deadlines(c *dove.Context) error {
+	state := State(a, c.Req)
+	return c.RenderOK(ui.Deadlines(state))
 }
 
 func (a *API) DeepWork(c *dove.Context) error {

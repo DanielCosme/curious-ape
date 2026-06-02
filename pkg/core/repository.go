@@ -23,6 +23,10 @@ type DeepWorkLogRepository interface {
 	Upsert(DeepWorkLog) (DeepWorkLog, error)
 }
 
+type DeadlineRepository interface {
+	Create(Deadline) (Deadline, error)
+}
+
 type RepositoryCommon struct {
 	ID uint
 }

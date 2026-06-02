@@ -29,6 +29,7 @@ func layout(title string, s *State, nodes ...Node) Node {
 					// TODO: Make pages from nav be partially loaded, and not the full page.
 					navItem(lucide.House(), "/", "Home "),
 					navItem(lucide.SquareCheckBig(), "/habits", "Habits"),
+					navItem(lucide.Hourglass(), "/deadlines", "Deadlines "),
 					navItem(lucide.Bed(), "/sleep", "Sleep "),
 					navItem(lucide.Dumbbell(), "/fitness", "Fitness"),
 					navItem(lucide.MonitorCog(), "/deep_work", "Deep-Work "),
