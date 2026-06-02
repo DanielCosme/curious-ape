@@ -9,4 +9,5 @@ const (
 	PROD_USER           = "daniel"
 	PROD_ADMIN          = "arch"
 	REGISTRY            = "danicos.dev"
+	DATASTAR            = "https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.2/bundles/datastar.js"
 )

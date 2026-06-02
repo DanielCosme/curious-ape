@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"git.danicos.dev/daniel/curious-ape/pkg/config"
 	lucide "github.com/eduardolat/gomponents-lucide"
 	. "maragu.dev/gomponents"
 	ds "maragu.dev/gomponents-datastar"
@@ -16,7 +17,7 @@ func layout(title string, s *State, nodes ...Node) Node {
 		Title:    "Curious Ape - " + title,
 		Language: "en",
 		Head: []Node{
-			Script(Type("module"), Src("https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.7/bundles/datastar.js")),
+			Script(Type("module"), Src(config.DATASTAR)),
 			Link(Rel("stylesheet"), Href("/assets/css/main.css")),
 		},
 		Body: []Node{
