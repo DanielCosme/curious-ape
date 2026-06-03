@@ -7,7 +7,7 @@ env:
   AGE_KEY: /var/lib/act_runner/.age.txt
 
 jobs:
-  test-and-audit:
+  release:
     runs-on: daniel-act-runner
     steps:
       - name: Clone Repository
@@ -19,42 +19,39 @@ jobs:
       - name: Ensure Task Runner is installed
         run: go install github.com/magefile/mage@latest
 
-      - name: Install Tools
+      # - name: Install Tools
+      #   working-directory: ./curious-ape
+      #   run: mage tools
+
+      - name: Build and push images to registry
         working-directory: ./curious-ape
-        run: mage tools
+        run: $REGISTRY_USER=${{ secrets.CI_TOKEN }} $REGISTRY_PASSWORD=${{ secrets.CI_TOKEN }} ./scripts/release-podman.sh
 
-      - name: Prepare Database
-        working-directory: ./curious-ape
-        run: "mkdir -p ./tmp && mage migrate:up"
+# Release
+# Need to decrypt secrets.
+#
+# Build images and push to registry?
+# Update the Deployment for GitOps? Or do something that triggers this in another repository.
+#
+# REGISTRY_PASSWORD
+# REGISTRY_USER
 
-      - name: Generate Database Models
-        working-directory: ./curious-ape
-        run: mage db:gen
+# deploy:
+#   needs: test-and-audit
+#   runs-on: arch-linux
+#   steps:
+#     - name: Clone Repository
+#       run: "git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY > /dev/null 2>&1"
 
-      - name: Test
-        working-directory: ./curious-ape
-        run: mage test
+#     - name: "Add go binaries to Path"
+#       run: echo "$HOME/go/bin" >> $GITHUB_PATH
 
-      - name: Audit
-        working-directory: ./curious-ape
-        run: mage audit
+#     - name: Ensure age is installed
+#       run: "go install filippo.io/age/cmd/...@latest"
 
-  # deploy:
-  #   needs: test-and-audit
-  #   runs-on: arch-linux
-  #   steps:
-  #     - name: Clone Repository
-  #       run: "git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY > /dev/null 2>&1"
+#     - name: Add server to known_hosts
+#       run: ssh-keyscan -H ape-0 > ~/.ssh/known_hosts
 
-  #     - name: "Add go binaries to Path"
-  #       run: echo "$HOME/go/bin" >> $GITHUB_PATH
-
-  #     - name: Ensure age is installed
-  #       run: "go install filippo.io/age/cmd/...@latest"
-
-  #     - name: Add server to known_hosts
-  #       run: ssh-keyscan -H ape-0 > ~/.ssh/known_hosts
-
-  #     - name: Deploy
-  #       working-directory: ./curious-ape
-  #       run: mage deploy
+#     - name: Deploy
+#       working-directory: ./curious-ape
+#       run: mage deploy
