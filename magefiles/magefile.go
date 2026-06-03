@@ -44,8 +44,6 @@ func init() {
 		"ENC_SECRETS_PATH": config.DEPLOYMENT_DIR + "/enc",
 	}
 	r = target.NewRunner(Env, nil)
-
-	prodHost = fmt.Sprintf("%s@%s", config.PROD_ADMIN, config.PROD_HOST)
 }
 
 func Run() error {

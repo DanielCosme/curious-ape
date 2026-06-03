@@ -2,7 +2,10 @@ package toggl
 
 import (
 	"net/http"
+	"os"
 	"time"
+
+	"git.danicos.dev/daniel/curious-ape/pkg/config"
 )
 
 type API struct {
@@ -28,11 +31,17 @@ func NewApi(workspaceID int, token string) (*API, error) {
 		TimeEntries: &TimeEntries{client: client},
 	}
 
-	profile, err := a.Me.GetProfile()
-	if err != nil {
-		return nil, err
+	var tz string
+	if os.Getenv("APE_ENVIRONMENT") == "dev" {
+		tz = config.TZ
+	} else {
+		profile, err := a.Me.GetProfile()
+		if err != nil {
+			return nil, err
+		}
+		tz = profile.Timezone
 	}
-	err = a.SetClientTimeZone(profile.Timezone)
+	err := a.SetClientTimeZone(tz)
 	if err != nil {
 		return nil, err
 	}

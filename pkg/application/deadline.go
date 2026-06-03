@@ -28,7 +28,7 @@ func (a *App) DeadlineList() ([]core.Deadline, error) {
 		return nil, err
 	}
 	sort.Slice(res, func(i, j int) bool {
-		return res[i].DaysLeft > res[j].DaysLeft // Change '>' to '<' for ascending
+		return res[i].DaysLeft < res[j].DaysLeft // Change '>' to '<' for ascending
 	})
 	return res, nil
 }
