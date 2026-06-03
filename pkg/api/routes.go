@@ -63,7 +63,12 @@ func Routes(a *API) http.Handler {
 }
 
 func (a *API) DeadlinesList(c *dove.Context) error {
+	res, err := a.App.DeadlineList()
+	if err != nil {
+		return err
+	}
 	state := State(a, c.Req)
+	state.Deadlines.DS = res
 	return c.RenderOK(ui.Deadlines(state))
 }
 

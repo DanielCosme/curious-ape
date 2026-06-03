@@ -81,6 +81,21 @@ func TestDeadline(t *testing.T) {
 			},
 			err: errors.New("end time is empty"),
 		},
+		"Error when end date is before start time": {
+			input: core.Deadline{
+				RepositoryCommon: core.RepositoryCommon{ID: 0},
+				Title:            "tt",
+				StartDate:        now,
+				EndDate:          core.NewDate(now.Time().AddDate(0, -3, 0)),
+			},
+			expected: core.Deadline{
+				RepositoryCommon: core.RepositoryCommon{ID: 0},
+				Title:            "tt",
+				StartDate:        now,
+				EndDate:          core.NewDate(now.Time().AddDate(0, -3, 0)),
+			},
+			err: errors.New("end time cannot be before start time"),
+		},
 	}
 
 	for name, tc := range testCases {

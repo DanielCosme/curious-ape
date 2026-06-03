@@ -1,6 +1,9 @@
 package ui
 
 import (
+	"fmt"
+
+	"git.danicos.dev/daniel/curious-ape/pkg/core"
 	. "maragu.dev/gomponents"
 	ds "maragu.dev/gomponents-datastar"
 	. "maragu.dev/gomponents/html"
@@ -12,18 +15,17 @@ func Deadlines(s *State) Node {
 			Href("/deadline"),
 			Button(Text("New deadline")),
 		),
-		H2(Text("2026")),
-		deadline(),
-		deadline(),
+		Map(s.Deadlines.DS, func(d core.Deadline) Node {
+			return deadline(d)
+		}),
 	))
 }
 
-func deadline() Node {
+func deadline(d core.Deadline) Node {
 	return Section(
-		H4(Text("Laura's Birthday")),
-		P(Text("7th July")),
-		P(Text("Days left: 50")),
-		P(Text("Percentage: 30%")),
+		H4(Text(d.Title)),
+		P(Text(d.EndDate.Time().Format("02 Jan 2006"))),
+		P(Text(fmt.Sprintf("Days left: %d", d.DaysLeft))),
 	)
 }
 
@@ -40,18 +42,31 @@ func DeadlineForm(s *State) Node {
 		),
 		Form(
 			ds.On("submit", post),
-			Input(
-				Type("test"), Name("title"), ds.Bind("name"),
+			Label(
+				Style("display: block"),
+				Text("Title"),
+				For("title"),
+				Input(Type("test"), Name("title"), ds.Bind("name")),
 			),
-			Input(
-				Type("date"),
-				Name("end_date"),
-				ds.Bind("end_date"),
+			Label(
+				Style("display: block"),
+				For("end_date"),
+				Text("End Date"),
+				Input(
+					Type("date"),
+					Name("end_date"),
+					ds.Bind("end_date"),
+				),
 			),
-			Input(
-				Type("checkbox"),
-				Name("recurrent"),
-				ds.Bind("recurrent"),
+			Label(
+				Style("display: block"),
+				For("recurrent"),
+				Text("Recurrent"),
+				Input(
+					Type("checkbox"),
+					Name("recurrent"),
+					ds.Bind("recurrent"),
+				),
 			),
 			Button(
 				Text("Create Deadline"),

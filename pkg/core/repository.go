@@ -25,6 +25,7 @@ type DeepWorkLogRepository interface {
 
 type DeadlineRepository interface {
 	Create(Deadline) (Deadline, error)
+	Find(DeadlineParams) ([]Deadline, error)
 }
 
 type RepositoryCommon struct {

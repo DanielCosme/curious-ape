@@ -24,8 +24,8 @@ type State struct {
 }
 
 type DeadlineState struct {
-	Err      error
-	Deadline core.Deadline
+	Err error
+	DS  []core.Deadline
 }
 
 func a(path, name string) Node {

@@ -38,6 +38,10 @@ type DayParams struct {
 	Order OrderParam
 }
 
+type DeadlineParams struct {
+	Order OrderParam
+}
+
 type OrderParam int
 
 const (
