@@ -3,7 +3,7 @@ ENV GOCACHE=/root/.cache/go-build
 ENV CGO_ENABLED=0
 ARG APE_VERSION=unknown
 
-FROM base-builder as ape-builder
+FROM base-builder AS ape-builder
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN --mount=type=cache,target=/go/pkg/mod go mod download

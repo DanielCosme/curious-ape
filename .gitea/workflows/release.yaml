@@ -1,57 +1,53 @@
-name: Release
+name: Build and Push Docker Image
+run-name: Build and push Docker image by ${{ gitea.actor }}
 on:
   push:
     tags: ["v*"]
 
 env:
-  AGE_KEY: /var/lib/act_runner/.age.txt
+  REGISTRY: danicos.dev
+  IMAGE_NAME: daniel/curious-ape
 
 jobs:
-  release:
+  build-and-push:
     runs-on: daniel-act-runner
+    # Use a container with Docker pre-installed (recommended for Gitea Actions)
+    container:
+      image: catthehacker/ubuntu:act-latest
+
     steps:
-      - name: Clone Repository
-        run: "git clone https://${{ secrets.CI_TOKEN }}@danicos.dev/daniel/curious-ape"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: "Add go binaries to Path"
-        run: echo "$HOME/go/bin" >> $GITHUB_PATH
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Ensure Task Runner is installed
-        run: go install github.com/magefile/mage@latest
+      - name: Login to Gitea Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ gitea.actor }}
+          password: ${{ secrets.CI_TOKEN }}
 
-      # - name: Install Tools
-      #   working-directory: ./curious-ape
-      #   run: mage tools
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=semver,pattern={{version}}
 
-      - name: Build and push images to registry
-        working-directory: ./curious-ape
-        run: $REGISTRY_USER=${{ secrets.CI_TOKEN }} $REGISTRY_PASSWORD=${{ secrets.CI_TOKEN }} ./scripts/release-podman.sh
-
-# Release
-# Need to decrypt secrets.
-#
-# Build images and push to registry?
-# Update the Deployment for GitOps? Or do something that triggers this in another repository.
-#
-# REGISTRY_PASSWORD
-# REGISTRY_USER
-
-# deploy:
-#   needs: test-and-audit
-#   runs-on: arch-linux
-#   steps:
-#     - name: Clone Repository
-#       run: "git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY > /dev/null 2>&1"
-
-#     - name: "Add go binaries to Path"
-#       run: echo "$HOME/go/bin" >> $GITHUB_PATH
-
-#     - name: Ensure age is installed
-#       run: "go install filippo.io/age/cmd/...@latest"
-
-#     - name: Add server to known_hosts
-#       run: ssh-keyscan -H ape-0 > ~/.ssh/known_hosts
-
-#     - name: Deploy
-#       working-directory: ./curious-ape
-#       run: mage deploy
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64 # Add more platforms as needed
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

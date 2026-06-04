@@ -10,6 +10,9 @@ jobs:
       - name: Clone Repository
         run: "git clone https://${{ secrets.CI_TOKEN }}@danicos.dev/daniel/curious-ape"
 
+      - name: "Install Go"
+        run: "apk add go"
+
       - name: "Add go binaries to Path"
         run: echo "$HOME/go/bin" >> $GITHUB_PATH
 
