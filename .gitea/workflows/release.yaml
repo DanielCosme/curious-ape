@@ -49,5 +49,5 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64 # Add more platforms as needed
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=your-image:buildcache
+          cache-to: type=registry,ref=your-image:buildcache,mode=max
