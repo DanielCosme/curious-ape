@@ -1,6 +1,6 @@
 module git.danicos.dev/daniel/curious-ape
 
-go 1.26.1
+go 1.26.3
 
 require (
 	danicos.dev/daniel/go-kube v1.14.1
