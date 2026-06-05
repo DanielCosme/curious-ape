@@ -15,6 +15,11 @@ import (
 func (a *App) fitnessSync(ctx context.Context, d core.Date) error {
 	logger := oak.FromContext(ctx)
 
+	if a.sync.Hevy == nil {
+		logger.Warning("Fitness provider: Hevy is nil, cannot sync Fitness")
+		return nil
+	}
+
 	fitnessLogs, err := a.fitnessLogsFromHevy(ctx, d)
 	if err != nil {
 		return err

@@ -110,18 +110,22 @@ func main() {
 		sessionManager.Cookie.Secure = true
 	}
 
+	appConfig := &application.Config{
+		Env: cfg.Environment,
+		// Google:           cfg.Integrations.Google.ToConf(),
+		HevyAPIKey:       cfg.Integrations.Hevy.ApiKey,
+		TogglToken:       cfg.Integrations.Toggl.Token,
+		TogglWorkspaceID: cfg.Integrations.Toggl.WorkspaceID,
+	}
+
+	if cfg.Integrations.Fitbit != nil {
+		appConfig.Fitbit = cfg.Integrations.Fitbit.ToConf()
+	}
 	bobDB := bob.NewDB(db)
 	app := application.New(&application.AppOptions{
 		Database: persistence.New(bobDB),
-		Config: &application.Config{
-			Env:    cfg.Environment,
-			Fitbit: cfg.Integrations.Fitbit.ToConf(),
-			// Google:           cfg.Integrations.Google.ToConf(),
-			HevyAPIKey:       cfg.Integrations.Hevy.ApiKey,
-			TogglToken:       cfg.Integrations.Toggl.Token,
-			TogglWorkspaceID: cfg.Integrations.Toggl.WorkspaceID,
-		},
-		Logger: logger,
+		Config:   appConfig,
+		Logger:   logger,
 	})
 
 	err = app.SetPassword(cfg.Admin.UserName, cfg.Admin.Password, cfg.Admin.Email, core.AuthRoleAdmin)

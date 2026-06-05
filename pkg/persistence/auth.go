@@ -2,6 +2,8 @@ package persistence
 
 import (
 	"context"
+	"fmt"
+
 	"git.danicos.dev/daniel/curious-ape/database/gen/dberrors"
 	"git.danicos.dev/daniel/curious-ape/database/gen/models"
 	"git.danicos.dev/daniel/curious-ape/pkg/core"
@@ -28,7 +30,7 @@ func (a *Auths) Upsert(s *models.OauthTokenSetter) (*models.OauthToken, error) {
 
 func (a *Auths) Get(p AuthParams) (*models.OauthToken, error) {
 	res, err := p.BuildQuery().One(context.Background(), a.db)
-	return res, catchDBErr("get auth", err)
+	return res, catchDBErr(fmt.Sprintf("repository: get auth: %s", p.Provider), err)
 }
 
 type AuthParams struct {
