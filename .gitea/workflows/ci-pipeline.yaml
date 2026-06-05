@@ -36,14 +36,6 @@ jobs:
         working-directory: ./curious-ape
         run: mage build
 
-      - name: Prepare Database
-        working-directory: ./curious-ape
-        run: "mkdir -p ./tmp && mage migrate:up"
-
-      - name: Generate Database Models
-        working-directory: ./curious-ape
-        run: mage db:gen
-
       - name: Test
         working-directory: ./curious-ape
         run: mage test
