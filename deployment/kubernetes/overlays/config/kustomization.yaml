@@ -4,6 +4,4 @@ metadata:
   name: curious-ape
   namespace: curious-ape
 resources:
-  - ../../base
-  - ../k3s
-  - ../config
+- secrets.yaml

@@ -17,7 +17,7 @@ const (
 	KUBERNETES_PORT        = 4000
 	KUBERNETES_HOST        = "ape.danicos.me"
 	KUBERNETES_DEPLOYMENT  = DEPLOYMENT_DIR + "/kubernetes"
-	KUBERNETES_ENC_SECRETS = KUBERNETES_DEPLOYMENT + "/overlays/secrets"
+	KUBERNETES_ENC_SECRETS = KUBERNETES_DEPLOYMENT + "/overlays/config"
 	KUBERNETES_SECRETS     = TMP_DIR + "/secrets"
 	LITESTREAM_IMAGE       = "docker.io/litestream/litestream:0.5.11"
 )

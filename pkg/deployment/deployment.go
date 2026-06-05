@@ -62,7 +62,7 @@ func SecretsStack() stack.Stack {
 			"secrets": ApeSecret,
 		},
 	)
-	return kz.Stack("secrets")
+	return kz.Stack("config")
 }
 
 func Deployment() apps.Deployment {
