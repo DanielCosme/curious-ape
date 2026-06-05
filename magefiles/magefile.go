@@ -102,8 +102,8 @@ func Tools() {
 		target.NewA("go", "get", "-tool", "-tags", "'sqlite3'", "github.com/golang-migrate/migrate/v4/cmd/migrate@latest"),
 		target.NewA("go", "get", "-tool", "github.com/rakyll/gotest@latest"),
 		target.NewA("go", "get", "-tool", "honnef.co/go/tools/cmd/staticcheck@latest"),
-		target.NewA("go", "get", "-tool", "github.com/stephenafamo/bob/gen/bobgen-sqlite@v0.42.0"),
-		target.NewA("go", "get", "-tool", "github.com/magefile/mage@latest"),
+		target.NewA("go", "get", "-tool", "github.com/stephenafamo/bob/gen/bobgen-sqlite@v0.45.0"),
+		target.NewA("go", "get", "-tool", "github.com/magefile/mage@v1.17.2"),
 	}
 	runSteps("tools", ts)
 }

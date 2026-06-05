@@ -12,8 +12,8 @@ jobs:
         run: |
           apk add --no-cache git make musl-dev curl tar
 
-          # Install latest Go from official binary (recommended over apk on stable)
-          GO_VERSION=1.26.1   # Update as needed
+          # Install latest Go from official binary
+          GO_VERSION=1.26.1
           wget -q https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz -O /tmp/go.tar.gz
           tar -C /usr/local -xzf /tmp/go.tar.gz
           rm /tmp/go.tar.gz
@@ -26,7 +26,7 @@ jobs:
           echo "/usr/local/go/bin" >> $GITHUB_PATH
 
       - name: Ensure Task Runner is installed
-        run: go install github.com/magefile/mage@latest
+        run: go install github.com/magefile/mage@1.17.2
 
       - name: Install Tools
         working-directory: ./curious-ape
