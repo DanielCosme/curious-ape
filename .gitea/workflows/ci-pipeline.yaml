@@ -32,9 +32,9 @@ jobs:
         working-directory: ./curious-ape
         run: mage tools
 
-      - name: Binary builds without errors
+      - name: Server builds without errors
         working-directory: ./curious-ape
-        run: mage build
+        run: go build ./cmd/web
 
       - name: Test
         working-directory: ./curious-ape
