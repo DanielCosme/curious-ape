@@ -16,7 +16,7 @@ const (
 	KUBERNETES_PORT       = 4000
 	KUBERNETES_HOST       = "ape.danicos.me"
 	KUBERNETES_DEPLOYMENT = DEPLOYMENT_DIR + "/kubernetes"
-	LITESTREAM_IMAGE      = "docker.io/litestream/litestream:0.5.11-scratch"
+	LITESTREAM_IMAGE      = "docker.io/litestream/litestream:0.5.11"
 )
 
 var (

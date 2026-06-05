@@ -36,7 +36,7 @@ spec:
       - command:
         - litestream
         - replicate
-        image: docker.io/litestream/litestream:0.5.11-scratch
+        image: docker.io/litestream/litestream:0.5.11
         name: replicate-litestream
         resources: {}
         securityContext:
@@ -55,7 +55,7 @@ spec:
         - -if-db-not-exists
         - -if-replica-exists
         - /db-data/ape.db
-        image: docker.io/litestream/litestream:0.5.11-scratch
+        image: docker.io/litestream/litestream:0.5.11
         name: restore-litestream
         resources: {}
         securityContext:
