@@ -28,6 +28,12 @@ jobs:
       - name: Ensure Task Runner is installed
         run: go install github.com/magefile/mage@v1.17.2
 
+      - name: Install build dependencies and migrate CLI
+        run: |
+          apk add git gcc musl-dev build-base
+          CGO_ENABLED=1 go install -tags 'sqlite3' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+          migrate version
+
       - name: Install Tools
         working-directory: ./curious-ape
         run: mage tools
