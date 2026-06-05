@@ -45,6 +45,12 @@ func BaseStack() stack.Stack {
 	return kz.Stack("base")
 }
 
+func K3sStack() stack.Stack {
+	return stack.NewStack("k3s", map[string]any{
+		"ingress": Ingress(),
+	})
+}
+
 func Deployment() apps.Deployment {
 	dataVolume := kube.NewVolumeFrom(kube.VolumeSourcePVC, "data", PVC.Name)
 	configVolume := kube.NewVolumeFromSecret("config", Secret.Name, []core.KeyToPath{{
@@ -55,10 +61,22 @@ func Deployment() apps.Deployment {
 		Key:  Secret.LitestreamKey,
 		Path: Secret.LitestreamKey,
 	}})
+	containerSecurityContext := &core.SecurityContext{
+		AllowPrivilegeEscalation: new(false),
+		RunAsNonRoot:             new(true),
+	}
+	fsUser := int64(65532)
 	podSpec := core.PodSpec{
+		SecurityContext: &core.PodSecurityContext{
+			FSGroup:             new(fsUser),
+			RunAsUser:           new(fsUser),
+			RunAsGroup:          new(fsUser),
+			FSGroupChangePolicy: new(core.FSGroupChangeOnRootMismatch),
+		},
 		InitContainers: []core.Container{{
-			Name:  "restore-litestream",
-			Image: config.LITESTREAM_IMAGE,
+			SecurityContext: containerSecurityContext,
+			Name:            "restore-litestream",
+			Image:           config.LITESTREAM_IMAGE,
 			Command: []string{
 				"litestream",
 				"restore",
@@ -80,10 +98,11 @@ func Deployment() apps.Deployment {
 		}},
 		Containers: []core.Container{
 			{
-				Name:  config.KUBERNETES_NAME,
-				Image: config.KUBERNETES_IMAGE,
-				Ports: []core.ContainerPort{{ContainerPort: int32(config.KUBERNETES_PORT)}},
-				Env:   []core.EnvVar{{Name: "APE_ENVIRONMENT", Value: "prod"}},
+				SecurityContext: containerSecurityContext,
+				Name:            config.KUBERNETES_NAME,
+				Image:           config.KUBERNETES_IMAGE,
+				Ports:           []core.ContainerPort{{ContainerPort: int32(config.KUBERNETES_PORT)}},
+				Env:             []core.EnvVar{{Name: "APE_ENVIRONMENT", Value: "prod"}},
 				VolumeMounts: []core.VolumeMount{
 					{
 						Name:      configVolume.Name,
@@ -97,8 +116,9 @@ func Deployment() apps.Deployment {
 				},
 			},
 			{
-				Name:  "replicate-litestream",
-				Image: config.LITESTREAM_IMAGE,
+				SecurityContext: containerSecurityContext,
+				Name:            "replicate-litestream",
+				Image:           config.LITESTREAM_IMAGE,
 				Command: []string{
 					"litestream",
 					"replicate",

@@ -70,6 +70,10 @@ func Deploy() error {
 	return r.RunV("deploy", enc)
 }
 
+func Build_kube() error {
+	c := target.NewA("go", "run", "./cmd/kubernetes/main.go")
+	return r.RunV("build kubernetes deployment", c)
+}
 func Install() error {
 	mg.SerialDeps(Build_prod, Decrypt)
 
