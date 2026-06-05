@@ -46,9 +46,23 @@ func BaseStack() stack.Stack {
 }
 
 func K3sStack() stack.Stack {
-	return stack.NewStack("k3s", map[string]any{
-		"ingress": Ingress(),
-	})
+	kz := kube.NewKuztomizedStack(
+		meta,
+		map[string]any{
+			"ingress": Ingress(),
+		},
+	)
+	return kz.Stack("k3s")
+}
+
+func SecretsStack() stack.Stack {
+	kz := kube.NewKuztomizedStack(
+		meta,
+		map[string]any{
+			"secrets": ApeSecret,
+		},
+	)
+	return kz.Stack("secrets")
 }
 
 func Deployment() apps.Deployment {
@@ -61,22 +75,10 @@ func Deployment() apps.Deployment {
 		Key:  Secret.LitestreamKey,
 		Path: Secret.LitestreamKey,
 	}})
-	containerSecurityContext := &core.SecurityContext{
-		AllowPrivilegeEscalation: new(false),
-		RunAsNonRoot:             new(true),
-	}
-	fsUser := int64(65532)
 	podSpec := core.PodSpec{
-		SecurityContext: &core.PodSecurityContext{
-			FSGroup:             new(fsUser),
-			RunAsUser:           new(fsUser),
-			RunAsGroup:          new(fsUser),
-			FSGroupChangePolicy: new(core.FSGroupChangeOnRootMismatch),
-		},
 		InitContainers: []core.Container{{
-			SecurityContext: containerSecurityContext,
-			Name:            "restore-litestream",
-			Image:           config.LITESTREAM_IMAGE,
+			Name:  "restore-litestream",
+			Image: config.LITESTREAM_IMAGE,
 			Command: []string{
 				"litestream",
 				"restore",
@@ -98,11 +100,10 @@ func Deployment() apps.Deployment {
 		}},
 		Containers: []core.Container{
 			{
-				SecurityContext: containerSecurityContext,
-				Name:            config.KUBERNETES_NAME,
-				Image:           config.KUBERNETES_IMAGE,
-				Ports:           []core.ContainerPort{{ContainerPort: int32(config.KUBERNETES_PORT)}},
-				Env:             []core.EnvVar{{Name: "APE_ENVIRONMENT", Value: "prod"}},
+				Name:  config.KUBERNETES_NAME,
+				Image: config.KUBERNETES_IMAGE,
+				Ports: []core.ContainerPort{{ContainerPort: int32(config.KUBERNETES_PORT)}},
+				Env:   []core.EnvVar{{Name: "APE_ENVIRONMENT", Value: "prod"}},
 				VolumeMounts: []core.VolumeMount{
 					{
 						Name:      configVolume.Name,
@@ -116,9 +117,8 @@ func Deployment() apps.Deployment {
 				},
 			},
 			{
-				SecurityContext: containerSecurityContext,
-				Name:            "replicate-litestream",
-				Image:           config.LITESTREAM_IMAGE,
+				Name:  "replicate-litestream",
+				Image: config.LITESTREAM_IMAGE,
 				Command: []string{
 					"litestream",
 					"replicate",

@@ -82,7 +82,6 @@ func main() {
 	exitIfErr(err)
 	err = db.Ping()
 	exitIfErr(err)
-	// UID/GID 65532
 
 	// Database migrations
 	migrationsSource, err := iofs.New(migrations.Migrations, "sqlite")

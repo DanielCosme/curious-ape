@@ -3,7 +3,7 @@
 set -e
 set -o pipefail
 
-APE_VERSION=$(mage version)
+APE_VERSION=$(mage version_image)
 echo Version: $APE_VERSION
 REGISTRY=$(mage registry)
 echo Registry $REGISTRY

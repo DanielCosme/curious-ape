@@ -19,14 +19,11 @@ spec:
       - env:
         - name: APE_ENVIRONMENT
           value: prod
-        image: danicos.dev/daniel/curious-ape:1.2.4
+        image: danicos.dev/daniel/curious-ape:1.2.6
         name: curious-ape
         ports:
         - containerPort: 4000
         resources: {}
-        securityContext:
-          allowPrivilegeEscalation: false
-          runAsNonRoot: true
         volumeMounts:
         - mountPath: /app/config.json
           name: config
@@ -39,9 +36,6 @@ spec:
         image: docker.io/litestream/litestream:0.5.11
         name: replicate-litestream
         resources: {}
-        securityContext:
-          allowPrivilegeEscalation: false
-          runAsNonRoot: true
         volumeMounts:
         - mountPath: /db-data
           name: data
@@ -58,20 +52,12 @@ spec:
         image: docker.io/litestream/litestream:0.5.11
         name: restore-litestream
         resources: {}
-        securityContext:
-          allowPrivilegeEscalation: false
-          runAsNonRoot: true
         volumeMounts:
         - mountPath: /db-data
           name: data
         - mountPath: /etc/litestream.yml
           name: litestream-vol
           subPath: litestream.yml
-      securityContext:
-        fsGroup: 65532
-        fsGroupChangePolicy: OnRootMismatch
-        runAsGroup: 65532
-        runAsUser: 65532
       volumes:
       - name: data
         persistentVolumeClaim:

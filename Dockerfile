@@ -16,13 +16,6 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 FROM alpine:latest AS ape
 RUN apk add --no-cache tzdata
 ENV TZ=America/Toronto
-# Dedicated group and user with the exact UID/GID
-RUN addgroup -g 65532 -S appgroup && \
-    adduser -u 65532 -G appgroup -S -D -H appuser && \
-    mkdir -p /app && \
-    chown -R appuser:appgroup /app
-
 WORKDIR /app
-COPY --chown=appuser:appgroup --from=ape-builder /app/bin/ape /app/bin/ape
-USER 65532:65532
+COPY --from=ape-builder /app/bin/ape /app/bin/ape
 CMD ["/app/bin/ape"]

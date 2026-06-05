@@ -1,9 +1,11 @@
 package main
 
 import (
+	"io/fs"
+	"os"
+
 	"git.danicos.dev/daniel/curious-ape/pkg/config"
 	"git.danicos.dev/daniel/curious-ape/pkg/deployment"
-	"git.danicos.dev/daniel/curious-ape/pkg/deployment/secrets"
 )
 
 func main() {
@@ -11,6 +13,9 @@ func main() {
 	base.MarshalYaml(config.KUBERNETES_DEPLOYMENT)
 
 	k3s := deployment.K3sStack()
-	k3s.Add("secrets", secrets.ApeSecret)
-	k3s.MarshalYamlFlat(config.KUBERNETES_DEPLOYMENT + "/overlays/k3s")
+	k3s.MarshalYaml(config.KUBERNETES_DEPLOYMENT + "/overlays")
+
+	os.MkdirAll(config.KUBERNETES_SECRETS, fs.ModeDir|0755)
+	secrets := deployment.SecretsStack()
+	secrets.MarshalYamlFlat(config.KUBERNETES_SECRETS)
 }

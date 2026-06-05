@@ -10,6 +10,7 @@ import (
 	*/
 
 	"fmt"
+	"strings"
 
 	"github.com/magefile/mage/mg" // mg contains helpful utility functions, like Deps
 	"github.com/magefile/mage/sh"
@@ -18,7 +19,7 @@ import (
 	"git.danicos.dev/daniel/curious-ape/pkg/target"
 )
 
-const tmpDir = "./tmp"
+const tmpDir = config.TMP_DIR
 
 var Default = Run
 var Aliases = map[string]any{
@@ -42,16 +43,19 @@ func init() {
 		"DEV_OUTPUT":       binOutput,
 		"SECRETS_PATH":     config.DEPLOYMENT_DIR + "/secrets",
 		"ENC_SECRETS_PATH": config.DEPLOYMENT_DIR + "/enc",
+		"KUBE_SECRETS":     config.KUBERNETES_SECRETS,
+		"KUBE_ENC_SECRETS": config.KUBERNETES_ENC_SECRETS,
 	}
 	r = target.NewRunner(Env, nil)
 }
 
+// "/overlays/secrets/secret, kustomization.yaml"
 func Run() error {
 	mg.Deps(Build)
 	return r.RunV("run", target.New(binOutput))
 }
 
-// Builds Binary
+// Builds Development Binary
 func Build() error {
 	c := target.New("./scripts/build.fish")
 	return r.RunV("build", c)
@@ -63,38 +67,10 @@ func Build_prod() error {
 	return r.RunV("build", c)
 }
 
-func Deploy() error {
-	mg.SerialDeps(Install)
-
-	enc := target.NewA("ssh", prodHost, "sudo", "systemctl", "restart", "curious-ape")
-	return r.RunV("deploy", enc)
-}
-
+// Generate kubenetes manifests from Go
 func Build_kube() error {
 	c := target.NewA("go", "run", "./cmd/kubernetes/main.go")
 	return r.RunV("build kubernetes deployment", c)
-}
-func Install() error {
-	mg.SerialDeps(Build_prod, Decrypt)
-
-	installDir := tmpDir + "/deployment"
-	ts := []target.Target{
-		target.NewA("mkdir", "-p", installDir),
-		target.NewA("mv", config.DEPLOYMENT_DIR+"/ape", installDir+"/ape"),
-		target.NewA("cp", config.DEPLOYMENT_DIR+"/curious-ape.service", installDir+"/curious-ape.service"),
-		target.NewA("cp", config.DEPLOYMENT_DIR+"/secrets/config.json", installDir+"/config.json"),
-		target.NewA("cp", config.DEPLOYMENT_DIR+"/litestream/litestream", installDir+"/litestream"),
-		target.NewA("cp", config.DEPLOYMENT_DIR+"/litestream/etc/litestream.service", installDir+"/litestream.service"),
-		target.NewA("cp", config.DEPLOYMENT_DIR+"/secrets/litestream.yaml", installDir+"/litestream.yaml"),
-		target.NewA("cp", "./scripts/install.fish", installDir+"/install.fish"),
-		target.NewA("cp", config.DEPLOYMENT_DIR+"/envfile", installDir+"/envfile"),
-		target.NewA("rm", "-r", config.DEPLOYMENT_DIR+"/secrets"),
-
-		target.NewA("rsync", "--compress", "--recursive", installDir, prodHost+":/tmp"),
-		target.NewA("ssh", prodHost, "/tmp/deployment/install.fish"),
-		target.NewA("rm", "-r", installDir),
-	}
-	return runSteps("install server", ts)
 }
 
 // Encrypts all secrets.
@@ -109,6 +85,16 @@ func Decrypt() error {
 	return r.RunV("decrypt secrets", dec)
 }
 
+// Encrypts SOPS Secrets for Kubernetes GITOPS (Flux)
+func Enc_sops() error {
+	mg.SerialDeps(Encrypt, Decrypt)
+	// SECRETS_ENC_PATH
+	// AGE_KEY_NO_PQ
+	// SECRETS_FOLDER
+	dec := target.NewA("./scripts/encrypt_sops.sh")
+	return r.RunV("Encrypt SOPS", dec)
+}
+
 // Install development environment tools
 func Tools() {
 	ts := []target.Target{
@@ -120,11 +106,6 @@ func Tools() {
 		target.NewA("go", "get", "-tool", "github.com/magefile/mage@latest"),
 	}
 	runSteps("tools", ts)
-}
-
-func Logs_Prod() error {
-	t := target.NewA("ssh", prodHost, "sudo", "journalctl", "--lines", "40", "-fu", "curious-ape.service")
-	return r.RunV("logs prod", t)
 }
 
 func Audit() error {
@@ -142,30 +123,6 @@ func Ci() {
 	mg.SerialDeps(Test, Audit)
 }
 
-// Push Pushes repository to GitHub and creates new Version
-func Push() error {
-	diff := target.NewA("git", "diff", "--exit-code").SetMsg("working tree cannot be dirty")
-	diff.Silent = true
-
-	branch, err := sh.Output("git", "branch", "--show-current")
-	assert(err)
-	ts := []target.Target{
-		diff,
-		target.NewA("test", branch, "=", "main").SetMsg("branch has to be main"),
-	}
-	err = runSteps("push", ts)
-	assert(err)
-
-	err = Tag()
-	assert(err)
-
-	ts = []target.Target{
-		// NOTE: not pushing to origin (GitHub)
-		target.NewA("git", "push", "gitea", "main", "--tags"),
-	}
-	return runSteps("push", ts)
-}
-
 func Test() error {
 	return r.RunV("test", target.NewA("go", "tool", "gotest", "./..."))
 }
@@ -176,6 +133,11 @@ func Tag() error {
 
 func Version() error {
 	return sh.RunV("echo", config.VERSION)
+}
+
+func Version_image() error {
+	s := strings.TrimPrefix(config.VERSION, "v")
+	return sh.RunV("echo", s)
 }
 
 func Registry() error {

@@ -3,20 +3,23 @@ package config
 import "strings"
 
 const (
-	APP_NAME              = "ape"
-	ENVIRONMENT           = "APE_ENVIRONMENT"
-	MIGRATIONS_LOCATION   = "database/migrations/sqlite"
-	DEPLOYMENT_DIR        = "deployment"
-	PROD_USER             = "daniel"
-	PROD_ADMIN            = "arch"
-	REGISTRY              = "danicos.dev"
-	DATASTAR              = "https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.2/bundles/datastar.js"
-	TZ                    = "America/Toronto"
-	KUBERNETES_NAME       = "curious-ape"
-	KUBERNETES_PORT       = 4000
-	KUBERNETES_HOST       = "ape.danicos.me"
-	KUBERNETES_DEPLOYMENT = DEPLOYMENT_DIR + "/kubernetes"
-	LITESTREAM_IMAGE      = "docker.io/litestream/litestream:0.5.11"
+	APP_NAME               = "ape"
+	ENVIRONMENT            = "APE_ENVIRONMENT"
+	MIGRATIONS_LOCATION    = "database/migrations/sqlite"
+	DEPLOYMENT_DIR         = "deployment"
+	PROD_USER              = "daniel"
+	PROD_ADMIN             = "arch"
+	REGISTRY               = "danicos.dev"
+	TMP_DIR                = "./tmp"
+	DATASTAR               = "https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.2/bundles/datastar.js"
+	TZ                     = "America/Toronto"
+	KUBERNETES_NAME        = "curious-ape"
+	KUBERNETES_PORT        = 4000
+	KUBERNETES_HOST        = "ape.danicos.me"
+	KUBERNETES_DEPLOYMENT  = DEPLOYMENT_DIR + "/kubernetes"
+	KUBERNETES_ENC_SECRETS = KUBERNETES_DEPLOYMENT + "/overlays/secrets"
+	KUBERNETES_SECRETS     = TMP_DIR + "/secrets"
+	LITESTREAM_IMAGE       = "docker.io/litestream/litestream:0.5.11"
 )
 
 var (
