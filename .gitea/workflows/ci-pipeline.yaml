@@ -4,6 +4,8 @@ on: push
 jobs:
   test-and-audit:
     runs-on: daniel-act-runner
+    container:
+      image: golang:1.26-alpine
     steps:
       - name: Clone Repository
         run: "git clone https://${{ secrets.CI_TOKEN }}@danicos.dev/daniel/curious-ape"
