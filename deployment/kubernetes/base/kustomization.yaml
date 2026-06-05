@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: curious-ape
+  namespace: curious-ape
+resources:
+- deployment.yaml
+- namespace.yaml
+- pvc.yaml
+- service.yaml

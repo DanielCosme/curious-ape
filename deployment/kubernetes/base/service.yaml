@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: curious-ape
+  name: curious-ape
+  namespace: curious-ape
+spec:
+  ports:
+  - port: 4000
+    targetPort: 0
+  selector:
+    app: curious-ape
+status:
+  loadBalancer: {}

@@ -76,7 +76,9 @@ func main() {
 
 	oak.Info("Version: " + v)
 	oak.Info("Opening database", "path", cfg.Database.DSN)
-	db, err := sql.Open("sqlite", cfg.Database.DSN)
+	dsn := cfg.Database.DSN + "?_busy_timeout=5000" +
+		"&_journal_mode=WAL"
+	db, err := sql.Open("sqlite", dsn)
 	exitIfErr(err)
 	err = db.Ping()
 	exitIfErr(err)

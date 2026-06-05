@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: curious-ape
+  name: curious-ape
+  namespace: curious-ape
+spec:
+  selector:
+    matchLabels:
+      app: curious-ape
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: curious-ape
+    spec:
+      containers:
+      - env:
+        - name: APE_ENVIRONMENT
+          value: prod
+        image: danicos.dev/daniel/curious-ape:1.2.3
+        name: curious-ape
+        ports:
+        - containerPort: 4000
+        resources: {}
+        volumeMounts:
+        - mountPath: /app/config.json
+          name: config
+          subPath: config.json
+        - mountPath: /app/db-data
+          name: data
+      - command:
+        - litestream
+        - replicate
+        image: docker.io/litestream/litestream:0.5-scratch
+        name: replicate-litestream
+        resources: {}
+        volumeMounts:
+        - mountPath: /db-data
+          name: data
+        - mountPath: /etc/litestream.yml
+          name: litestream-vol
+          subPath: litestream.yml
+      initContainers:
+      - command:
+        - litestream
+        - restore
+        - -if-db-not-exists
+        - -if-replica-exists
+        - /db-data/ape.db
+        image: docker.io/litestream/litestream:0.5-scratch
+        name: restore-litestream
+        resources: {}
+        volumeMounts:
+        - mountPath: /db-data
+          name: data
+        - mountPath: /etc/litestream.yml
+          name: litestream-vol
+          subPath: litestream.yml
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: curious-ape-pvc
+      - name: config
+        secret:
+          items:
+          - key: config.json
+            path: config.json
+          secretName: curious-ape-secret
+      - name: litestream-vol
+        secret:
+          items:
+          - key: litestream.yml
+            path: litestream.yml
+          secretName: curious-ape-secret
+status: {}
