@@ -50,11 +50,9 @@ func (Migrate) Force(version string) error {
 }
 
 func migrate(op, version string) error {
-	t := target.New("go")
+	t := target.New("migrate")
 	dbConn := fmt.Sprintf("sqlite3://%s", dbLocation)
 	t.Args(
-		"tool",
-		"migrate",
 		"-verbose",
 		"-path", config.MIGRATIONS_LOCATION,
 		"-database", dbConn,
