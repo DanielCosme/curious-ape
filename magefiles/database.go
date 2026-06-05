@@ -54,6 +54,7 @@ func migrate(op, version string) error {
 	dbConn := fmt.Sprintf("sqlite3://%s", dbLocation)
 	t.Args(
 		"tool",
+		"migrate",
 		"-verbose",
 		"-path", config.MIGRATIONS_LOCATION,
 		"-database", dbConn,
