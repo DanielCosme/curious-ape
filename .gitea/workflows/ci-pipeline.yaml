@@ -22,7 +22,7 @@ jobs:
           source /etc/profile
 
       - name: "Add go binaries to Path"
-        run: echo "/usr/local/go/bin" >> $GITHUB_PATH
+        run: echo "$HOME/go/bin" >> $GITHUB_PATH
 
       - name: Ensure Task Runner is installed
         run: go install github.com/magefile/mage@latest
