@@ -5,8 +5,8 @@ import (
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 
-	"git.danicos.dev/daniel/curious-ape/pkg/application"
-	"git.danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/application"
+	"danicos.dev/daniel/curious-ape/pkg/core"
 )
 
 // Clases

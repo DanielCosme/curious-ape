@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	"git.danicos.dev/daniel/curious-ape/pkg/config"
-	"git.danicos.dev/daniel/curious-ape/pkg/target"
+	"danicos.dev/daniel/curious-ape/pkg/config"
+	"danicos.dev/daniel/curious-ape/pkg/target"
 	"github.com/magefile/mage/mg"
 )
 

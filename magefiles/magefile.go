@@ -15,8 +15,8 @@ import (
 	"github.com/magefile/mage/mg" // mg contains helpful utility functions, like Deps
 	"github.com/magefile/mage/sh"
 
-	"git.danicos.dev/daniel/curious-ape/pkg/config"
-	"git.danicos.dev/daniel/curious-ape/pkg/target"
+	"danicos.dev/daniel/curious-ape/pkg/config"
+	"danicos.dev/daniel/curious-ape/pkg/target"
 )
 
 const tmpDir = config.TMP_DIR

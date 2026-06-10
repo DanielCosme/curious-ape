@@ -1,10 +1,10 @@
 package application
 
 import (
+	"danicos.dev/daniel/curious-ape/database/gen/models"
+	"danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/persistence"
 	"errors"
-	"git.danicos.dev/daniel/curious-ape/database/gen/models"
-	"git.danicos.dev/daniel/curious-ape/pkg/core"
-	"git.danicos.dev/daniel/curious-ape/pkg/persistence"
 	"github.com/aarondl/opt/omit"
 
 	"golang.org/x/crypto/bcrypt"

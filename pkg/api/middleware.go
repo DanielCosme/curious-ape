@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"git.danicos.dev/daniel/curious-ape/pkg/dove"
-	"git.danicos.dev/daniel/curious-ape/pkg/oak"
+	"danicos.dev/daniel/curious-ape/pkg/dove"
+	"danicos.dev/daniel/curious-ape/pkg/oak"
 	"github.com/alexedwards/scs/v2"
 )
 

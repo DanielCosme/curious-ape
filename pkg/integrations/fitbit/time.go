@@ -3,7 +3,7 @@ package fitbit
 import (
 	"time"
 
-	"git.danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/core"
 )
 
 func ToDuration(i int) time.Duration {

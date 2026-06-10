@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"git.danicos.dev/daniel/curious-ape/pkg/core"
-	"git.danicos.dev/daniel/curious-ape/pkg/integrations/google"
-	"git.danicos.dev/daniel/curious-ape/pkg/oak"
+	"danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/integrations/google"
+	"danicos.dev/daniel/curious-ape/pkg/oak"
 )
 
 func (a *App) fitnessSync(ctx context.Context, d core.Date) error {

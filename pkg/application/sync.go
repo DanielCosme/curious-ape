@@ -3,8 +3,8 @@ package application
 import (
 	"context"
 
-	"git.danicos.dev/daniel/curious-ape/pkg/core"
-	"git.danicos.dev/daniel/curious-ape/pkg/oak"
+	"danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/oak"
 )
 
 func (a *App) DaySync(ctx context.Context, date core.Date) (core.Day, error) {

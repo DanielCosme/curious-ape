@@ -1,9 +1,9 @@
 package persistence
 
 import (
+	"danicos.dev/daniel/curious-ape/database/gen/models"
+	"danicos.dev/daniel/curious-ape/pkg/test"
 	"database/sql"
-	"git.danicos.dev/daniel/curious-ape/database/gen/models"
-	"git.danicos.dev/daniel/curious-ape/pkg/test"
 	"github.com/aarondl/opt/omit"
 	"github.com/golang-migrate/migrate/v4"
 	m_sqlite "github.com/golang-migrate/migrate/v4/database/sqlite"

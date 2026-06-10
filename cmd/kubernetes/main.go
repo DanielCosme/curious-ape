@@ -4,8 +4,8 @@ import (
 	"io/fs"
 	"os"
 
-	"git.danicos.dev/daniel/curious-ape/pkg/config"
-	"git.danicos.dev/daniel/curious-ape/pkg/deployment"
+	"danicos.dev/daniel/curious-ape/pkg/config"
+	"danicos.dev/daniel/curious-ape/pkg/deployment"
 )
 
 func main() {

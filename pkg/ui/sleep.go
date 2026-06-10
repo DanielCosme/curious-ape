@@ -3,7 +3,7 @@ package ui
 import (
 	"fmt"
 
-	"git.danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/core"
 	. "maragu.dev/gomponents"
 
 	. "maragu.dev/gomponents/html"

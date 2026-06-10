@@ -1,7 +1,7 @@
 package toggl
 
 import (
-	"git.danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/core"
 	"net/http"
 	"net/url"
 	"time"

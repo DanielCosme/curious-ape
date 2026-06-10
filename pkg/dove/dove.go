@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"git.danicos.dev/daniel/curious-ape/pkg/oak"
+	"danicos.dev/daniel/curious-ape/pkg/oak"
 )
 
 // TODO:

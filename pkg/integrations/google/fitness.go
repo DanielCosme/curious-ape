@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"git.danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/core"
 )
 
 type FitnessService struct {

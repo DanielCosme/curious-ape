@@ -3,10 +3,10 @@ package persistence
 import (
 	"context"
 
-	"git.danicos.dev/daniel/curious-ape/database/gen/dberrors"
-	"git.danicos.dev/daniel/curious-ape/database/gen/models"
-	"git.danicos.dev/daniel/curious-ape/pkg/core"
-	"git.danicos.dev/daniel/curious-ape/pkg/oak"
+	"danicos.dev/daniel/curious-ape/database/gen/dberrors"
+	"danicos.dev/daniel/curious-ape/database/gen/models"
+	"danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/oak"
 	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
 	"github.com/stephenafamo/bob"

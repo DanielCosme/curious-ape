@@ -3,7 +3,7 @@ package api
 import (
 	"net/http"
 
-	"git.danicos.dev/daniel/curious-ape/pkg/application"
+	"danicos.dev/daniel/curious-ape/pkg/application"
 	"github.com/alexedwards/scs/v2"
 )
 

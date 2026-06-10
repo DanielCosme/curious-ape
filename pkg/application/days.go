@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"git.danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/core"
 	"time"
 )
 

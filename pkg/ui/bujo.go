@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strconv"
 
-	"git.danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/core"
 	lucide "github.com/eduardolat/gomponents-lucide"
 	. "maragu.dev/gomponents"
 

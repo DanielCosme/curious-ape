@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"git.danicos.dev/daniel/curious-ape/pkg/config"
+	"danicos.dev/daniel/curious-ape/pkg/config"
 	lucide "github.com/eduardolat/gomponents-lucide"
 	. "maragu.dev/gomponents"
 	ds "maragu.dev/gomponents-datastar"

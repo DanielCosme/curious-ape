@@ -17,14 +17,14 @@ import (
 	"github.com/stephenafamo/bob"
 	"golang.org/x/oauth2"
 
-	"git.danicos.dev/daniel/curious-ape/database/migrations"
-	"git.danicos.dev/daniel/curious-ape/pkg/application"
-	root "git.danicos.dev/daniel/curious-ape/pkg/config"
-	"git.danicos.dev/daniel/curious-ape/pkg/core"
-	"git.danicos.dev/daniel/curious-ape/pkg/oak"
-	"git.danicos.dev/daniel/curious-ape/pkg/persistence"
+	"danicos.dev/daniel/curious-ape/database/migrations"
+	"danicos.dev/daniel/curious-ape/pkg/application"
+	root "danicos.dev/daniel/curious-ape/pkg/config"
+	"danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/oak"
+	"danicos.dev/daniel/curious-ape/pkg/persistence"
 
-	"git.danicos.dev/daniel/curious-ape/pkg/api"
+	"danicos.dev/daniel/curious-ape/pkg/api"
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
 	"github.com/golang-migrate/migrate/v4"
@@ -76,8 +76,7 @@ func main() {
 
 	oak.Info("Version: " + v)
 	oak.Info("Opening database", "path", cfg.Database.DSN)
-	dsn := cfg.Database.DSN + "?_busy_timeout=5000" +
-		"&_journal_mode=WAL"
+	dsn := cfg.Database.DSN + "?_busy_timeout=5000" + "&_journal_mode=WAL"
 	db, err := sql.Open("sqlite", dsn)
 	exitIfErr(err)
 	err = db.Ping()

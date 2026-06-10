@@ -4,8 +4,8 @@ import (
 	"context"
 	"sort"
 
-	"git.danicos.dev/daniel/curious-ape/pkg/core"
-	"git.danicos.dev/daniel/curious-ape/pkg/oak"
+	"danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/oak"
 )
 
 func (a *App) DeadlineCreate(ctx context.Context, params core.Deadline) (core.Deadline, error) {

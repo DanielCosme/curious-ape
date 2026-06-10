@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strings"
 
-	"git.danicos.dev/daniel/curious-ape/pkg/application"
+	"danicos.dev/daniel/curious-ape/pkg/application"
 	. "maragu.dev/gomponents"
 
 	ds "maragu.dev/gomponents-datastar"

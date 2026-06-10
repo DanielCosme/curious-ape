@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"git.danicos.dev/daniel/curious-ape/pkg/config"
+	"danicos.dev/daniel/curious-ape/pkg/config"
 )
 
 type API struct {

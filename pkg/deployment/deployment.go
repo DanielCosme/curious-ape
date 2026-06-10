@@ -1,8 +1,8 @@
 package deployment
 
 import (
+	"danicos.dev/daniel/curious-ape/pkg/config"
 	"danicos.dev/daniel/go-kube/pkg/kube"
-	"git.danicos.dev/daniel/curious-ape/pkg/config"
 
 	"danicos.dev/daniel/go-kube/pkg/stack"
 	apps "k8s.io/api/apps/v1"
