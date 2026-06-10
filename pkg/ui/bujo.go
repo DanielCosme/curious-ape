@@ -55,33 +55,28 @@ func Day(day core.Day) Node {
 	q := url.Values{}
 	q.Add("date", day.Date.String())
 	sync := fmt.Sprintf("@post('/day/sync?%s')", q.Encode())
-	var goalColor string
 	var goalIcon Node
 	switch day.Habits.Score {
 	case 0:
-		goalColor = "red"
 		goalIcon = lucide.Frown()
 	case 1:
-		goalColor = "orangered"
 		goalIcon = lucide.HeartCrack()
 	case 2:
-		goalColor = "goldenrod"
 		goalIcon = lucide.TriangleAlert()
 	case 3:
-		goalColor = "yellowgreen"
 		goalIcon = lucide.Trophy()
 	case 4:
-		goalColor = "rebeccapurple"
 		goalIcon = lucide.ChessKing()
 	default:
-		goalColor = "white"
+		goalIcon = nil
 	}
+	scoreClass := fmt.Sprintf("score-%d", day.Habits.Score)
+
 	return Div(
 		Class("day"),
 		Span(Text(day.Date.Time().Format(core.HumanDate))),
 		Span(
-			Class("day-score flex"),
-			Style(fmt.Sprintf("color: %s", goalColor)),
+			Class("day-score flex "+scoreClass),
 			goalIcon,
 			Text(fmt.Sprintf("%d", day.Habits.Score)),
 		),
@@ -89,7 +84,7 @@ func Day(day core.Day) Node {
 		habitSpot(lucide.Dumbbell(), day.Habits.Fitness),
 		habitSpot(lucide.UserCog(), day.Habits.DeepWork),
 		habitSpot(lucide.Beef(), day.Habits.Eat),
-		Button(Text("sync"), ds.On("click", sync)),
+		Button(Class(cBtn+" btn-sync"), Text("sync"), ds.On("click", sync)),
 		ID(fmt.Sprintf("day-%d", day.ID)),
 	)
 }

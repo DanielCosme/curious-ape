@@ -11,9 +11,10 @@ import (
 
 func Deadlines(s *State) Node {
 	return layout("Deadlines", s, Div(
+		Class(cSurface),
 		A(
 			Href("/deadline"),
-			Button(Text("New deadline")),
+			Button(Class(cBtn), Text("New deadline")),
 		),
 		Map(s.Deadlines.DS, func(d core.Deadline) Node {
 			return deadline(d)
@@ -22,7 +23,8 @@ func Deadlines(s *State) Node {
 }
 
 func deadline(d core.Deadline) Node {
-	return Section(
+	return Div(
+		Class(cLogEntry+" deadline-item"),
 		H4(Text(d.Title)),
 		P(Text(d.EndDate.Time().Format("02 Jan 2006"))),
 		P(Text(fmt.Sprintf("Days left: %d", d.DaysLeft))),
@@ -37,19 +39,18 @@ func DeadlineForm(s *State) Node {
 		err = s.Deadlines.Err.Error()
 	}
 	return layout("New Deadline", s, Div(
+		Class(cSurface),
 		If(s.Deadlines.Err != nil,
-			P(Text("ERROR: "+err)),
+			P(Class(cError), Text("ERROR: "+err)),
 		),
 		Form(
 			ds.On("submit", post),
 			Label(
-				Style("display: block"),
 				Text("Title"),
 				For("title"),
-				Input(Type("test"), Name("title"), ds.Bind("name")),
+				Input(Type("text"), Name("title"), ds.Bind("name")),
 			),
 			Label(
-				Style("display: block"),
 				For("end_date"),
 				Text("End Date"),
 				Input(
@@ -59,7 +60,6 @@ func DeadlineForm(s *State) Node {
 				),
 			),
 			Label(
-				Style("display: block"),
 				For("recurrent"),
 				Text("Recurrent"),
 				Input(
@@ -69,6 +69,7 @@ func DeadlineForm(s *State) Node {
 				),
 			),
 			Button(
+				Class(cBtn),
 				Text("Create Deadline"),
 			),
 		),

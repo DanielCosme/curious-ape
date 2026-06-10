@@ -13,8 +13,8 @@ import (
 
 func GetNextPrevButtons(day core.Day, route string) (prev, next Node) {
 	p, n := GetNextPrev(day, route)
-	prev = Button(Text("Previous Month"), ds.On("click", p))
-	next = Button(Text("Next Month"), ds.On("click", n))
+	prev = Button(Class(cBtnNav), Text("Previous Month"), ds.On("click", p))
+	next = Button(Class(cBtnNav), Text("Next Month"), ds.On("click", n))
 	return
 }
 

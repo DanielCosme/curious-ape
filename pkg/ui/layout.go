@@ -40,7 +40,7 @@ func layout(title string, s *State, nodes ...Node) Node {
 			Main(
 				Group(nodes),
 				If(s.Authenticated,
-					Button(Text("Logout"), Class("button"), ds.On("click", "@delete('/login')")),
+					Button(Text("Logout"), Class("btn btn-secondary"), ds.On("click", "@delete('/login')")),
 				)),
 			Footer(
 				P(Text(s.Version)),
@@ -51,6 +51,7 @@ func layout(title string, s *State, nodes ...Node) Node {
 
 func navItem(icon Node, path, name string) Node {
 	return A(
+		Class(cNavLink),
 		icon, Href(path), Text(name),
 	)
 }

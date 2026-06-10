@@ -14,6 +14,7 @@ import (
 
 func Integrations(s *State) Node {
 	return layout("Integrations", s, Div(
+		Class(cSurface),
 		Map(s.Integrations, func(i application.IntegrationInfo) Node {
 			return Integration(i)
 		}),
@@ -26,6 +27,7 @@ func Integration(i application.IntegrationInfo) Node {
 	q.Add("name", integrationName)
 	onLoad := fmt.Sprintf("@get('/integration?%s')", q.Encode())
 	return Article(
+		Class("integration"),
 		ID("itg-"+integrationName),
 		ds.Init(onLoad),
 		H3(Text(i.Name)),
@@ -41,7 +43,7 @@ func Integration(i application.IntegrationInfo) Node {
 			A(
 				Href(i.AuthURL),
 				Target("_blank"),
-				Button(Text("Authenticate")),
+				Button(Class(cBtn), Text("Authenticate")),
 			),
 		),
 	)

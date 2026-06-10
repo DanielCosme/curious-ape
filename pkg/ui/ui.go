@@ -9,9 +9,15 @@ import (
 	"danicos.dev/daniel/curious-ape/pkg/core"
 )
 
-// Clases
+// Classes (central place for reusable class names)
 const (
-	cLayout = "layout"
+	cLayout   = "layout"
+	cNavLink  = "nav-link"
+	cBtn      = "btn"
+	cBtnNav   = "btn btn-nav"
+	cSurface  = "surface"
+	cLogEntry = "log-entry"
+	cError    = "error"
 )
 
 type State struct {

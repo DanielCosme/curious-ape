@@ -1,38 +1,137 @@
+/* =========================================
+   Curious Ape — Earthy natural color scheme
+   Less dark, warm olive/forest tones. More grounded and organic.
+   ========================================= */
+
 :root {
-	--clr-accent-300: hsl(67 90% 32%);
-	--clr-accent-400: hsl(67 81.5% 25.5%);
-	--clr-neutral-100: hsl(0 0% 100%);
-	--clr-neutral-800: hsl(0 0% 20%);
+	/* Earthy base (natural, less stark) */
+	--bg-base: #111c18;
+	--bg-surface: #1a2a24;
+	--bg-elevated: #22372f;
+	--bg-header: #0f1916;
 
-	--clr-base: black;
-	--clr-base-inverse: grey;
-	--clr-background-base: floralwhite;
-	--clr-background-dark: hsl(158 24.4% 8.8%);
+	/* Foreground - warm muted olive */
+	--fg-base: #C1C497;
+	--fg-muted: #8a9578;
+	--fg-inverse: #111c18;
 
+	/* Earthy sage green accent */
+	--accent: #7d8f5e;
+	--accent-hover: #96a97a;
+	--accent-dim: #374a33;
+	--accent-weak: #2c3c2a;
+
+	/* Borders + separators - stronger for better definition */
+	--border: #32433c;
+	--border-strong: #45544d;
+
+	/* Semantic earthy tones */
+	--success: #6b8a58;   /* moss green - better contrast */
+	--warning: #9c8a5e;   /* warm earth */
+	--danger: #8b6355;    /* clay / terracotta */
+
+	/* Typography scale (kept close to original) */
 	--fs-400: 1.125rem;
 	--fs-500: 1.3125rem;
 	--fs-600: 1.5rem;
 	--fs-700: 2.25rem;
 	--fs-800: 3rem;
 
-	--ff-base: system-ui, sans-serif;
-	--ff-accent: serif;
+	/* Fonts: unified sans + mono for data/console feel */
+	--ff-base: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	--ff-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+	/* Spacing */
+	--space-2: 0.5rem;
+	--space-3: 0.75rem;
+	--space-4: 1rem;
 }
 
+/* Base reset */
 * {
 	box-sizing: border-box;
 	margin: 0;
 }
 
+html {
+	background: var(--bg-base);
+}
+
 body {
-	color: var(--clr-neutral-800);
+	color: var(--fg-base);
 	font-size: var(--fs-400);
 	font-family: var(--ff-base);
-	line-height: 1.6;
-
-	background-color: var(--clr-background-base);
+	line-height: 1.55;
+	background-color: var(--bg-base);
 	min-height: 100vh;
+	-webkit-font-smoothing: antialiased;
 }
+
+/* Headings — clean, green accent, mostly sans for unity */
+h1,
+h2,
+h3,
+h4 {
+	line-height: 1.1;
+	text-overflow: clip;
+	font-family: var(--ff-base);
+}
+
+h1 {
+	font-size: var(--fs-800);
+	color: var(--accent);
+	padding-left: var(--space-2);
+	white-space: nowrap;
+	letter-spacing: -0.02em;
+}
+
+h2 {
+	font-size: var(--fs-700);
+	color: var(--fg-base);
+	padding: 10px 0;
+	letter-spacing: -0.01em;
+}
+
+h3 {
+	font-size: var(--fs-600);
+	color: var(--accent);
+	font-weight: 600;
+}
+
+h4 {
+	font-size: var(--fs-500);
+	color: var(--fg-base);
+	font-weight: 600;
+}
+
+/* Links */
+a {
+	color: var(--accent);
+	text-decoration: none;
+}
+
+a:hover,
+a:focus-visible {
+	color: var(--accent-hover);
+	text-decoration: underline;
+}
+
+/* Form elements base */
+input,
+button,
+textarea,
+select {
+	font-family: inherit;
+	font-size: inherit;
+}
+
+button {
+	cursor: pointer;
+}
+
+/* =========================================
+   Layout (grid structure unchanged)
+   ========================================= */
 
 .layout {
 	margin: 0 auto;
@@ -45,239 +144,428 @@ body {
 		"header main"
 		"aside  main"
 		"footer main";
-
-	main {
-		grid-area: main;
-	}
-
-	header {
-		grid-area: header;
-	}
-
-	aside {
-		grid-area: aside;
-	}
-
-	footer {
-		grid-area: footer;
-		position: fixed;
-		bottom: 0;
-	}
-
-	nav {
-		display: grid;
-
-		> a {
-			padding: 0.5rem 0px 0.5rem 0.5rem;
-			text-decoration: none;
-			display: flex;
-			align-items: center;
-			padding-right: 1rem;
-
-			> svg {
-				margin-right: 1rem;
-			}
-		}
-	}
 }
 
-h1,
-h2,
-h3,
-h4 {
-	line-height: 1.1;
-	text-overflow: clip;
+.layout main {
+	grid-area: main;
+	padding: var(--space-4);
 }
 
-h1,
-h2 {
-	color: var(--clr-accent-400);
-	font-family: var(--ff-accent);
+.layout header {
+	grid-area: header;
+	background: var(--bg-header);
+	border-bottom: 1px solid var(--border);
+	display: flex;
+	align-items: center;
 }
 
-h1 {
-	font-size: var(--fs-800);
-	text-align: left;
-	padding-left: 0.5rem;
-	white-space: nowrap;
-	/*
-  overflow: hidden;
- */
+.layout aside {
+	grid-area: aside;
+	background: var(--bg-surface);
+	border-right: 1px solid var(--border);
+	padding-top: var(--space-2);
 }
 
-h2 {
-	font-size: var(--fs-700);
-	padding: 10px 0;
+.layout footer {
+	grid-area: footer;
+	position: fixed;
+	bottom: 0;
+	font-size: 0.75rem;
+	color: var(--fg-muted);
+	padding: 0.25rem 0.5rem;
+	background: var(--bg-base);
+	border-top: 1px solid var(--border);
 }
 
-h3 {
-	color: var(--clr-accent-300);
-	font-size: var(--fs-600);
-	font-family: var(--ff-accent);
-	font-weight: 800;
+/* Sidebar nav */
+.layout nav {
+	display: grid;
 }
 
-input,
-button,
-textarea,
-select {
-	font-family: inherit;
-	font-size: inherit;
+.layout nav > a {
+	padding: 0.55rem 0.75rem 0.55rem 0.75rem;
+	text-decoration: none;
+	display: flex;
+	align-items: center;
+	color: var(--fg-base);
+	border-left: 3px solid transparent;
+	transition: all 80ms ease;
 }
 
-a {
-	color: var(--clr-accent-400);
+.layout nav > a > svg {
+	margin-right: 0.85rem;
+	width: 18px;
+	height: 18px;
+	opacity: 0.85;
 }
 
-a:hover,
-a:focus-visible {
-	color: var(--clr-background-base);
-	background-color: var(--clr-accent-300);
+.layout nav > a:hover,
+.layout nav > a:focus-visible {
+	background: var(--bg-elevated);
+	color: var(--accent);
+	border-left-color: var(--accent);
 }
 
-.button {
+.layout nav > a:hover svg,
+.layout nav > a:focus-visible svg {
+	opacity: 1;
+}
+
+/* =========================================
+   Buttons (unified, green accent primary)
+   ========================================= */
+
+.button,
+.btn {
 	font: inherit;
-	font-weight: 700;
+	font-weight: 600;
+	letter-spacing: 0.02em;
 	text-transform: uppercase;
-	background: var(--clr-accent-300);
-	border: 0;
-	padding: 0.75em 1.5em;
+	border: 1px solid var(--accent);
+	background: var(--accent);
+	color: var(--fg-inverse);
+	padding: 0.55em 1.1em;
+	border-radius: 3px;
+	transition: all 80ms ease;
 }
 
 .button:hover,
-.button:focus-visible {
-	background: var(--clr-neutral-800);
-	color: var(--clr-accent-300);
+.button:focus-visible,
+.btn:hover,
+.btn:focus-visible {
+	background: var(--accent-hover);
+	border-color: var(--accent-hover);
+	color: var(--fg-inverse);
 }
 
-.text-center {
+.btn-secondary,
+.button-secondary {
+	background: transparent;
+	color: var(--accent);
+	border-color: var(--border-strong);
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus-visible,
+.button-secondary:hover,
+.button-secondary:focus-visible {
+	background: var(--bg-elevated);
+	border-color: var(--accent);
+	color: var(--accent);
+}
+
+.btn-nav,
+.button-nav {
+	background: var(--bg-surface);
+	color: var(--fg-base);
+	border-color: var(--border);
+	text-transform: none;
+	font-weight: 500;
+}
+
+.btn-nav:hover,
+.btn-nav:focus-visible,
+.button-nav:hover,
+.button-nav:focus-visible {
+	background: var(--bg-elevated);
+	border-color: var(--accent);
+	color: var(--accent);
+}
+
+.btn-sync {
+	font-size: 0.8rem;
+	padding: 0.3em 0.65em;
+	text-transform: uppercase;
+}
+
+/* =========================================
+   Forms
+   ========================================= */
+
+form {
+	margin-block: var(--space-4);
+}
+
+label {
+	display: block;
+	margin-bottom: 0.35rem;
+	color: var(--fg-muted);
+	font-size: 0.95rem;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="date"],
+input[type="checkbox"] {
+	background: var(--bg-base);
+	color: var(--fg-base);
+	border: 1px solid var(--border);
+	padding: 0.45rem 0.6rem;
+	border-radius: 3px;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="date"]:focus {
+	outline: none;
+	border-color: var(--accent);
+	box-shadow: 0 0 0 2px var(--accent-dim);
+}
+
+input[type="checkbox"] {
+	accent-color: var(--accent);
+}
+
+fieldset {
+	border: 1px solid var(--border);
+	padding: var(--space-4);
+	margin-bottom: var(--space-4);
+}
+
+legend {
+	padding: 0 0.5rem;
+	color: var(--accent);
+	font-weight: 600;
+}
+
+/* Error callouts */
+.error,
+p.error {
+	color: var(--danger);
+	background: rgba(139, 99, 85, 0.12);
+	border: 1px solid rgba(139, 99, 85, 0.35);
+	padding: 0.5rem 0.75rem;
+	border-radius: 3px;
+}
+
+/* =========================================
+   Surfaces / cards (unifying treatment)
+   ========================================= */
+
+.surface,
+.card,
+.panel {
+	background: var(--bg-elevated);
+	border: 1px solid var(--border-strong);
+	border-radius: 4px;
+	padding: var(--space-4);
+	margin-bottom: var(--space-4);
+}
+
+.log-entry,
+.deadline-item,
+.integration {
+	background: var(--bg-elevated);
+	border: 1px solid var(--border-strong);
+	border-radius: 4px;
+	padding: var(--space-3) var(--space-4);
+	margin-bottom: var(--space-3);
+}
+
+.log-entry h3,
+.log-entry h4 {
+	margin-bottom: 0.25rem;
+}
+
+/* =========================================
+   Home / Days (bujo) view
+   ========================================= */
+
+.days-container {
+	margin-bottom: 2rem;
+}
+
+.days-list {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+}
+
+.day {
+	display: grid;
+	grid-template-columns: 0.3fr 0.3fr repeat(4, 1fr) 0.3fr;
+	align-items: center;
+	background: var(--bg-elevated);
+	border: 1px solid var(--border);
+	border-left: 4px solid var(--accent);
+	margin-bottom: 1px;
+	padding: 0.35rem 0.5rem;
+	font-size: 0.95rem;
+	transition: border-color 80ms ease;
+}
+
+.day:hover {
+	border-color: var(--border-strong);
+}
+
+.day > .habit-spot {
+	display: flex;
+	align-items: center;
+	padding: 0.25rem 0.4rem;
+	border-radius: 2px;
+}
+
+.day > button {
+	justify-self: end;
+}
+
+.day-score {
+	font-weight: 700;
+	font-family: var(--ff-mono);
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+/* Score color states (earthy natural progression - higher contrast on cards) */
+.score-0 { color: #c48d7e; } /* warm clay */
+.score-1 { color: #b88f72; } /* clay */
+.score-2 { color: #b5a16e; } /* warm earth */
+.score-3 { color: #8fa36d; } /* sage */
+.score-4 { color: #8C5FA3; } /* regal purple */
+
+.habit-spot {
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	padding: 0.15rem 0.35rem;
+	border-radius: 2px;
+	transition: background 80ms ease, color 80ms ease;
+}
+
+.habit-spot > svg {
+	margin-right: 0.5rem;
+	flex-shrink: 0;
+}
+
+.habit-spot:hover {
+	background: var(--accent-dim);
+	color: var(--accent-hover);
+}
+
+.habit-spot-done {
+	color: var(--success);
+}
+
+.habit-spot-not-done {
+	color: var(--danger);
+}
+
+/* =========================================
+   Habits grid (year matrix)
+   ========================================= */
+
+.habits-grid {
+	display: grid;
+	gap: 1px;
+	margin: var(--space-4) 0;
+	max-width: min-content;
+	background: var(--border);
+	border: 1px solid var(--border);
+}
+
+.grid-header {
+	background: var(--accent-dim);
+	color: var(--fg-base);
+	padding: 0.45rem 0.5rem;
 	text-align: center;
+	font-weight: 600;
+	font-size: 0.9rem;
+	font-family: var(--ff-mono);
 }
 
-.element-with-padding > * {
-	margin-block: 0;
+.habit-category {
+	background: var(--bg-elevated);
+	color: var(--fg-base);
+	padding: 0.45rem 0.5rem;
+	text-align: center;
+	font-weight: 500;
 }
 
-.element-with-padding > p {
-	margin-block: 1em;
+.habit-cell {
+	aspect-ratio: 1;
+	background: var(--bg-base);
+	border: 1px solid var(--border);
 }
 
-.element-with-padding > :first-child {
-	margin-block-start: 0;
+.habit-grid-item {
+	max-width: 2.75rem;
+	max-height: 2.75rem;
 }
+
+.habit-done {
+	background: var(--success);
+}
+
+.habit-not_done {
+	background: var(--danger);
+}
+
+.habit-no_info {
+	background: var(--bg-surface);
+}
+
+/* Month header on habits page */
+.habits-grid + h2,
+h2:has(+ .habits-grid) {
+	display: inline-block;
+}
+
+/* =========================================
+   Month navigation
+   ========================================= */
+
+.month-navigation {
+	display: flex;
+	gap: var(--space-3);
+	margin: var(--space-4) 0;
+}
+
+.month-score {
+	font-weight: 700;
+	font-family: var(--ff-mono);
+	margin-left: var(--space-3);
+	color: var(--accent);
+}
+
+/* =========================================
+   Integrations
+   ========================================= */
+
+.integration h3 {
+	margin-bottom: 0.25rem;
+}
+
+.integration ul {
+	margin-top: 0.5rem;
+	padding-left: 1.1rem;
+	color: var(--fg-muted);
+	font-size: 0.95rem;
+}
+
+/* =========================================
+   Utilities (kept + new)
+   ========================================= */
+
+.text-center { text-align: center; }
 
 .flex {
 	display: flex;
 	align-items: center;
 }
 
-.habit-spot {
-	display: flex;
-	align-items: center;
-
-	> svg {
-		margin-right: 1rem;
-	}
+.muted {
+	color: var(--fg-muted);
 }
 
-.habit-spot:hover {
-	color: var(--clr-background-base);
-	background-color: var(--clr-accent-400);
-	cursor: pointer;
+.mono {
+	font-family: var(--ff-mono);
 }
 
-.habit-spot-done {
-	color: green;
-}
+/* Small presentational helper used by a few labels */
+.block { display: block; }
 
-.habit-spot-not-done {
-	color: red;
-}
-
-.day {
-	display: grid;
-	grid-template-columns: 0.3fr 0.3fr repeat(4, 1fr) 0.3fr;
-	border-bottom: 0.1rem solid var(--clr-background-dark);
-	margin: 1rem;
-
-	> .habit-spot {
-		place-items: center;
-		text-align: center;
-	}
-
-	> button {
-		font: inherit;
-		background: var(--clr-accent-400);
-		border: 0;
-		border-radius: 8px;
-		margin-bottom: 2px;
-		color: var(--clr-background-base);
-	}
-
-	> button:hover {
-		background-color: var(--clr-accent-400);
-	}
-
-	> button:hover,
-	> button:focus-visible {
-		background: var(--clr-background-dark);
-	}
-}
-
-.habits-grid {
-	display: grid;
-	gap: 1px;
-	margin: 1rem 0;
-	max-width: min-content;
-}
-
-.grid-header {
-	background-color: var(--clr-accent-400);
-	color: var(--clr-background-base);
-	padding: 0.5rem;
-	text-align: center;
-	font-weight: bold;
-}
-
-.habit-category {
-	background-color: var(--clr-accent-300);
-	color: var(--clr-neutral-800);
-	padding: 0.5rem;
-	text-align: center;
-	align-items: center;
-	justify-content: center;
-}
-
-.habit-cell {
-	aspect-ratio: 1;
-	border: 1px solid var(--clr-background-dark);
-}
-
-.habit-grid-item {
-	max-width: 3rem;
-	max-height: 3rem;
-}
-
-.habit-done {
-	background-color: yellowgreen;
-}
-
-.habit-not_done {
-	background-color: indianred;
-}
-
-.habit-no_info {
-	background-color: var(--clr-neutral-100);
-}
-
-.day-score {
-	font-weight: bold;
-	> svg {
-		margin-right: 0.5rem;
-	}
-}
-
-.month-score {
-	font-weight: bold;
-	margin-left: 1rem;
+/* Footer version */
+.layout footer p {
+	margin: 0;
 }

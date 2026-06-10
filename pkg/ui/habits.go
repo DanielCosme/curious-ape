@@ -47,7 +47,7 @@ func Habits(s *State) Node {
 		maxScore := daysCount * 4
 		percentage := (float32(monthScore) * float32(100)) / float32(maxScore)
 		node := Div(
-			H2(Style("display: inline-block"), Text(days[0].Date.Time().Month().String())),
+			H2(Class("mono"), Text(days[0].Date.Time().Month().String())),
 			Span(Class("month-score"), Text(fmt.Sprintf("%.0f%% %d/%d", percentage, monthScore, maxScore))),
 			Div(allNodes...),
 		)

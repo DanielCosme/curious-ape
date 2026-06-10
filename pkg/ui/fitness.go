@@ -18,8 +18,10 @@ func Fitness(s *State) Node {
 		}
 
 		return Div(
+			Class(cSurface),
 			Map(day.FitnessLogs, func(fl core.FitnessLog) Node {
-				return Section(
+				return Div(
+					Class(cLogEntry),
 					H3(Text(fl.Title)),
 					Span(Text(fl.Date.Time().Format(core.HumanDate))),
 					Span(Text(fmt.Sprintf("%s-%s", fl.StartTime.Format(core.Time), fl.EndTime.Format(core.Time)))),
