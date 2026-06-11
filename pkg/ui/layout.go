@@ -28,13 +28,13 @@ func layout(title string, s *State, nodes ...Node) Node {
 			Aside(
 				If(s.Authenticated, Nav(
 					// TODO: Make pages from nav be partially loaded, and not the full page.
-					navItem(lucide.House(), "/", "Home "),
-					navItem(lucide.SquareCheckBig(), "/habits", "Habits"),
-					navItem(lucide.Hourglass(), "/deadlines", "Deadlines "),
-					navItem(lucide.Bed(), "/sleep", "Sleep "),
-					navItem(lucide.Dumbbell(), "/fitness", "Fitness"),
-					navItem(lucide.MonitorCog(), "/deep_work", "Deep-Work "),
-					navItem(lucide.Workflow(), "/integrations", "Integrations"),
+					navItem(lucide.House(), "/", "Home ", s.CurrentPath),
+					navItem(lucide.SquareCheckBig(), "/habits", "Habits", s.CurrentPath),
+					navItem(lucide.Hourglass(), "/deadlines", "Deadlines ", s.CurrentPath),
+					navItem(lucide.Bed(), "/sleep", "Sleep ", s.CurrentPath),
+					navItem(lucide.Dumbbell(), "/fitness", "Fitness", s.CurrentPath),
+					navItem(lucide.MonitorCog(), "/deep_work", "Deep-Work ", s.CurrentPath),
+					navItem(lucide.Workflow(), "/integrations", "Integrations", s.CurrentPath),
 				)),
 			),
 			Main(
@@ -49,9 +49,14 @@ func layout(title string, s *State, nodes ...Node) Node {
 	})
 }
 
-func navItem(icon Node, path, name string) Node {
+func navItem(icon Node, path, name, current string) Node {
+	cls := cNavLink
+	if path == current {
+		cls = cNavLinkActive
+	}
 	return A(
-		Class(cNavLink),
-		icon, Href(path), Text(name),
+		Class(cls),
+		Href(path),
+		icon, Text(name),
 	)
 }

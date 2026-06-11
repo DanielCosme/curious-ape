@@ -39,9 +39,11 @@ Use `mage` (task runner) for nearly everything. Aliases: `v` (version), `r` (run
 | `mage enc_sops` | Encrypt SOPS secrets for Flux GitOps |
 
 **Direct Go commands** (when needed):
-- `go build ./cmd/web` - verify server compiles (used in CI)
+- `go build -o ./tmp/web ./cmd/web` - verify server compiles (used in CI)
 - `go tool gotest ./...` - tests with color output
 - `go tool staticcheck -checks='inherit,-ST1001' ./cmd... ./pkg...` - lint (note: `-ST1001` excluded)
+
+**Agent rule for builds**: Whenever you run `go build` (or any direct compile) *to test for compilation errors*, you **must** always place the binary in `./tmp/` using `-o ./tmp/<name>`. Never emit a binary to the project root (bare `go build ./cmd/web` produces `./web`, which is forbidden). The `tmp/` directory exists for dev artifacts and is the canonical location (see also `mage build`, which already targets `./tmp/ape`). This keeps the repository root clean.
 
 **Database connection string for tools**: `sqlite3://./tmp/ape.db`
 
@@ -249,6 +251,8 @@ All production logging should go through oak, never raw `log` or `slog` directly
 
 15. **Migrations are iofs-embedded**: At runtime they come from the compiled binary via `database/migrations/efs.go`. Adding a migration requires rebuild to be visible in a running binary.
 
+16. **Build output location (agents)**: Any direct `go build` performed to test compilation **must** use `-o ./tmp/...`. Binaries must never land in the project root.
+
 ## What Not to Do
 
 - Do not edit files under `database/gen/`.
@@ -256,6 +260,7 @@ All production logging should go through oak, never raw `log` or `slog` directly
 - Do not add new external HTTP frameworks or ORMs without explicit discussion.
 - Do not bypass `application.App` methods from handlers; keep business logic in the application layer.
 - Do not hardcode secrets or tokens in source.
+- When using `go build` (or similar) to check for compilation errors, never place the resulting binary in the project root. Always use `-o ./tmp/<name>`.
 
 ## Quick File Reference for Common Tasks
 

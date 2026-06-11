@@ -97,7 +97,7 @@ func (a *API) DeadlinesPostForm(c *dove.Context) error {
 		return c.RenderOK(ui.DeadlineForm(state))
 	}
 
-	return c.RenderOK(ui.Deadlines(state))
+	return c.Redirect("/deadlines")
 }
 
 func (a *API) DeepWork(c *dove.Context) error {
@@ -293,5 +293,6 @@ func State(a *API, r *http.Request) *ui.State {
 	return &ui.State{
 		Version:       a.Version,
 		Authenticated: a.IsAuthenticated(r),
+		CurrentPath:   r.URL.Path,
 	}
 }

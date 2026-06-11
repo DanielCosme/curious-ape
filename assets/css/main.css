@@ -211,6 +211,17 @@ button {
 	opacity: 1;
 }
 
+/* Active (current page) nav item */
+.layout nav > a.active {
+	background: var(--bg-elevated);
+	color: var(--accent);
+	border-left-color: var(--accent);
+}
+
+.layout nav > a.active svg {
+	opacity: 1;
+}
+
 /* =========================================
    Buttons (unified, green accent primary)
    ========================================= */

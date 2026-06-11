@@ -11,18 +11,20 @@ import (
 
 // Classes (central place for reusable class names)
 const (
-	cLayout   = "layout"
-	cNavLink  = "nav-link"
-	cBtn      = "btn"
-	cBtnNav   = "btn btn-nav"
-	cSurface  = "surface"
-	cLogEntry = "log-entry"
-	cError    = "error"
+	cLayout        = "layout"
+	cNavLink       = "nav-link"
+	cNavLinkActive = "nav-link active"
+	cBtn           = "btn"
+	cBtnNav        = "btn btn-nav"
+	cSurface       = "surface"
+	cLogEntry      = "log-entry"
+	cError         = "error"
 )
 
 type State struct {
 	Version       string
 	Authenticated bool
+	CurrentPath   string
 	DaysYear      [][]core.Day
 	Days          []core.Day
 	Integrations  []application.IntegrationInfo
