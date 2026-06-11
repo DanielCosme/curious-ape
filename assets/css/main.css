@@ -90,6 +90,10 @@
 	--border: #32433c;
 	--border-strong: #45544d;
 
+	/* Refined surfaces / elevation */
+	--shadow-inner: inset 0 1px 0 rgba(255, 255, 255, 0.03), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+	--shadow-elevated: 0 2px 4px rgba(0, 0, 0, 0.15);
+
 	/* Semantic earthy tones */
 	--success: #6b8a58; /* moss green - better contrast */
 	--warning: #9c8a5e; /* warm earth */
@@ -429,8 +433,25 @@ p.error {
 	background: var(--bg-elevated);
 	border: 1px solid var(--border-strong);
 	border-radius: 4px;
-	padding: var(--space-4);
+	padding: calc(var(--space-4) + 4px) var(--space-4) var(--space-4);
 	margin-bottom: var(--space-4);
+	box-shadow: var(--shadow-inner), var(--shadow-elevated);
+	border-left: 3px solid var(--accent);
+	position: relative;
+}
+
+/* Subtle console-style header bar on refined surfaces */
+.surface::before,
+.card::before,
+.panel::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 4px;
+	background: var(--accent-weak);
+	border-radius: 4px 4px 0 0;
 }
 
 .log-entry,
@@ -439,8 +460,25 @@ p.error {
 	background: var(--bg-elevated);
 	border: 1px solid var(--border-strong);
 	border-radius: 4px;
-	padding: var(--space-3) var(--space-4);
+	padding: calc(var(--space-3) + 3px) var(--space-3) var(--space-3);
 	margin-bottom: var(--space-3);
+	box-shadow: var(--shadow-inner), var(--shadow-elevated);
+	border-left: 3px solid var(--accent);
+	position: relative;
+}
+
+/* Subtle console-style header bar on log entries / cards too */
+.log-entry::before,
+.deadline-item::before,
+.integration::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 3px;
+	background: var(--accent-weak);
+	border-radius: 4px 4px 0 0;
 }
 
 .log-entry h3,
