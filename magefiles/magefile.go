@@ -127,8 +127,13 @@ func Test() error {
 	return r.RunV("test", target.NewA("go", "tool", "gotest", "./..."))
 }
 
+// Create tag and push to origin
 func Tag() error {
-	return r.RunV("tag", target.NewA("git", "tag", config.VERSION))
+	ts := []target.Target{
+		target.NewA("git", "tag", config.VERSION),
+		target.NewA("git", "push", "--tags"),
+	}
+	return runSteps("tag and push", ts)
 }
 
 func Version() error {
