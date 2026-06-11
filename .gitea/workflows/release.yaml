@@ -25,7 +25,7 @@ jobs:
         run: go install github.com/magefile/mage@v1.17.2
 
       - name: Clone Repository
-        run: "git clone --branch ${{ gitea.ref_name }} https://${{ secrets.CI_TOKEN }}@danicos.dev/daniel/curious-ape"
+        run: "git clone --branch main https://${{ secrets.CI_TOKEN }}@danicos.dev/daniel/curious-ape"
 
       - name: Ensure Docker CLI Installed
         run: apk add docker-cli docker-cli-buildx && docker version
