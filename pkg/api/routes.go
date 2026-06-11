@@ -1,6 +1,8 @@
 package api
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"mime"
 	"net/http"
@@ -26,11 +28,11 @@ func Routes(a *API) http.Handler {
 
 	d.Use(dove.MiddlewarePanicRecover)
 
+	d.Prefix("/assets").GET(a.ServeStaticAssets)
+
 	if a.App.Env == application.Dev {
 		d.Use(DevMiddleware)
 	}
-
-	d.Prefix("/assets").GET(a.ServeStaticAssets)
 
 	d.Use(a.MiddlewareLoadCookie)
 	d.Use(a.MiddlewareAuthenticateFromSession)
@@ -165,7 +167,30 @@ func (a *API) ServeStaticAssets(c *dove.Context) (err error) {
 	}
 
 	mimeType := mime.TypeByExtension(filepath.Ext(path))
-	c.Res.Header().Add("Content-Type", mimeType)
+	c.Res.Header().Set("Content-Type", mimeType)
+
+	// Compute a strong ETag from content hash (works for both dev disk and prod embed)
+	hash := sha256.Sum256(data)
+	etag := `"` + hex.EncodeToString(hash[:]) + `"`
+	c.Res.Header().Set("ETag", etag)
+
+	// Strong caching for static assets.
+	// In prod: long-lived immutable cache (1 year). New deploys will use new asset content (ETag changes).
+	// In dev: no-cache with revalidation so changes are picked up on refresh without hard-reload.
+	if a.App.Env == application.Dev {
+		c.Res.Header().Set("Cache-Control", "no-cache, must-revalidate")
+	} else {
+		c.Res.Header().Set("Cache-Control", "public, max-age=86400, immutable")
+	}
+
+	c.Res.Header().Set("X-Content-Type-Options", "nosniff")
+
+	// Support conditional GET (304 Not Modified)
+	if match := c.Req.Header.Get("If-None-Match"); match != "" && match == etag {
+		c.Res.WriteHeader(http.StatusNotModified)
+		return nil
+	}
+
 	_, err = c.Res.Write(data)
 	return err
 }
