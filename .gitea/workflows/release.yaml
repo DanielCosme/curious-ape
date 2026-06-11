@@ -17,7 +17,7 @@ jobs:
         run: apk add git
 
       - name: Clone Repository
-        run: "git clone --branch ${{ gitea.ref_name }} https://${{ secrets.CI_TOKEN }}@${{ gitea.repositoryUrl }}"
+        run: "git clone --branch ${{ gitea.ref_name }} https://${{ secrets.CI_TOKEN }}@danicos.dev/daniel/curious-ape"
 
       - name: Ensure Docker CLI Installed
         run: apk add docker-cli docker-cli-buildx && docker version
