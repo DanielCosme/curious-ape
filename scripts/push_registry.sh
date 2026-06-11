@@ -12,7 +12,7 @@ echo Registry $REGISTRY
 docker tag curious-ape $REGISTRY/daniel/curious-ape:latest
 docker tag curious-ape $REGISTRY/daniel/curious-ape:$APE_VERSION
 
-docker login https://$REGISTRY -u $REGISTRY_USER --password-stdin <<< "$REGISTRY_PASSWORD"
+# docker login https://$REGISTRY -u $REGISTRY_USER --password-stdin <<< "$REGISTRY_PASSWORD"
 
 docker push $REGISTRY/daniel/curious-ape:latest
 docker push $REGISTRY/daniel/curious-ape:$APE_VERSION

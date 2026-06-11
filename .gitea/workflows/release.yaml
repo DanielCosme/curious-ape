@@ -6,7 +6,6 @@ on:
 
 env:
   REGISTRY: danicos.dev
-  REGISTRY_PASSWORD: ${{ secrets.CI_TOKEN }}
 
 jobs:
   build-and-push-image:
@@ -36,6 +35,9 @@ jobs:
 
       - name: Check image version
         run: docker run curious-ape /app/bin/ape version
+
+      - name: Login to Registry
+        run: echo ${{ secrets.CI_TOKEN }} | docker login ${{ env.REGISTRY }} -u daniel --password-stdin
 
       - name: Push images to registry
         run: ./scripts/push_registry.sh
