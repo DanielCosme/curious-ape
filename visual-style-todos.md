@@ -52,8 +52,6 @@ This file captures ideas and deferred items from the visual style work on Curiou
 
 ## Out of Scope for Initial Overhaul (but valuable later)
 
-- **Active/current nav highlighting**: Would require passing current route/path into `ui.State` and conditionally adding an `active` class in navItem / layout. Purely presentational but touches a bit of handler wiring.
-- **Custom fonts**: Oxide uses Inter; we stayed on system-ui + mono. Adding a self-hosted or CDN font + updating `--ff-base` / preload in layout head.
 - **Dotted / console rule decorations**: The oxide.computer site uses lots of `........` leaders and fig captions. Could add a `.rule` or `::before` dotted border utility for section dividers or page headers.
 - **More refined surfaces / elevation**: Current `.surface` is flat. Could add subtle inner shadows, stronger left accent bars, or "console window" header bars on cards.
 - **Dark / light or user theme toggle**: Full theme switcher (persisted in session or localStorage via datastar). Requires more CSS vars + a small toggle component.

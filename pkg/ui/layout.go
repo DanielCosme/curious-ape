@@ -17,6 +17,12 @@ func layout(title string, s *State, nodes ...Node) Node {
 		Title:    "Curious Ape - " + title,
 		Language: "en",
 		Head: []Node{
+			// Preload critical Exo 2 (sans) + Fira Code (mono) weights.
+			// Mono preloads help the prominent data/scores/grids appear fast.
+			Link(Rel("preload"), Href("/assets/fonts/Exo2-Regular.woff2"), As("font"), Type("font/woff2"), CrossOrigin("anonymous")),
+			Link(Rel("preload"), Href("/assets/fonts/Exo2-SemiBold.woff2"), As("font"), Type("font/woff2"), CrossOrigin("anonymous")),
+			Link(Rel("preload"), Href("/assets/fonts/FiraCode-Regular.woff2"), As("font"), Type("font/woff2"), CrossOrigin("anonymous")),
+			Link(Rel("preload"), Href("/assets/fonts/FiraCode-Bold.woff2"), As("font"), Type("font/woff2"), CrossOrigin("anonymous")),
 			Script(Type("module"), Src(config.DATASTAR)),
 			Link(Rel("stylesheet"), Href("/assets/css/main.css")),
 		},
