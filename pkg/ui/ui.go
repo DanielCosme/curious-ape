@@ -20,6 +20,7 @@ const (
 	cLogEntry      = "log-entry"
 	cError         = "error"
 	cVersion       = "version"
+	cStatusBadge   = "status-badge"
 )
 
 type State struct {

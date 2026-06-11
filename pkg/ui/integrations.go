@@ -30,8 +30,13 @@ func Integration(i application.IntegrationInfo) Node {
 		Class("integration"),
 		ID("itg-"+integrationName),
 		ds.Init(onLoad),
-		H3(Text(i.Name)),
-		P(Text(fmt.Sprintf("Status: %s", i.Status))),
+		H3(
+			Img(Src("/assets/icons/"+integrationName+".svg"), Alt(i.Name), Class("integration-icon")),
+			Text(i.Name),
+		),
+		P(
+			Div(Class(cStatusBadge+" status-"+string(i.Status)), Text(string(i.Status))),
+		),
 		If(len(i.Info) > 0,
 			Ul(
 				Map(i.Info, func(info string) Node {

@@ -52,15 +52,12 @@ This file captures ideas and deferred items from the visual style work on Curiou
 
 ## Out of Scope for Initial Overhaul (but valuable later)
 
-- **Dotted / console rule decorations**: The oxide.computer site uses lots of `........` leaders and fig captions. Could add a `.rule` or `::before` dotted border utility for section dividers or page headers.
 - **More refined surfaces / elevation**: Current `.surface` is flat. Could add subtle inner shadows, stronger left accent bars, or "console window" header bars on cards.
 - **Dark / light or user theme toggle**: Full theme switcher (persisted in session or localStorage via datastar). Requires more CSS vars + a small toggle component.
 - **Responsive / mobile refinements**: The sidebar grid is desktop-first. Media queries for collapsing nav, stacking day columns, smaller habit cells on narrow screens.
-- **Accessibility polish**: Full keyboard audit, better ARIA on habit spots (currently clickable spans), focus management after datastar swaps, contrast verification beyond basic.
 - **Empty state illustrations or better messaging**: "No days", "No logs this month" could get nicer treatment with icons or subtle copy.
 - **Login / auth visual extras**: Background illustration, better error messaging UI, "remember me" affordance (if backend supports).
 - **Data-dense table views**: The habit matrix and day list could become more "console table" like with sticky headers, zebra subtle, column alignment helpers.
-- **Integration status badges**: Colored pills (green/amber/gray) instead of plain "Status: ..." text.
 - **Deadline urgency accents**: Color or icon treatment based on `DaysLeft` (soon = stronger accent).
 - **Print styles**: Minimal print stylesheet for habit grids / reports.
 - **Reduced motion / high contrast variants**: Respect `prefers-reduced-motion` and `prefers-contrast`.
