@@ -130,10 +130,16 @@ func Test() error {
 // Create tag and push to origin
 func Tag() error {
 	ts := []target.Target{
+		target.NewA("git", "checkout", "main"),
+		target.NewA("git", "pull"),
 		target.NewA("git", "tag", config.VERSION),
 		target.NewA("git", "push", "--tags"),
 	}
 	return runSteps("tag and push", ts)
+}
+
+func Flux_reconcile() error {
+	return r.RunV("Reconcile GitOps deployment", target.NewA("flux", "--kubeconfig", "/home/daniel/.kube/charlie", "reconcile", "source", "git", "flux-system"))
 }
 
 func Version() error {
