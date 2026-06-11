@@ -9,35 +9,35 @@
    Using font-display: swap to avoid invisible text while loading.
 */
 @font-face {
-	font-family: 'Exo 2';
+	font-family: "Exo 2";
 	font-style: normal;
 	font-weight: 400;
 	font-display: swap;
-	src: url('/assets/fonts/Exo2-Regular.woff2') format('woff2');
+	src: url("/assets/fonts/Exo2-Regular.woff2") format("woff2");
 }
 
 @font-face {
-	font-family: 'Exo 2';
+	font-family: "Exo 2";
 	font-style: normal;
 	font-weight: 500;
 	font-display: swap;
-	src: url('/assets/fonts/Exo2-Medium.woff2') format('woff2');
+	src: url("/assets/fonts/Exo2-Medium.woff2") format("woff2");
 }
 
 @font-face {
-	font-family: 'Exo 2';
+	font-family: "Exo 2";
 	font-style: normal;
 	font-weight: 600;
 	font-display: swap;
-	src: url('/assets/fonts/Exo2-SemiBold.woff2') format('woff2');
+	src: url("/assets/fonts/Exo2-SemiBold.woff2") format("woff2");
 }
 
 @font-face {
-	font-family: 'Exo 2';
+	font-family: "Exo 2";
 	font-style: normal;
 	font-weight: 700;
 	font-display: swap;
-	src: url('/assets/fonts/Exo2-Bold.woff2') format('woff2');
+	src: url("/assets/fonts/Exo2-Bold.woff2") format("woff2");
 }
 
 /* Fun monospace: Fira Code — clean, modern, with programming ligatures
@@ -45,27 +45,27 @@
    on scores, durations, grid data, etc.). Still very legible.
 */
 @font-face {
-	font-family: 'Fira Code';
+	font-family: "Fira Code";
 	font-style: normal;
 	font-weight: 400;
 	font-display: swap;
-	src: url('/assets/fonts/FiraCode-Regular.woff2') format('woff2');
+	src: url("/assets/fonts/FiraCode-Regular.woff2") format("woff2");
 }
 
 @font-face {
-	font-family: 'Fira Code';
+	font-family: "Fira Code";
 	font-style: normal;
 	font-weight: 500;
 	font-display: swap;
-	src: url('/assets/fonts/FiraCode-Medium.woff2') format('woff2');
+	src: url("/assets/fonts/FiraCode-Medium.woff2") format("woff2");
 }
 
 @font-face {
-	font-family: 'Fira Code';
+	font-family: "Fira Code";
 	font-style: normal;
 	font-weight: 700;
 	font-display: swap;
-	src: url('/assets/fonts/FiraCode-Bold.woff2') format('woff2');
+	src: url("/assets/fonts/FiraCode-Bold.woff2") format("woff2");
 }
 
 :root {
@@ -76,7 +76,7 @@
 	--bg-header: #0f1916;
 
 	/* Foreground - warm muted olive */
-	--fg-base: #C1C497;
+	--fg-base: #c1c497;
 	--fg-muted: #8a9578;
 	--fg-inverse: #111c18;
 
@@ -91,9 +91,9 @@
 	--border-strong: #45544d;
 
 	/* Semantic earthy tones */
-	--success: #6b8a58;   /* moss green - better contrast */
-	--warning: #9c8a5e;   /* warm earth */
-	--danger: #8b6355;    /* clay / terracotta */
+	--success: #6b8a58; /* moss green - better contrast */
+	--warning: #9c8a5e; /* warm earth */
+	--danger: #8b6355; /* clay / terracotta */
 
 	/* Typography scale (kept close to original) */
 	--fs-400: 1.125rem;
@@ -105,7 +105,9 @@
 	/* Fonts: Exo 2 (self-hosted, geometric cyberpunk-adjacent) + strong system fallbacks.
 	   Mono kept separate for data, scores, grids, etc. */
 	--ff-base: "Exo 2", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-	--ff-mono: "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+	--ff-mono:
+		"Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+		"Courier New", monospace;
 
 	/* Spacing */
 	--space-2: 0.5rem;
@@ -497,11 +499,21 @@ p.error {
 }
 
 /* Score color states (earthy natural progression - higher contrast on cards) */
-.score-0 { color: #c48d7e; } /* warm clay */
-.score-1 { color: #b88f72; } /* clay */
-.score-2 { color: #b5a16e; } /* warm earth */
-.score-3 { color: #8fa36d; } /* sage */
-.score-4 { color: #8C5FA3; } /* regal purple */
+.score-0 {
+	color: #c48d7e;
+} /* warm clay */
+.score-1 {
+	color: #b88f72;
+} /* clay */
+.score-2 {
+	color: #b5a16e;
+} /* warm earth */
+.score-3 {
+	color: #8fa36d;
+} /* sage */
+.score-4 {
+	color: #8c5fa3;
+} /* regal purple */
 
 .habit-spot {
 	display: flex;
@@ -509,7 +521,9 @@ p.error {
 	cursor: pointer;
 	padding: 0.15rem 0.35rem;
 	border-radius: 2px;
-	transition: background 80ms ease, color 80ms ease;
+	transition:
+		background 80ms ease,
+		color 80ms ease;
 }
 
 .habit-spot > svg {
@@ -626,7 +640,9 @@ h2:has(+ .habits-grid) {
    Utilities (kept + new)
    ========================================= */
 
-.text-center { text-align: center; }
+.text-center {
+	text-align: center;
+}
 
 .flex {
 	display: flex;
@@ -654,9 +670,16 @@ h2:has(+ .habits-grid) {
 }
 
 /* Small presentational helper used by a few labels */
-.block { display: block; }
+.block {
+	display: block;
+}
 
 /* Footer version */
 .layout footer p {
 	margin: 0;
+}
+
+.version {
+	/* Make the version text bigger than the rest of the small footer */
+	font-size: 0.95rem;
 }

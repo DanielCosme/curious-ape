@@ -19,6 +19,7 @@ const (
 	cSurface       = "surface"
 	cLogEntry      = "log-entry"
 	cError         = "error"
+	cVersion       = "version"
 )
 
 type State struct {

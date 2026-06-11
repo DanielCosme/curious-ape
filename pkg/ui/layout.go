@@ -49,7 +49,7 @@ func layout(title string, s *State, nodes ...Node) Node {
 					Button(Text("Logout"), Class("btn btn-secondary"), ds.On("click", "@delete('/login')")),
 				)),
 			Footer(
-				P(Text(s.Version)),
+				P(Class(cVersion), Text(s.Version)),
 			),
 		},
 	})
