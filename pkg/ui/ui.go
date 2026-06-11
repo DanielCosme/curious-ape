@@ -21,6 +21,7 @@ const (
 	cError         = "error"
 	cVersion       = "version"
 	cStatusBadge   = "status-badge"
+	cSkeleton      = "skeleton"
 )
 
 type State struct {

@@ -117,6 +117,9 @@
 	--space-2: 0.5rem;
 	--space-3: 0.75rem;
 	--space-4: 1rem;
+
+	/* Polish: radius for machine feel */
+	--radius: 2px;
 }
 
 /* Base reset */
@@ -157,6 +160,18 @@ h1 {
 	padding-left: var(--space-2);
 	white-space: nowrap;
 	letter-spacing: -0.02em;
+	position: relative;
+}
+
+/* Subtle top green accent line under h1 (console polish) */
+h1::after {
+	content: "";
+	position: absolute;
+	bottom: -2px;
+	left: var(--space-2);
+	right: 0;
+	height: 1px;
+	background: linear-gradient(to right, var(--accent), transparent);
 }
 
 h2 {
@@ -267,9 +282,9 @@ button {
 }
 
 .layout nav > a > svg {
-	margin-right: 0.85rem;
-	width: 18px;
-	height: 18px;
+	margin-right: 0.6rem;
+	width: 1.25rem;
+	height: 1.25rem;
 	opacity: 0.85;
 }
 
@@ -310,7 +325,7 @@ button {
 	background: var(--accent);
 	color: var(--fg-inverse);
 	padding: 0.55em 1.1em;
-	border-radius: 3px;
+	border-radius: var(--radius);
 	transition: all 80ms ease;
 }
 
@@ -386,7 +401,7 @@ input[type="checkbox"] {
 	color: var(--fg-base);
 	border: 1px solid var(--border);
 	padding: 0.45rem 0.6rem;
-	border-radius: 3px;
+	border-radius: var(--radius);
 }
 
 input[type="text"]:focus,
@@ -420,7 +435,7 @@ p.error {
 	background: rgba(139, 99, 85, 0.12);
 	border: 1px solid rgba(139, 99, 85, 0.35);
 	padding: 0.5rem 0.75rem;
-	border-radius: 3px;
+	border-radius: var(--radius);
 }
 
 /* =========================================
@@ -432,7 +447,7 @@ p.error {
 .panel {
 	background: var(--bg-elevated);
 	border: 1px solid var(--border-strong);
-	border-radius: 4px;
+	border-radius: var(--radius);
 	padding: calc(var(--space-4) + 4px) var(--space-4) var(--space-4);
 	margin-bottom: var(--space-4);
 	box-shadow: var(--shadow-inner), var(--shadow-elevated);
@@ -444,14 +459,14 @@ p.error {
 .surface::before,
 .card::before,
 .panel::before {
-	content: '';
+	content: "";
 	position: absolute;
 	top: 0;
 	left: 0;
 	right: 0;
 	height: 4px;
 	background: var(--accent-weak);
-	border-radius: 4px 4px 0 0;
+	border-radius: var(--radius) var(--radius) 0 0;
 }
 
 .log-entry,
@@ -459,7 +474,7 @@ p.error {
 .integration {
 	background: var(--bg-elevated);
 	border: 1px solid var(--border-strong);
-	border-radius: 4px;
+	border-radius: var(--radius);
 	padding: calc(var(--space-3) + 3px) var(--space-3) var(--space-3);
 	margin-bottom: var(--space-3);
 	box-shadow: var(--shadow-inner), var(--shadow-elevated);
@@ -467,18 +482,27 @@ p.error {
 	position: relative;
 }
 
+.log-entry:hover,
+.deadline-item:hover,
+.integration:hover {
+	transform: translateY(-1px);
+	box-shadow:
+		var(--shadow-inner),
+		0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
 /* Subtle console-style header bar on log entries / cards too */
 .log-entry::before,
 .deadline-item::before,
 .integration::before {
-	content: '';
+	content: "";
 	position: absolute;
 	top: 0;
 	left: 0;
 	right: 0;
 	height: 3px;
 	background: var(--accent-weak);
-	border-radius: 4px 4px 0 0;
+	border-radius: var(--radius) var(--radius) 0 0;
 }
 
 .log-entry h3,
@@ -513,8 +537,20 @@ p.error {
 	transition: border-color 80ms ease;
 }
 
+/* Stronger mono on dates, durations, etc. */
+.day > span:first-child,
+.log-entry p,
+.log-entry span,
+.day-score,
+.month-score,
+.grid-header {
+	font-family: var(--ff-mono);
+}
+
 .day:hover {
 	border-color: var(--border-strong);
+	transform: translateY(-1px);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .day > .habit-spot {
@@ -566,6 +602,8 @@ p.error {
 
 .habit-spot > svg {
 	margin-right: 0.5rem;
+	width: 1.5rem;
+	height: 1.5rem;
 	flex-shrink: 0;
 }
 
@@ -763,4 +801,32 @@ h2:has(+ .habits-grid) {
 .version {
 	/* Make the version text bigger than the rest of the small footer */
 	font-size: 0.95rem;
+}
+
+/* Skeleton / loading states for datastar in-flight (e.g. integrations, sync) */
+.skeleton {
+	background: linear-gradient(
+		90deg,
+		var(--bg-elevated) 25%,
+		var(--bg-surface) 50%,
+		var(--bg-elevated) 75%
+	);
+	background-size: 200% 100%;
+	animation: skeleton-loading 1.5s infinite;
+	border-radius: var(--radius);
+}
+
+@keyframes skeleton-loading {
+	0% {
+		background-position: 200% 0;
+	}
+	100% {
+		background-position: -200% 0;
+	}
+}
+
+/* Example: apply .skeleton to content during load, or to .integration, .day during datastar */
+.integration.skeleton,
+.day.skeleton {
+	min-height: 2rem;
 }
