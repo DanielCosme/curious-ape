@@ -19,7 +19,7 @@ spec:
       - env:
         - name: APE_ENVIRONMENT
           value: prod
-        image: danicos.dev/daniel/curious-ape:1.4.1
+        image: danicos.dev/daniel/curious-ape:1.5.0
         name: curious-ape
         ports:
         - containerPort: 4000
