@@ -6,48 +6,73 @@ on:
 
 env:
   REGISTRY: danicos.dev
-  IMAGE_NAME: daniel/curious-ape
+  REGISTRY_PASSWORD: ${{ secrets.CI_TOKEN }}
 
 jobs:
-  build-and-push:
-    runs-on: daniel-act-runner
-    # Use a container with Docker pre-installed (recommended for Gitea Actions)
-    container:
-      image: catthehacker/ubuntu:act-latest
-
+  build-and-push-image:
+    runs-on: "daniel-act-runner"
+    container: alpine:latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - name: Install dependencies
+        run: apk add git
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Clone Repository
+        run: "git clone --branch ${{ gitea.ref_name }} https://${{ secrets.CI_TOKEN }}@${{ gitea.repositoryUrl }}"
 
-      - name: Login to Gitea Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ gitea.actor }}
-          password: ${{ secrets.CI_TOKEN }}
+      - name: Ensure Docker CLI Installed
+        run: apk add docker-cli docker-cli-buildx && docker version
 
-      - name: Extract metadata (tags, labels)
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=latest
-            type=semver,pattern={{version}}
+      - name: Build image
+        run: ./scripts/build_image.sh
+        working-directory: ./curious-ape
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64 # Add more platforms as needed
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
+      - name: Check image version
+        run: docker run curious-ape /app/bin/ape version
+
+      - name: Push images to registry
+        run: ./scripts/push_registry.sh
+        working-directory: ./curious-ape
+
+# jobs:
+#   build-and-push:
+#     runs-on: daniel-act-runner
+#     # Use a container with Docker pre-installed (recommended for Gitea Actions)
+#     container:
+#       image: catthehacker/ubuntu:act-latest
+#
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
+#
+#       - name: Set up Docker Buildx
+#         uses: docker/setup-buildx-action@v3
+#
+#       - name: Login to Gitea Container Registry
+#         uses: docker/login-action@v3
+#         with:
+#           registry: ${{ env.REGISTRY }}
+#           username: ${{ gitea.actor }}
+#           password: ${{ secrets.CI_TOKEN }}
+#
+#       - name: Extract metadata (tags, labels)
+#         id: meta
+#         uses: docker/metadata-action@v5
+#         with:
+#           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+#           tags: |
+#             type=raw,value=latest
+#             type=semver,pattern={{version}}
+#
+#       - name: Build and push Docker image
+#         uses: docker/build-push-action@v6
+#         with:
+#           context: .
+#           file: ./Dockerfile
+#           push: true
+#           tags: ${{ steps.meta.outputs.tags }}
+#           labels: ${{ steps.meta.outputs.labels }}
+#           platforms: linux/amd64 # Add more platforms as needed
+#           cache-from: type=local,src=/tmp/.buildx-cache
+#           cache-to: type=local,dest=/tmp/.buildx-cache,mode=max

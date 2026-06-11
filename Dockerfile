@@ -4,6 +4,7 @@ ENV CGO_ENABLED=0
 ARG APE_VERSION=unknown
 
 FROM base-builder AS ape-builder
+RUN apk add git
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN --mount=type=cache,target=/go/pkg/mod go mod download
@@ -11,7 +12,7 @@ RUN go mod verify
 COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg/mod \
-    go build -ldflags="-extldflags=-static -X main.version=${APE_VERSION}" -o=./bin/ape ./cmd/web
+    go build -buildvcs=true -ldflags="-extldflags=-static -X main.version=${APE_VERSION}" -o=./bin/ape ./cmd/web
 
 FROM alpine:latest AS ape
 RUN apk add --no-cache tzdata

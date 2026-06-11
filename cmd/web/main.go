@@ -71,6 +71,14 @@ func main() {
 
 	cfg := new(config)
 	v := Version()
+
+	if len(os.Args) > 1 {
+		if os.Args[1] == "version" {
+			fmt.Println(v)
+			os.Exit(0)
+		}
+	}
+
 	readConfiguration(cfg)
 	oak.Info("Environment: " + string(cfg.Environment))
 
