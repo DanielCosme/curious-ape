@@ -27,53 +27,58 @@ func (h *Habits) Get(p core.HabitParams) (habit core.Habit, err error) {
 
 func (h *Habits) Upsert(p core.Habit) (coreHabit core.Habit, err error) {
 	day, err := getDay(p.Date, h.db)
-	if err != nil {
-		return coreHabit, catchDBErr("habits: upsert", err)
-	}
-	hCategory, err := buildHabitCategoryQuery(core.HabitCategoryParams{Kind: p.Type}).One(context.Background(), h.db)
-	if err != nil {
-		return coreHabit, catchDBErr("habits: upsert", err)
-	}
-	s := &models.HabitSetter{
-		DayID:           omit.From(day.ID),
-		HabitCategoryID: omit.From(hCategory.ID),
-		State:           omit.From(string(p.State)),
-		NOTE:            omitnull.From(p.Note),
-		Automated:       omit.From(p.Automated),
-	}
-	habit, err := models.Habits.Insert(s).One(context.Background(), h.db)
-	if err != nil {
-		if dberrors.HabitErrors.ErrUniqueSqliteAutoindexHabit1.Is(err) {
-			habit, err = models.Habits.Query(
-				models.SelectWhere.Habits.DayID.EQ(s.DayID.GetOrZero()),
-				models.SelectWhere.Habits.HabitCategoryID.EQ(s.HabitCategoryID.GetOrZero()),
-				models.Preload.Habit.Day(),
-				models.Preload.Habit.HabitCategory(),
-			).One(context.Background(), h.db)
-			if err != nil {
-				return coreHabit, catchDBErr("habits: upsert", err)
+	if err == nil {
+		hCategory, err := buildHabitCategoryQuery(core.HabitCategoryParams{Kind: p.Type}).One(context.Background(), h.db)
+		if err == nil {
+			s := &models.HabitSetter{
+				DayID:           omit.From(day.ID),
+				HabitCategoryID: omit.From(hCategory.ID),
+				State:           omit.From(string(p.State)),
+				NOTE:            omitnull.From(p.Note),
+				Automated:       omit.From(p.Automated),
 			}
+			habit, err := models.Habits.Insert(s).One(context.Background(), h.db)
+			isUpdate := dberrors.HabitErrors.ErrUniqueSqliteAutoindexHabit1.Is(err)
+			if err == nil || isUpdate {
+				if isUpdate {
+					habit, err = models.Habits.Query(
+						models.SelectWhere.Habits.DayID.EQ(s.DayID.GetOrZero()),
+						models.SelectWhere.Habits.HabitCategoryID.EQ(s.HabitCategoryID.GetOrZero()),
+						models.Preload.Habit.Day(),
+						models.Preload.Habit.HabitCategory(),
+					).One(context.Background(), h.db)
+					if err == nil {
+						// No-op for a non-automated habit for which the update is automated.
+						if !habit.Automated && s.Automated.GetOrZero() && habit.State != string(core.HabitStateNoInfo) {
+							return habitToCore(habit), nil
+						}
+						if err = habit.Update(context.Background(), h.db, s); err != nil {
+							return coreHabit, catchDBErr("habits: upsert", err)
+						}
+					} else {
+						return coreHabit, catchDBErr("habits: upsert", err)
+					}
+				}
 
-			// No-op for a non-automated habit for which the update is automated.
-			if !habit.Automated && s.Automated.GetOrZero() && habit.State != string(core.HabitStateNoInfo) {
-				return habitToCore(habit), nil
-			}
-			err = habit.Update(context.Background(), h.db, s)
-			if err != nil {
-				return coreHabit, catchDBErr("habits: upsert", err)
+				ctx := context.Background()
+				if err = habit.LoadDay(ctx, h.db); err == nil {
+					if err = habit.LoadHabitCategory(ctx, h.db); err == nil {
+						return habitToCore(habit), nil
+					} else {
+						return coreHabit, catchDBErr("habits: create: load habit category", err)
+					}
+				} else {
+					return coreHabit, catchDBErr("habits: create: load habit day", err)
+				}
+			} else {
+				return coreHabit, catchDBErr("habits: create", err)
 			}
 		} else {
-			return coreHabit, catchDBErr("habits: create", err)
+			return coreHabit, catchDBErr("habits: upsert", err)
 		}
+	} else {
+		return coreHabit, catchDBErr("habits: upsert", err)
 	}
-	ctx := context.Background()
-	if err := habit.LoadDay(ctx, h.db); err != nil {
-		return coreHabit, catchDBErr("habits: create: load habit day", err)
-	}
-	if err := habit.LoadHabitCategory(ctx, h.db); err != nil {
-		return coreHabit, catchDBErr("habits: create: load habit category", err)
-	}
-	return habitToCore(habit), nil
 }
 
 func habitToCore(h *models.Habit) (habit core.Habit) {
