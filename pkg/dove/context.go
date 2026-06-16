@@ -33,12 +33,11 @@ func NewContext(req *http.Request, rw http.ResponseWriter, logger *oak.Oak) *Con
 
 func (c *Context) JSON(status int, payload any) error {
 	bytes, err := json.Marshal(payload)
-	if err != nil {
-		return err
+	if err == nil {
+		c.Res.WriteHeader(status)
+		c.Res.Header().Set("Content-Type", "application/json")
+		_, err = c.Res.Write(bytes)
 	}
-	c.Res.WriteHeader(status)
-	c.Res.Header().Set("Content-Type", "application/json")
-	_, err = c.Res.Write(bytes)
 	return err
 }
 

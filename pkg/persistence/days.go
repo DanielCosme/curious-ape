@@ -24,47 +24,44 @@ func (d *Days) Create(date core.Date) (day core.Day, err error) {
 
 func (d *Days) Get(p core.DayParams) (day core.Day, err error) {
 	res, err := BuildDayQuery(p).One(context.Background(), d.db)
-	if err != nil {
-		return day, catchDBErr("days: get", err)
+	if err == nil {
+		err = d.LoadHabitRelations(res)
+		return dayToCore(res), err
 	}
-	err = d.LoadHabitRelations(res)
-	return dayToCore(res), err
+	return day, catchDBErr("days: get", err)
 }
 
 func (d *Days) GetOrCreate(p core.DayParams) (day core.Day, err error) {
 	day, err = d.Get(p)
 	if core.IfErrNNotFound(err) {
-		return
-	}
-	if day.IsZero() {
-		return d.Create(p.Date)
+		day, err = d.Create(p.Date)
 	}
 	return
 }
 
 func (d *Days) Find(p core.DayParams) (days []core.Day, err error) {
 	res, err := BuildDayQuery(p).All(context.Background(), d.db)
-	if err != nil {
+	if err == nil {
+		for _, day := range res { // TODO: optimize this.
+			if err = d.LoadHabitRelations(day); err == nil {
+				days = append(days, dayToCore(day))
+			} else {
+				return days, catchDBErr("days: find", err)
+			}
+		}
+		return
+	} else {
 		return days, catchDBErr("days: find", err)
 	}
-	//TODO:optimize this.
-	for _, day := range res {
-		if err = d.LoadHabitRelations(day); err != nil {
-			return
-		}
-		days = append(days, dayToCore(day))
-	}
-	return
 }
 
-func (d *Days) LoadHabitRelations(m *models.Day) error {
-	if err := m.R.Habits.LoadDay(context.Background(), d.db); err != nil {
-		return catchDBErr("days: load: habit relations", err)
+func (d *Days) LoadHabitRelations(m *models.Day) (err error) {
+	if err = m.R.Habits.LoadDay(context.Background(), d.db); err == nil {
+		if err = m.R.Habits.LoadHabitCategory(context.Background(), d.db); err == nil {
+			return nil
+		}
 	}
-	if err := m.R.Habits.LoadHabitCategory(context.Background(), d.db); err != nil {
-		return catchDBErr("days: load: habit relations", err)
-	}
-	return nil
+	return catchDBErr("days: load: habit relations", err)
 }
 
 func dayToCore(d *models.Day) (day core.Day) {

@@ -20,31 +20,24 @@ func (c *Client) Call(method string, path string, urlParams url.Values, i any) e
 	if urlParams != nil {
 		reqURL = fmt.Sprintf("%s?%s", reqURL, urlParams.Encode())
 	}
-
-	// Make request
 	req, err := http.NewRequest(method, reqURL, nil)
-	if err != nil {
-		return err
+	if err == nil {
+		req.Header.Set("accept", "application/json")
+		res, err := c.Do(req)
+		if err == nil {
+			body, err := io.ReadAll(res.Body)
+			if err == nil {
+				if strconv.Itoa(res.StatusCode)[:1] == "2" {
+					if json.Valid(body) {
+						return json.Unmarshal(body, i)
+					}
+					return errors.New("response body is not valid json")
+				}
+				return c.catchFitbitError(body)
+			}
+		}
 	}
-
-	req.Header.Set("accept", "application/json")
-	res, err := c.Do(req)
-	if err != nil {
-		return err
-	}
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
-
-	if strconv.Itoa(res.StatusCode)[:1] != "2" {
-		return c.catchFitbitError(body)
-	}
-	if !json.Valid(body) {
-		return errors.New("response body is not valid json")
-	}
-
-	return json.Unmarshal(body, i)
+	return err
 }
 
 func (c *Client) catchFitbitError(b []byte) error {

@@ -17,7 +17,6 @@ import (
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/dove"
 	"danicos.dev/daniel/curious-ape/pkg/oak"
-	"danicos.dev/daniel/curious-ape/pkg/persistence"
 	"danicos.dev/daniel/curious-ape/pkg/ui"
 )
 
@@ -66,12 +65,12 @@ func Routes(a *API) http.Handler {
 
 func (a *API) DeadlinesList(c *dove.Context) error {
 	res, err := a.App.DeadlineList()
-	if err != nil {
-		return err
+	if err == nil {
+		state := State(a, c.Req)
+		state.Deadlines.DS = res
+		return c.RenderOK(ui.Deadlines(state))
 	}
-	state := State(a, c.Req)
-	state.Deadlines.DS = res
-	return c.RenderOK(ui.Deadlines(state))
+	return err
 }
 
 func (a *API) DeadlinesGetForm(c *dove.Context) error {
@@ -82,44 +81,45 @@ func (a *API) DeadlinesGetForm(c *dove.Context) error {
 func (a *API) DeadlinesPostForm(c *dove.Context) error {
 	c.ParseForm()
 	state := State(a, c.Req)
-
 	var recurring bool
 	if c.Req.PostForm.Get("recurrent") == "on" {
 		recurring = true
 	}
-	date, _ := core.NewDateFromISO8601(c.Req.PostForm.Get("end_date"))
-	_, err := a.App.DeadlineCreate(c.Ctx(), core.Deadline{
-		Title:     c.Req.PostForm.Get("title"),
-		StartDate: core.NewDateToday(),
-		EndDate:   date,
-		Recurring: recurring,
-	})
-	if err != nil {
+	date, err := core.NewDateFromISO8601(c.Req.PostForm.Get("end_date"))
+	if err == nil {
+		_, err := a.App.DeadlineCreate(c.Ctx(), core.Deadline{
+			Title:     c.Req.PostForm.Get("title"),
+			StartDate: core.NewDateToday(),
+			EndDate:   date,
+			Recurring: recurring,
+		})
+		if err == nil {
+			return c.Redirect("/deadlines")
+		}
 		state.Deadlines.Err = err
 		return c.RenderOK(ui.DeadlineForm(state))
 	}
-
-	return c.Redirect("/deadlines")
+	return err
 }
 
 func (a *API) DeepWork(c *dove.Context) error {
 	days, err := a.App.DaysMonth(c.Ctx(), getDateParam(c))
-	if err != nil {
-		return err
+	if err == nil {
+		state := State(a, c.Req)
+		state.Days = days
+		return c.RenderOK(ui.DeepWork(state))
 	}
-	state := State(a, c.Req)
-	state.Days = days
-	return c.RenderOK(ui.DeepWork(state))
+	return err
 }
 
 func (a *API) Fitness(c *dove.Context) error {
 	days, err := a.App.DaysMonth(c.Ctx(), getDateParam(c))
-	if err != nil {
-		return err
+	if err == nil {
+		state := State(a, c.Req)
+		state.Days = days
+		return c.RenderOK(ui.Fitness(state))
 	}
-	state := State(a, c.Req)
-	state.Days = days
-	return c.RenderOK(ui.Fitness(state))
+	return err
 }
 
 func (a *API) Habits(c *dove.Context) error {
@@ -132,67 +132,58 @@ func (a *API) Habits(c *dove.Context) error {
 			d = today
 		}
 		days, err := a.App.DaysMonthASC(c.Ctx(), d)
-		if err != nil {
+		if err == nil {
+			state.DaysYear = append(state.DaysYear, days)
+		} else {
 			return err
 		}
-		state.DaysYear = append(state.DaysYear, days)
 	}
 	return c.RenderOK(ui.Habits(state))
 }
 
 func (a *API) Sleep(c *dove.Context) error {
 	days, err := a.App.DaysMonth(c.Ctx(), getDateParam(c))
-	if err != nil {
-		return err
+	if err == nil {
+		state := State(a, c.Req)
+		state.Days = days
+		return c.RenderOK(ui.Sleep(state))
 	}
-	state := State(a, c.Req)
-	state.Days = days
-	return c.RenderOK(ui.Sleep(state))
+	return err
 }
 
 func (a *API) ServeStaticAssets(c *dove.Context) (err error) {
 	path, found := strings.CutPrefix(c.Req.URL.Path, "/assets/")
-	if !found {
+	if found {
+		var data []byte
+		if a.App.Env == application.Dev {
+			// In dev: no-cache with revalidation so changes are picked up on refresh without hard-reload.
+			c.Res.Header().Set("Cache-Control", "no-cache, must-revalidate")
+			data, err = os.ReadFile("./assets/" + path)
+		} else {
+			// In prod: long-lived immutable cache (1 year). New deploys will use new asset content (ETag changes).
+			c.Res.Header().Set("Cache-Control", "public, max-age=86400, immutable")
+			data, err = assets.Assets.ReadFile(path)
+		}
+		if err == nil {
+			mimeType := mime.TypeByExtension(filepath.Ext(path))
+			c.Res.Header().Set("Content-Type", mimeType)
+			hash := sha256.Sum256(data)
+			etag := `"` + hex.EncodeToString(hash[:]) + `"` // Compute a strong ETag from content hash (works for both dev disk and prod embed)
+			c.Res.Header().Set("ETag", etag)
+			c.Res.Header().Set("X-Content-Type-Options", "nosniff")
+
+			// Support conditional GET (304 Not Modified)
+			if match := c.Req.Header.Get("If-None-Match"); match != "" && match == etag {
+				c.Res.WriteHeader(http.StatusNotModified)
+				return
+			}
+			_, err = c.Res.Write(data)
+		}
+		return
+	} else {
 		c.Res.WriteHeader(http.StatusNotFound)
 		return errors.New(c.Req.URL.Path + " " + "not found")
 	}
-	var data []byte
-	if a.App.Env == application.Dev {
-		data, err = os.ReadFile("./assets/" + path)
-	} else {
-		data, err = assets.Assets.ReadFile(path)
-	}
-	if err != nil {
-		return err
-	}
-
-	mimeType := mime.TypeByExtension(filepath.Ext(path))
-	c.Res.Header().Set("Content-Type", mimeType)
-
-	// Compute a strong ETag from content hash (works for both dev disk and prod embed)
-	hash := sha256.Sum256(data)
-	etag := `"` + hex.EncodeToString(hash[:]) + `"`
-	c.Res.Header().Set("ETag", etag)
-
-	// Strong caching for static assets.
-	// In prod: long-lived immutable cache (1 year). New deploys will use new asset content (ETag changes).
-	// In dev: no-cache with revalidation so changes are picked up on refresh without hard-reload.
-	if a.App.Env == application.Dev {
-		c.Res.Header().Set("Cache-Control", "no-cache, must-revalidate")
-	} else {
-		c.Res.Header().Set("Cache-Control", "public, max-age=86400, immutable")
-	}
-
-	c.Res.Header().Set("X-Content-Type-Options", "nosniff")
-
-	// Support conditional GET (304 Not Modified)
-	if match := c.Req.Header.Get("If-None-Match"); match != "" && match == etag {
-		c.Res.WriteHeader(http.StatusNotModified)
-		return nil
-	}
-
-	_, err = c.Res.Write(data)
-	return err
 }
 
 func (a *API) FitbitSuccess(c *dove.Context) error {
@@ -209,69 +200,69 @@ func (a *API) IntegrationGet(c *dove.Context) error {
 	c.ParseForm()
 	provider := c.Req.Form.Get("name")
 	integrationInfo, err := a.App.IntegrationGet(c.Ctx(), core.Integration(provider))
-	if err != nil {
-		return err
+	if err == nil {
+		return c.RenderOK(ui.Integration(integrationInfo))
 	}
-	return c.RenderOK(ui.Integration(integrationInfo))
+	return err
 }
 
 func (a *API) IntegrationsGetList(c *dove.Context) error {
 	integrationInfo, err := a.App.IntegrationsGetList()
-	if err != nil {
-		return err
+	if err == nil {
+		state := State(a, c.Req)
+		state.Integrations = integrationInfo
+		return c.RenderOK(ui.Integrations(state))
 	}
-	state := State(a, c.Req)
-	state.Integrations = integrationInfo
-	return c.RenderOK(ui.Integrations(state))
+	return err
 }
 
 func (a *API) Home(c *dove.Context) (err error) {
 	days, err := a.App.DaysMonth(c.Ctx(), getDateParam(c))
-	if err != nil {
-		return err
+	if err == nil {
+		s := State(a, c.Req)
+		s.Days = days
+		return c.RenderOK(ui.Home(s))
 	}
-
-	s := State(a, c.Req)
-	s.Days = days
-	return c.RenderOK(ui.Home(s))
+	return err
 }
 
 func getDateParam(c *dove.Context) core.Date {
-	var err error
 	c.ParseForm()
-	date := core.NewDate(time.Now())
-	if c.Req.Form.Get("date") != "" {
-		date, err = core.NewDateFromISO8601(c.Req.Form.Get("date"))
-		if err != nil {
-			c.Log.Fatal("cannot parse date", "err", err)
-			panic(err)
+	if c.Req.Form.Get("date") == "" {
+		return core.NewDate(time.Now())
+	} else {
+		date, err := core.NewDateFromISO8601(c.Req.Form.Get("date"))
+		if err == nil {
+			return date
 		}
+		c.Log.Fatal("cannot parse date", "err", err)
+		panic(err)
 	}
-	return date
 }
 
 func (a *API) HabitFlip(c *dove.Context) error {
 	c.ParseForm()
-	id, _ := strconv.Atoi(c.Req.Form.Get("id"))
-	habit, err := a.App.HabitFlip(id)
-	if err != nil {
-		return err
+	id, err := strconv.Atoi(c.Req.Form.Get("id"))
+	if err == nil {
+		habit, err := a.App.HabitFlip(id)
+		if err == nil {
+			day, err := a.App.DayGetOrCreate(habit.Date)
+			if err == nil {
+				return c.RenderOK(ui.Day(day))
+			}
+		}
 	}
-	day, err := a.App.DayGetOrCreate(habit.Date)
-	if err != nil {
-		return err
-	}
-	return c.RenderOK(ui.Day(day))
+	return err
 }
 
 func (a *API) DaySync(c *dove.Context) error {
 	c.ParseForm()
 	date, _ := core.NewDateFromISO8601(c.Req.Form.Get("date"))
 	day, err := a.App.DaySync(c.Ctx(), date)
-	if err != nil {
-		return err
+	if err == nil {
+		return c.RenderOK(ui.Day(day))
 	}
-	return c.RenderOK(ui.Day(day))
+	return err
 }
 
 func (a *API) GetLoginForm(c *dove.Context) error {
@@ -283,27 +274,26 @@ func (a *API) GetLoginForm(c *dove.Context) error {
 
 func (a *API) Login(c *dove.Context) error {
 	logger := oak.FromContext(c.Ctx())
-
 	c.ParseForm()
 	username := c.Req.PostFormValue("username")
 	password := c.Req.PostFormValue("password")
 	id, err := a.App.Authenticate(username, password)
-	if err != nil {
-		if errors.Is(err, persistence.ErrInvalidCredentials) {
-			// TODO: send http.StatusUnauthorized
-			return err
-		} else {
-			// TODO: send http.InternalServerError
-			return err
+	if err == nil {
+		err = a.Scs.RenewToken(c.Ctx())
+		if err == nil {
+			logger.Info("User authenticated")
+			a.Scs.Put(c.Ctx(), string(ctxKeyAuthenticatedUserID), id)
+			return c.Redirect("/")
 		}
 	}
-	err = a.Scs.RenewToken(c.Ctx())
-	if err != nil {
-		return err
-	}
-	logger.Info("User authenticated")
-	a.Scs.Put(c.Ctx(), string(ctxKeyAuthenticatedUserID), id)
-	return c.Redirect("/")
+	return err
+	// if errors.Is(err, persistence.ErrInvalidCredentials) {
+	// 	// TODO: send http.StatusUnauthorized
+	// 	return err
+	// } else {
+	// 	// TODO: send http.InternalServerError
+	// 	return err
+	// }
 }
 
 func (a *API) Logout(c *dove.Context) error {

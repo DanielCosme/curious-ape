@@ -14,94 +14,87 @@ import (
 
 func (a *App) fitnessSync(ctx context.Context, d core.Date) error {
 	logger := oak.FromContext(ctx)
-
-	if a.sync.Hevy == nil {
-		logger.Warning("Fitness provider: Hevy is nil, cannot sync Fitness")
-		return nil
-	}
-
-	fitnessLogs, err := a.fitnessLogsFromHevy(ctx, d)
-	if err != nil {
+	if a.sync.Hevy != nil {
+		fitnessLogs, err := a.fitnessLogsFromHevy(ctx, d)
+		if err == nil {
+			habitParams := core.Habit{
+				Date:      d,
+				Type:      core.HabitTypeFitness,
+				State:     core.HabitStateNotDone,
+				Automated: true,
+			}
+			for idx, fl := range fitnessLogs {
+				fl, err := a.db.Fitness.Upsert(fl)
+				if err == nil {
+					logger.Info("Fitness log added", "date", fl.Date, "origin", fl.Origin)
+					if idx == 0 {
+						habitParams.State = core.HabitStateDone
+						duration := core.DurationToString(fl.EndTime.Sub(fl.StartTime))
+						habitParams.Note = fmt.Sprintf("%s - %s (%s)", fl.StartTime.Format(core.Time), fl.EndTime.Format(core.Time), duration)
+					}
+				} else {
+					return err
+				}
+			}
+			_, err = a.HabitUpsert(ctx, habitParams)
+		}
 		return err
 	}
-
-	habitParams := core.Habit{
-		Date:      d,
-		Type:      core.HabitTypeFitness,
-		State:     core.HabitStateNotDone,
-		Automated: true,
-	}
-	for idx, fl := range fitnessLogs {
-		fl, err := a.db.Fitness.Upsert(fl)
-		if err != nil {
-			return err
-		}
-		logger.Info("Fitness log added", "date", fl.Date, "origin", fl.Origin)
-
-		if idx == 0 {
-			habitParams.State = core.HabitStateDone
-
-			duration := core.DurationToString(fl.EndTime.Sub(fl.StartTime))
-			habitParams.Note = fmt.Sprintf("%s - %s (%s)", fl.StartTime.Format(core.Time), fl.EndTime.Format(core.Time), duration)
-		}
-	}
-	_, err = a.HabitUpsert(ctx, habitParams)
-	return err
+	logger.Warning("Fitness provider: Hevy is nil, cannot sync Fitness")
+	return nil
 }
 
 func (a *App) fitnessLogsFromHevy(ctx context.Context, d core.Date) (res []core.FitnessLog, err error) {
 	logger := oak.FromContext(ctx)
+	if !d.Time().Before(core.NewDate(time.Now()).Time()) {
+		day, err := a.dayGetOrCreate(d)
+		if err == nil {
+			events, err := a.sync.Hevy.WorkoutEvents.Get(day.Date.Time())
+			if err == nil {
+				logger.Info("Fitness log for: "+day.Date.Time().Format(core.HumanDateWeekDay), "entries", len(events))
+				for _, event := range events {
+					if event.Type == "updated" {
+						raw, err := json.Marshal(event.Workout)
+						if err == nil {
+							fitnessLogType := core.FitnessLogTypeOther
+							title := strings.ToLower(event.Workout.Title)
+							if strings.Contains(title, "lower") || strings.Contains(title, "upper") {
+								fitnessLogType = core.FitnessLogTypeStrength
+							} else if strings.Contains(title, "cardio") {
+								fitnessLogType = core.FitnessLogTypeCardio
+							}
 
-	if d.Time().Before(core.NewDate(time.Now()).Time()) {
+							normalizeTime := func(t time.Time, loc *time.Location) time.Time {
+								return core.TimeUTC(t.In(loc))
+							}
+							location, _ := time.LoadLocation("America/Toronto")
+							fl := core.FitnessLog{
+								Date: day.Date,
+								TimelineLog: core.TimelineLog{
+									Title:     event.Workout.Title,
+									StartTime: normalizeTime(event.Workout.StartTime, location),
+									EndTime:   normalizeTime(event.Workout.EndTime, location),
+								},
+								FitnessType: fitnessLogType,
+								Origin:      core.LogOriginHevy,
+								Raw:         raw,
+							}
+							res = append(res, fl)
+						} else {
+							return nil, err
+						}
+					} else {
+						return nil, fmt.Errorf("unkouwn event type: %s", event.Type)
+					}
+				}
+				return res, nil
+			}
+		}
+		return nil, err
+	} else {
 		//NOTE: no-op if the desired log is not for the current day. TODO: support this in the future (their API is funny).
-		return res, fmt.Errorf("fitness log to sync is not today: %s", d.String())
+		return nil, fmt.Errorf("fitness log to sync is not today: %s", d.String())
 	}
-
-	day, err := a.dayGetOrCreate(d)
-	if err != nil {
-		return nil, err
-	}
-	events, err := a.sync.Hevy.WorkoutEvents.Get(d.Time())
-	if err != nil {
-		return nil, err
-	}
-
-	logger.Info("Fitness log for: "+day.Date.Time().Format(core.HumanDateWeekDay), "entries", len(events))
-	for _, event := range events {
-		if event.Type != "updated" {
-			return res, fmt.Errorf("unkouwn event type: %s", event.Type)
-		}
-
-		raw, err := json.Marshal(event.Workout)
-		if err != nil {
-			return res, err
-		}
-		fitnessLogType := core.FitnessLogTypeOther
-		title := strings.ToLower(event.Workout.Title)
-		if strings.Contains(title, "lower") || strings.Contains(title, "upper") {
-			fitnessLogType = core.FitnessLogTypeStrength
-		} else if strings.Contains(title, "cardio") {
-			fitnessLogType = core.FitnessLogTypeCardio
-		}
-
-		normalizeTime := func(t time.Time, loc *time.Location) time.Time {
-			return core.TimeUTC(t.In(loc))
-		}
-		location, _ := time.LoadLocation("America/Toronto")
-		fl := core.FitnessLog{
-			Date: day.Date,
-			TimelineLog: core.TimelineLog{
-				Title:     event.Workout.Title,
-				StartTime: normalizeTime(event.Workout.StartTime, location),
-				EndTime:   normalizeTime(event.Workout.EndTime, location),
-			},
-			FitnessType: fitnessLogType,
-			Origin:      core.LogOriginHevy,
-			Raw:         raw,
-		}
-		res = append(res, fl)
-	}
-	return res, nil
 }
 
 func (a *App) fitnessLogsFromGoogle(d core.Date) (res []core.FitnessLog, err error) {
