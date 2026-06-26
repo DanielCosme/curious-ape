@@ -45,6 +45,26 @@ func (d *Deadlines) Find(params core.DeadlineParams) (ds []core.Deadline, err er
 	return
 }
 
+func (d *Deadlines) Delete(id uint) error {
+	_, err := models.Deadlines.Delete(
+		models.DeleteWhere.Days.ID.EQ(int64(id)),
+	).Exec(context.Background(), d.db)
+	return catchDBErr("deadlines: delete", err)
+}
+
+func (d *Deadlines) Update(params core.Deadline) error {
+	s := &models.DeadlineSetter{
+		Title:     omit.From(params.Title),
+		EndTime:   omit.From(params.EndDate.Time()),
+		Recurring: omit.From(params.Recurring),
+	}
+	_, err := models.Deadlines.Update(
+		models.UpdateWhere.Deadlines.ID.EQ(int64(params.ID)),
+		s.UpdateMod(),
+	).Exec(context.Background(), d.db)
+	return catchDBErr("deadline: update", err)
+}
+
 func deadlineToCore(params *models.Deadline, today core.Date) core.Deadline {
 	d := core.Deadline{
 		Title:     params.Title,

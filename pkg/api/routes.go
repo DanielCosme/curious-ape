@@ -64,7 +64,7 @@ func Routes(a *API) http.Handler {
 }
 
 func (a *API) DeadlinesList(c *dove.Context) error {
-	res, err := a.App.DeadlineList()
+	res, err := a.App.DeadlineList(c.Ctx())
 	if err == nil {
 		state := State(a, c.Req)
 		state.Deadlines.DS = res
