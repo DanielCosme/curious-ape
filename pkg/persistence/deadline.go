@@ -47,7 +47,7 @@ func (d *Deadlines) Find(params core.DeadlineParams) (ds []core.Deadline, err er
 
 func (d *Deadlines) Delete(id uint) error {
 	_, err := models.Deadlines.Delete(
-		models.DeleteWhere.Days.ID.EQ(int64(id)),
+		models.DeleteWhere.Deadlines.ID.EQ(int64(id)),
 	).Exec(context.Background(), d.db)
 	return catchDBErr("deadlines: delete", err)
 }
