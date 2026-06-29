@@ -23,6 +23,9 @@ func Deadlines(s *State) Node {
 }
 
 func deadline(d core.Deadline) Node {
+	if d.EndDate.Time().IsZero() {
+		return nil
+	}
 	return Div(
 		Class(cLogEntry+" deadline-item"),
 		H4(Text(d.Title)),
