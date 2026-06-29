@@ -31,9 +31,6 @@ func (d *Deadline) Validate() error {
 
 // DaysLeft calculates days remaining from start until end time.
 func DaysLeft(start, end Date) int {
-	if start.time.After(end.time) {
-		return 0 // Deadline has passed
-	}
 	remainingDuration := end.time.Sub(start.time)
 	return int(math.Ceil(remainingDuration.Hours() / 24))
 }
