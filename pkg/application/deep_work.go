@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
-	"danicos.dev/daniel/curious-ape/pkg/day"
 	"danicos.dev/daniel/curious-ape/pkg/oak"
 )
 
@@ -19,7 +18,7 @@ func (a *App) deepWorkSync(ctx context.Context, date core.Date) error {
 		return errors.New("Toggl API struct is nil")
 	}
 
-	d, err := day.GetOrCreate(date)
+	d, err := a.Day.GetOrCreate(date)
 	if err != nil {
 		return err
 	}

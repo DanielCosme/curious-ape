@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log/slog"
 
+	"danicos.dev/daniel/curious-ape/pkg/day"
 	"danicos.dev/daniel/curious-ape/pkg/integrations"
 	"danicos.dev/daniel/curious-ape/pkg/oak"
 	"danicos.dev/daniel/curious-ape/pkg/persistence"
@@ -15,12 +16,14 @@ type App struct {
 	Env  Environment
 	db   *persistence.Database
 	sync *integrations.Integrations
+	Day  *day.App
 }
 
 type AppOptions struct {
 	Logger   *oak.Oak
 	Config   *Config
 	Database *persistence.Database
+	Day      *day.App
 }
 
 type Config struct {
@@ -39,6 +42,7 @@ func New(opts *AppOptions) *App {
 		Env:  opts.Config.Env,
 		db:   opts.Database,
 		sync: sync,
+		Day:  opts.Day,
 	}
 	a.Log.Info("Application initialized", "Environment", a.Env)
 	return a

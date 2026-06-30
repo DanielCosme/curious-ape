@@ -134,8 +134,8 @@ func main() {
 		Database: persistence.New(bobDB),
 		Config:   appConfig,
 		Logger:   logger,
+		Day:      day.New(bobDB),
 	})
-	day.SetDaysBOB(bobDB)
 
 	err = app.SetPassword(cfg.Admin.UserName, cfg.Admin.Password, cfg.Admin.Email, core.AuthRoleAdmin)
 	exitIfErr(err)

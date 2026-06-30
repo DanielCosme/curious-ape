@@ -8,9 +8,9 @@ import (
 	"danicos.dev/daniel/curious-ape/pkg/ui"
 )
 
-func HandleDaysMonth(c *dove.Context) (err error) {
+func (a *App) HandleDaysMonth(c *dove.Context) (err error) {
 	paramDate := getDateParam(c)
-	days, err := Month(paramDate, core.DESC)
+	days, err := a.Month(paramDate, core.DESC)
 	if err == nil {
 		s := ui.StateFromContext(c.Ctx())
 		l := ui.Layout("Days", s, UI_days(days))
