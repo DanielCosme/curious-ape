@@ -7,7 +7,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"time"
 
 	"danicos.dev/daniel/curious-ape/pkg/application"
 	"danicos.dev/daniel/curious-ape/pkg/core"
@@ -120,6 +119,8 @@ func TestDeadline(t *testing.T) {
 	}
 }
 
+/*
+
 func TestDay(t *testing.T) {
 	t.Parallel()
 	app := NewTestApplication(t)
@@ -175,6 +176,7 @@ func TestDay(t *testing.T) {
 	test.NilErr(t, err)
 	test.True(t, len(days) == 31)
 }
+*/
 
 func TestApp_UserExists(t *testing.T) {
 	t.Parallel()

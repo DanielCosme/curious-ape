@@ -17,6 +17,10 @@ type Habits struct {
 	db bob.DB
 }
 
+func NewHabits(executor bob.DB) *Habits {
+	return &Habits{db: executor}
+}
+
 func (h *Habits) Get(p core.HabitParams) (habit core.Habit, err error) {
 	res, err := buildHabitQuery(p).One(context.Background(), h.db)
 	if err != nil {

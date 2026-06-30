@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/day"
 	"danicos.dev/daniel/curious-ape/pkg/integrations/google"
 	"danicos.dev/daniel/curious-ape/pkg/oak"
 )
@@ -44,14 +45,14 @@ func (a *App) fitnessSync(ctx context.Context, d core.Date) error {
 	return nil
 }
 
-func (a *App) fitnessLogsFromHevy(ctx context.Context, d core.Date) (res []core.FitnessLog, err error) {
+func (a *App) fitnessLogsFromHevy(ctx context.Context, date core.Date) (res []core.FitnessLog, err error) {
 	logger := oak.FromContext(ctx)
-	if !d.Time().Before(core.NewDate(time.Now()).Time()) {
-		day, err := a.dayGetOrCreate(d)
+	if !date.Time().Before(core.NewDate(time.Now()).Time()) {
+		d, err := day.GetOrCreate(date)
 		if err == nil {
-			events, err := a.sync.Hevy.WorkoutEvents.Get(day.Date.Time())
+			events, err := a.sync.Hevy.WorkoutEvents.Get(d.Date.Time())
 			if err == nil {
-				logger.Info("Fitness log for: "+day.Date.Time().Format(core.HumanDateWeekDay), "entries", len(events))
+				logger.Info("Fitness log for: "+d.Date.Time().Format(core.HumanDateWeekDay), "entries", len(events))
 				for _, event := range events {
 					if event.Type == "updated" {
 						raw, err := json.Marshal(event.Workout)
@@ -69,7 +70,7 @@ func (a *App) fitnessLogsFromHevy(ctx context.Context, d core.Date) (res []core.
 							}
 							location, _ := time.LoadLocation("America/Toronto")
 							fl := core.FitnessLog{
-								Date: day.Date,
+								Date: d.Date,
 								TimelineLog: core.TimelineLog{
 									Title:     event.Workout.Title,
 									StartTime: normalizeTime(event.Workout.StartTime, location),
@@ -93,26 +94,26 @@ func (a *App) fitnessLogsFromHevy(ctx context.Context, d core.Date) (res []core.
 		return nil, err
 	} else {
 		//NOTE: no-op if the desired log is not for the current day. TODO: support this in the future (their API is funny).
-		return nil, fmt.Errorf("fitness log to sync is not today: %s", d.String())
+		return nil, fmt.Errorf("fitness log to sync is not today: %s", date.String())
 	}
 }
 
-func (a *App) fitnessLogsFromGoogle(d core.Date) (res []core.FitnessLog, err error) {
+func (a *App) fitnessLogsFromGoogle(date core.Date) (res []core.FitnessLog, err error) {
 	googleClient, err := a.googleClient()
 	if err != nil {
 		return
 	}
-	day, err := a.DayGetOrCreate(d)
+	d, err := day.GetOrCreate(date)
 	if err != nil {
 		return
 	}
 
-	sessions, err := googleClient.Fitness.GetFitnessSessions(day.Date.ToBeginningOfDay(), day.Date.ToEndOfDay())
+	sessions, err := googleClient.Fitness.GetFitnessSessions(d.Date.ToBeginningOfDay(), d.Date.ToEndOfDay())
 	if err != nil {
 		return
 	}
 	for _, s := range sessions {
-		fl, err := fitnessLogFromGoogle(day, s)
+		fl, err := fitnessLogFromGoogle(d, s)
 		if err != nil {
 			return nil, err
 		}

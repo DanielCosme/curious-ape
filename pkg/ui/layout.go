@@ -9,7 +9,7 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
-func layout(title string, s *State, nodes ...Node) Node {
+func Layout(title string, s *State, nodes ...Node) Node {
 	if title == "" {
 		title = "Curious Ape"
 	}

@@ -8,37 +8,38 @@ import (
 	"time"
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/day"
 	"danicos.dev/daniel/curious-ape/pkg/oak"
 )
 
-func (a *App) deepWorkSync(ctx context.Context, d core.Date) error {
+func (a *App) deepWorkSync(ctx context.Context, date core.Date) error {
 	logger := oak.FromContext(ctx)
 
 	if a.sync.TogglAPI == nil {
 		return errors.New("Toggl API struct is nil")
 	}
 
-	day, err := a.dayGetOrCreate(d)
+	d, err := day.GetOrCreate(date)
 	if err != nil {
 		return err
 	}
-	entries, err := a.sync.TogglAPI.TimeEntries.GetDayEntries(d.Time())
+	entries, err := a.sync.TogglAPI.TimeEntries.GetDayEntries(date.Time())
 	if err != nil {
 		return err
 	}
 
-	logger.Info("Deep work logs for: "+day.Date.Time().Format(core.HumanDateWeekDay), "entries", len(entries))
+	logger.Info("Deep work logs for: "+d.Date.Time().Format(core.HumanDateWeekDay), "entries", len(entries))
 	var totalDuration time.Duration
 	for _, entry := range entries {
-		if entry.Stop.Before(d.ToBeginningOfDay()) {
+		if entry.Stop.Before(date.ToBeginningOfDay()) {
 			logger.Info("skipping Toggl entry because it has not stopped")
 			continue
 		}
-		if entry.Start.Before(d.ToBeginningOfDay()) {
+		if entry.Start.Before(date.ToBeginningOfDay()) {
 			logger.Info("skipping Toggl entry because it started before the desired day")
 			continue
 		}
-		if entry.Start.After(d.ToEndOfDay()) {
+		if entry.Start.After(date.ToEndOfDay()) {
 			logger.Info("skipping Toggl entry because it is beyond the current day")
 			continue
 		}
@@ -47,7 +48,7 @@ func (a *App) deepWorkSync(ctx context.Context, d core.Date) error {
 			return err
 		}
 		params := core.DeepWorkLog{
-			Date: day.Date,
+			Date: d.Date,
 			TimelineLog: core.TimelineLog{
 				Title:     entry.Description,
 				StartTime: entry.Start,
@@ -72,7 +73,7 @@ func (a *App) deepWorkSync(ctx context.Context, d core.Date) error {
 	}
 
 	_, err = a.HabitUpsert(ctx, core.Habit{
-		Date:      day.Date,
+		Date:      d.Date,
 		Type:      core.HabitTypeDeepWork,
 		State:     habitState,
 		Note:      core.DurationToString(totalDuration),
