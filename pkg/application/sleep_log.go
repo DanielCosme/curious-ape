@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
-	"danicos.dev/daniel/curious-ape/pkg/day"
 	"danicos.dev/daniel/curious-ape/pkg/integrations/fitbit"
 	"danicos.dev/daniel/curious-ape/pkg/oak"
 )
@@ -51,7 +50,7 @@ func (a *App) sleepLogsGetFromFitbit(dates ...core.Date) (res []core.SleepLog, e
 		return
 	}
 	for _, date := range dates {
-		day, err := day.GetOrCreate(date)
+		day, err := a.Day.GetOrCreate(date)
 		if err != nil {
 			return res, err
 		}

@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
-	"danicos.dev/daniel/curious-ape/pkg/day"
 	"danicos.dev/daniel/curious-ape/pkg/oak"
 )
 
@@ -29,5 +28,5 @@ func (a *App) DaySync(ctx context.Context, date core.Date) (core.Day, error) {
 		}
 	}
 
-	return day.GetOrCreate(date)
+	return a.Day.GetOrCreate(date)
 }

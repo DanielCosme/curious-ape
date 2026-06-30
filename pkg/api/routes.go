@@ -48,7 +48,7 @@ func Routes(a *API) http.Handler {
 
 	d.Use(a.MiddlewareRequireAuthentication)
 
-	d.Endpoint("/").GET(day.HandleDaysMonth)
+	d.Endpoint("/").GET(a.App.Day.HandleDaysMonth)
 	d.Endpoint("/habit/flip").PUT(a.HabitFlip)
 	d.Endpoint("/day/sync").POST(a.DaySync)
 	d.Endpoint("/integration").GET(a.IntegrationGet)
@@ -105,7 +105,7 @@ func (a *API) DeadlinesPostForm(c *dove.Context) error {
 }
 
 func (a *API) DeepWork(c *dove.Context) error {
-	days, err := day.Month(getDateParam(c), core.DESC)
+	days, err := a.App.Day.Month(getDateParam(c), core.DESC)
 	if err == nil {
 		state := State(a, c.Req)
 		state.Days = days
@@ -115,7 +115,7 @@ func (a *API) DeepWork(c *dove.Context) error {
 }
 
 func (a *API) Fitness(c *dove.Context) error {
-	days, err := day.Month(getDateParam(c), core.DESC)
+	days, err := a.App.Day.Month(getDateParam(c), core.DESC)
 	if err == nil {
 		state := State(a, c.Req)
 		state.Days = days
@@ -133,7 +133,7 @@ func (a *API) Habits(c *dove.Context) error {
 		if month == today.Time().Month() {
 			d = today
 		}
-		days, err := day.Month(d, core.ASC)
+		days, err := a.App.Day.Month(d, core.ASC)
 		if err == nil {
 			state.DaysYear = append(state.DaysYear, days)
 		} else {
@@ -144,7 +144,7 @@ func (a *API) Habits(c *dove.Context) error {
 }
 
 func (a *API) Sleep(c *dove.Context) error {
-	days, err := day.Month(getDateParam(c), core.DESC)
+	days, err := a.App.Day.Month(getDateParam(c), core.DESC)
 	if err == nil {
 		state := State(a, c.Req)
 		state.Days = days
@@ -238,7 +238,7 @@ func (a *API) HabitFlip(c *dove.Context) error {
 	if err == nil {
 		habit, err := a.App.HabitFlip(id)
 		if err == nil {
-			d, err := day.GetOrCreate(habit.Date)
+			d, err := a.App.Day.GetOrCreate(habit.Date)
 			if err == nil {
 				return c.RenderOK(day.UI_day(d))
 			}
