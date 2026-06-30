@@ -19,12 +19,12 @@ func Login(s *State) Node {
 				Label(For("password"), Text("Password")),
 				Input(Type("text"), ID("password"), Name("password"), Placeholder(""), Required()),
 			),
-			Button(Class(cBtn),
+			Button(Class(CBtn),
 				Text("Login"),
 				Type("submit"),
 				ds.On("click", "@post('/login', {contentType: 'form'})"),
 			),
 		),
 	)
-	return layout("Login", s, form)
+	return Layout("Login", s, form)
 }

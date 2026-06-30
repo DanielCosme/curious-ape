@@ -15,6 +15,7 @@ import (
 	"danicos.dev/daniel/curious-ape/assets"
 	"danicos.dev/daniel/curious-ape/pkg/application"
 	"danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/day"
 	"danicos.dev/daniel/curious-ape/pkg/dove"
 	"danicos.dev/daniel/curious-ape/pkg/oak"
 	"danicos.dev/daniel/curious-ape/pkg/ui"
@@ -35,6 +36,7 @@ func Routes(a *API) http.Handler {
 
 	d.Use(a.MiddlewareLoadCookie)
 	d.Use(a.MiddlewareAuthenticateFromSession)
+	d.Use(a.MiddlewareSetUIState)
 
 	d.Endpoint("/login").
 		GET(a.GetLoginForm).
@@ -46,7 +48,7 @@ func Routes(a *API) http.Handler {
 
 	d.Use(a.MiddlewareRequireAuthentication)
 
-	d.Endpoint("/").GET(a.Home)
+	d.Endpoint("/").GET(day.HandleDaysMonth)
 	d.Endpoint("/habit/flip").PUT(a.HabitFlip)
 	d.Endpoint("/day/sync").POST(a.DaySync)
 	d.Endpoint("/integration").GET(a.IntegrationGet)
@@ -103,7 +105,7 @@ func (a *API) DeadlinesPostForm(c *dove.Context) error {
 }
 
 func (a *API) DeepWork(c *dove.Context) error {
-	days, err := a.App.DaysMonth(c.Ctx(), getDateParam(c))
+	days, err := day.Month(getDateParam(c), core.DESC)
 	if err == nil {
 		state := State(a, c.Req)
 		state.Days = days
@@ -113,7 +115,7 @@ func (a *API) DeepWork(c *dove.Context) error {
 }
 
 func (a *API) Fitness(c *dove.Context) error {
-	days, err := a.App.DaysMonth(c.Ctx(), getDateParam(c))
+	days, err := day.Month(getDateParam(c), core.DESC)
 	if err == nil {
 		state := State(a, c.Req)
 		state.Days = days
@@ -131,7 +133,7 @@ func (a *API) Habits(c *dove.Context) error {
 		if month == today.Time().Month() {
 			d = today
 		}
-		days, err := a.App.DaysMonthASC(c.Ctx(), d)
+		days, err := day.Month(d, core.ASC)
 		if err == nil {
 			state.DaysYear = append(state.DaysYear, days)
 		} else {
@@ -142,7 +144,7 @@ func (a *API) Habits(c *dove.Context) error {
 }
 
 func (a *API) Sleep(c *dove.Context) error {
-	days, err := a.App.DaysMonth(c.Ctx(), getDateParam(c))
+	days, err := day.Month(getDateParam(c), core.DESC)
 	if err == nil {
 		state := State(a, c.Req)
 		state.Days = days
@@ -216,16 +218,6 @@ func (a *API) IntegrationsGetList(c *dove.Context) error {
 	return err
 }
 
-func (a *API) Home(c *dove.Context) (err error) {
-	days, err := a.App.DaysMonth(c.Ctx(), getDateParam(c))
-	if err == nil {
-		s := State(a, c.Req)
-		s.Days = days
-		return c.RenderOK(ui.Home(s))
-	}
-	return err
-}
-
 func getDateParam(c *dove.Context) core.Date {
 	c.ParseForm()
 	if c.Req.Form.Get("date") == "" {
@@ -246,9 +238,9 @@ func (a *API) HabitFlip(c *dove.Context) error {
 	if err == nil {
 		habit, err := a.App.HabitFlip(id)
 		if err == nil {
-			day, err := a.App.DayGetOrCreate(habit.Date)
+			d, err := day.GetOrCreate(habit.Date)
 			if err == nil {
-				return c.RenderOK(ui.Day(day))
+				return c.RenderOK(day.UI_day(d))
 			}
 		}
 	}
@@ -258,9 +250,9 @@ func (a *API) HabitFlip(c *dove.Context) error {
 func (a *API) DaySync(c *dove.Context) error {
 	c.ParseForm()
 	date, _ := core.NewDateFromISO8601(c.Req.Form.Get("date"))
-	day, err := a.App.DaySync(c.Ctx(), date)
+	d, err := a.App.DaySync(c.Ctx(), date)
 	if err == nil {
-		return c.RenderOK(ui.Day(day))
+		return c.RenderOK(day.UI_day(d))
 	}
 	return err
 }

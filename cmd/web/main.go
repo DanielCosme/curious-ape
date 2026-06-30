@@ -21,6 +21,7 @@ import (
 	"danicos.dev/daniel/curious-ape/pkg/application"
 	root "danicos.dev/daniel/curious-ape/pkg/config"
 	"danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/day"
 	"danicos.dev/daniel/curious-ape/pkg/oak"
 	"danicos.dev/daniel/curious-ape/pkg/persistence"
 
@@ -134,6 +135,7 @@ func main() {
 		Config:   appConfig,
 		Logger:   logger,
 	})
+	day.SetDaysBOB(bobDB)
 
 	err = app.SetPassword(cfg.Admin.UserName, cfg.Admin.Password, cfg.Admin.Email, core.AuthRoleAdmin)
 	exitIfErr(err)

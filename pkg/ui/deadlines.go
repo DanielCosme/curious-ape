@@ -10,11 +10,11 @@ import (
 )
 
 func Deadlines(s *State) Node {
-	return layout("Deadlines", s, Div(
+	return Layout("Deadlines", s, Div(
 		Class(cSurface),
 		A(
 			Href("/deadline"),
-			Button(Class(cBtn), Text("New deadline")),
+			Button(Class(CBtn), Text("New deadline")),
 		),
 		Map(s.Deadlines.DS, func(d core.Deadline) Node {
 			return deadline(d)
@@ -38,7 +38,7 @@ func DeadlineForm(s *State) Node {
 	if s.Deadlines.Err != nil {
 		err = s.Deadlines.Err.Error()
 	}
-	return layout("New Deadline", s, Div(
+	return Layout("New Deadline", s, Div(
 		Class(cSurface),
 		If(s.Deadlines.Err != nil,
 			P(Class(cError), Text("ERROR: "+err)),
@@ -69,7 +69,7 @@ func DeadlineForm(s *State) Node {
 				),
 			),
 			Button(
-				Class(cBtn),
+				Class(CBtn),
 				Text("Create Deadline"),
 			),
 		),

@@ -20,8 +20,8 @@ type Database struct {
 func New(executor bob.DB) *Database {
 	return &Database{
 		Users:     Users{db: executor},
-		Days:      &Days{db: executor},
-		Habits:    &Habits{db: executor},
+		Days:      NewDays(executor),
+		Habits:    NewHabits(executor),
 		Sleep:     &SleepLogs{db: executor},
 		Fitness:   &FitnessLogs{db: executor},
 		DeepWork:  &DeepWorkLogs{db: executor},

@@ -2,19 +2,24 @@ package ui
 
 import (
 	// "github.com/eduardolat/gomponents-lucide"
+	"context"
+
 	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 
-	"danicos.dev/daniel/curious-ape/pkg/application"
 	"danicos.dev/daniel/curious-ape/pkg/core"
 )
+
+type CtxKey string
+
+const CtxState CtxKey = "ui_state"
 
 // Classes (central place for reusable class names)
 const (
 	cLayout        = "layout"
 	cNavLink       = "nav-link"
 	cNavLinkActive = "nav-link active"
-	cBtn           = "btn"
+	CBtn           = "btn"
 	cBtnNav        = "btn btn-nav"
 	cSurface       = "surface"
 	cLogEntry      = "log-entry"
@@ -30,7 +35,7 @@ type State struct {
 	CurrentPath   string
 	DaysYear      [][]core.Day
 	Days          []core.Day
-	Integrations  []application.IntegrationInfo
+	Integrations  []core.IntegrationInfo
 	Deadlines     DeadlineState
 }
 
@@ -45,4 +50,16 @@ func a(path, name string) Node {
 
 func blockDisplay() Node {
 	return Style("display: block;")
+}
+
+func StateWithContext(ctx context.Context, s *State) context.Context {
+	return context.WithValue(ctx, CtxState, s)
+}
+
+func StateFromContext(ctx context.Context) *State {
+	v, ok := ctx.Value(CtxState).(*State)
+	if ok {
+		return v
+	}
+	panic("state not set")
 }

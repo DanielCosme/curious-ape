@@ -1,4 +1,4 @@
-package ui
+package day
 
 import (
 	"fmt"
@@ -6,41 +6,28 @@ import (
 	"strconv"
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/ui"
 	lucide "github.com/eduardolat/gomponents-lucide"
+
 	. "maragu.dev/gomponents"
 
 	ds "maragu.dev/gomponents-datastar"
 	. "maragu.dev/gomponents/html"
 )
 
-// Habit state symbols
-const (
-	habitDone    = "O"
-	habitNotDone = "X"
-	habitNoInfo  = "_"
-)
-
-func Home(s *State) Node {
-	return bujoPage(s)
-}
-
-func bujoPage(s *State) Node {
-	return layout("Days", s, days(s.Days))
-}
-
-func days(days []core.Day) Node {
+func UI_days(days []core.Day) Node {
 	if len(days) == 0 {
 		return Div(Text("No days available"))
 	}
 
-	next, prev := GetNextPrevButtons(days[0], "")
+	next, prev := ui.GetNextPrevButtons(days[0], "")
 	return Div(
 		Class("days-container"),
 		H2(Text(days[0].Date.Time().Month().String())),
 		Div(
 			Class("days-list"),
 			Map(days, func(d core.Day) Node {
-				return Day(d)
+				return UI_day(d)
 			}),
 		),
 		Div(
@@ -51,7 +38,7 @@ func days(days []core.Day) Node {
 	)
 }
 
-func Day(day core.Day) Node {
+func UI_day(day core.Day) Node {
 	q := url.Values{}
 	q.Add("date", day.Date.String())
 	sync := fmt.Sprintf("@post('/day/sync?%s')", q.Encode())
@@ -84,7 +71,7 @@ func Day(day core.Day) Node {
 		habitSpot(lucide.Dumbbell(), day.Habits.Fitness),
 		habitSpot(lucide.UserCog(), day.Habits.DeepWork),
 		habitSpot(lucide.Beef(), day.Habits.Eat),
-		Button(Class(cBtn+" btn-sync"), Text("sync"), ds.On("click", sync)),
+		Button(Class(ui.CBtn+" btn-sync"), Text("sync"), ds.On("click", sync)),
 		ID(fmt.Sprintf("day-%d", day.ID)),
 	)
 }

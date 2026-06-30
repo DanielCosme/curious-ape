@@ -5,6 +5,7 @@ import (
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	. "maragu.dev/gomponents"
+
 	// ds "maragu.dev/gomponents-datastar"
 
 	. "maragu.dev/gomponents/html"
@@ -12,7 +13,7 @@ import (
 
 func Fitness(s *State) Node {
 	next, prev := GetNextPrevButtons(s.Days[0], "fitness")
-	return layout("Fitness", s, Map(s.Days, func(day core.Day) Node {
+	return Layout("Fitness", s, Map(s.Days, func(day core.Day) Node {
 		if len(day.FitnessLogs) == 0 {
 			return nil
 		}

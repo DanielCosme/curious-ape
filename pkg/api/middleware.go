@@ -6,6 +6,7 @@ import (
 
 	"danicos.dev/daniel/curious-ape/pkg/dove"
 	"danicos.dev/daniel/curious-ape/pkg/oak"
+	"danicos.dev/daniel/curious-ape/pkg/ui"
 	"github.com/alexedwards/scs/v2"
 )
 
@@ -35,6 +36,19 @@ func (a *API) MiddlewareLoadCookie(next dove.HandlerFunc) dove.HandlerFunc {
 				a.Scs.WriteSessionCookie(ctx, c.Res.Writer, "", time.Time{})
 			}
 		})
+		return next(c)
+	}
+}
+
+func (a *API) MiddlewareSetUIState(next dove.HandlerFunc) dove.HandlerFunc {
+	return func(c *dove.Context) error {
+		s := ui.State{
+			Version:       a.Version,
+			Authenticated: a.IsAuthenticated(c.Req),
+			CurrentPath:   c.Req.URL.Path,
+		}
+		ctx := ui.StateWithContext(c.Ctx(), &s)
+		c.Req = c.Req.WithContext(ctx)
 		return next(c)
 	}
 }

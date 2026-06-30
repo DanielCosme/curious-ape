@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strings"
 
-	"danicos.dev/daniel/curious-ape/pkg/application"
+	"danicos.dev/daniel/curious-ape/pkg/core"
 	. "maragu.dev/gomponents"
 
 	ds "maragu.dev/gomponents-datastar"
@@ -13,15 +13,15 @@ import (
 )
 
 func Integrations(s *State) Node {
-	return layout("Integrations", s, Div(
+	return Layout("Integrations", s, Div(
 		Class(cSurface),
-		Map(s.Integrations, func(i application.IntegrationInfo) Node {
+		Map(s.Integrations, func(i core.IntegrationInfo) Node {
 			return Integration(i)
 		}),
 	))
 }
 
-func Integration(i application.IntegrationInfo) Node {
+func Integration(i core.IntegrationInfo) Node {
 	integrationName := strings.ToLower(i.Name)
 	q := url.Values{}
 	q.Add("name", integrationName)
@@ -44,11 +44,11 @@ func Integration(i application.IntegrationInfo) Node {
 				}),
 			),
 		),
-		If(i.Status == application.IntegrationStatusDisconnected && i.AuthURL != "",
+		If(i.Status == core.IntegrationStatusDisconnected && i.AuthURL != "",
 			A(
 				Href(i.AuthURL),
 				Target("_blank"),
-				Button(Class(cBtn), Text("Authenticate")),
+				Button(Class(CBtn), Text("Authenticate")),
 			),
 		),
 	)

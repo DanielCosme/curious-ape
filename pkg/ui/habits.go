@@ -1,8 +1,9 @@
 package ui
 
 import (
-	"danicos.dev/daniel/curious-ape/pkg/core"
 	"fmt"
+
+	"danicos.dev/daniel/curious-ape/pkg/core"
 	. "maragu.dev/gomponents"
 
 	// ds "maragu.dev/gomponents-datastar"
@@ -53,7 +54,7 @@ func Habits(s *State) Node {
 		)
 		finalNodes = append(finalNodes, node)
 	}
-	return layout("Habits", s, Group(finalNodes))
+	return Layout("Habits", s, Group(finalNodes))
 }
 
 func getHabitState(day core.Day, typ core.HabitType) core.HabitState {

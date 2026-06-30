@@ -8,7 +8,8 @@ import (
 )
 
 func (a *App) HabitUpsert(ctx context.Context, params core.Habit) (habit core.Habit, err error) {
-	logger := oak.FromContext(ctx)
+	logger := oak.FromContextWithLayer(ctx, "app")
+	defer logger.PopLayer()
 
 	habit, err = a.db.Habits.Upsert(params)
 	if err != nil {

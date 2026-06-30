@@ -16,52 +16,38 @@ import (
 	"golang.org/x/oauth2"
 )
 
-type IntegrationStatus string
-
-const IntegrationStatusConnected IntegrationStatus = "connected"
-const IntegrationStatusUnkown IntegrationStatus = "unknown"
-const IntegrationStatusDisconnected IntegrationStatus = "disconnected"
-const IntegrationStatusNotImplemented IntegrationStatus = "not-implemented"
-
-type IntegrationInfo struct {
-	Name    string
-	Status  IntegrationStatus
-	Info    []string
-	AuthURL string
-}
-
-func (a *App) IntegrationsGetList() ([]IntegrationInfo, error) {
-	var res []IntegrationInfo
+func (a *App) IntegrationsGetList() ([]core.IntegrationInfo, error) {
+	var res []core.IntegrationInfo
 	for _, integration := range a.sync.IntegrationsList() {
-		res = append(res, IntegrationInfo{
+		res = append(res, core.IntegrationInfo{
 			Name:   core.ToUpperFist(string(integration)),
-			Status: IntegrationStatusUnkown,
+			Status: core.IntegrationStatusUnkown,
 		})
 	}
 	return res, nil
 }
 
-func (a *App) IntegrationGet(ctx context.Context, provider core.Integration) (IntegrationInfo, error) {
+func (a *App) IntegrationGet(ctx context.Context, provider core.Integration) (core.IntegrationInfo, error) {
 	logger := oak.FromContext(ctx).Layer("app")
 	defer logger.PopLayer()
 
-	var res IntegrationInfo
+	var res core.IntegrationInfo
 	var info []string
 	var authURL string
 	today := core.NewDateToday()
-	status := IntegrationStatusNotImplemented
+	status := core.IntegrationStatusNotImplemented
 
 	switch provider {
 	case core.IntegrationHevy:
 		count, err := a.sync.Hevy.Workouts.Count()
 		if err != nil {
-			status = IntegrationStatusDisconnected
+			status = core.IntegrationStatusDisconnected
 			info = append(info, err.Error())
 		} else {
-			status = IntegrationStatusConnected
+			status = core.IntegrationStatusConnected
 			info = append(info, fmt.Sprintf("Number of workouts: %d", count))
 		}
-		res = IntegrationInfo{
+		res = core.IntegrationInfo{
 			Name:   "Hevy",
 			Info:   info,
 			Status: status,
@@ -71,13 +57,13 @@ func (a *App) IntegrationGet(ctx context.Context, provider core.Integration) (In
 		if err != nil {
 			authURL = a.sync.GenerateOauth2URI(provider)
 			if authURL != "" {
-				status = IntegrationStatusDisconnected
+				status = core.IntegrationStatusDisconnected
 			}
 			info = append(info, err.Error())
 		} else {
-			status = IntegrationStatusConnected
+			status = core.IntegrationStatusConnected
 		}
-		res = IntegrationInfo{
+		res = core.IntegrationInfo{
 			Name:    "Google",
 			Info:    info,
 			AuthURL: authURL,
@@ -88,16 +74,16 @@ func (a *App) IntegrationGet(ctx context.Context, provider core.Integration) (In
 		if err != nil {
 			authURL = a.sync.GenerateOauth2URI(provider)
 			if authURL != "" {
-				status = IntegrationStatusDisconnected
+				status = core.IntegrationStatusDisconnected
 			}
 			info = append(info, err.Error())
 		} else {
-			status = IntegrationStatusConnected
+			status = core.IntegrationStatusConnected
 			if len(sls) > 0 {
 				info = append(info, fmt.Sprintf("Total time asleep last night: %s", sls[0].TimeAsleep.String()))
 			}
 		}
-		res = IntegrationInfo{
+		res = core.IntegrationInfo{
 			Name:    "Fitbit",
 			Info:    info,
 			AuthURL: authURL,
@@ -108,7 +94,7 @@ func (a *App) IntegrationGet(ctx context.Context, provider core.Integration) (In
 		if err != nil {
 			info = append(info, err.Error())
 		} else if profile != nil {
-			status = IntegrationStatusConnected
+			status = core.IntegrationStatusConnected
 			name := fmt.Sprintf("Profile name: %s", profile.FullName)
 			timeZone := fmt.Sprintf("Timezone: %s", profile.Timezone)
 			info = append(info, name, timeZone)
@@ -129,7 +115,7 @@ func (a *App) IntegrationGet(ctx context.Context, provider core.Integration) (In
 				info = append(info, fmt.Sprintf("Total time worked so far: %s", summary.TotalDuration))
 			}
 		}
-		res = IntegrationInfo{
+		res = core.IntegrationInfo{
 			Name:   "Toggl",
 			Info:   info,
 			Status: status,

@@ -16,6 +16,10 @@ type Days struct {
 	db bob.DB
 }
 
+func NewDays(executor bob.DB) *Days {
+	return &Days{db: executor}
+}
+
 func (d *Days) Create(date core.Date) (day core.Day, err error) {
 	s := &models.DaySetter{Date: omit.From(date.Time())}
 	res, err := models.Days.Insert(s).One(context.Background(), d.db)
