@@ -14,8 +14,8 @@ import (
 
 	"danicos.dev/daniel/curious-ape/assets"
 	"danicos.dev/daniel/curious-ape/pkg/application"
+	"danicos.dev/daniel/curious-ape/pkg/apps/day"
 	"danicos.dev/daniel/curious-ape/pkg/core"
-	"danicos.dev/daniel/curious-ape/pkg/day"
 	"danicos.dev/daniel/curious-ape/pkg/dove"
 	"danicos.dev/daniel/curious-ape/pkg/oak"
 	"danicos.dev/daniel/curious-ape/pkg/ui"

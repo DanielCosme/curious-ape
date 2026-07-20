@@ -19,9 +19,11 @@ import (
 
 	"danicos.dev/daniel/curious-ape/database/migrations"
 	"danicos.dev/daniel/curious-ape/pkg/application"
+	"danicos.dev/daniel/curious-ape/pkg/apps/day"
+	"danicos.dev/daniel/curious-ape/pkg/apps/habit"
 	root "danicos.dev/daniel/curious-ape/pkg/config"
 	"danicos.dev/daniel/curious-ape/pkg/core"
-	"danicos.dev/daniel/curious-ape/pkg/day"
+	"danicos.dev/daniel/curious-ape/pkg/event"
 	"danicos.dev/daniel/curious-ape/pkg/oak"
 	"danicos.dev/daniel/curious-ape/pkg/persistence"
 
@@ -126,15 +128,20 @@ func main() {
 		TogglWorkspaceID: cfg.Integrations.Toggl.WorkspaceID,
 	}
 
+	bobDB := bob.NewDB(db)
+	eventBus := event.NewBus()
+	habitsApp := habit.New(bobDB, eventBus)
+
 	if cfg.Integrations.Fitbit != nil {
 		appConfig.Fitbit = cfg.Integrations.Fitbit.ToConf()
 	}
-	bobDB := bob.NewDB(db)
 	app := application.New(&application.AppOptions{
 		Database: persistence.New(bobDB),
 		Config:   appConfig,
 		Logger:   logger,
-		Day:      day.New(bobDB),
+		Day:      day.New(bobDB, eventBus),
+		Habit:    habitsApp,
+		Bus:      eventBus,
 	})
 
 	err = app.SetPassword(cfg.Admin.UserName, cfg.Admin.Password, cfg.Admin.Email, core.AuthRoleAdmin)

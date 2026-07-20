@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/event"
 	"danicos.dev/daniel/curious-ape/pkg/integrations/google"
 	"danicos.dev/daniel/curious-ape/pkg/oak"
 )
@@ -36,7 +37,7 @@ func (a *App) fitnessSync(ctx context.Context, d core.Date) error {
 					return err
 				}
 			}
-			_, err = a.HabitUpsert(ctx, habitParams)
+			a.Bus.Publish(event.HabitUpsert, habitParams)
 		}
 		return err
 	}

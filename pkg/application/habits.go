@@ -1,27 +1,8 @@
 package application
 
 import (
-	"context"
-
 	"danicos.dev/daniel/curious-ape/pkg/core"
-	"danicos.dev/daniel/curious-ape/pkg/oak"
 )
-
-func (a *App) HabitUpsert(ctx context.Context, params core.Habit) (habit core.Habit, err error) {
-	logger := oak.FromContextWithLayer(ctx, "app")
-	defer logger.PopLayer()
-
-	habit, err = a.db.Habits.Upsert(params)
-	if err != nil {
-		return
-	}
-	logger.Info("Habit logged",
-		"type", habit.Type,
-		"state", habit.State,
-		"date", habit.Date.Time().Format(core.HumanDateWeekDay),
-	)
-	return
-}
 
 func (a *App) HabitFlip(id int) (habit core.Habit, err error) {
 	habit, err = a.db.Habits.Get(core.HabitParams{ID: id})

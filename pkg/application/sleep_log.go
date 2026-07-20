@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/event"
 	"danicos.dev/daniel/curious-ape/pkg/integrations/fitbit"
 	"danicos.dev/daniel/curious-ape/pkg/oak"
 )
@@ -30,15 +31,13 @@ func (a *App) sleepSync(ctx context.Context, d core.Date) error {
 			if sl.EndTime.Before(wakeUpTime) {
 				habitState = core.HabitStateDone
 			}
-			_, err := a.HabitUpsert(ctx, core.Habit{
+			a.Bus.Publish(event.HabitUpsert, core.Habit{
 				Date:      d,
 				Type:      core.HabitTypeWakeUp,
 				State:     habitState,
 				Note:      sl.EndTime.Format(core.Time),
-				Automated: true})
-			if err != nil {
-				return err
-			}
+				Automated: true,
+			})
 		}
 	}
 	return nil

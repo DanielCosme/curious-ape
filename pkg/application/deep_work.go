@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/event"
 	"danicos.dev/daniel/curious-ape/pkg/oak"
 )
 
@@ -71,14 +72,12 @@ func (a *App) deepWorkSync(ctx context.Context, date core.Date) error {
 		habitState = core.HabitStateDone
 	}
 
-	_, err = a.HabitUpsert(ctx, core.Habit{
+	a.Bus.Publish(event.HabitUpsert, core.Habit{
 		Date:      d.Date,
 		Type:      core.HabitTypeDeepWork,
 		State:     habitState,
 		Note:      core.DurationToString(totalDuration),
-		Automated: true})
-	if err != nil {
-		return err
-	}
+		Automated: true,
+	})
 	return nil
 }

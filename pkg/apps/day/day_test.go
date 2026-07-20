@@ -4,8 +4,10 @@ import (
 	"testing"
 	"time"
 
+	"danicos.dev/daniel/curious-ape/pkg/apps/day"
+	"danicos.dev/daniel/curious-ape/pkg/apps/habit"
 	"danicos.dev/daniel/curious-ape/pkg/core"
-	"danicos.dev/daniel/curious-ape/pkg/day"
+	"danicos.dev/daniel/curious-ape/pkg/event"
 	"danicos.dev/daniel/curious-ape/pkg/test"
 	"github.com/stephenafamo/bob"
 )
@@ -13,7 +15,9 @@ import (
 func TestDay(t *testing.T) {
 	t.Parallel()
 	bobDB := bob.NewDB(test.NewTestDB(t))
-	app := day.New(bobDB)
+	eventBus := event.NewBus()
+	app := day.New(bobDB, eventBus)
+	_ = habit.New(bobDB, eventBus)
 
 	date1 := core.NewDate(time.Now()).FirstDayOfTheMonth()
 	day1, err := app.GetOrCreate(date1)

@@ -4,7 +4,9 @@ import (
 	"errors"
 	"log/slog"
 
-	"danicos.dev/daniel/curious-ape/pkg/day"
+	"danicos.dev/daniel/curious-ape/pkg/apps/day"
+	"danicos.dev/daniel/curious-ape/pkg/apps/habit"
+	"danicos.dev/daniel/curious-ape/pkg/event"
 	"danicos.dev/daniel/curious-ape/pkg/integrations"
 	"danicos.dev/daniel/curious-ape/pkg/oak"
 	"danicos.dev/daniel/curious-ape/pkg/persistence"
@@ -12,11 +14,13 @@ import (
 )
 
 type App struct {
-	Log  *oak.Oak // Maybe delete the logger.
-	Env  Environment
-	db   *persistence.Database
-	sync *integrations.Integrations
-	Day  *day.App
+	Log   *oak.Oak // Maybe delete the logger.
+	Env   Environment
+	db    *persistence.Database
+	sync  *integrations.Integrations
+	Day   *day.App
+	Habit *habit.App
+	Bus   event.Bus
 }
 
 type AppOptions struct {
@@ -24,6 +28,8 @@ type AppOptions struct {
 	Config   *Config
 	Database *persistence.Database
 	Day      *day.App
+	Habit    *habit.App
+	Bus      event.Bus
 }
 
 type Config struct {
@@ -38,11 +44,13 @@ type Config struct {
 func New(opts *AppOptions) *App {
 	sync := integrations.New(opts.Config.TogglWorkspaceID, opts.Config.TogglToken, opts.Config.HevyAPIKey, opts.Config.Fitbit, opts.Config.Google)
 	a := &App{
-		Log:  opts.Logger.Layer("app"),
-		Env:  opts.Config.Env,
-		db:   opts.Database,
-		sync: sync,
-		Day:  opts.Day,
+		Log:   opts.Logger.Layer("app"),
+		Env:   opts.Config.Env,
+		db:    opts.Database,
+		sync:  sync,
+		Day:   opts.Day,
+		Habit: opts.Habit,
+		Bus:   opts.Bus,
 	}
 	a.Log.Info("Application initialized", "Environment", a.Env)
 	return a

@@ -20,7 +20,7 @@ func NewTestDB(t *testing.T) *sql.DB {
 	failIfErr(t, err)
 
 	migrator, err := migrate.NewWithDatabaseInstance(
-		"file://../../database/migrations/sqlite",
+		"file://../../../database/migrations/sqlite", // Only works if called from ./pkg/apps/<package>/file_test.go
 		"ape",
 		migrationDriver,
 	)
