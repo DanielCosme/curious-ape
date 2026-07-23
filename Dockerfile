@@ -12,7 +12,9 @@ RUN go mod verify
 COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg/mod \
-    go build -buildvcs=true -ldflags="-extldflags=-static -X main.version=${APE_VERSION}" -o=./bin/ape ./cmd/web
+    # -s omits the symbol table and some related debugging data.
+    # -w omits the DWARF debugging information (the detailed debug info used by debuggers such as Delve or GDB).
+    go build -buildvcs=true -ldflags="-s -w -extldflags=-static -X main.version=${APE_VERSION}" -o=./bin/ape ./cmd/web
 
 FROM alpine:latest AS ape
 RUN apk add --no-cache tzdata
