@@ -10,7 +10,7 @@ import (
 	"github.com/alexedwards/scs/v2"
 )
 
-func (a *API) MiddlewareLoadCookie(next dove.HandlerFunc) dove.HandlerFunc {
+func (a *OldAPI) MiddlewareLoadCookie(next dove.HandlerFunc) dove.HandlerFunc {
 	return func(c *dove.Context) error {
 		c.Res.Header().Add("Vary", "Cookie")
 		var token string
@@ -40,7 +40,7 @@ func (a *API) MiddlewareLoadCookie(next dove.HandlerFunc) dove.HandlerFunc {
 	}
 }
 
-func (a *API) MiddlewareSetUIState(next dove.HandlerFunc) dove.HandlerFunc {
+func (a *OldAPI) MiddlewareSetUIState(next dove.HandlerFunc) dove.HandlerFunc {
 	return func(c *dove.Context) error {
 		s := ui.State{
 			Version:       a.Version,
@@ -53,7 +53,7 @@ func (a *API) MiddlewareSetUIState(next dove.HandlerFunc) dove.HandlerFunc {
 	}
 }
 
-func (a *API) MiddlewareAuthenticateFromSession(next dove.HandlerFunc) dove.HandlerFunc {
+func (a *OldAPI) MiddlewareAuthenticateFromSession(next dove.HandlerFunc) dove.HandlerFunc {
 	return func(c *dove.Context) error {
 		logger := oak.FromContext(c.Ctx())
 		id := a.Scs.GetInt(c.Ctx(), string(ctxKeyAuthenticatedUserID))
@@ -73,7 +73,7 @@ func (a *API) MiddlewareAuthenticateFromSession(next dove.HandlerFunc) dove.Hand
 	}
 }
 
-func (a *API) MiddlewareRequireAuthentication(next dove.HandlerFunc) dove.HandlerFunc {
+func (a *OldAPI) MiddlewareRequireAuthentication(next dove.HandlerFunc) dove.HandlerFunc {
 	return func(c *dove.Context) error {
 		if !a.IsAuthenticated(c.Req) {
 			return c.Redirect("/login")

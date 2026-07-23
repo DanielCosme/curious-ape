@@ -25,25 +25,11 @@
 web/resources/static/libs/*
 web/resources/static/index.css
 
+!scripts/**
+!Dockerfile
+!*.sql
+
 # !Makefile
 
 # ...even if they are in subdirectories
 !*/
-
-
-# # binaries
-# # =
-# # k
-# bin/
-# tmp/
-# # Environment
-# *.env*
-# *.db
-# # IDE
-# .idea
-# # MacOS
-# .DS_Store
-# # Config
-# config.json
-# .vscode
-# **/secrets/

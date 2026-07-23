@@ -15,21 +15,21 @@ const (
 	ctxUser                   ContextKey = "user"
 )
 
-type API struct {
+type OldAPI struct {
 	App     *application.App
 	Scs     *scs.SessionManager
 	Version string
 }
 
-func NewApi(app *application.App, sessionManager *scs.SessionManager, version string) *API {
-	return &API{
+func NewApi(app *application.App, sessionManager *scs.SessionManager, version string) *OldAPI {
+	return &OldAPI{
 		App:     app,
 		Version: version,
 		Scs:     sessionManager,
 	}
 }
 
-func (a *API) IsAuthenticated(r *http.Request) bool {
+func (a *OldAPI) IsAuthenticated(r *http.Request) bool {
 	isAuthenticated, ok := r.Context().Value(ctxKeyIsAuthenticated).(bool)
 	if !ok {
 		return false

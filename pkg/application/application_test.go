@@ -208,7 +208,7 @@ func NewTestApplication(t *testing.T) *application.App {
 	opts := &application.AppOptions{
 		Logger: oak.New(oak.TintHandler(os.Stdout, oak.LevelTrace, true)),
 		Config: &application.Config{
-			Env: config.Test,
+			Env: config.CI,
 		},
 		Database: persistence.New(bob.NewDB(db)),
 	}

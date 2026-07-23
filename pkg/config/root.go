@@ -3,6 +3,13 @@ package config
 import "strings"
 
 const (
+	// Configuration keys
+	CONFIG_PORT      = "APE_PORT"
+	CONFIG_LOG_LEVEL = "APE_LOG_LEVEL" // DEBUG, INFO, WARN, ERROR
+	CONFIG_DB_PATH   = "APE_DB_PATH"
+)
+
+const (
 	APP_NAME               = "ape"
 	ENVIRONMENT            = "APE_ENVIRONMENT"
 	MIGRATIONS_LOCATION    = "database/migrations/sqlite"
@@ -12,6 +19,8 @@ const (
 	REGISTRY               = "danicos.dev"
 	TMP_DIR                = "./tmp"
 	DATASTAR               = "https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.2/bundles/datastar.js"
+	DOWNLOAD_DATASTAR      = "https://raw.githubusercontent.com/starfederation/datastar/develop/bundles/datastar.js"
+	DOWNLOAD_DATASTAR_MAP  = "https://raw.githubusercontent.com/starfederation/datastar/develop/bundles/datastar.js.map"
 	TZ                     = "America/Toronto"
 	KUBERNETES_NAME        = "curious-ape"
 	KUBERNETES_PORT        = 4000

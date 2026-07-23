@@ -1,122 +1,65 @@
 package config
 
 import (
-	"encoding/json"
-	"errors"
-	"fmt"
 	"log/slog"
 	"os"
-	"runtime/debug"
+	"sync"
 
-	"danicos.dev/daniel/curious-ape/pkg/oak"
-	"golang.org/x/oauth2"
+	"github.com/joho/godotenv"
 )
 
 type Environment string
 
 const (
-	Prod Environment = "prod"
 	Dev  Environment = "dev"
-	Test Environment = "test"
+	CI   Environment = "ci"
+	Prod Environment = "prod"
 )
 
+var (
+	Global *Config
+	once   sync.Once
+)
+
+func init() {
+	once.Do(func() {
+		Global = Load()
+	})
+}
+
 type Config struct {
-	Port     int `json:"port"`
-	Database struct {
-		DSN string `json:"dsn"`
-	} `json:"database"`
-	Integrations struct {
-		Fitbit *Oauth2Config `json:"fitbit"`
-		Google *Oauth2Config `json:"google"`
-		Toggl  struct {
-			Token       string `json:"api_token"`
-			WorkspaceID int    `json:"workspace_id"`
-		} `json:"toggl"`
-		Hevy struct {
-			ApiKey string `json:"api_key"`
-		} `json:"hevy"`
-	} `json:"integrations"`
-	Environment Environment
-	Admin       User `json:"admin"`
-	User        User `json:"user"`
-	Guest       User `json:"guest"`
+	Environment  Environment
+	Port         string
+	LogLevel     slog.Level
+	DatabasePath string
 }
 
-type User struct {
-	UserName string `json:"username"`
-	Password string `json:"password"`
-	Email    string `json:"email"`
-}
+func loadBase() *Config {
+	godotenv.Load()
 
-func ParseEnvironment(s string) (Environment, error) {
-	switch Environment(s) {
-	case Prod:
-		return Prod, nil
-	case Dev:
-		return Dev, nil
-	case Test:
-	case "":
-		e := errors.New("empty environment field")
-		slog.Error(e.Error())
-		return "", e
-	}
-	e := errors.New("ivalid environment value: " + s)
-	slog.Error(e.Error())
-	return "", e
-}
-
-type Oauth2Config struct {
-	ClientID     string   `json:"client_id"`
-	ClientSecret string   `json:"client_secret"`
-	RedirectURL  string   `json:"redirect_url"`
-	TokenURL     string   `json:"token_url"`
-	AuthURL      string   `json:"auth_url"`
-	AuthStyle    int      `json:"auth_style"`
-	Scopes       []string `json:"scopes"`
-}
-
-func (o Oauth2Config) ToConf() *oauth2.Config {
-	oak.Info("Loading Oauth2 configuration", "redirect", o.RedirectURL)
-	return &oauth2.Config{
-		ClientID:     o.ClientID,
-		ClientSecret: o.ClientSecret,
-		Endpoint: oauth2.Endpoint{
-			AuthURL:   o.AuthURL,
-			TokenURL:  o.TokenURL,
-			AuthStyle: oauth2.AuthStyle(o.AuthStyle), // Zero value means auto-detect.
-		},
-		RedirectURL: o.RedirectURL,
-		Scopes:      o.Scopes,
+	return &Config{
+		Port:         getEnv(CONFIG_PORT, "4000"),
+		DatabasePath: getEnv(CONFIG_DB_PATH, TMP_DIR+"/ape.db"),
+		LogLevel: func() slog.Level {
+			switch os.Getenv(CONFIG_LOG_LEVEL) {
+			case slog.LevelDebug.String():
+				return slog.LevelDebug
+			case slog.LevelInfo.String():
+				return slog.LevelInfo
+			case slog.LevelWarn.String():
+				return slog.LevelWarn
+			case slog.LevelError.String():
+				return slog.LevelError
+			default:
+				return slog.LevelInfo
+			}
+		}(),
 	}
 }
 
-func ReadConfiguration(cfg *Config) *Config {
-	var err error
-	var rawFile []byte
-
-	env, err := ParseEnvironment(os.Getenv(ENVIRONMENT))
-	if err != nil {
-		logFatal(fmt.Errorf("environment variable %s is empty", ENVIRONMENT))
+func getEnv(key, fallback string) string {
+	if val, ok := os.LookupEnv(key); ok {
+		return val
 	}
-	cfg.Environment = env
-	// TODO: make the config path injectable via ENV Var or Command line Flag.
-	configPath := "config.json"
-	rawFile, err = os.ReadFile(configPath)
-	exitIfErr(err)
-	oak.Info("Configuration file loaded", "path", configPath)
-
-	err = json.Unmarshal(rawFile, cfg)
-	exitIfErr(err)
-	return cfg
-}
-
-func exitIfErr(err error) {
-	if err != nil {
-		logFatal(err)
-	}
-}
-
-func logFatal(err error) {
-	oak.Fatal("Fatal failure", "err", err.Error(), "stack", string(debug.Stack()))
-	os.Exit(1)
+	return fallback
 }

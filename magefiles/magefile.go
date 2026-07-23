@@ -21,7 +21,7 @@ import (
 
 const tmpDir = config.TMP_DIR
 
-var Default = Run
+var Default = Live.All
 var Aliases = map[string]any{
 	"v": Version,
 	"r": Run,
@@ -29,18 +29,19 @@ var Aliases = map[string]any{
 }
 
 var r target.Runner
-var binOutput string
+var devOutput string
+var prodOutput string
 var dbLocation string
-var prodHost string
 
 func init() {
-	binOutput = fmt.Sprintf("%s/%s", tmpDir, config.APP_NAME)
-	dbLocation = binOutput + ".db"
+	devOutput = fmt.Sprintf("%s/%s", tmpDir, config.APP_NAME)
+	prodOutput = fmt.Sprintf("bin/%s", config.APP_NAME)
+	dbLocation = devOutput + ".db"
 
 	Env := map[string]string{
 		config.ENVIRONMENT: "dev",
-		"PROD_OUTPUT":      fmt.Sprintf("%s/%s", config.DEPLOYMENT_DIR, config.APP_NAME),
-		"DEV_OUTPUT":       binOutput,
+		"PROD_OUTPUT":      prodOutput,
+		"DEV_OUTPUT":       devOutput,
 		"SECRETS_PATH":     config.DEPLOYMENT_DIR + "/secrets",
 		"ENC_SECRETS_PATH": config.DEPLOYMENT_DIR + "/enc",
 		"KUBE_SECRETS":     config.KUBERNETES_SECRETS,
@@ -49,22 +50,21 @@ func init() {
 	r = target.NewRunner(Env, nil)
 }
 
-// "/overlays/secrets/secret, kustomization.yaml"
+// Build and run server
 func Run() error {
 	mg.Deps(Build)
-	return r.RunV("run", target.New(binOutput))
-}
-
-// Builds Development Binary
-func Build() error {
-	c := target.New("./scripts/build.fish")
-	return r.RunV("build", c)
+	return r.RunV("run", target.New(prodOutput))
 }
 
 // Builds production static Binary
-func Build_prod() error {
-	c := target.NewA("./scripts/build.fish", "prod")
+func Build() error {
+	mg.Deps(Build_Templ)
+	c := target.New("./scripts/build.sh")
 	return r.RunV("build", c)
+}
+
+func Build_Templ() error {
+	return r.RunV("build templ", target.NewA("go", "tool", "templ", "generate"))
 }
 
 // Generate kubenetes manifests from Go
@@ -98,12 +98,13 @@ func Enc_sops() error {
 // Install development environment tools
 func Tools() {
 	ts := []target.Target{
-		// target.NewA("go", "install", "github.com/air-verse/air@latest"),
+		target.NewA("go", "get", "-tool", "github.com/air-verse/air@latest"),
 		target.NewA("go", "install", "-tags", "'sqlite3'", "github.com/golang-migrate/migrate/v4/cmd/migrate@latest"),
 		target.NewA("go", "get", "-tool", "github.com/rakyll/gotest@latest"),
 		target.NewA("go", "get", "-tool", "honnef.co/go/tools/cmd/staticcheck@latest"),
 		target.NewA("go", "get", "-tool", "github.com/stephenafamo/bob/gen/bobgen-sqlite@v0.45.0"),
 		target.NewA("go", "get", "-tool", "github.com/magefile/mage@v1.17.2"),
+		target.NewA("go", "get", "-tool", "github.com/a-h/templ/cmd/templ"),
 	}
 	runSteps("tools", ts)
 }
@@ -119,6 +120,12 @@ func Audit() error {
 	return runSteps("audit", ts)
 }
 
+// Download Javascript Libraries
+func Download() error {
+	return r.RunV("download JS libraries", target.NewA("go", "run", "./cmd/downloader/main.go"))
+}
+
+// Run test and audit tasks
 func Ci() {
 	mg.SerialDeps(Test, Audit)
 }

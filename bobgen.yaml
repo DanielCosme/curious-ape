@@ -8,23 +8,23 @@ plugins:
   dbinfo:
     disabled: true
     pkgname: "dbinfo"
-    destination: "./database/gen/dbinfo"
+    destination: "./pkg/gen/bob/dbinfo"
   enums:
     disabled: false
     pkgname: "enums"
-    destination: "./database/gen/enums"
+    destination: "./pkg/gen/bob/enums"
   models:
     disabled: false
     pkgname: "models"
-    destination: "./database/gen/models"
+    destination: "./pkg/gen/bob/models"
   factory:
     disabled: true
     pkgname: "factory"
-    destination: "./database/gen/factory"
+    destination: "./pkg/gen/bob/factory"
   dberrors:
     disabled: false
     pkgname: "dberrors"
-    destination: "./database/gen/dberrors"
+    destination: "./pkg/gen/bob/dberrors"
   where:
     disabled: false
   loaders:
