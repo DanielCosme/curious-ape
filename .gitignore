@@ -1,14 +1,49 @@
-# binaries
-bin/
-tmp/
-# Environment
-*.env*
-*.db
-# IDE
-.idea
-# MacOS
-.DS_Store
-# Config
-config.json
-.vscode
-**/secrets/
+
+# source: https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
+# -------------------------------------------------------------------------------------------------
+# Allowlisting gitignore template for GO projects prevents us
+# from adding various unwanted local files, such as generated
+# files, developer configurations or IDE-specific files etc.
+#
+# Recommended: Go.AllowList.gitignore
+
+# Ignore everything
+*
+
+# But not these files...
+!/.gitignore
+
+!*.go
+!*.templ
+!go.sum
+!go.mod
+
+!README.md
+
+!web/**/*
+
+web/resources/static/libs/*
+web/resources/static/index.css
+
+# !Makefile
+
+# ...even if they are in subdirectories
+!*/
+
+
+# # binaries
+# # =
+# # k
+# bin/
+# tmp/
+# # Environment
+# *.env*
+# *.db
+# # IDE
+# .idea
+# # MacOS
+# .DS_Store
+# # Config
+# config.json
+# .vscode
+# **/secrets/

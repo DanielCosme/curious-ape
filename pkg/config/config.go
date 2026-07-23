@@ -1,31 +1,122 @@
 package config
 
-import "strings"
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"log/slog"
+	"os"
+	"runtime/debug"
+
+	"danicos.dev/daniel/curious-ape/pkg/oak"
+	"golang.org/x/oauth2"
+)
+
+type Environment string
 
 const (
-	APP_NAME               = "ape"
-	ENVIRONMENT            = "APE_ENVIRONMENT"
-	MIGRATIONS_LOCATION    = "database/migrations/sqlite"
-	DEPLOYMENT_DIR         = "deployment"
-	PROD_USER              = "daniel"
-	PROD_ADMIN             = "arch"
-	REGISTRY               = "danicos.dev"
-	TMP_DIR                = "./tmp"
-	DATASTAR               = "https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.2/bundles/datastar.js"
-	TZ                     = "America/Toronto"
-	KUBERNETES_NAME        = "curious-ape"
-	KUBERNETES_PORT        = 4000
-	KUBERNETES_HOST        = "ape.danicos.me"
-	KUBERNETES_DEPLOYMENT  = DEPLOYMENT_DIR + "/kubernetes"
-	KUBERNETES_ENC_SECRETS = KUBERNETES_DEPLOYMENT + "/overlays/config"
-	KUBERNETES_SECRETS     = TMP_DIR + "/secrets"
-	LITESTREAM_IMAGE       = "docker.io/litestream/litestream:0.5.11"
+	Prod Environment = "prod"
+	Dev  Environment = "dev"
+	Test Environment = "test"
 )
 
-var (
-	KUBERNETES_IMAGE = "danicos.dev/daniel/curious-ape:"
-)
+type Config struct {
+	Port     int `json:"port"`
+	Database struct {
+		DSN string `json:"dsn"`
+	} `json:"database"`
+	Integrations struct {
+		Fitbit *Oauth2Config `json:"fitbit"`
+		Google *Oauth2Config `json:"google"`
+		Toggl  struct {
+			Token       string `json:"api_token"`
+			WorkspaceID int    `json:"workspace_id"`
+		} `json:"toggl"`
+		Hevy struct {
+			ApiKey string `json:"api_key"`
+		} `json:"hevy"`
+	} `json:"integrations"`
+	Environment Environment
+	Admin       User `json:"admin"`
+	User        User `json:"user"`
+	Guest       User `json:"guest"`
+}
 
-func init() {
-	KUBERNETES_IMAGE += strings.TrimPrefix(VERSION, "v")
+type User struct {
+	UserName string `json:"username"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
+}
+
+func ParseEnvironment(s string) (Environment, error) {
+	switch Environment(s) {
+	case Prod:
+		return Prod, nil
+	case Dev:
+		return Dev, nil
+	case Test:
+	case "":
+		e := errors.New("empty environment field")
+		slog.Error(e.Error())
+		return "", e
+	}
+	e := errors.New("ivalid environment value: " + s)
+	slog.Error(e.Error())
+	return "", e
+}
+
+type Oauth2Config struct {
+	ClientID     string   `json:"client_id"`
+	ClientSecret string   `json:"client_secret"`
+	RedirectURL  string   `json:"redirect_url"`
+	TokenURL     string   `json:"token_url"`
+	AuthURL      string   `json:"auth_url"`
+	AuthStyle    int      `json:"auth_style"`
+	Scopes       []string `json:"scopes"`
+}
+
+func (o Oauth2Config) ToConf() *oauth2.Config {
+	oak.Info("Loading Oauth2 configuration", "redirect", o.RedirectURL)
+	return &oauth2.Config{
+		ClientID:     o.ClientID,
+		ClientSecret: o.ClientSecret,
+		Endpoint: oauth2.Endpoint{
+			AuthURL:   o.AuthURL,
+			TokenURL:  o.TokenURL,
+			AuthStyle: oauth2.AuthStyle(o.AuthStyle), // Zero value means auto-detect.
+		},
+		RedirectURL: o.RedirectURL,
+		Scopes:      o.Scopes,
+	}
+}
+
+func ReadConfiguration(cfg *Config) *Config {
+	var err error
+	var rawFile []byte
+
+	env, err := ParseEnvironment(os.Getenv(ENVIRONMENT))
+	if err != nil {
+		logFatal(fmt.Errorf("environment variable %s is empty", ENVIRONMENT))
+	}
+	cfg.Environment = env
+	// TODO: make the config path injectable via ENV Var or Command line Flag.
+	configPath := "config.json"
+	rawFile, err = os.ReadFile(configPath)
+	exitIfErr(err)
+	oak.Info("Configuration file loaded", "path", configPath)
+
+	err = json.Unmarshal(rawFile, cfg)
+	exitIfErr(err)
+	return cfg
+}
+
+func exitIfErr(err error) {
+	if err != nil {
+		logFatal(err)
+	}
+}
+
+func logFatal(err error) {
+	oak.Fatal("Fatal failure", "err", err.Error(), "stack", string(debug.Stack()))
+	os.Exit(1)
 }

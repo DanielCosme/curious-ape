@@ -1,11 +1,9 @@
 package application
 
 import (
-	"errors"
-	"log/slog"
-
 	"danicos.dev/daniel/curious-ape/pkg/apps/day"
 	"danicos.dev/daniel/curious-ape/pkg/apps/habit"
+	"danicos.dev/daniel/curious-ape/pkg/config"
 	"danicos.dev/daniel/curious-ape/pkg/event"
 	"danicos.dev/daniel/curious-ape/pkg/integrations"
 	"danicos.dev/daniel/curious-ape/pkg/oak"
@@ -15,7 +13,7 @@ import (
 
 type App struct {
 	Log   *oak.Oak // Maybe delete the logger.
-	Env   Environment
+	Env   config.Environment
 	db    *persistence.Database
 	sync  *integrations.Integrations
 	Day   *day.App
@@ -38,7 +36,7 @@ type Config struct {
 	TogglToken       string
 	TogglWorkspaceID int
 	HevyAPIKey       string
-	Env              Environment
+	Env              config.Environment
 }
 
 func New(opts *AppOptions) *App {
@@ -54,29 +52,4 @@ func New(opts *AppOptions) *App {
 	}
 	a.Log.Info("Application initialized", "Environment", a.Env)
 	return a
-}
-
-type Environment string
-
-const (
-	Prod Environment = "prod"
-	Dev  Environment = "dev"
-	Test Environment = "test"
-)
-
-func ParseEnvironment(s string) (Environment, error) {
-	switch Environment(s) {
-	case Prod:
-		return Prod, nil
-	case Dev:
-		return Dev, nil
-	case Test:
-	case "":
-		e := errors.New("empty environment field")
-		slog.Error(e.Error())
-		return "", e
-	}
-	e := errors.New("ivalid environment value: " + s)
-	slog.Error(e.Error())
-	return "", e
 }

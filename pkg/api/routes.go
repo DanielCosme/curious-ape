@@ -13,8 +13,8 @@ import (
 	"time"
 
 	"danicos.dev/daniel/curious-ape/assets"
-	"danicos.dev/daniel/curious-ape/pkg/application"
 	"danicos.dev/daniel/curious-ape/pkg/apps/day"
+	"danicos.dev/daniel/curious-ape/pkg/config"
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/dove"
 	"danicos.dev/daniel/curious-ape/pkg/oak"
@@ -30,7 +30,7 @@ func Routes(a *API) http.Handler {
 
 	d.Prefix("/assets").GET(a.ServeStaticAssets)
 
-	if a.App.Env == application.Dev {
+	if a.App.Env == config.Dev {
 		d.Use(DevMiddleware)
 	}
 
@@ -157,7 +157,7 @@ func (a *API) ServeStaticAssets(c *dove.Context) (err error) {
 	path, found := strings.CutPrefix(c.Req.URL.Path, "/assets/")
 	if found {
 		var data []byte
-		if a.App.Env == application.Dev {
+		if a.App.Env == config.Dev {
 			// In dev: no-cache with revalidation so changes are picked up on refresh without hard-reload.
 			c.Res.Header().Set("Cache-Control", "no-cache, must-revalidate")
 			data, err = os.ReadFile("./assets/" + path)

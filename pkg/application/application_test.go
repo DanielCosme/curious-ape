@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"danicos.dev/daniel/curious-ape/pkg/application"
+	"danicos.dev/daniel/curious-ape/pkg/config"
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/oak"
 	"danicos.dev/daniel/curious-ape/pkg/persistence"
@@ -207,7 +208,7 @@ func NewTestApplication(t *testing.T) *application.App {
 	opts := &application.AppOptions{
 		Logger: oak.New(oak.TintHandler(os.Stdout, oak.LevelTrace, true)),
 		Config: &application.Config{
-			Env: application.Test,
+			Env: config.Test,
 		},
 		Database: persistence.New(bob.NewDB(db)),
 	}

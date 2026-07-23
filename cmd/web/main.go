@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -15,13 +14,12 @@ import (
 	"time"
 
 	"github.com/stephenafamo/bob"
-	"golang.org/x/oauth2"
 
 	"danicos.dev/daniel/curious-ape/database/migrations"
 	"danicos.dev/daniel/curious-ape/pkg/application"
 	"danicos.dev/daniel/curious-ape/pkg/apps/day"
 	"danicos.dev/daniel/curious-ape/pkg/apps/habit"
-	root "danicos.dev/daniel/curious-ape/pkg/config"
+	"danicos.dev/daniel/curious-ape/pkg/config"
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/event"
 	"danicos.dev/daniel/curious-ape/pkg/oak"
@@ -39,40 +37,12 @@ import (
 
 var version string
 
-type config struct {
-	Port     int `json:"port"`
-	Database struct {
-		DSN string `json:"dsn"`
-	} `json:"database"`
-	Integrations struct {
-		Fitbit *Oauth2Config `json:"fitbit"`
-		Google *Oauth2Config `json:"google"`
-		Toggl  struct {
-			Token       string `json:"api_token"`
-			WorkspaceID int    `json:"workspace_id"`
-		} `json:"toggl"`
-		Hevy struct {
-			ApiKey string `json:"api_key"`
-		} `json:"hevy"`
-	} `json:"integrations"`
-	Environment application.Environment
-	Admin       user `json:"admin"`
-	User        user `json:"user"`
-	Guest       user `json:"guest"`
-}
-
-type user struct {
-	UserName string `json:"username"`
-	Password string `json:"password"`
-	Email    string `json:"email"`
-}
-
 func main() {
 	logger := oak.New(oak.TintHandler(os.Stdout, oak.LevelTrace, false))
 	oak.SetDefault(logger)
 	logLogger := oak.NewLogLogger(logger, oak.LevelTrace)
 
-	cfg := new(config)
+	cfg := new(config.Config)
 	v := Version()
 
 	if len(os.Args) > 1 {
@@ -82,7 +52,7 @@ func main() {
 		}
 	}
 
-	readConfiguration(cfg)
+	config.ReadConfiguration(cfg)
 	oak.Info("Environment: " + string(cfg.Environment))
 
 	oak.Info("Version: " + v)
@@ -115,7 +85,7 @@ func main() {
 	sessionManager.Lifetime = 24 * time.Hour * 7 // 7 days
 	sessionManager.Cookie.SameSite = http.SameSiteStrictMode
 	sessionManager.Cookie.Name = "curious-ape-session"
-	if cfg.Environment == application.Prod {
+	if cfg.Environment == config.Prod {
 		sessionManager.Cookie.HttpOnly = true
 		sessionManager.Cookie.Secure = true
 	}
@@ -185,25 +155,6 @@ func main() {
 	}
 }
 
-func readConfiguration(cfg *config) *config {
-	var err error
-	var rawFile []byte
-
-	env, err := application.ParseEnvironment(os.Getenv(root.ENVIRONMENT))
-	if err != nil {
-		logFatal(fmt.Errorf("environment variable %s is empty", root.ENVIRONMENT))
-	}
-	cfg.Environment = env
-	configPath := "config.json"
-	rawFile, err = os.ReadFile(configPath)
-	exitIfErr(err)
-	oak.Info("Configuration file loaded", "path", configPath)
-
-	err = json.Unmarshal(rawFile, cfg)
-	exitIfErr(err)
-	return cfg
-}
-
 func exitIfErr(err error) {
 	if err != nil {
 		logFatal(err)
@@ -227,31 +178,6 @@ func Version() string {
 		}
 	}
 	return fmt.Sprintf("%s-%s", version, hash)
-}
-
-type Oauth2Config struct {
-	ClientID     string   `json:"client_id"`
-	ClientSecret string   `json:"client_secret"`
-	RedirectURL  string   `json:"redirect_url"`
-	TokenURL     string   `json:"token_url"`
-	AuthURL      string   `json:"auth_url"`
-	AuthStyle    int      `json:"auth_style"`
-	Scopes       []string `json:"scopes"`
-}
-
-func (o Oauth2Config) ToConf() *oauth2.Config {
-	oak.Info("Loading Oauth2 configuration", "redirect", o.RedirectURL)
-	return &oauth2.Config{
-		ClientID:     o.ClientID,
-		ClientSecret: o.ClientSecret,
-		Endpoint: oauth2.Endpoint{
-			AuthURL:   o.AuthURL,
-			TokenURL:  o.TokenURL,
-			AuthStyle: oauth2.AuthStyle(o.AuthStyle), // Zero value means auto-detect.
-		},
-		RedirectURL: o.RedirectURL,
-		Scopes:      o.Scopes,
-	}
 }
 
 func runDataMigration(db bob.DB) error {
