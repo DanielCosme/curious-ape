@@ -8,12 +8,10 @@ package pages
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import (
-	"danicos.dev/daniel/curious-ape/pkg/ui"
-	"danicos.dev/daniel/curious-ape/pkg/ui/layouts"
-)
+import "danicos.dev/daniel/curious-ape/pkg/ui"
+import "danicos.dev/daniel/curious-ape/pkg/ui/layouts"
 
-func LoginPage(s ui.UIState) templ.Component {
+func Index(s ui.UIState) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -46,7 +44,7 @@ func LoginPage(s ui.UIState) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<form class=\"login-form\"><fieldset><legend>Login </legend><div><label for=\"username\">Username </label> <input type=\"text\" id=\"username\" name=\"username\" placeholder=\"\" required=\"\"></div><div><label for=\"password\">Password </label> <input type=\"text\" id=\"password\" name=\"password\" placeholder=\"\" required=\"\"></div><button style=\"margin-top: 1rem\" class=\"btn\" type=\"submit\" data-on:click=\"@post('/login', {contentType: 'form'})\">Login </button></fieldset></form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<p>Hello World</p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

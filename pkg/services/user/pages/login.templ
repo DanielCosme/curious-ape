@@ -2,10 +2,11 @@ package pages
 
 import (
 	"danicos.dev/daniel/curious-ape/pkg/ui/layouts"
+	"danicos.dev/daniel/curious-ape/pkg/ui"
 )
 
-templ LoginPage(title string) {
-	@layouts.Base(title) {
+templ LoginPage(s ui.UIState) {
+	@layouts.Base(s) {
 		<form class="login-form">
 			<fieldset>
 				<legend> Login </legend>

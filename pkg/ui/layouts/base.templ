@@ -1,15 +1,17 @@
 package layouts
 
+import "danicos.dev/daniel/curious-ape/pkg/ui"
+
 import(
 	"danicos.dev/daniel/curious-ape/web/resources"
 	// "danicos.dev/daniel/curious-ape/pkg/config"
 )
 
-templ Base(title string) {
+templ Base(s ui.UIState) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
-			<title>{ title }</title>
+			<title>{ s.Title }</title>
 			<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
 
 			// <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -25,7 +27,7 @@ templ Base(title string) {
 			// if config.Global.Environment == config.Dev {
 			// 	<div data-init="@get('/reload', {retryMaxCount: Infinity, retryInterval:20, retryMaxWaitMs:200})"></div>
 			// }
-			<h1>{ title }</h1>
+			<h1>{ s.Title }</h1>
 			{ children... }
 		</body>
 	</html>

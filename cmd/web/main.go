@@ -136,6 +136,7 @@ func initDB() *sql.DB {
 }
 
 func migrateDB(db *sql.DB) {
+	slog.Info("Applying migrations")
 	migrationsSource, err := iofs.New(migrations.Migrations, "sqlite")
 	exitIfErr(err)
 	migrationDriver, err := sqlite.WithInstance(db, &sqlite.Config{})

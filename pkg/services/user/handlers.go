@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"danicos.dev/daniel/curious-ape/pkg/services/user/pages"
+	"danicos.dev/daniel/curious-ape/pkg/ui"
 	"danicos.dev/daniel/curious-ape/pkg/web"
 	"github.com/alexedwards/scs/v2"
 )
@@ -14,12 +15,17 @@ type Handler struct {
 	session *scs.SessionManager
 }
 
+func NewHandler(s *Service, session *scs.SessionManager) *Handler {
+	return &Handler{svc: s, session: session}
+}
+
 func (h *Handler) LoginPage(w http.ResponseWriter, r *http.Request) {
 	if IsAuthenticated(r) {
 		web.Redirect(w, "/")
 		return
 	}
-	err := pages.LoginPage("Login").Render(r.Context(), w)
+	s := ui.NewUIState("Login")
+	err := pages.LoginPage(s).Render(r.Context(), w)
 	if err != nil {
 		web.ErrInternalServer(err, w)
 	}
@@ -29,18 +35,20 @@ func (h *Handler) LoginPost(w http.ResponseWriter, r *http.Request) {
 	username := r.PostFormValue("username")
 	password := r.PostFormValue("password")
 	id, err := h.svc.Authenticate(username, password)
-	if err == nil {
-		err = h.session.RenewToken(r.Context())
-		if err == nil {
-			slog.Info("User authenticated")
-			h.session.Put(r.Context(), string(ctxKeyAuthenticatedUserID), id)
-			web.Redirect(w, "/")
-		} else {
-			web.ErrInternalServer(err, w)
-		}
-	} else {
+	if err != nil {
 		web.Err(http.StatusUnauthorized, err, w)
+		return
 	}
+
+	err = h.session.RenewToken(r.Context())
+	if err != nil {
+		web.ErrInternalServer(err, w)
+		return
+	}
+
+	slog.Info("User authenticated")
+	h.session.Put(r.Context(), string(ctxKeyAuthenticatedUserID), id)
+	web.Redirect(w, "/")
 }
 
 func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {

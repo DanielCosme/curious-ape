@@ -18,7 +18,7 @@ const (
 
 func SetupRoutes(r chi.Router, db bob.DB, session *scs.SessionManager) error {
 	svc := NewService(db)
-	handler := Handler{svc: svc, session: session}
+	handler := NewHandler(svc, session)
 
 	r.Route("/login", func(r chi.Router) {
 		r.Get("/", handler.LoginPage)

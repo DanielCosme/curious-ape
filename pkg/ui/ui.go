@@ -29,6 +29,18 @@ const (
 	cSkeleton      = "skeleton"
 )
 
+type UIState struct {
+	Title           string
+	IsAuthenticated bool
+	CurrentPath     string
+}
+
+func NewUIState(tittle string) UIState {
+	return UIState{
+		Title: tittle,
+	}
+}
+
 type State struct {
 	Version       string
 	Authenticated bool

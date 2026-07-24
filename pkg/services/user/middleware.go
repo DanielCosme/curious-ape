@@ -10,7 +10,7 @@ import (
 	"github.com/stephenafamo/bob"
 )
 
-func MiddlewareAuthenticateFromSession(session *scs.SessionManager, db bob.DB) func(next http.Handler) http.Handler {
+func AuthenticateFromSession(session *scs.SessionManager, db bob.DB) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			id := session.GetInt64(r.Context(), string(ctxKeyAuthenticatedUserID))
@@ -32,4 +32,14 @@ func MiddlewareAuthenticateFromSession(session *scs.SessionManager, db bob.DB) f
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+func RequireAuthentication(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !IsAuthenticated(r) {
+			web.Redirect(w, "/login")
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }
