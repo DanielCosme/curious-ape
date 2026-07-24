@@ -37,3 +37,11 @@ func (s *Service) Month(date core.Date, order core.OrderParam) ([]core.Day, erro
 
 	return find(s.db, core.DayParams{Dates: daysOfTheMonth, Order: order})
 }
+
+/*
+  Next steps:
+  - Create the habit Service
+  	1. Make sure that Habits are initialized once a Day is created
+  - Implement Navigation in Base Layout
+  - Load Habits Page
+*/

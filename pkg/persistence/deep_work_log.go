@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
+	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/gen/bob/dberrors"
 	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
-	"danicos.dev/daniel/curious-ape/pkg/core"
 	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
 	"github.com/stephenafamo/bob"
@@ -18,7 +18,7 @@ type DeepWorkLogs struct {
 }
 
 func (dw *DeepWorkLogs) Upsert(params core.DeepWorkLog) (log core.DeepWorkLog, err error) {
-	day, err := getDay(params.Date, dw.db)
+	day, err := GetDay(params.Date, dw.db)
 	if err != nil {
 		return log, CatchDBErr("fitness logs: upsert: get day", err)
 	}

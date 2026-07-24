@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
+	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/gen/bob/dberrors"
 	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
-	"danicos.dev/daniel/curious-ape/pkg/core"
 	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
 	"github.com/stephenafamo/bob"
@@ -18,7 +18,7 @@ type FitnessLogs struct {
 }
 
 func (fls *FitnessLogs) Upsert(params core.FitnessLog) (fl core.FitnessLog, err error) {
-	day, err := getDay(params.Date, fls.db)
+	day, err := GetDay(params.Date, fls.db)
 	if err != nil {
 		return fl, CatchDBErr("fitness logs: upsert: get day", err)
 	}

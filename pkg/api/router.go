@@ -28,7 +28,7 @@ func SetupRoutes(ctx context.Context, r chi.Router, sessionManager *scs.SessionM
 		r.Use(user.AuthenticateFromSession(sessionManager, db))
 		r.Use(SetState)
 
-		user.SetupRoutes(r, db, sessionManager)
+		err = user.SetupRoutes(r, db, sessionManager)
 
 		r.Group(func(r chi.Router) {
 			r.Use(user.RequireAuthentication)

@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
+	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/gen/bob/dberrors"
 	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
-	"danicos.dev/daniel/curious-ape/pkg/core"
 	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
 	"github.com/stephenafamo/bob"
@@ -18,7 +18,7 @@ type SleepLogs struct {
 }
 
 func (sls *SleepLogs) Upsert(params core.SleepLog) (sl core.SleepLog, err error) {
-	day, err := getDay(params.Date, sls.db)
+	day, err := GetDay(params.Date, sls.db)
 	if err != nil {
 		return sl, CatchDBErr("sleep logs: upsert: get day", err)
 	}

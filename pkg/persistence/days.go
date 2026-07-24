@@ -4,8 +4,8 @@ import (
 	"context"
 	"log/slog"
 
-	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
 	"danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
 	"github.com/aarondl/opt/omit"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/sqlite"
@@ -129,6 +129,6 @@ func BuildDayQuery(f core.DayParams) *sqlite.ViewQuery[*models.Day, models.DaySl
 	return q
 }
 
-func getDay(date core.Date, exec bob.Executor) (*models.Day, error) {
+func GetDay(date core.Date, exec bob.Executor) (*models.Day, error) {
 	return BuildDayQuery(core.DayParams{Date: date}).One(context.Background(), exec)
 }
