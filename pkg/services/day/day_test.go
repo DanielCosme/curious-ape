@@ -2,11 +2,37 @@ package day_test
 
 import (
 	"testing"
+	"time"
+
+	"danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/services/day"
+	"danicos.dev/daniel/curious-ape/pkg/test"
+	"github.com/stephenafamo/bob"
 )
 
 func TestDay(t *testing.T) {
 	t.Parallel()
-	// bobDB := bob.NewDB(test.NewTestDB(t))
+	bobDB := bob.NewDB(test.NewTestDB(t))
+
+	t.Run("Month create expected range of dates", func(t *testing.T) {
+		t.Parallel()
+		srv := day.NewService(bobDB)
+
+		date1 := core.NewDate(time.Now()).FirstDayOfTheMonth()
+		date2 := core.NewDate(date1.Time().AddDate(0, 0, 1))
+
+		days, err := srv.Month(date2, core.ASC)
+		test.NilErr(t, err)
+		test.True(t, len(days) == 2)
+		test.True(t, days[0].Date.IsEqual(date1.Time()))
+		test.True(t, days[1].Date.IsEqual(date2.Time()))
+
+		date3 := core.NewDate(date1.Time().AddDate(0, 0, 27))
+		days, err = srv.Month(date3, core.ASC)
+		test.NilErr(t, err)
+		test.True(t, len(days) == 28)
+	})
+
 	// eventBus := event.NewBus()
 	// app := day.New(bobDB, eventBus)
 	// _ = habit.New(bobDB, eventBus)
