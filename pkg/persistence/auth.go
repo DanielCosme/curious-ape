@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"danicos.dev/daniel/curious-ape/database/gen/dberrors"
-	"danicos.dev/daniel/curious-ape/database/gen/models"
+	"danicos.dev/daniel/curious-ape/pkg/gen/bob/dberrors"
+	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/sqlite"
@@ -25,12 +25,12 @@ func (a *Auths) Upsert(s *models.OauthTokenSetter) (*models.OauthToken, error) {
 			Update(s.UpdateMod(), models.UpdateWhere.OauthTokens.Provider.EQ(s.Provider.GetOrZero())).
 			One(context.Background(), a.db)
 	}
-	return nil, catchDBErr("auths: upsert", err)
+	return nil, CatchDBErr("auths: upsert", err)
 }
 
 func (a *Auths) Get(p AuthParams) (*models.OauthToken, error) {
 	res, err := p.BuildQuery().One(context.Background(), a.db)
-	return res, catchDBErr(fmt.Sprintf("repository: get auth: %s", p.Provider), err)
+	return res, CatchDBErr(fmt.Sprintf("repository: get auth: %s", p.Provider), err)
 }
 
 type AuthParams struct {

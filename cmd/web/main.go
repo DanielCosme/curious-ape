@@ -16,12 +16,14 @@ import (
 	"danicos.dev/daniel/curious-ape/database/migrations"
 	"danicos.dev/daniel/curious-ape/pkg/api"
 	"danicos.dev/daniel/curious-ape/pkg/config"
+	"danicos.dev/daniel/curious-ape/pkg/services/user"
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httplog/v3"
 	"github.com/lmittmann/tint"
+	"github.com/stephenafamo/bob"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -68,6 +70,7 @@ func run(ctx context.Context) error {
 	)
 
 	db := initDB()
+	bobDB := bob.NewDB(db)
 	migrateDB(db)
 	sessionManager := initSessionManager(db)
 	errGroup, errGroupCtx := errgroup.WithContext(ctx)
@@ -77,9 +80,10 @@ func run(ctx context.Context) error {
 		"version", version,
 	)
 
-	// Initialize application modules inside.
-	err := api.SetupRoutes(errGroupCtx, router, sessionManager, db)
-	if err != nil {
+	if err := user.NewService(bobDB).SetPassword(config.Global.Username, config.Global.Password); err != nil {
+		return fmt.Errorf("error setting up username/password: %w", err)
+	}
+	if err := api.SetupRoutes(errGroupCtx, router, sessionManager, db); err != nil {
 		return fmt.Errorf("error setting up routes: %w", err)
 	}
 

@@ -3,7 +3,7 @@ package persistence
 import (
 	"context"
 
-	"danicos.dev/daniel/curious-ape/database/gen/models"
+	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"github.com/aarondl/opt/omit"
 	"github.com/stephenafamo/bob"
@@ -28,7 +28,7 @@ func (d *Deadlines) Create(params core.Deadline) (deadlineRes core.Deadline, err
 	}
 	deadline, err := models.Deadlines.Insert(s).One(context.Background(), d.db)
 	if err != nil {
-		return deadlineRes, catchDBErr("dealines: create", err)
+		return deadlineRes, CatchDBErr("dealines: create", err)
 	}
 	return deadlineToCore(deadline, core.NewDateToday()), nil
 }
@@ -36,7 +36,7 @@ func (d *Deadlines) Create(params core.Deadline) (deadlineRes core.Deadline, err
 func (d *Deadlines) Find(params core.DeadlineParams) (ds []core.Deadline, err error) {
 	res, err := buildDeadlineQuery(params).All(context.Background(), d.db)
 	if err != nil {
-		return ds, catchDBErr("deadlines: find", err)
+		return ds, CatchDBErr("deadlines: find", err)
 	}
 	today := core.NewDateToday()
 	for _, deadline := range res {
@@ -49,7 +49,7 @@ func (d *Deadlines) Delete(id uint) error {
 	_, err := models.Deadlines.Delete(
 		models.DeleteWhere.Deadlines.ID.EQ(int64(id)),
 	).Exec(context.Background(), d.db)
-	return catchDBErr("deadlines: delete", err)
+	return CatchDBErr("deadlines: delete", err)
 }
 
 func (d *Deadlines) Update(params core.Deadline) error {
@@ -62,7 +62,7 @@ func (d *Deadlines) Update(params core.Deadline) error {
 		models.UpdateWhere.Deadlines.ID.EQ(int64(params.ID)),
 		s.UpdateMod(),
 	).Exec(context.Background(), d.db)
-	return catchDBErr("deadline: update", err)
+	return CatchDBErr("deadline: update", err)
 }
 
 func deadlineToCore(params *models.Deadline, today core.Date) core.Deadline {

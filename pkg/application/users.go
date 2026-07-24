@@ -1,17 +1,18 @@
 package application
 
 import (
-	"danicos.dev/daniel/curious-ape/database/gen/models"
+	"errors"
+
+	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/persistence"
-	"errors"
 	"github.com/aarondl/opt/omit"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (a *App) SetPassword(username, password, email string, role core.AuthRole) error {
-	a.Log.Info("Setting password", "username", username, "role", role)
+func (a *App) SetPassword(username, password string) error {
+	a.Log.Info("Setting password", "username", username)
 	if password == "" {
 		return errors.New("password cannot be empty")
 	}
@@ -19,7 +20,7 @@ func (a *App) SetPassword(username, password, email string, role core.AuthRole) 
 		return errors.New("username cannot be empty")
 	}
 
-	u, err := a.db.Users.Get(persistence.UserParams{Role: role, Username: username})
+	u, err := a.db.Users.Get(persistence.UserParams{Username: username})
 	if core.IfErrNNotFound(err) {
 		return err
 	}
@@ -31,8 +32,6 @@ func (a *App) SetPassword(username, password, email string, role core.AuthRole) 
 		_, err = a.db.Users.Create(&models.UserSetter{
 			Username: omit.From(username),
 			Password: omit.From(string(hash)),
-			Role:     omit.From(string(role)),
-			Email:    omit.From(email),
 		})
 		return err
 	}

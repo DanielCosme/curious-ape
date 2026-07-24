@@ -3,8 +3,8 @@ package persistence
 import (
 	"context"
 
-	"danicos.dev/daniel/curious-ape/database/gen/dberrors"
-	"danicos.dev/daniel/curious-ape/database/gen/models"
+	"danicos.dev/daniel/curious-ape/pkg/gen/bob/dberrors"
+	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/oak"
 	"github.com/aarondl/opt/omit"
@@ -24,7 +24,7 @@ func NewHabits(executor bob.DB) *Habits {
 func (h *Habits) Get(p core.HabitParams) (habit core.Habit, err error) {
 	res, err := buildHabitQuery(p).One(context.Background(), h.db)
 	if err != nil {
-		return habit, catchDBErr("habits: get", err)
+		return habit, CatchDBErr("habits: get", err)
 	}
 	return habitToCore(res), nil
 }
@@ -58,7 +58,7 @@ func (h *Habits) Upsert(p core.Habit) (coreHabit core.Habit, err error) {
 							!setterAutomated ||
 							habit.State == string(core.HabitStateNoInfo) {
 							if err = habit.Update(context.Background(), h.db, setter); err != nil {
-								return coreHabit, catchDBErr("habits: upsert", err)
+								return coreHabit, CatchDBErr("habits: upsert", err)
 							}
 						} else {
 							oak.Info("No-Op UPDATE for habit",
@@ -66,7 +66,7 @@ func (h *Habits) Upsert(p core.Habit) (coreHabit core.Habit, err error) {
 								"setter automated", setterAutomated)
 						}
 					} else {
-						return coreHabit, catchDBErr("habits: upsert", err)
+						return coreHabit, CatchDBErr("habits: upsert", err)
 					}
 				}
 
@@ -75,13 +75,13 @@ func (h *Habits) Upsert(p core.Habit) (coreHabit core.Habit, err error) {
 					if err = habit.LoadHabitCategory(ctx, h.db); err == nil {
 						return habitToCore(habit), nil
 					}
-					return coreHabit, catchDBErr("habits: create: load habit category", err)
+					return coreHabit, CatchDBErr("habits: create: load habit category", err)
 				}
-				return coreHabit, catchDBErr("habits: create: load habit day", err)
+				return coreHabit, CatchDBErr("habits: create: load habit day", err)
 			}
 		}
 	}
-	return coreHabit, catchDBErr("habits: upsert", err)
+	return coreHabit, CatchDBErr("habits: upsert", err)
 }
 
 // OLD: 7 err

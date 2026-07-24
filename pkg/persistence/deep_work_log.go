@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"danicos.dev/daniel/curious-ape/database/gen/dberrors"
-	"danicos.dev/daniel/curious-ape/database/gen/models"
+	"danicos.dev/daniel/curious-ape/pkg/gen/bob/dberrors"
+	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
@@ -20,7 +20,7 @@ type DeepWorkLogs struct {
 func (dw *DeepWorkLogs) Upsert(params core.DeepWorkLog) (log core.DeepWorkLog, err error) {
 	day, err := getDay(params.Date, dw.db)
 	if err != nil {
-		return log, catchDBErr("fitness logs: upsert: get day", err)
+		return log, CatchDBErr("fitness logs: upsert: get day", err)
 	}
 	setter := &models.DeepWorkLogSetter{
 		DayID:     ID(day.ID),
@@ -47,7 +47,7 @@ func (dw *DeepWorkLogs) Upsert(params core.DeepWorkLog) (log core.DeepWorkLog, e
 		}
 	}
 
-	return deepWorkLogToCore(day, bobLog), catchDBErr("work: upsert", err)
+	return deepWorkLogToCore(day, bobLog), CatchDBErr("work: upsert", err)
 }
 
 func deepWorkLogToCore(day *models.Day, bob *models.DeepWorkLog) (log core.DeepWorkLog) {
@@ -64,7 +64,7 @@ func deepWorkLogToCore(day *models.Day, bob *models.DeepWorkLog) (log core.DeepW
 func (dw *DeepWorkLogs) Get(p DeepWorkLogParams) (*models.DeepWorkLog, error) {
 	workLog, err := p.BuildQuery().One(context.Background(), dw.db)
 	if err != nil {
-		return nil, catchDBErr("work logs: get", err)
+		return nil, CatchDBErr("work logs: get", err)
 	}
 	return workLog, nil
 }

@@ -11,14 +11,6 @@ const (
 	Time              = "15:04"
 )
 
-type AuthRole string
-
-const (
-	AuthRoleAdmin AuthRole = "admin"
-	AuthRoleUser  AuthRole = "user"
-	AuthRoleGuest AuthRole = "guest"
-)
-
 type LogOrigin string
 
 const (

@@ -2,11 +2,13 @@ package config
 
 import "strings"
 
+// Configuration keys
 const (
-	// Configuration keys
 	CONFIG_PORT      = "APE_PORT"
 	CONFIG_LOG_LEVEL = "APE_LOG_LEVEL" // DEBUG, INFO, WARN, ERROR
 	CONFIG_DB_PATH   = "APE_DB_PATH"
+	CONFIG_USERNAME  = "APE_USERNAME"
+	CONFIG_PASSWORD  = "APE_PASSWORD"
 )
 
 const (

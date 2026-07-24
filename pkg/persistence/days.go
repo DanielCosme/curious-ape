@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 
-	"danicos.dev/daniel/curious-ape/database/gen/models"
+	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"github.com/aarondl/opt/omit"
 	"github.com/stephenafamo/bob"
@@ -32,7 +32,7 @@ func (d *Days) Get(p core.DayParams) (day core.Day, err error) {
 		err = d.LoadHabitRelations(res)
 		return dayToCore(res), err
 	}
-	return day, catchDBErr("days: get", err)
+	return day, CatchDBErr("days: get", err)
 }
 
 func (d *Days) GetOrCreate(p core.DayParams) (day core.Day, err error) {
@@ -50,12 +50,12 @@ func (d *Days) Find(p core.DayParams) (days []core.Day, err error) {
 			if err = d.LoadHabitRelations(day); err == nil {
 				days = append(days, dayToCore(day))
 			} else {
-				return days, catchDBErr("days: find", err)
+				return days, CatchDBErr("days: find", err)
 			}
 		}
 		return
 	} else {
-		return days, catchDBErr("days: find", err)
+		return days, CatchDBErr("days: find", err)
 	}
 }
 
@@ -65,7 +65,7 @@ func (d *Days) LoadHabitRelations(m *models.Day) (err error) {
 			return nil
 		}
 	}
-	return catchDBErr("days: load: habit relations", err)
+	return CatchDBErr("days: load: habit relations", err)
 }
 
 func dayToCore(d *models.Day) (day core.Day) {

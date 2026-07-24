@@ -17,8 +17,8 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/lmittmann/tint v1.1.3
 	github.com/magefile/mage v1.17.2
-	github.com/stephenafamo/bob v0.45.0
-	github.com/stephenafamo/scan v0.7.0
+	github.com/stephenafamo/bob v0.49.0
+	github.com/stephenafamo/scan v0.9.0
 	golang.org/x/crypto v0.53.0
 	golang.org/x/oauth2 v0.36.0
 	golang.org/x/sync v0.21.0

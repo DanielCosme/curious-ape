@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"danicos.dev/daniel/curious-ape/database/gen/dberrors"
-	"danicos.dev/daniel/curious-ape/database/gen/models"
+	"danicos.dev/daniel/curious-ape/pkg/gen/bob/dberrors"
+	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
@@ -20,7 +20,7 @@ type SleepLogs struct {
 func (sls *SleepLogs) Upsert(params core.SleepLog) (sl core.SleepLog, err error) {
 	day, err := getDay(params.Date, sls.db)
 	if err != nil {
-		return sl, catchDBErr("sleep logs: upsert: get day", err)
+		return sl, CatchDBErr("sleep logs: upsert: get day", err)
 	}
 	s := &models.SleepLogSetter{
 		DayID:          omit.From(day.ID),
@@ -55,7 +55,7 @@ func (sls *SleepLogs) Upsert(params core.SleepLog) (sl core.SleepLog, err error)
 		}
 	}
 
-	return sleepLogToCore(day, sleepLog), catchDBErr("sleep: upsert", err)
+	return sleepLogToCore(day, sleepLog), CatchDBErr("sleep: upsert", err)
 }
 
 func sleepLogToCore(day *models.Day, s *models.SleepLog) (sl core.SleepLog) {
@@ -79,7 +79,7 @@ func sleepLogToCore(day *models.Day, s *models.SleepLog) (sl core.SleepLog) {
 func (sls *SleepLogs) Get(p SleepLogParams) (*models.SleepLog, error) {
 	sleepLog, err := p.BuildQuery().One(context.Background(), sls.db)
 	if err != nil {
-		return nil, catchDBErr("sleep logs: get", err)
+		return nil, CatchDBErr("sleep logs: get", err)
 	}
 	return sleepLog, nil
 }

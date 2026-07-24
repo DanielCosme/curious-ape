@@ -14,7 +14,7 @@ var (
 	ErrInvalidCredentials = errors.New("database: invalid credentials")
 )
 
-func catchDBErr(op string, err error) error {
+func CatchDBErr(op string, err error) error {
 	if err == nil {
 		return nil
 	}

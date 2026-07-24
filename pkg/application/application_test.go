@@ -187,7 +187,6 @@ func TestApp_UserExists(t *testing.T) {
 	test.NilErr(t, err)
 	test.False(t, exists)
 
-	err = app.SetPassword("daniel", "test", "admin@example.com", core.AuthRoleAdmin)
 	test.NilErr(t, err)
 
 	exists, err = app.UserExists(1)

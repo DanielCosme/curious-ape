@@ -24,6 +24,7 @@ var (
 func init() {
 	once.Do(func() {
 		Global = Load()
+		Global.validate()
 	})
 }
 
@@ -32,14 +33,27 @@ type Config struct {
 	Port         string
 	LogLevel     slog.Level
 	DatabasePath string
+	Username     string
+	Password     string
+}
+
+func (c *Config) validate() {
+	if c.DatabasePath == "" {
+		panic("config error: database path empty")
+	}
+	if c.Username == "" {
+		panic("config error: username empty")
+	}
+	if c.Password == "" {
+		panic("config error: password empty")
+	}
 }
 
 func loadBase() *Config {
 	godotenv.Load()
 
 	return &Config{
-		Port:         getEnv(CONFIG_PORT, "4000"),
-		DatabasePath: getEnv(CONFIG_DB_PATH, TMP_DIR+"/ape.db"),
+		Port: getEnv(CONFIG_PORT, "4000"),
 		LogLevel: func() slog.Level {
 			switch os.Getenv(CONFIG_LOG_LEVEL) {
 			case slog.LevelDebug.String():

@@ -1,7 +1,7 @@
 package persistence
 
 import (
-	"danicos.dev/daniel/curious-ape/database/gen/models"
+	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
 	"danicos.dev/daniel/curious-ape/pkg/test"
 	"database/sql"
 	"github.com/aarondl/opt/omit"

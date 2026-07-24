@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"io"
+	"log/slog"
 	"net/http"
 
 	"danicos.dev/daniel/curious-ape/pkg/config"
@@ -17,14 +18,22 @@ func SetupRoutes(ctx context.Context, r chi.Router, sessionManager *scs.SessionM
 	if config.Global.Environment == config.Dev {
 		setupReload(r)
 	}
+	// Common
+	// - Login Page
+	// Internal
+	// - User
+	// - Oauth
 
 	r.Handle("/static/*", resources.Handler())
 
 	r.Group(func(r chi.Router) {
 		r.Use(sessionManager.LoadAndSave)
 
-		r.Get("/", Index)
 		r.Get("/login", LoginPage)
+		r.Post("/login", LoginPost)
+
+		// Auth
+		r.Get("/", Index)
 	})
 
 	// Implement Hotreload?
@@ -54,6 +63,12 @@ func LoginPage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
+}
+
+func LoginPost(w http.ResponseWriter, r *http.Request) {
+	username := r.PostFormValue("username")
+	password := r.PostFormValue("password")
+	slog.Info("login", "username", username, "password", password)
 }
 
 func putHandler(w http.ResponseWriter, r *http.Request, sessionManager *scs.SessionManager) {

@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"danicos.dev/daniel/curious-ape/database/gen/dberrors"
-	"danicos.dev/daniel/curious-ape/database/gen/models"
+	"danicos.dev/daniel/curious-ape/pkg/gen/bob/dberrors"
+	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
@@ -20,7 +20,7 @@ type FitnessLogs struct {
 func (fls *FitnessLogs) Upsert(params core.FitnessLog) (fl core.FitnessLog, err error) {
 	day, err := getDay(params.Date, fls.db)
 	if err != nil {
-		return fl, catchDBErr("fitness logs: upsert: get day", err)
+		return fl, CatchDBErr("fitness logs: upsert: get day", err)
 	}
 	setter := &models.FitnessLogSetter{
 		DayID:     ID(day.ID),
@@ -44,7 +44,7 @@ func (fls *FitnessLogs) Upsert(params core.FitnessLog) (fl core.FitnessLog, err 
 			}
 			err = bobFitnessLog.Update(context.Background(), fls.db, setter)
 		} else {
-			return fl, catchDBErr("fitness: upsert", err)
+			return fl, CatchDBErr("fitness: upsert", err)
 		}
 	}
 	return fitnessLogToCore(day, bobFitnessLog), err
@@ -53,7 +53,7 @@ func (fls *FitnessLogs) Upsert(params core.FitnessLog) (fl core.FitnessLog, err 
 func (dw *FitnessLogs) Get(p FitnessLogParams) (*models.FitnessLog, error) {
 	fitnessLog, err := p.BuildQuery().One(context.Background(), dw.db)
 	if err != nil {
-		return nil, catchDBErr("fitness logs: get", err)
+		return nil, CatchDBErr("fitness logs: get", err)
 	}
 	return fitnessLog, nil
 }

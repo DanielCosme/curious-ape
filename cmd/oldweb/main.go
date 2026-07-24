@@ -114,7 +114,7 @@ func main() {
 		Bus:      eventBus,
 	})
 
-	err = app.SetPassword(cfg.Admin.UserName, cfg.Admin.Password, cfg.Admin.Email, core.AuthRoleAdmin)
+	err = app.SetPassword(cfg.Admin.UserName, cfg.Admin.Password)
 	exitIfErr(err)
 
 	err = runDataMigration(bobDB)
