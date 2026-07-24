@@ -33,12 +33,7 @@ type UIState struct {
 	Title           string
 	IsAuthenticated bool
 	CurrentPath     string
-}
-
-func NewUIState(tittle string) UIState {
-	return UIState{
-		Title: tittle,
-	}
+	Version         string
 }
 
 type State struct {
@@ -66,6 +61,18 @@ func blockDisplay() Node {
 
 func StateWithContext(ctx context.Context, s *State) context.Context {
 	return context.WithValue(ctx, CtxState, s)
+}
+
+func StateWithContextUI(ctx context.Context, s *UIState) context.Context {
+	return context.WithValue(ctx, CtxState, s)
+}
+
+func StateFromContextUI(ctx context.Context) *UIState {
+	v, ok := ctx.Value(CtxState).(*UIState)
+	if ok {
+		return v
+	}
+	panic("state not set")
 }
 
 func StateFromContext(ctx context.Context) *State {

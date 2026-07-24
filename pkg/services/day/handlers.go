@@ -16,6 +16,6 @@ func NewHandler(s *Service) *Handler {
 }
 
 func (h *Handler) Index(w http.ResponseWriter, r *http.Request) {
-	s := ui.NewUIState("Days")
+	s := ui.StateFromContextUI(r.Context())
 	web.Render(w, UI_Index(s, nil))
 }

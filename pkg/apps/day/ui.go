@@ -15,6 +15,10 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
+func Index(s *ui.UIState, days []core.Day) Node {
+	return ui.UILayout(s, UI_days(days))
+}
+
 func UI_days(days []core.Day) Node {
 	if len(days) == 0 {
 		return Div(Text("No days available"))

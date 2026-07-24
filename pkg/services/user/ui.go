@@ -7,7 +7,7 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
-func UI_Login(s ui.UIState) Node {
+func UI_Login(s *ui.UIState) Node {
 	form := Form(
 		Class("login-form"),
 		FieldSet(

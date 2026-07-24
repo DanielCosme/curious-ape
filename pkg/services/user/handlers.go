@@ -23,8 +23,8 @@ func (h *Handler) LoginPage(w http.ResponseWriter, r *http.Request) {
 		web.Redirect(w, "/")
 		return
 	}
-	s := ui.NewUIState("Login")
-	web.Render(w, UI_Login(s))
+	state := ui.StateFromContextUI(r.Context())
+	web.Render(w, UI_Login(state))
 }
 
 func (h *Handler) LoginPost(w http.ResponseWriter, r *http.Request) {

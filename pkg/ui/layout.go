@@ -4,11 +4,12 @@ import (
 	"danicos.dev/daniel/curious-ape/pkg/config"
 	"danicos.dev/daniel/curious-ape/web/resources"
 	. "maragu.dev/gomponents"
+	ds "maragu.dev/gomponents-datastar"
 	. "maragu.dev/gomponents/components"
 	. "maragu.dev/gomponents/html"
 )
 
-func UILayout(s UIState, nodes ...Node) Node {
+func UILayout(s *UIState, nodes ...Node) Node {
 	if s.Title == "" {
 		s.Title = "Curious Ape"
 	}
@@ -31,7 +32,18 @@ func UILayout(s UIState, nodes ...Node) Node {
 			Header(
 				H1(Text(s.Title)),
 			),
-			Group(nodes),
+			If(s.IsAuthenticated,
+				Aside(),
+			),
+			Main(
+				Group(nodes),
+				If(s.IsAuthenticated,
+					Button(Text("Logout"), Class("btn btn-secondary"), ds.On("click", "@delete('/login')")),
+				),
+			),
+			Footer(
+				P(Class(cVersion), Text(s.Version)),
+			),
 		},
 	})
 }
@@ -56,9 +68,17 @@ func Layout(title string, s *State, nodes ...Node) Node {
 		Body: []Node{
 			Class(cLayout),
 			Header(
+				Text("header"),
 				H1(Text(title)),
 			),
-			Group(nodes),
+			Aside(
+				Text("nav"),
+			),
+			Main(
+				P(Text("main")),
+				Group(nodes),
+			),
+			Footer(Text("footer")),
 		},
 	})
 }
