@@ -3,8 +3,8 @@ package application
 import (
 	"errors"
 
-	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
 	"danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
 	"danicos.dev/daniel/curious-ape/pkg/persistence"
 	"github.com/aarondl/opt/omit"
 

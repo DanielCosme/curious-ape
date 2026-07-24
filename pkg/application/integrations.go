@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
 	"danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
 	"danicos.dev/daniel/curious-ape/pkg/integrations/fitbit"
 	"danicos.dev/daniel/curious-ape/pkg/integrations/google"
 	"danicos.dev/daniel/curious-ape/pkg/oak"

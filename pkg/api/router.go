@@ -8,6 +8,7 @@ import (
 	"github.com/stephenafamo/bob"
 
 	"danicos.dev/daniel/curious-ape/pkg/config"
+	"danicos.dev/daniel/curious-ape/pkg/event"
 	"danicos.dev/daniel/curious-ape/pkg/services/day"
 	"danicos.dev/daniel/curious-ape/pkg/services/user"
 	"danicos.dev/daniel/curious-ape/pkg/ui"
@@ -16,7 +17,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func SetupRoutes(ctx context.Context, r chi.Router, sessionManager *scs.SessionManager, db bob.DB) (err error) {
+func SetupRoutes(ctx context.Context, r chi.Router, sessionManager *scs.SessionManager, db bob.DB, bus event.Broker) (err error) {
 	if config.Global.Environment == config.Dev {
 		setupReload(r)
 	}
@@ -33,7 +34,7 @@ func SetupRoutes(ctx context.Context, r chi.Router, sessionManager *scs.SessionM
 		r.Group(func(r chi.Router) {
 			r.Use(user.RequireAuthentication)
 
-			day.SetupRoutes(r, db)
+			day.SetupRoutes(r, db, bus)
 		})
 	})
 

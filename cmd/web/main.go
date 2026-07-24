@@ -16,6 +16,8 @@ import (
 	"danicos.dev/daniel/curious-ape/database/migrations"
 	"danicos.dev/daniel/curious-ape/pkg/api"
 	"danicos.dev/daniel/curious-ape/pkg/config"
+	"danicos.dev/daniel/curious-ape/pkg/event"
+	"danicos.dev/daniel/curious-ape/pkg/services/habit"
 	"danicos.dev/daniel/curious-ape/pkg/services/user"
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
@@ -80,15 +82,16 @@ func run(ctx context.Context) error {
 		"version", version,
 	)
 
+	bus := event.NewBroker()
+	_ = habit.NewService(bobDB, bus)
 	if err := user.NewService(bobDB).SetPassword(config.Global.Username, config.Global.Password); err != nil {
 		return fmt.Errorf("error setting up username/password: %w", err)
 	}
-	if err := api.SetupRoutes(errGroupCtx, router, sessionManager, bobDB); err != nil {
+	if err := api.SetupRoutes(errGroupCtx, router, sessionManager, bobDB, bus); err != nil {
 		return fmt.Errorf("error setting up routes: %w", err)
 	}
 
 	// TODOs
-	// - Integrations Config Loading from secret.
 	// - Create ticker to sync data daily
 
 	addr := fmt.Sprintf(":%s", config.Global.Port)

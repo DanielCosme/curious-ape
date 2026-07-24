@@ -3,8 +3,8 @@ package persistence
 import (
 	"context"
 
-	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
 	"danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
 	"github.com/aarondl/opt/omit"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/sqlite"

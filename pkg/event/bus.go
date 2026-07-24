@@ -4,11 +4,7 @@ import (
 	"danicos.dev/daniel/curious-ape/pkg/oak"
 )
 
-type Topic string
-
-var (
-	HabitUpsert Topic = "habit-upsert"
-)
+type Listener func(data any) error
 
 type Bus interface {
 	Publish(topic Topic, data any) error

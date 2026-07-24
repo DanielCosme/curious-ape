@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"danicos.dev/daniel/curious-ape/assets"
-	"danicos.dev/daniel/curious-ape/pkg/apps/day"
 	"danicos.dev/daniel/curious-ape/pkg/config"
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/dove"
@@ -48,7 +47,6 @@ func Routes(a *OldAPI) http.Handler {
 
 	d.Use(a.MiddlewareRequireAuthentication)
 
-	d.Endpoint("/").GET(a.App.Day.HandleDaysMonth)
 	d.Endpoint("/habit/flip").PUT(a.HabitFlip)
 	d.Endpoint("/day/sync").POST(a.DaySync)
 	d.Endpoint("/integration").GET(a.IntegrationGet)
@@ -238,9 +236,9 @@ func (a *OldAPI) HabitFlip(c *dove.Context) error {
 	if err == nil {
 		habit, err := a.App.HabitFlip(id)
 		if err == nil {
-			d, err := a.App.Day.GetOrCreate(habit.Date)
+			_, err := a.App.Day.GetOrCreate(habit.Date)
 			if err == nil {
-				return c.RenderOK(day.UI_day(d))
+				// return c.RenderOK(day.UI_day(d))
 			}
 		}
 	}
@@ -250,9 +248,9 @@ func (a *OldAPI) HabitFlip(c *dove.Context) error {
 func (a *OldAPI) DaySync(c *dove.Context) error {
 	c.ParseForm()
 	date, _ := core.NewDateFromISO8601(c.Req.Form.Get("date"))
-	d, err := a.App.DaySync(c.Ctx(), date)
+	_, err := a.App.DaySync(c.Ctx(), date)
 	if err == nil {
-		return c.RenderOK(day.UI_day(d))
+		// return c.RenderOK(day.UI_day(d))
 	}
 	return err
 }
