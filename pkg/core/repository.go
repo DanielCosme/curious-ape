@@ -33,3 +33,6 @@ type DeadlineRepository interface {
 type RepositoryCommon struct {
 	ID uint
 }
+type RepositoryID struct {
+	ID int64
+}

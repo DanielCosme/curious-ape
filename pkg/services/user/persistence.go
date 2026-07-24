@@ -10,7 +10,7 @@ import (
 )
 
 type Params struct {
-	ID       uint
+	ID       int64
 	Username string
 }
 
@@ -26,7 +26,9 @@ func Get(db bob.DB, p Params) (*User, error) {
 	if err != nil {
 		return nil, persistence.CatchDBErr("app: user get:", err)
 	}
-	return &User{Name: m.Username, Password: m.Password}, nil
+	u := &User{Name: m.Username, Password: m.Password}
+	u.ID = m.ID
+	return u, nil
 }
 
 func create(db bob.DB, username, hashedPassword string) error {

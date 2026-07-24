@@ -83,14 +83,12 @@ func run(ctx context.Context) error {
 	if err := user.NewService(bobDB).SetPassword(config.Global.Username, config.Global.Password); err != nil {
 		return fmt.Errorf("error setting up username/password: %w", err)
 	}
-	if err := api.SetupRoutes(errGroupCtx, router, sessionManager, db); err != nil {
+	if err := api.SetupRoutes(errGroupCtx, router, sessionManager, bobDB); err != nil {
 		return fmt.Errorf("error setting up routes: %w", err)
 	}
 
 	// TODOs
 	// - Integrations Config Loading from secret.
-	// - Bob DB init?
-	// - Set admin password
 	// - Create ticker to sync data daily
 
 	addr := fmt.Sprintf(":%s", config.Global.Port)

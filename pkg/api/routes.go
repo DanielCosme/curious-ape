@@ -2,73 +2,39 @@ package api
 
 import (
 	"context"
-	"database/sql"
 	"io"
-	"log/slog"
 	"net/http"
 
+	"github.com/stephenafamo/bob"
+
 	"danicos.dev/daniel/curious-ape/pkg/config"
-	"danicos.dev/daniel/curious-ape/pkg/ui/pages"
+	"danicos.dev/daniel/curious-ape/pkg/services/user"
+	"danicos.dev/daniel/curious-ape/pkg/web"
 	"danicos.dev/daniel/curious-ape/web/resources"
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
 )
 
-func SetupRoutes(ctx context.Context, r chi.Router, sessionManager *scs.SessionManager, db *sql.DB) error {
+func SetupRoutes(ctx context.Context, r chi.Router, sessionManager *scs.SessionManager, db bob.DB) error {
 	if config.Global.Environment == config.Dev {
 		setupReload(r)
 	}
-	// Common
-	// - Login Page
-	// Internal
-	// - User
-	// - Oauth
 
 	r.Handle("/static/*", resources.Handler())
 
 	r.Group(func(r chi.Router) {
 		r.Use(sessionManager.LoadAndSave)
+		r.Use(user.MiddlewareAuthenticateFromSession(sessionManager, db))
 
-		r.Get("/login", LoginPage)
-		r.Post("/login", LoginPost)
-
-		// Auth
-		r.Get("/", Index)
+		user.SetupRoutes(r, db, sessionManager)
 	})
-
-	// Implement Hotreload?
-
-	// TODO: Return the Login Page.
-	// ALSO: If Non-Authenticated, Redirect to /Login
-	//
-	// 2. Authenticate from session
-	// 3. Set UI State?
-	//
-
-	// Here, I stablish the protected from the non-protected routes.
-	// So, the first thing I need to do is to Return the Login Page.
-	//  - I need the Authentication wiring.
 
 	return nil
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	// io.WriteString(w, "Index")
-	Redirect(w, "/login")
-}
-
-func LoginPage(w http.ResponseWriter, r *http.Request) {
-	// TODO: if is authenticated redirect -> to index "/"
-	err := pages.LoginPage("Login").Render(r.Context(), w)
-	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-	}
-}
-
-func LoginPost(w http.ResponseWriter, r *http.Request) {
-	username := r.PostFormValue("username")
-	password := r.PostFormValue("password")
-	slog.Info("login", "username", username, "password", password)
+	web.Redirect(w, "/login")
 }
 
 func putHandler(w http.ResponseWriter, r *http.Request, sessionManager *scs.SessionManager) {
@@ -81,11 +47,6 @@ func getHandler(w http.ResponseWriter, r *http.Request, sessionManager *scs.Sess
 	// key. The zero value is returned if the key does not exist.
 	msg := sessionManager.GetString(r.Context(), "message")
 	io.WriteString(w, msg)
-}
-
-func Redirect(w http.ResponseWriter, loc string) {
-	w.Header().Set("Location", loc)
-	w.WriteHeader(http.StatusSeeOther)
 }
 
 func setupReload(router chi.Router) {
