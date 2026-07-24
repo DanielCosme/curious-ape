@@ -1,9 +1,14 @@
 package web
 
 import (
+	"io"
 	"log/slog"
 	"net/http"
 )
+
+type Node interface {
+	Render(w io.Writer) error
+}
 
 func Redirect(w http.ResponseWriter, loc string) {
 	w.Header().Set("Location", loc)
@@ -18,4 +23,10 @@ func ErrInternalServer(err error, w http.ResponseWriter) {
 func Err(code int, err error, w http.ResponseWriter) {
 	slog.Error("Error", "err", err)
 	http.Error(w, http.StatusText(code), code)
+}
+func Render(w http.ResponseWriter, node Node) {
+	err := node.Render(w)
+	if err != nil {
+		ErrInternalServer(err, w)
+	}
 }

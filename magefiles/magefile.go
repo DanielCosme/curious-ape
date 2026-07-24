@@ -57,13 +57,8 @@ func Run() error {
 
 // Builds production static Binary
 func Build() error {
-	mg.Deps(Build_Templ)
 	c := target.New("./scripts/build.sh")
 	return r.RunV("build", c)
-}
-
-func Build_Templ() error {
-	return r.RunV("build templ", target.NewA("go", "tool", "templ", "generate"))
 }
 
 // Install development environment tools
@@ -75,7 +70,6 @@ func Tools() {
 		target.NewA("go", "get", "-tool", "honnef.co/go/tools/cmd/staticcheck@latest"),
 		target.NewA("go", "get", "-tool", "github.com/stephenafamo/bob/gen/bobgen-sqlite@v0.45.0"),
 		target.NewA("go", "get", "-tool", "github.com/magefile/mage@v1.17.2"),
-		target.NewA("go", "get", "-tool", "github.com/a-h/templ/cmd/templ"),
 	}
 	runSteps("tools", ts)
 }

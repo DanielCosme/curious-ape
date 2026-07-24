@@ -3,7 +3,6 @@ package day
 import (
 	"net/http"
 
-	"danicos.dev/daniel/curious-ape/pkg/services/day/pages"
 	"danicos.dev/daniel/curious-ape/pkg/ui"
 	"danicos.dev/daniel/curious-ape/pkg/web"
 )
@@ -18,8 +17,5 @@ func NewHandler(s *Service) *Handler {
 
 func (h *Handler) Index(w http.ResponseWriter, r *http.Request) {
 	s := ui.NewUIState("Days")
-	err := pages.Index(s).Render(r.Context(), w)
-	if err != nil {
-		web.ErrInternalServer(err, w)
-	}
+	web.Render(w, UI_Index(s, nil))
 }

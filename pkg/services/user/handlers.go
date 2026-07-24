@@ -4,7 +4,6 @@ import (
 	"log/slog"
 	"net/http"
 
-	"danicos.dev/daniel/curious-ape/pkg/services/user/pages"
 	"danicos.dev/daniel/curious-ape/pkg/ui"
 	"danicos.dev/daniel/curious-ape/pkg/web"
 	"github.com/alexedwards/scs/v2"
@@ -25,10 +24,7 @@ func (h *Handler) LoginPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s := ui.NewUIState("Login")
-	err := pages.LoginPage(s).Render(r.Context(), w)
-	if err != nil {
-		web.ErrInternalServer(err, w)
-	}
+	web.Render(w, UI_Login(s))
 }
 
 func (h *Handler) LoginPost(w http.ResponseWriter, r *http.Request) {

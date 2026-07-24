@@ -12,7 +12,6 @@ type Live mg.Namespace
 
 func (Live) All() {
 	mg.Deps(
-		Live.Templ,
 		Live.Server,
 	)
 }
@@ -25,12 +24,8 @@ func (Live) Server() error {
 		"-build.cmd", fmt.Sprintf("go build -tags=dev -o %s ./cmd/web", devOutput),
 		"-build.entrypoint", devOutput,
 		"-build.include_dir", "cmd,pkg",
-		"-build.include_ext", "go,templ",
+		"-build.include_ext", "go",
 	}...)
 
 	return r.RunV("live server", t)
-}
-
-func (Live) Templ() error {
-	return r.RunV("live templ", target.NewA("go", "tool", "templ", "generate", "-watch"))
 }
