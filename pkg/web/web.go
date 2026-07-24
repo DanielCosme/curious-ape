@@ -4,6 +4,9 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"time"
+
+	"danicos.dev/daniel/curious-ape/pkg/core"
 )
 
 type Node interface {
@@ -29,4 +32,21 @@ func Render(w http.ResponseWriter, node Node) {
 	if err != nil {
 		ErrInternalServer(err, w)
 	}
+}
+
+func GetDayParams(r *http.Request) core.Date {
+	err := r.ParseForm()
+	if err != nil {
+		panic("get day params: error parsing form: " + err.Error())
+	}
+
+	if r.Form.Get("date") == "" {
+		return core.NewDate(time.Now())
+	}
+	date, err := core.NewDateFromISO8601(r.Form.Get("date"))
+	if err != nil {
+		slog.Error("cannot parse date", "err", err)
+		panic(err)
+	}
+	return date
 }

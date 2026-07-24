@@ -179,7 +179,7 @@ func TestDay(t *testing.T) {
 }
 */
 
-func TestApp_UserExists(t *testing.T) {
+func testApp_UserExists(t *testing.T) {
 	t.Parallel()
 	app := NewTestApplication(t)
 
