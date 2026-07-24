@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"danicos.dev/daniel/curious-ape/pkg/config"
+	"danicos.dev/daniel/curious-ape/pkg/ui/pages"
 	"danicos.dev/daniel/curious-ape/web/resources"
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
@@ -43,12 +44,16 @@ func SetupRoutes(ctx context.Context, r chi.Router, sessionManager *scs.SessionM
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "Index")
+	// io.WriteString(w, "Index")
+	Redirect(w, "/login")
 }
 
 func LoginPage(w http.ResponseWriter, r *http.Request) {
 	// TODO: if is authenticated redirect -> to index "/"
-	io.WriteString(w, "You have to Login")
+	err := pages.LoginPage("Login").Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	}
 }
 
 func putHandler(w http.ResponseWriter, r *http.Request, sessionManager *scs.SessionManager) {
