@@ -10,6 +10,7 @@ import (
 	"danicos.dev/daniel/curious-ape/pkg/config"
 	"danicos.dev/daniel/curious-ape/pkg/event"
 	"danicos.dev/daniel/curious-ape/pkg/services/day"
+	"danicos.dev/daniel/curious-ape/pkg/services/habit"
 	"danicos.dev/daniel/curious-ape/pkg/services/user"
 	"danicos.dev/daniel/curious-ape/pkg/ui"
 	"danicos.dev/daniel/curious-ape/web/resources"
@@ -35,6 +36,7 @@ func SetupRoutes(ctx context.Context, r chi.Router, sessionManager *scs.SessionM
 			r.Use(user.RequireAuthentication)
 
 			day.SetupRoutes(r, db, bus)
+			habit.SetupRoutes(r, db, bus)
 		})
 	})
 
@@ -49,6 +51,7 @@ func SetState(next http.Handler) http.Handler {
 		state := ui.UIState{
 			IsAuthenticated: user.IsAuthenticated(r),
 			Version:         config.Version(),
+			CurrentPath:     r.URL.Path,
 		}
 		ctx := ui.StateWithContextUI(r.Context(), &state)
 		r = r.WithContext(ctx)

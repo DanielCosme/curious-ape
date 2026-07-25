@@ -13,6 +13,7 @@ import (
 	"github.com/aarondl/opt/omitnull"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/sqlite"
+	"github.com/stephenafamo/bob/dialect/sqlite/sm"
 )
 
 func get(db bob.DB, p core.HabitParams) (habit core.Habit, err error) {
@@ -21,6 +22,18 @@ func get(db bob.DB, p core.HabitParams) (habit core.Habit, err error) {
 		return habit, persistence.CatchDBErr("habits: get", err)
 	}
 	return bobto.Habit(res), nil
+}
+
+func find(db bob.DB, p core.HabitParams) ([]core.Habit, error) {
+	res, err := buildHabitQuery(p).All(context.Background(), db)
+	if err != nil {
+		return nil, persistence.CatchDBErr("habits: find", err)
+	}
+	habits := make([]core.Habit, 0, len(res))
+	for _, h := range res {
+		habits = append(habits, bobto.Habit(h))
+	}
+	return habits, nil
 }
 
 func upsert(db bob.DB, p core.Habit) (coreHabit core.Habit, err error) {
@@ -85,14 +98,17 @@ func buildHabitQuery(f core.HabitParams) *sqlite.ViewQuery[*models.Habit, models
 	if f.ID > 0 {
 		q.Apply(models.SelectWhere.Habits.ID.EQ(int64(f.ID)))
 	}
-	/*
-		if f.DayID > 0 {
-			q.Apply(models.SelectWhere.Habits.DayID.EQ(int64(f.DayID)))
-		}
-		if f.CategoryID > 0 {
-			q.Apply(models.SelectWhere.Habits.HabitCategoryID.EQ(int64(f.CategoryID)))
-		}
-	*/
+	// maps to habit_category.kind (e.g. wake_up, fitness).
+	if f.Type != "" {
+		q.Apply(models.SelectJoins().Habits.InnerJoin.HabitCategory)
+		q.Apply(models.SelectWhere.HabitCategories.Kind.EQ(string(f.Type)))
+	}
+	if !f.From.Time().IsZero() && !f.To.Time().IsZero() {
+		q.Apply(models.SelectJoins().Habits.InnerJoin.Day)
+		q.Apply(models.SelectWhere.Days.Date.GTE(f.From.Time()))
+		q.Apply(models.SelectWhere.Days.Date.LTE(f.To.Time()))
+		q.Apply(sm.OrderBy(models.Days.Columns.Date).Asc())
+	}
 	return q
 }
 
@@ -106,18 +122,3 @@ func buildHabitCategoryQuery(f core.HabitCategoryParams) *sqlite.ViewQuery[*mode
 	}
 	return q
 }
-
-/*
-func habitCategoryToCore(hc *models.HabitCategory) (c core.HabitCategory) {
-	if hc == nil {
-		slog.Error("habitCategoryToCore habit category is nil")
-		return
-	}
-	c.ID = uint(hc.ID)
-	c.Name = hc.Name
-	c.Kind = core.HabitType(hc.Kind)
-	c.Description = hc.Description
-	// Now we are missing the habits.
-	return
-}
-*/

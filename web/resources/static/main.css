@@ -631,6 +631,8 @@ p.error {
 	max-width: min-content;
 	background: var(--border);
 	border: 1px solid var(--border);
+	/* Allow hovered cells to scale outside their track without clipping */
+	overflow: visible;
 }
 
 .grid-header {
@@ -655,6 +657,44 @@ p.error {
 	aspect-ratio: 1;
 	background: var(--bg-base);
 	border: 1px solid var(--border);
+	cursor: pointer;
+	position: relative;
+	z-index: 0;
+	transform-origin: center center;
+	transition:
+		transform 120ms ease,
+		box-shadow 120ms ease,
+		border-color 120ms ease,
+		filter 120ms ease;
+}
+
+/* Pop out of the grid on hover */
+.habit-cell:hover {
+	z-index: 2;
+	transform: scale(1.1);
+	border-color: var(--accent-hover);
+	box-shadow:
+		0 0 0 1px var(--accent-dim),
+		0 4px 12px rgba(0, 0, 0, 0.45);
+	filter: brightness(1.12);
+}
+
+/* Press feedback on click */
+.habit-cell:active {
+	z-index: 2;
+	transform: scale(1.1);
+	border-color: var(--accent);
+	box-shadow:
+		0 0 0 2px var(--accent),
+		0 1px 4px rgba(0, 0, 0, 0.35);
+	filter: brightness(1.25);
+	transition-duration: 60ms;
+}
+
+.habit-cell:focus-visible {
+	z-index: 2;
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
 }
 
 .habit-grid-item {

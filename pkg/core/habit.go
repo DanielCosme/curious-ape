@@ -49,6 +49,10 @@ type HabitCategory struct {
 
 type HabitParams struct {
 	ID int
+	// From and To are inclusive bounds on day.date. Zero means unbounded.
+	From Date
+	To   Date
+	Type HabitType
 }
 
 type HabitCategoryParams struct {

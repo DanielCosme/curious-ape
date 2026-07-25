@@ -3,6 +3,7 @@ package ui
 import (
 	"danicos.dev/daniel/curious-ape/pkg/config"
 	"danicos.dev/daniel/curious-ape/web/resources"
+	lucide "github.com/eduardolat/gomponents-lucide"
 	. "maragu.dev/gomponents"
 	ds "maragu.dev/gomponents-datastar"
 	. "maragu.dev/gomponents/components"
@@ -33,7 +34,17 @@ func UILayout(s *UIState, nodes ...Node) Node {
 				H1(Text(s.Title)),
 			),
 			If(s.IsAuthenticated,
-				Aside(),
+				Aside(
+					Nav(
+						navItem(lucide.House(), "/", "Home ", s.CurrentPath),
+						navItem(lucide.SquareCheckBig(), "/habits", "Habits", s.CurrentPath),
+						// navItem(lucide.Hourglass(), "/deadlines", "Deadlines ", s.CurrentPath),
+						// navItem(lucide.Bed(), "/sleep", "Sleep ", s.CurrentPath),
+						// navItem(lucide.Dumbbell(), "/fitness", "Fitness", s.CurrentPath),
+						// navItem(lucide.MonitorCog(), "/deep_work", "Deep-Work ", s.CurrentPath),
+						// navItem(lucide.Workflow(), "/integrations", "Integrations", s.CurrentPath),
+					),
+				),
 			),
 			Main(
 				Group(nodes),

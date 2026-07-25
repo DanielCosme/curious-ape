@@ -17,7 +17,6 @@ import (
 	"danicos.dev/daniel/curious-ape/pkg/api"
 	"danicos.dev/daniel/curious-ape/pkg/config"
 	"danicos.dev/daniel/curious-ape/pkg/event"
-	"danicos.dev/daniel/curious-ape/pkg/services/habit"
 	"danicos.dev/daniel/curious-ape/pkg/services/user"
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
@@ -74,6 +73,7 @@ func run(ctx context.Context) error {
 	db := initDB()
 	bobDB := bob.NewDB(db)
 	migrateDB(db)
+	bus := event.NewBroker()
 	sessionManager := initSessionManager(db)
 	errGroup, errGroupCtx := errgroup.WithContext(ctx)
 
@@ -82,8 +82,6 @@ func run(ctx context.Context) error {
 		"version", version,
 	)
 
-	bus := event.NewBroker()
-	_ = habit.NewService(bobDB, bus)
 	if err := user.NewService(bobDB).SetPassword(config.Global.Username, config.Global.Password); err != nil {
 		return fmt.Errorf("error setting up username/password: %w", err)
 	}

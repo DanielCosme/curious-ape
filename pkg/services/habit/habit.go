@@ -37,6 +37,23 @@ func (s *Service) HabitUpsert(params core.Habit) (habit core.Habit, err error) {
 	return
 }
 
+func (s *Service) Flip(id int) (habit core.Habit, err error) {
+	habit, err = get(s.db, core.HabitParams{ID: id})
+	if err != nil {
+		return
+	}
+	state := core.HabitStateNotDone
+	if habit.State == core.HabitStateNotDone || habit.State == core.HabitStateNoInfo {
+		state = core.HabitStateDone
+	}
+	habit.State = state
+	return upsert(s.db, core.Habit{
+		Date:  habit.Date,
+		Type:  habit.Type,
+		State: habit.State,
+	})
+}
+
 func (s *Service) Listen() {
 	for {
 		ev, ok := <-s.events
@@ -47,6 +64,7 @@ func (s *Service) Listen() {
 		switch ev.Topic {
 		case event.DayCreated:
 			if ev.Date == nil {
+				slog.Error("event payload should not be nil", "topic", ev.Topic, "event", event.DayCreated)
 				return
 			}
 			date := *ev.Date
