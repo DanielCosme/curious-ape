@@ -91,7 +91,6 @@ func ReadConfiguration(cfg *OldConfig) *OldConfig {
 		logFatal(fmt.Errorf("environment variable %s is empty", ENVIRONMENT))
 	}
 	cfg.Environment = env
-	// TODO: make the config path injectable via ENV Var or Command line Flag.
 	configPath := "config.json"
 	rawFile, err = os.ReadFile(configPath)
 	exitIfErr(err)

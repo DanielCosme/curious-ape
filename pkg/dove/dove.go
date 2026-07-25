@@ -10,10 +10,6 @@ import (
 	"danicos.dev/daniel/curious-ape/pkg/oak"
 )
 
-// TODO:
-// - Add Middleware.
-// 	- Rate limiter.
-
 // Dove is the main framework Instance.
 type Dove struct {
 	logHandler slog.Handler // Log backend.
