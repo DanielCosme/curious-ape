@@ -17,6 +17,7 @@ import (
 	"danicos.dev/daniel/curious-ape/pkg/api"
 	"danicos.dev/daniel/curious-ape/pkg/config"
 	"danicos.dev/daniel/curious-ape/pkg/event"
+	"danicos.dev/daniel/curious-ape/pkg/nats"
 	"danicos.dev/daniel/curious-ape/pkg/services/user"
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
@@ -31,6 +32,7 @@ import (
 	"github.com/golang-migrate/migrate/v4/database/sqlite"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
+	natsserver "github.com/nats-io/nats-server/v2/server"
 	_ "modernc.org/sqlite"
 )
 
@@ -44,7 +46,7 @@ func main() {
 }
 
 func run(ctx context.Context) error {
-	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
+	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, os.Kill)
 	defer cancel()
 
 	logger := slog.New(tint.NewHandler(os.Stdout, &tint.Options{
@@ -67,17 +69,7 @@ func run(ctx context.Context) error {
 	router := chi.NewMux()
 	router.Use(
 		httplog.RequestLogger(logger, &httplog.Options{
-			Schema: &httplog.Schema{
-				RequestRemoteIP: "ip",
-				// Examples for OTEL
-				// RequestRemoteIP: httplog.SchemaOTEL.RequestRemoteIP, // "client.address"
-				// RequestHeaders:     httplog.SchemaOTEL.RequestHeaders,
-				// ResponseHeaders:    httplog.SchemaOTEL.ResponseHeaders,
-				// RequestBody:        httplog.SchemaOTEL.RequestBody,
-				// ResponseBody:       httplog.SchemaOTEL.ResponseBody,
-				// RequestBytesUnread: httplog.SchemaOTEL.RequestBytesUnread,
-				// GroupDelimiter:     httplog.SchemaOTEL.GroupDelimiter,
-			},
+			Schema: &httplog.Schema{RequestRemoteIP: "ip"},
 		}),
 		middleware.Recoverer,
 	)
@@ -101,8 +93,17 @@ func run(ctx context.Context) error {
 		return fmt.Errorf("error setting up routes: %w", err)
 	}
 
-	// TODOs
-	// - Create ticker to sync data daily
+	natsOps := &natsserver.Options{
+		// DontListen: true,
+	}
+	ns, err := nats.New(ctx,
+		nats.WithNATSServerOptions(natsOps),
+		nats.WithLogging(),
+	)
+	ns.WaitForServer()
+	exitIfErr(err)
+	_, err = ns.Client()
+	exitIfErr(err)
 
 	addr := fmt.Sprintf(":%s", config.Global.Port)
 	server := &http.Server{
