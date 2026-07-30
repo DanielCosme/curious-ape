@@ -66,7 +66,19 @@ func run(ctx context.Context) error {
 
 	router := chi.NewMux()
 	router.Use(
-		httplog.RequestLogger(logger, nil),
+		httplog.RequestLogger(logger, &httplog.Options{
+			Schema: &httplog.Schema{
+				RequestRemoteIP: "ip",
+				// Examples for OTEL
+				// RequestRemoteIP: httplog.SchemaOTEL.RequestRemoteIP, // "client.address"
+				// RequestHeaders:     httplog.SchemaOTEL.RequestHeaders,
+				// ResponseHeaders:    httplog.SchemaOTEL.ResponseHeaders,
+				// RequestBody:        httplog.SchemaOTEL.RequestBody,
+				// ResponseBody:       httplog.SchemaOTEL.ResponseBody,
+				// RequestBytesUnread: httplog.SchemaOTEL.RequestBytesUnread,
+				// GroupDelimiter:     httplog.SchemaOTEL.GroupDelimiter,
+			},
+		}),
 		middleware.Recoverer,
 	)
 
