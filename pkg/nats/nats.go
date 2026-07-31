@@ -43,6 +43,12 @@ func New(ctx context.Context, opts ...Option) (*Server, error) {
 
 	options.NATSServerOptions.DontListen = true
 
+	if options.EnableLogging {
+		options.NATSServerOptions.Debug = true
+		options.NATSServerOptions.Trace = true
+		options.NATSServerOptions.TraceVerbose = false
+	}
+
 	ns, err := server.NewServer(options.NATSServerOptions)
 	if err != nil {
 		return nil, err
@@ -50,8 +56,6 @@ func New(ctx context.Context, opts ...Option) (*Server, error) {
 
 	if options.EnableLogging {
 		ns.ConfigureLogger()
-		options.NATSServerOptions.Trace = true
-		options.NATSServerOptions.Debug = true
 	}
 
 	go func() {

@@ -44,9 +44,7 @@ func UI_days(days []core.Day) Node {
 }
 
 func UI_day(day core.Day) Node {
-	q := url.Values{}
-	q.Add("date", day.Date.String())
-	sync := fmt.Sprintf("@post('/day/sync?%s')", q.Encode())
+	sync := fmt.Sprintf("@post('/days/%s/sync')", day.Date.String())
 	var goalIcon Node
 	switch day.Habits.Score {
 	case 0:

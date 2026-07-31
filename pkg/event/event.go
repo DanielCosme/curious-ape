@@ -4,6 +4,7 @@ import "danicos.dev/daniel/curious-ape/pkg/core"
 
 var (
 	DayCreated  = "days.created"
+	DaySync     = "days.sync"
 	HabitUpsert = "habits.upsert"
 )
 

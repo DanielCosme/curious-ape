@@ -29,7 +29,6 @@ func Routes(a *OldAPI) http.Handler {
 	d.Use(a.MiddlewareRequireAuthentication)
 
 	d.Endpoint("/day/sync").POST(a.DaySync)
-	d.Endpoint("/habits").GET(a.Habits)
 	d.Endpoint("/sleep").GET(a.Sleep)
 	d.Endpoint("/fitness").GET(a.Fitness)
 	d.Endpoint("/deep_work").GET(a.DeepWork)
@@ -98,25 +97,6 @@ func (a *OldAPI) Fitness(c *dove.Context) error {
 		return c.RenderOK(ui.Fitness(state))
 	}
 	return err
-}
-
-func (a *OldAPI) Habits(c *dove.Context) error {
-	state := State(a, c.Req)
-	today := core.NewDate(time.Now())
-	for _, month := range today.MonthsOfYear() {
-		t := time.Date(today.Time().Year(), month+1, -1, 0, 0, 0, 0, time.UTC)
-		d := core.NewDate(t)
-		if month == today.Time().Month() {
-			d = today
-		}
-		days, err := a.App.Day.Month(d, core.ASC)
-		if err == nil {
-			state.DaysYear = append(state.DaysYear, days)
-		} else {
-			return err
-		}
-	}
-	return c.RenderOK(ui.Habits(state))
 }
 
 func (a *OldAPI) Sleep(c *dove.Context) error {

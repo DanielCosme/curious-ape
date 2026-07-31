@@ -11,6 +11,9 @@ func SetupRoutes(r chi.Router, db bob.DB, ns *nats.Conn) error {
 	handler := NewHandler(svc)
 
 	r.Get("/", handler.Index)
+	r.Route("/days", func(r chi.Router) {
+		r.Post("/{date}/sync", handler.Sync)
+	})
 
 	return nil
 }
