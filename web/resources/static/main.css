@@ -13,7 +13,7 @@
 	font-style: normal;
 	font-weight: 400;
 	font-display: swap;
-	src: url("/assets/fonts/Exo2-Regular.woff2") format("woff2");
+	src: url("/static/assets/fonts/Exo2-Regular.woff2") format("woff2");
 }
 
 @font-face {
@@ -21,7 +21,7 @@
 	font-style: normal;
 	font-weight: 500;
 	font-display: swap;
-	src: url("/assets/fonts/Exo2-Medium.woff2") format("woff2");
+	src: url("/static/assets/fonts/Exo2-Medium.woff2") format("woff2");
 }
 
 @font-face {
@@ -29,7 +29,7 @@
 	font-style: normal;
 	font-weight: 600;
 	font-display: swap;
-	src: url("/assets/fonts/Exo2-SemiBold.woff2") format("woff2");
+	src: url("/static/assets/fonts/Exo2-SemiBold.woff2") format("woff2");
 }
 
 @font-face {
@@ -37,7 +37,7 @@
 	font-style: normal;
 	font-weight: 700;
 	font-display: swap;
-	src: url("/assets/fonts/Exo2-Bold.woff2") format("woff2");
+	src: url("/static/assets/fonts/Exo2-Bold.woff2") format("woff2");
 }
 
 /* Fun monospace: Fira Code — clean, modern, with programming ligatures
@@ -49,7 +49,7 @@
 	font-style: normal;
 	font-weight: 400;
 	font-display: swap;
-	src: url("/assets/fonts/FiraCode-Regular.woff2") format("woff2");
+	src: url("/static/assets/fonts/FiraCode-Regular.woff2") format("woff2");
 }
 
 @font-face {
@@ -57,7 +57,7 @@
 	font-style: normal;
 	font-weight: 500;
 	font-display: swap;
-	src: url("/assets/fonts/FiraCode-Medium.woff2") format("woff2");
+	src: url("/static/assets/fonts/FiraCode-Medium.woff2") format("woff2");
 }
 
 @font-face {
@@ -65,7 +65,7 @@
 	font-style: normal;
 	font-weight: 700;
 	font-display: swap;
-	src: url("/assets/fonts/FiraCode-Bold.woff2") format("woff2");
+	src: url("/static/assets/fonts/FiraCode-Bold.woff2") format("woff2");
 }
 
 :root {

@@ -32,7 +32,8 @@ func NewApi(workspaceID int, token string) (*API, error) {
 	}
 
 	var tz string
-	if os.Getenv("APE_ENVIRONMENT") == "dev" {
+	// TODO: address this...
+	if os.Getenv("APE_ENVIRONMENT") == string(config.Dev) {
 		tz = config.TZ
 	} else {
 		profile, err := a.Me.GetProfile()

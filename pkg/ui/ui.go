@@ -16,17 +16,17 @@ const CtxState CtxKey = "ui_state"
 
 // Classes (central place for reusable class names)
 const (
-	cLayout        = "layout"
-	cNavLink       = "nav-link"
-	cNavLinkActive = "nav-link active"
+	CLayout        = "layout"
+	CNavLink       = "nav-link"
+	CNavLinkActive = "nav-link active"
 	CBtn           = "btn"
-	cBtnNav        = "btn btn-nav"
-	cSurface       = "surface"
-	cLogEntry      = "log-entry"
-	cError         = "error"
-	cVersion       = "version"
-	cStatusBadge   = "status-badge"
-	cSkeleton      = "skeleton"
+	CBtnNav        = "btn btn-nav"
+	CSurface       = "surface"
+	CLogEntry      = "log-entry"
+	CError         = "error"
+	CVersion       = "version"
+	CStatusBadge   = "status-badge"
+	CSkeleton      = "skeleton"
 )
 
 type UIState struct {

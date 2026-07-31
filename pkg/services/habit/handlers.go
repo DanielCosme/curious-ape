@@ -47,7 +47,7 @@ func (h *Handler) Flip(w http.ResponseWriter, r *http.Request) {
 	web.Render(w, HabitsGrid(m))
 }
 
-func (h *Handler) Habits(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HabitsPage(w http.ResponseWriter, r *http.Request) {
 	state := ui.StateFromContextUI(r.Context())
 	today := core.NewDate(time.Now())
 

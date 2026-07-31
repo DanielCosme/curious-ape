@@ -16,6 +16,7 @@ import (
 	"danicos.dev/daniel/curious-ape/database/migrations"
 	"danicos.dev/daniel/curious-ape/pkg/api"
 	"danicos.dev/daniel/curious-ape/pkg/config"
+	"danicos.dev/daniel/curious-ape/pkg/integrations"
 	embbeded_nats "danicos.dev/daniel/curious-ape/pkg/nats"
 	"danicos.dev/daniel/curious-ape/pkg/services/user"
 	"github.com/alexedwards/scs/sqlite3store"
@@ -47,8 +48,11 @@ func run(ctx context.Context) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, os.Kill)
 	defer cancel()
 
+	cfg := config.Load()
+	cfg.Validate() // Will panic if fails validation.
+
 	logger := slog.New(tint.NewHandler(os.Stdout, &tint.Options{
-		Level:      config.Global.LogLevel,
+		Level:      cfg.LogLevel,
 		TimeFormat: time.TimeOnly,
 	}))
 	slog.SetDefault(logger)
@@ -78,25 +82,27 @@ func run(ctx context.Context) error {
 	nc, err := ns.Client()
 	exitIfErr(err)
 
-	db := initDB()
+	db := initDB(cfg)
 	bobDB := bob.NewDB(db)
 	migrateDB(db)
-	sessionManager := initSessionManager(db)
+	sessionManager := initSessionManager(cfg, db)
 	errGroup, errGroupCtx := errgroup.WithContext(ctx)
 
+	is := integrations.New(cfg.TogglWorkspaceID, cfg.TogglAPIKey, cfg.HevyAPIKey, nil, nil)
+
 	logger.Info("Application initialized",
-		"env", config.Global.Environment,
+		"env", cfg.Environment,
 		"version", version,
 	)
 
-	if err := user.NewService(bobDB).SetPassword(config.Global.Username, config.Global.Password); err != nil {
+	if err := user.NewService(bobDB).SetPassword(cfg.Username, cfg.Password); err != nil {
 		return fmt.Errorf("error setting up username/password: %w", err)
 	}
-	if err := api.SetupRoutes(errGroupCtx, router, sessionManager, bobDB, nc); err != nil {
+	if err := api.SetupRoutes(errGroupCtx, cfg, is, router, sessionManager, bobDB, nc); err != nil {
 		return fmt.Errorf("error setting up routes: %w", err)
 	}
 
-	addr := fmt.Sprintf(":%s", config.Global.Port)
+	addr := fmt.Sprintf(":%s", cfg.Port)
 	server := &http.Server{
 		Addr:     addr,
 		Handler:  router,
@@ -129,10 +135,10 @@ func run(ctx context.Context) error {
 	return errGroup.Wait()
 }
 
-func initDB() *sql.DB {
-	slog.Info("Opening database", "path", config.Global.DatabasePath)
+func initDB(cfg *config.Config) *sql.DB {
+	slog.Info("Opening database", "path", cfg.DatabasePath)
 	options := "?_pragma=journal_mode(WAL)&_pragma=busy_timeout(5000)&_pragma=synchronous(NORMAL)&_pragma=foreign_keys(ON)"
-	dsn := config.Global.DatabasePath + options
+	dsn := cfg.DatabasePath + options
 	db, err := sql.Open("sqlite", dsn)
 	exitIfErr(err)
 	err = db.Ping()
@@ -160,13 +166,13 @@ func migrateDB(db *sql.DB) {
 	}
 }
 
-func initSessionManager(db *sql.DB) *scs.SessionManager {
+func initSessionManager(cfg *config.Config, db *sql.DB) *scs.SessionManager {
 	sessionManager := scs.New()
 	sessionManager.Store = sqlite3store.New(db)
 	sessionManager.Lifetime = 24 * time.Hour * 7 // 7 days
 	sessionManager.Cookie.SameSite = http.SameSiteStrictMode
 	sessionManager.Cookie.Name = "curious-ape-session"
-	if config.Global.Environment == config.Prod {
+	if cfg.Environment == config.Prod {
 		sessionManager.Cookie.HttpOnly = true
 		sessionManager.Cookie.Secure = true
 	}

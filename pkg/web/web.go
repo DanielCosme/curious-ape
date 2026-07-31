@@ -28,6 +28,7 @@ func Err(code int, err error, w http.ResponseWriter) {
 	http.Error(w, http.StatusText(code), code)
 }
 func Render(w http.ResponseWriter, node Node) {
+	w.Header().Set("Content-Type", "text/html")
 	err := node.Render(w)
 	if err != nil {
 		ErrInternalServer(err, w)

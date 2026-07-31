@@ -9,8 +9,10 @@ import (
 	"github.com/stephenafamo/bob"
 
 	"danicos.dev/daniel/curious-ape/pkg/config"
+	"danicos.dev/daniel/curious-ape/pkg/integrations"
 	"danicos.dev/daniel/curious-ape/pkg/services/day"
 	"danicos.dev/daniel/curious-ape/pkg/services/habit"
+	"danicos.dev/daniel/curious-ape/pkg/services/integration"
 	"danicos.dev/daniel/curious-ape/pkg/services/user"
 	"danicos.dev/daniel/curious-ape/pkg/ui"
 	"danicos.dev/daniel/curious-ape/web/resources"
@@ -18,8 +20,8 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func SetupRoutes(ctx context.Context, r chi.Router, sessionManager *scs.SessionManager, db bob.DB, ns *nats.Conn) (err error) {
-	if config.Global.Environment == config.Dev {
+func SetupRoutes(ctx context.Context, cfg *config.Config, is *integrations.Integrations, r chi.Router, sessionManager *scs.SessionManager, db bob.DB, ns *nats.Conn) (err error) {
+	if cfg.Environment == config.Dev {
 		setupReload(r)
 	}
 
@@ -37,6 +39,7 @@ func SetupRoutes(ctx context.Context, r chi.Router, sessionManager *scs.SessionM
 
 			day.SetupRoutes(r, db, ns)
 			habit.SetupRoutes(r, db, ns)
+			integration.SetupRoutes(r, cfg, is, db, ns)
 		})
 	})
 

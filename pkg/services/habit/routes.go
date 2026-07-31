@@ -11,7 +11,7 @@ func SetupRoutes(r chi.Router, db bob.DB, ns *nats.Conn) error {
 	handler := NewHandler(svc)
 
 	r.Route("/habits", func(r chi.Router) {
-		r.Get("/", handler.Habits)
+		r.Get("/", handler.HabitsPage)
 		r.Put("/{id}/flip", handler.Flip)
 	})
 

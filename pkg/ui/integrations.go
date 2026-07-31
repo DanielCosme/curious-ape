@@ -14,7 +14,7 @@ import (
 
 func Integrations(s *State) Node {
 	return Layout("Integrations", s, Div(
-		Class(cSurface),
+		Class(CSurface),
 		Map(s.Integrations, func(i core.IntegrationInfo) Node {
 			return Integration(i)
 		}),
@@ -35,7 +35,7 @@ func Integration(i core.IntegrationInfo) Node {
 			Text(i.Name),
 		),
 		P(
-			Div(Class(cStatusBadge+" status-"+string(i.Status)), Text(string(i.Status))),
+			Div(Class(CStatusBadge+" status-"+string(i.Status)), Text(string(i.Status))),
 		),
 		If(len(i.Info) > 0,
 			Ul(

@@ -21,15 +21,17 @@ func UILayout(s *UIState, nodes ...Node) Node {
 			Script(Defer(), Type("module"), Src(resources.StaticPath("datastar/datastar.js"))),
 			Link(Rel("stylesheet"), Href(resources.StaticPath("main.css")), Type("text/css")),
 
-			// <link rel="icon" type="image/x-icon" href={ resources.StaticPath("assets/favicon.ico") }/>
+			Link(Rel("icon"), Type("image/x-icon"), Href(resources.StaticPath("assets/icons/favicon.ico"))),
 
-			// Link(Rel("preload"), Href("/assets/fonts/Exo2-Regular.woff2"), As("font"), Type("font/woff2"), CrossOrigin("anonymous")),
-			// Link(Rel("preload"), Href("/assets/fonts/Exo2-SemiBold.woff2"), As("font"), Type("font/woff2"), CrossOrigin("anonymous")),
-			// Link(Rel("preload"), Href("/assets/fonts/FiraCode-Regular.woff2"), As("font"), Type("font/woff2"), CrossOrigin("anonymous")),
-			// Link(Rel("preload"), Href("/assets/fonts/FiraCode-Bold.woff2"), As("font"), Type("font/woff2"), CrossOrigin("anonymous")),
+			// Preload critical Exo 2 (sans) + Fira Code (mono) weights.
+			// Paths must match @font-face urls in main.css (/static/assets/fonts/...).
+			Link(Rel("preload"), Href(resources.StaticPath("assets/fonts/Exo2-Regular.woff2")), As("font"), Type("font/woff2"), CrossOrigin("anonymous")),
+			Link(Rel("preload"), Href(resources.StaticPath("assets/fonts/Exo2-SemiBold.woff2")), As("font"), Type("font/woff2"), CrossOrigin("anonymous")),
+			Link(Rel("preload"), Href(resources.StaticPath("assets/fonts/FiraCode-Regular.woff2")), As("font"), Type("font/woff2"), CrossOrigin("anonymous")),
+			Link(Rel("preload"), Href(resources.StaticPath("assets/fonts/FiraCode-Bold.woff2")), As("font"), Type("font/woff2"), CrossOrigin("anonymous")),
 		},
 		Body: []Node{
-			Class(cLayout),
+			Class(CLayout),
 			Header(
 				H1(Text(s.Title)),
 			),
@@ -53,7 +55,7 @@ func UILayout(s *UIState, nodes ...Node) Node {
 				),
 			),
 			Footer(
-				P(Class(cVersion), Text(s.Version)),
+				P(Class(CVersion), Text(s.Version)),
 			),
 		},
 	})
@@ -77,7 +79,7 @@ func Layout(title string, s *State, nodes ...Node) Node {
 			Link(Rel("stylesheet"), Href("/assets/css/main.css")),
 		},
 		Body: []Node{
-			Class(cLayout),
+			Class(CLayout),
 			Header(
 				Text("header"),
 				H1(Text(title)),
@@ -95,9 +97,9 @@ func Layout(title string, s *State, nodes ...Node) Node {
 }
 
 func navItem(icon Node, path, name, current string) Node {
-	cls := cNavLink
+	cls := CNavLink
 	if path == current {
-		cls = cNavLinkActive
+		cls = CNavLinkActive
 	}
 	return A(
 		Class(cls),

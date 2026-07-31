@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"sync"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -17,30 +17,19 @@ const (
 	Prod Environment = "prod"
 )
 
-var (
-	Global *Config
-	once   sync.Once
-)
-
-func init() {
-	once.Do(func() {
-		Global = Load()
-		Global.validate()
-	})
-}
-
 type Config struct {
-	Environment  Environment
-	Port         string
-	LogLevel     slog.Level
-	DatabasePath string
-	Username     string
-	Password     string
-	HevyAPIKey   string
-	TogglAPIKey  string
+	Environment      Environment
+	Port             string
+	LogLevel         slog.Level
+	DatabasePath     string
+	Username         string
+	Password         string
+	HevyAPIKey       string
+	TogglAPIKey      string
+	TogglWorkspaceID int
 }
 
-func (c *Config) validate() {
+func (c *Config) Validate() {
 	if c.DatabasePath == "" {
 		panic("config error: database path empty")
 	}
@@ -73,6 +62,14 @@ func loadBase() *Config {
 		}(),
 		HevyAPIKey:  getEnv(CONFIG_HEVY_API_KEY, ""),
 		TogglAPIKey: getEnv(CONFIG_TOGGL_API_KEY, ""),
+		TogglWorkspaceID: func() int {
+			wokID := getEnv(CONFIG_TOGGL_WORKSPACE_ID, "")
+			id, err := strconv.Atoi(wokID)
+			if err != nil {
+				panic(err)
+			}
+			return id
+		}(),
 	}
 }
 
@@ -81,6 +78,5 @@ func getEnv(key, fallback string) string {
 		slog.Info(fmt.Sprintf("Config value loaded from environment: %s", key))
 		return val
 	}
-	slog.Info(fmt.Sprintf("Config value loaded from fallbck: %s", key))
 	return fallback
 }

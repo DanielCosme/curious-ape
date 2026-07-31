@@ -11,7 +11,7 @@ import (
 
 func Deadlines(s *State) Node {
 	return Layout("Deadlines", s, Div(
-		Class(cSurface),
+		Class(CSurface),
 		A(
 			Href("/deadline"),
 			Button(Class(CBtn), Text("New deadline")),
@@ -27,7 +27,7 @@ func deadline(d core.Deadline) Node {
 		return nil
 	}
 	return Div(
-		Class(cLogEntry+" deadline-item"),
+		Class(CLogEntry+" deadline-item"),
 		H4(Text(d.Title)),
 		P(Text(d.EndDate.Time().Format("02 Jan 2006"))),
 		P(Text(fmt.Sprintf("Days left: %d", d.DaysLeft))),
@@ -42,9 +42,9 @@ func DeadlineForm(s *State) Node {
 		err = s.Deadlines.Err.Error()
 	}
 	return Layout("New Deadline", s, Div(
-		Class(cSurface),
+		Class(CSurface),
 		If(s.Deadlines.Err != nil,
-			P(Class(cError), Text("ERROR: "+err)),
+			P(Class(CError), Text("ERROR: "+err)),
 		),
 		Form(
 			ds.On("submit", post),
