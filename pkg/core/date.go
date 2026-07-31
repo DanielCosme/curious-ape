@@ -83,6 +83,18 @@ func (d Date) MarshalJSON() ([]byte, error) {
 	return []byte(s), nil
 }
 
+func (d Date) Enc() []byte {
+	return []byte(d.String())
+}
+
+func DateDecode(in []byte) Date {
+	d, err := NewDateFromISO8601(string(in))
+	if err != nil {
+		panic(err)
+	}
+	return d
+}
+
 func (ds DateSlice) ToTimeSlice() []time.Time {
 	res := make([]time.Time, len(ds))
 	for idx, d := range ds {

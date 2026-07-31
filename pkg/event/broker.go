@@ -4,19 +4,19 @@ import "sync"
 
 type Broker interface {
 	Publish(Event)
-	Subscribe(Topic, EventChan)
+	Subscribe(string, EventChan)
 }
 
 var _ Broker = (*BrokerImpl)(nil)
 
 type BrokerImpl struct {
-	subs map[Topic][]EventChan
+	subs map[string][]EventChan
 	mu   sync.Mutex
 }
 
 func NewBroker() *BrokerImpl {
 	return &BrokerImpl{
-		subs: map[Topic][]EventChan{},
+		subs: map[string][]EventChan{},
 		mu:   sync.Mutex{},
 	}
 }
@@ -25,7 +25,7 @@ func NewBroker() *BrokerImpl {
 // subscriber calls Event.Done(). Delivery is sequential per subscriber.
 func (b *BrokerImpl) Publish(event Event) {
 	b.mu.Lock()
-	chans := append([]EventChan(nil), b.subs[event.Topic]...)
+	chans := append([]EventChan(nil), b.subs[event.string]...)
 	b.mu.Unlock()
 
 	for _, ch := range chans {
@@ -36,7 +36,7 @@ func (b *BrokerImpl) Publish(event Event) {
 	}
 }
 
-func (b *BrokerImpl) Subscribe(topic Topic, ch EventChan) {
+func (b *BrokerImpl) Subscribe(topic string, ch EventChan) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	b.subs[topic] = append(b.subs[topic], ch)

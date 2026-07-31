@@ -2,15 +2,13 @@ package event
 
 import "danicos.dev/daniel/curious-ape/pkg/core"
 
-type Topic string
-
 var (
-	DayCreated  Topic = "day-created"
-	HabitUpsert Topic = "habit-upsert"
+	DayCreated  = "days.created"
+	HabitUpsert = "habits.upsert"
 )
 
 type Event struct {
-	Topic
+	string
 	Date *core.Date
 
 	// done is set by Publish so it can block until the subscriber finishes.

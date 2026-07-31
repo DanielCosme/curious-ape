@@ -7,21 +7,21 @@ import (
 type Listener func(data any) error
 
 type Bus interface {
-	Publish(topic Topic, data any) error
-	Subscribe(topic Topic, listener Listener)
+	Publish(topic string, data any) error
+	Subscribe(topic string, listener Listener)
 }
 
 type BusImpl struct {
-	events map[Topic][]Listener
+	events map[string][]Listener
 }
 
 func NewBus() BusImpl {
 	return BusImpl{
-		events: map[Topic][]Listener{},
+		events: map[string][]Listener{},
 	}
 }
 
-func (b BusImpl) Publish(topic Topic, data any) error {
+func (b BusImpl) Publish(topic string, data any) error {
 	if listeners, ok := b.events[topic]; ok {
 		for _, run := range listeners {
 			err := run(data)
@@ -36,7 +36,7 @@ func (b BusImpl) Publish(topic Topic, data any) error {
 	return nil
 }
 
-func (b BusImpl) Subscribe(topic Topic, listener Listener) {
+func (b BusImpl) Subscribe(topic string, listener Listener) {
 	if listeners, found := b.events[topic]; found {
 		listeners = append(listeners, listener)
 	} else {

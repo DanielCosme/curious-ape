@@ -5,16 +5,18 @@ import (
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/event"
+	"danicos.dev/daniel/curious-ape/pkg/utils"
+	"github.com/nats-io/nats.go"
 	"github.com/stephenafamo/bob"
 )
 
 type Service struct {
-	db  bob.DB
-	bus event.Broker
+	db bob.DB
+	ns *nats.Conn
 }
 
-func NewService(db bob.DB, bus event.Broker) *Service {
-	return &Service{db: db, bus: bus}
+func NewService(db bob.DB, ns *nats.Conn) *Service {
+	return &Service{db: db, ns: ns}
 }
 
 func (s *Service) Month(date core.Date, order core.OrderParam) ([]core.Day, error) {
@@ -49,11 +51,13 @@ func (s *Service) GetOrCreate(date core.Date) (d core.Day, err error) {
 		if err != nil {
 			return
 		}
-		s.bus.Publish(event.Event{
-			Topic: event.DayCreated,
-			Date:  &date,
-		})
-		// Reload so habits created by DayCreated subscribers are included.
+
+		// NOTE: the first subscriber to respond will un-block this. Might need to address this in the future.
+		_, err := s.ns.Request(event.DayCreated, date.Enc(), time.Second*10)
+		if err != nil && !utils.ErrNatsIsNoResponders(err) {
+			return d, err
+		}
+
 		return get(s.db, core.DayParams{Date: date})
 	}
 	return

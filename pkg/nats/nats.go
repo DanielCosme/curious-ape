@@ -34,10 +34,13 @@ type Server struct {
 }
 
 func New(ctx context.Context, opts ...Option) (*Server, error) {
-	options := &options{}
+	options := &options{
+		NATSServerOptions: &server.Options{},
+	}
 	for _, o := range opts {
 		o(options)
 	}
+
 	options.NATSServerOptions.DontListen = true
 
 	ns, err := server.NewServer(options.NATSServerOptions)
@@ -47,6 +50,8 @@ func New(ctx context.Context, opts ...Option) (*Server, error) {
 
 	if options.EnableLogging {
 		ns.ConfigureLogger()
+		options.NATSServerOptions.Trace = true
+		options.NATSServerOptions.Debug = true
 	}
 
 	go func() {

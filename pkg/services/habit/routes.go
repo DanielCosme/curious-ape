@@ -1,13 +1,13 @@
 package habit
 
 import (
-	"danicos.dev/daniel/curious-ape/pkg/event"
 	"github.com/go-chi/chi/v5"
+	"github.com/nats-io/nats.go"
 	"github.com/stephenafamo/bob"
 )
 
-func SetupRoutes(r chi.Router, db bob.DB, bus event.Broker) error {
-	svc := NewService(db, bus)
+func SetupRoutes(r chi.Router, db bob.DB, ns *nats.Conn) error {
+	svc := NewService(db, ns)
 	handler := NewHandler(svc)
 
 	r.Route("/habits", func(r chi.Router) {

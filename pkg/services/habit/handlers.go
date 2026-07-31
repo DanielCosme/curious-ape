@@ -54,6 +54,9 @@ func (h *Handler) Habits(w http.ResponseWriter, r *http.Request) {
 		if month == today.Time().Month() {
 			d = today
 		}
+
+		// Maybe I emit an event here?...
+
 		// TODO: Improve this mess.
 		wakeUphabits, err := find(h.svc.db, core.HabitParams{
 			From: d.FirstDayOfTheMonth(),

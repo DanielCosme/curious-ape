@@ -1,11 +1,12 @@
 package day_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
-	"danicos.dev/daniel/curious-ape/pkg/event"
+	embbeded_nats "danicos.dev/daniel/curious-ape/pkg/nats"
 	"danicos.dev/daniel/curious-ape/pkg/services/day"
 	"danicos.dev/daniel/curious-ape/pkg/services/habit"
 	"danicos.dev/daniel/curious-ape/pkg/test"
@@ -17,9 +18,16 @@ func TestDay(t *testing.T) {
 
 	t.Run("Month create expected range of dates", func(t *testing.T) {
 		t.Parallel()
+
+		ctx := context.Background()
+		ns, err := embbeded_nats.New(ctx)
+		test.NilErr(t, err)
+		ns.WaitForServer()
+		nc, err := ns.Client()
+		test.NilErr(t, err)
+
 		bobDB := bob.NewDB(test.NewTestDB(t))
-		bus := event.NewBroker()
-		srv := day.NewService(bobDB, bus)
+		srv := day.NewService(bobDB, nc)
 
 		date1 := core.NewDate(time.Now()).FirstDayOfTheMonth()
 		date2 := core.NewDate(date1.Time().AddDate(0, 0, 1))
@@ -38,13 +46,22 @@ func TestDay(t *testing.T) {
 
 	t.Run("Day creation triggers habit creation, when habit service is initialized", func(t *testing.T) {
 		t.Parallel()
+
+		ctx := context.Background()
+		ns, err := embbeded_nats.New(ctx)
+		test.NilErr(t, err)
+		ns.WaitForServer()
+		nc, err := ns.Client()
+		test.NilErr(t, err)
+
 		bobDB := bob.NewDB(test.NewTestDB(t))
-		bus := event.NewBroker()
-		_ = habit.NewService(bobDB, bus)
-		srv := day.NewService(bobDB, bus)
+		_ = habit.NewService(bobDB, nc)
+		srv := day.NewService(bobDB, nc)
 
 		date1 := core.NewDate(time.Now()).FirstDayOfTheMonth()
 		day1, err := srv.GetOrCreate(date1)
+		test.NilErr(t, err)
+
 		test.NilErr(t, err)
 		test.True(t, day1.ID == 1)
 		test.True(t, day1.Habits.Hs[0].State == core.HabitStateNoInfo)

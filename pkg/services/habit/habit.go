@@ -5,22 +5,22 @@ import (
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/event"
+	"github.com/nats-io/nats.go"
 	"github.com/stephenafamo/bob"
 )
 
 type Service struct {
-	db     bob.DB
-	events event.EventChan
+	db bob.DB
+	ns *nats.Conn
 }
 
-func NewService(db bob.DB, bus event.Broker) *Service {
+func NewService(db bob.DB, ns *nats.Conn) *Service {
 	s := &Service{
-		db:     db,
-		events: make(event.EventChan),
+		db: db,
+		ns: ns,
 	}
-	if bus != nil {
-		bus.Subscribe(event.DayCreated, s.events)
-		go s.Listen()
+	if ns != nil {
+		ns.Subscribe(event.DayCreated, s.listen)
 	}
 	return s
 }
@@ -54,34 +54,21 @@ func (s *Service) Flip(id int) (habit core.Habit, err error) {
 	})
 }
 
-func (s *Service) Listen() {
-	for {
-		ev, ok := <-s.events
-		if !ok {
-			return
+func (s *Service) listen(msg *nats.Msg) {
+	switch msg.Subject {
+	case event.DayCreated:
+		date := core.DateDecode(msg.Data)
+		params := []core.Habit{
+			{Date: date, State: core.HabitStateNoInfo, Type: core.HabitTypeWakeUp},
+			{Date: date, State: core.HabitStateNoInfo, Type: core.HabitTypeFitness},
+			{Date: date, State: core.HabitStateNoInfo, Type: core.HabitTypeDeepWork},
+			{Date: date, State: core.HabitStateNoInfo, Type: core.HabitTypeEatHealthy},
 		}
-
-		switch ev.Topic {
-		case event.DayCreated:
-			if ev.Date == nil {
-				slog.Error("event payload should not be nil", "topic", ev.Topic, "event", event.DayCreated)
-				return
+		for _, param := range params {
+			if _, err := s.HabitUpsert(param); err != nil {
+				slog.Error("Failed to upsert habit", "err", err)
 			}
-			date := *ev.Date
-			params := []core.Habit{
-				{Date: date, State: core.HabitStateNoInfo, Type: core.HabitTypeWakeUp},
-				{Date: date, State: core.HabitStateNoInfo, Type: core.HabitTypeFitness},
-				{Date: date, State: core.HabitStateNoInfo, Type: core.HabitTypeDeepWork},
-				{Date: date, State: core.HabitStateNoInfo, Type: core.HabitTypeEatHealthy},
-			}
-			for _, param := range params {
-				if _, err := s.HabitUpsert(param); err != nil {
-					slog.Error("Failed to upsert habit", "err", err)
-				}
-			}
-
-			// Unblock Publish only after work for this event is done.
-			ev.Done()
 		}
+		msg.Respond(nil)
 	}
 }

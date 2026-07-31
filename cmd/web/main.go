@@ -16,8 +16,7 @@ import (
 	"danicos.dev/daniel/curious-ape/database/migrations"
 	"danicos.dev/daniel/curious-ape/pkg/api"
 	"danicos.dev/daniel/curious-ape/pkg/config"
-	"danicos.dev/daniel/curious-ape/pkg/event"
-	"danicos.dev/daniel/curious-ape/pkg/nats"
+	embbeded_nats "danicos.dev/daniel/curious-ape/pkg/nats"
 	"danicos.dev/daniel/curious-ape/pkg/services/user"
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
@@ -32,7 +31,6 @@ import (
 	"github.com/golang-migrate/migrate/v4/database/sqlite"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
-	natsserver "github.com/nats-io/nats-server/v2/server"
 	_ "modernc.org/sqlite"
 )
 
@@ -74,10 +72,15 @@ func run(ctx context.Context) error {
 		middleware.Recoverer,
 	)
 
+	ns, err := embbeded_nats.New(ctx, embbeded_nats.WithLogging())
+	ns.WaitForServer()
+	exitIfErr(err)
+	nc, err := ns.Client()
+	exitIfErr(err)
+
 	db := initDB()
 	bobDB := bob.NewDB(db)
 	migrateDB(db)
-	bus := event.NewBroker()
 	sessionManager := initSessionManager(db)
 	errGroup, errGroupCtx := errgroup.WithContext(ctx)
 
@@ -89,21 +92,9 @@ func run(ctx context.Context) error {
 	if err := user.NewService(bobDB).SetPassword(config.Global.Username, config.Global.Password); err != nil {
 		return fmt.Errorf("error setting up username/password: %w", err)
 	}
-	if err := api.SetupRoutes(errGroupCtx, router, sessionManager, bobDB, bus); err != nil {
+	if err := api.SetupRoutes(errGroupCtx, router, sessionManager, bobDB, nc); err != nil {
 		return fmt.Errorf("error setting up routes: %w", err)
 	}
-
-	natsOps := &natsserver.Options{
-		// DontListen: true,
-	}
-	ns, err := nats.New(ctx,
-		nats.WithNATSServerOptions(natsOps),
-		nats.WithLogging(),
-	)
-	ns.WaitForServer()
-	exitIfErr(err)
-	_, err = ns.Client()
-	exitIfErr(err)
 
 	addr := fmt.Sprintf(":%s", config.Global.Port)
 	server := &http.Server{
@@ -140,7 +131,8 @@ func run(ctx context.Context) error {
 
 func initDB() *sql.DB {
 	slog.Info("Opening database", "path", config.Global.DatabasePath)
-	dsn := config.Global.DatabasePath + "?_busy_timeout=5000" + "&_journal_mode=WAL"
+	options := "?_pragma=journal_mode(WAL)&_pragma=busy_timeout(5000)&_pragma=synchronous(NORMAL)&_pragma=foreign_keys(ON)"
+	dsn := config.Global.DatabasePath + options
 	db, err := sql.Open("sqlite", dsn)
 	exitIfErr(err)
 	err = db.Ping()
