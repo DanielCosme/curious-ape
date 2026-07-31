@@ -107,7 +107,7 @@ func buildHabitQuery(f core.HabitParams) *sqlite.ViewQuery[*models.Habit, models
 		q.Apply(models.SelectJoins().Habits.InnerJoin.Day)
 		q.Apply(models.SelectWhere.Days.Date.GTE(f.From.Time()))
 		q.Apply(models.SelectWhere.Days.Date.LTE(f.To.Time()))
-		q.Apply(sm.OrderBy(models.Days.Columns.Date).Asc())
+		q.Apply(sm.OrderBy(models.Days.Columns.Date).Desc())
 	}
 	return q
 }

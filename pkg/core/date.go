@@ -59,8 +59,8 @@ func (d Date) RangeMonth() DateSlice {
 	return dates
 }
 
-// Months return all months of the year until the current date.
-func (d Date) Months() []time.Month {
+// MonthsOfYear return all months of the year until the current date.
+func (d Date) MonthsOfYear() []time.Month {
 	months := []time.Month{}
 	for i := d.time.Month(); i > 0; i -= 1 {
 		months = append(months, i)

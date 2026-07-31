@@ -1,6 +1,7 @@
 package habit
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -9,9 +10,6 @@ import (
 	"danicos.dev/daniel/curious-ape/pkg/ui"
 	"danicos.dev/daniel/curious-ape/pkg/web"
 	"github.com/go-chi/chi/v5"
-	// "time"
-	// "danicos.dev/daniel/curious-ape/pkg/core"
-	// "danicos.dev/daniel/curious-ape/pkg/ui"
 )
 
 type Handler struct {
@@ -34,13 +32,19 @@ func (h *Handler) Flip(w http.ResponseWriter, r *http.Request) {
 		web.ErrInternalServer(err, w)
 		return
 	}
-	// TODO: I should Send SSE Events
-	// 1. For the habit cell.
-	// 2. For the re-calculation of the Month Score.
-	//
-	// OR Just Re-Render the Entire Month back?
-	//
-	web.Render(w, ui_habitCell(habit))
+
+	month := habit.Date.Time().Month()
+	habitsMonth, err := find(h.svc.db, core.HabitParams{
+		From: habit.Date.FirstDayOfTheMonth(),
+		To:   habit.Date.LastDayOfTheMonth(),
+	})
+	if err != nil {
+		web.ErrInternalServer(err, w)
+		return
+	}
+
+	m := toUIMonth(month, habitsMonth)
+	web.Render(w, HabitsGrid(m))
 }
 
 func (h *Handler) Habits(w http.ResponseWriter, r *http.Request) {
@@ -48,62 +52,53 @@ func (h *Handler) Habits(w http.ResponseWriter, r *http.Request) {
 	today := core.NewDate(time.Now())
 
 	habitState := &HabitsPageState{}
-	for _, month := range today.Months() {
+	for _, month := range today.MonthsOfYear() {
 		t := time.Date(today.Time().Year(), month+1, 0, 0, 0, 0, 0, time.UTC)
 		d := core.NewDate(t)
 		if month == today.Time().Month() {
 			d = today
 		}
 
-		// Maybe I emit an event here?...
-
-		// TODO: Improve this mess.
-		wakeUphabits, err := find(h.svc.db, core.HabitParams{
+		habitsMonth, err := find(h.svc.db, core.HabitParams{
 			From: d.FirstDayOfTheMonth(),
 			To:   d.LastDayOfTheMonth(),
-			Type: core.HabitTypeWakeUp,
 		})
 		if err != nil {
 			web.ErrInternalServer(err, w)
 			return
 		}
-		fitnessHabits, err := find(h.svc.db, core.HabitParams{
-			From: d.FirstDayOfTheMonth(),
-			To:   d.LastDayOfTheMonth(),
-			Type: core.HabitTypeFitness,
-		})
-		if err != nil {
-			web.ErrInternalServer(err, w)
-			return
-		}
-		workHabits, err := find(h.svc.db, core.HabitParams{
-			From: d.FirstDayOfTheMonth(),
-			To:   d.LastDayOfTheMonth(),
-			Type: core.HabitTypeDeepWork,
-		})
-		if err != nil {
-			web.ErrInternalServer(err, w)
-			return
-		}
-		eatHabits, err := find(h.svc.db, core.HabitParams{
-			From: d.FirstDayOfTheMonth(),
-			To:   d.LastDayOfTheMonth(),
-			Type: core.HabitTypeEatHealthy,
-		})
-		if err != nil {
-			web.ErrInternalServer(err, w)
-			return
+		if len(habitsMonth) == 0 {
+			continue
 		}
 
-		m := Month{
-			m:       month,
-			days:    d.RangeMonth(),
-			wakeUp:  wakeUphabits,
-			fitness: fitnessHabits,
-			work:    workHabits,
-			eat:     eatHabits,
-		}
+		m := toUIMonth(month, habitsMonth)
 		habitState.Months = append(habitState.Months, m)
 	}
+
 	web.Render(w, HabitsPage(state, habitState))
+}
+
+func toUIMonth(month time.Month, hs []core.Habit) Month {
+	m := Month{m: month}
+	for _, h := range hs {
+		switch h.Type {
+		case core.HabitTypeWakeUp:
+			m.days = append(m.days, h.Date)
+			m.wakeUp = append(m.wakeUp, h)
+		case core.HabitTypeFitness:
+			m.fitness = append(m.fitness, h)
+		case core.HabitTypeDeepWork:
+			m.work = append(m.work, h)
+		case core.HabitTypeEatHealthy:
+			m.eat = append(m.eat, h)
+		default:
+			panic(fmt.Sprintf("unexpected core.HabitType: %#v", h.Type))
+		}
+
+		if h.State == core.HabitStateDone {
+			m.score++
+		}
+	}
+
+	return m
 }

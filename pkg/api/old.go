@@ -125,7 +125,7 @@ func (a *OldAPI) Fitness(c *dove.Context) error {
 func (a *OldAPI) Habits(c *dove.Context) error {
 	state := State(a, c.Req)
 	today := core.NewDate(time.Now())
-	for _, month := range today.Months() {
+	for _, month := range today.MonthsOfYear() {
 		t := time.Date(today.Time().Year(), month+1, -1, 0, 0, 0, 0, time.UTC)
 		d := core.NewDate(t)
 		if month == today.Time().Month() {

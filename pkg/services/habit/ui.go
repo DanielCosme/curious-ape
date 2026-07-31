@@ -24,6 +24,7 @@ type Month struct {
 	fitness []core.Habit
 	work    []core.Habit
 	eat     []core.Habit
+	score   int
 }
 
 type DayHabit struct{}
@@ -33,28 +34,32 @@ func HabitsPage(s *ui.UIState, habitState *HabitsPageState) Node {
 
 	finalNodes := []Node{}
 	for _, month := range habitState.Months {
-		daysCount := len(month.days) // Len of one of the Habits len...
-		monthScore := 40             // TODO: Implement this!!
-		maxScore := daysCount * 4
-		percentage := (float32(monthScore) * float32(100)) / float32(maxScore)
-		gridStyle := fmt.Sprintf("grid-template-columns: 120px repeat(%d, 1fr);", daysCount)
-
-		monthDiv := Div(
-			H2(Class("mono"), Text(month.m.String())),
-			Span(Class("month-score"), Text(fmt.Sprintf("%.0f%% %d/%d", percentage, monthScore, maxScore))),
-			Div(
-				Class("habits-grid"), Style(gridStyle),
-				Div(Class("grid-header"), Text("Category")),
-				UI_habitHeaders(month.days),
-				UI_HabitCells(month.wakeUp, core.HabitTypeWakeUp),
-				UI_HabitCells(month.fitness, core.HabitTypeFitness),
-				UI_HabitCells(month.work, core.HabitTypeDeepWork),
-				UI_HabitCells(month.eat, core.HabitTypeEatHealthy),
-			),
-		)
-		finalNodes = append(finalNodes, monthDiv)
+		finalNodes = append(finalNodes, HabitsGrid(month))
 	}
 	return ui.UILayout(s, Group(finalNodes))
+}
+
+func HabitsGrid(month Month) Node {
+	daysCount := len(month.days)
+	maxScore := daysCount * 4
+	percentage := (float32(month.score) * float32(100)) / float32(maxScore)
+	gridStyle := fmt.Sprintf("grid-template-columns: 120px repeat(%d, 1fr);", daysCount)
+
+	monthDiv := Div(
+		ID(fmt.Sprintf("%d-%d", month.days[0].Time().Year(), month.m)),
+		H2(Class("mono"), Text(month.m.String())),
+		Span(Class("month-score"), Text(fmt.Sprintf("%.0f%% %d/%d", percentage, month.score, maxScore))),
+		Div(
+			Class("habits-grid"), Style(gridStyle),
+			Div(Class("grid-header"), Text("Category")),
+			UI_habitHeaders(month.days),
+			UI_HabitCells(month.wakeUp, core.HabitTypeWakeUp),
+			UI_HabitCells(month.fitness, core.HabitTypeFitness),
+			UI_HabitCells(month.work, core.HabitTypeDeepWork),
+			UI_HabitCells(month.eat, core.HabitTypeEatHealthy),
+		),
+	)
+	return monthDiv
 }
 
 func UI_habitHeaders(ds []core.Date) Node {
