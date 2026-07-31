@@ -1,64 +1,9 @@
 package application
 
 import (
-	"errors"
-
-	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
 	"danicos.dev/daniel/curious-ape/pkg/persistence"
-	"github.com/aarondl/opt/omit"
-
-	"golang.org/x/crypto/bcrypt"
 )
-
-func (a *App) SetPassword(username, password string) error {
-	a.Log.Info("Setting password", "username", username)
-	if password == "" {
-		return errors.New("password cannot be empty")
-	}
-	if username == "" {
-		return errors.New("username cannot be empty")
-	}
-
-	u, err := a.db.Users.Get(persistence.UserParams{Username: username})
-	if core.IfErrNNotFound(err) {
-		return err
-	}
-	if u == nil {
-		hash, err := bcrypt.GenerateFromPassword([]byte(password), 10)
-		if err != nil {
-			return err
-		}
-		_, err = a.db.Users.Create(&models.UserSetter{
-			Username: omit.From(username),
-			Password: omit.From(string(hash)),
-		})
-		return err
-	}
-	return nil
-}
-
-// Authenticate returns userID if successfully authenticated.
-func (a *App) Authenticate(username, password string) (int, error) {
-	u, err := a.db.Users.Get(persistence.UserParams{Username: username})
-	if err != nil {
-		if errors.Is(err, persistence.ErrNotFound) {
-			return 0, persistence.ErrInvalidCredentials
-		}
-		return 0, err
-	}
-
-	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
-	if err != nil {
-		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			return 0, persistence.ErrInvalidCredentials
-		} else {
-			return 0, err
-		}
-	}
-
-	return int(u.ID), nil
-}
 
 func (a *App) UserExists(id int) (bool, error) {
 	return a.db.Users.Exists(id)

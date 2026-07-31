@@ -1,33 +1,19 @@
 package api
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
-	"errors"
-	"mime"
 	"net/http"
-	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
 	"time"
 
-	"danicos.dev/daniel/curious-ape/assets"
 	"danicos.dev/daniel/curious-ape/pkg/config"
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/dove"
-	"danicos.dev/daniel/curious-ape/pkg/oak"
 	"danicos.dev/daniel/curious-ape/pkg/ui"
 )
 
 func Routes(a *OldAPI) http.Handler {
 	d := dove.New(a.App.Log.Handler())
 
-	// e.StaticFS("/static", echo.MustSubFS(views.StaticFS, "static"))
-
 	d.Use(dove.MiddlewarePanicRecover)
-
-	d.Prefix("/assets").GET(a.ServeStaticAssets)
 
 	if a.App.Env == config.Dev {
 		d.Use(DevMiddleware)
@@ -37,20 +23,12 @@ func Routes(a *OldAPI) http.Handler {
 	d.Use(a.MiddlewareAuthenticateFromSession)
 	d.Use(a.MiddlewareSetUIState)
 
-	d.Endpoint("/login").
-		GET(a.GetLoginForm).
-		POST(a.Login).
-		DELETE(a.Logout)
-
 	d.Endpoint("/api/oauth2/fitbit/success").GET(a.FitbitSuccess)
 	d.Endpoint("/api/oauth2/google/success").GET(a.GoogleSuccess)
 
 	d.Use(a.MiddlewareRequireAuthentication)
 
-	d.Endpoint("/habit/flip").PUT(a.HabitFlip)
 	d.Endpoint("/day/sync").POST(a.DaySync)
-	d.Endpoint("/integration").GET(a.IntegrationGet)
-	d.Endpoint("/integrations").GET(a.IntegrationsGetList)
 	d.Endpoint("/habits").GET(a.Habits)
 	d.Endpoint("/sleep").GET(a.Sleep)
 	d.Endpoint("/fitness").GET(a.Fitness)
@@ -151,41 +129,6 @@ func (a *OldAPI) Sleep(c *dove.Context) error {
 	return err
 }
 
-func (a *OldAPI) ServeStaticAssets(c *dove.Context) (err error) {
-	path, found := strings.CutPrefix(c.Req.URL.Path, "/assets/")
-	if found {
-		var data []byte
-		if a.App.Env == config.Dev {
-			// In dev: no-cache with revalidation so changes are picked up on refresh without hard-reload.
-			c.Res.Header().Set("Cache-Control", "no-cache, must-revalidate")
-			data, err = os.ReadFile("./assets/" + path)
-		} else {
-			// In prod: long-lived immutable cache (1 year). New deploys will use new asset content (ETag changes).
-			c.Res.Header().Set("Cache-Control", "public, max-age=86400, immutable")
-			data, err = assets.Assets.ReadFile(path)
-		}
-		if err == nil {
-			mimeType := mime.TypeByExtension(filepath.Ext(path))
-			c.Res.Header().Set("Content-Type", mimeType)
-			hash := sha256.Sum256(data)
-			etag := `"` + hex.EncodeToString(hash[:]) + `"` // Compute a strong ETag from content hash (works for both dev disk and prod embed)
-			c.Res.Header().Set("ETag", etag)
-			c.Res.Header().Set("X-Content-Type-Options", "nosniff")
-
-			// Support conditional GET (304 Not Modified)
-			if match := c.Req.Header.Get("If-None-Match"); match != "" && match == etag {
-				c.Res.WriteHeader(http.StatusNotModified)
-				return
-			}
-			_, err = c.Res.Write(data)
-		}
-		return
-	} else {
-		c.Res.WriteHeader(http.StatusNotFound)
-		return errors.New(c.Req.URL.Path + " " + "not found")
-	}
-}
-
 func (a *OldAPI) FitbitSuccess(c *dove.Context) error {
 	c.ParseForm()
 	return a.App.Oauth2Success(core.IntegrationFitbit, c.Req.FormValue("code"))
@@ -194,26 +137,6 @@ func (a *OldAPI) FitbitSuccess(c *dove.Context) error {
 func (a *OldAPI) GoogleSuccess(c *dove.Context) error {
 	c.ParseForm()
 	return a.App.Oauth2Success(core.IntegrationGoogle, c.Req.FormValue("code"))
-}
-
-func (a *OldAPI) IntegrationGet(c *dove.Context) error {
-	c.ParseForm()
-	provider := c.Req.Form.Get("name")
-	integrationInfo, err := a.App.IntegrationGet(c.Ctx(), core.Integration(provider))
-	if err == nil {
-		return c.RenderOK(ui.Integration(integrationInfo))
-	}
-	return err
-}
-
-func (a *OldAPI) IntegrationsGetList(c *dove.Context) error {
-	integrationInfo, err := a.App.IntegrationsGetList()
-	if err == nil {
-		state := State(a, c.Req)
-		state.Integrations = integrationInfo
-		return c.RenderOK(ui.Integrations(state))
-	}
-	return err
 }
 
 func getDateParam(c *dove.Context) core.Date {
@@ -230,21 +153,6 @@ func getDateParam(c *dove.Context) core.Date {
 	}
 }
 
-func (a *OldAPI) HabitFlip(c *dove.Context) error {
-	c.ParseForm()
-	id, err := strconv.Atoi(c.Req.Form.Get("id"))
-	if err == nil {
-		habit, err := a.App.HabitFlip(id)
-		if err == nil {
-			_, err := a.App.Day.GetOrCreate(habit.Date)
-			if err == nil {
-				// return c.RenderOK(day.UI_day(d))
-			}
-		}
-	}
-	return err
-}
-
 func (a *OldAPI) DaySync(c *dove.Context) error {
 	c.ParseForm()
 	date, _ := core.NewDateFromISO8601(c.Req.Form.Get("date"))
@@ -253,45 +161,6 @@ func (a *OldAPI) DaySync(c *dove.Context) error {
 		// return c.RenderOK(day.UI_day(d))
 	}
 	return err
-}
-
-func (a *OldAPI) GetLoginForm(c *dove.Context) error {
-	if a.IsAuthenticated(c.Req) {
-		return c.Redirect("/")
-	}
-	return c.RenderOK(ui.Login(State(a, c.Req)))
-}
-
-func (a *OldAPI) Login(c *dove.Context) error {
-	logger := oak.FromContext(c.Ctx())
-	c.ParseForm()
-	username := c.Req.PostFormValue("username")
-	password := c.Req.PostFormValue("password")
-	id, err := a.App.Authenticate(username, password)
-	if err == nil {
-		err = a.Scs.RenewToken(c.Ctx())
-		if err == nil {
-			logger.Info("User authenticated")
-			a.Scs.Put(c.Ctx(), string(ctxKeyAuthenticatedUserID), id)
-			return c.Redirect("/")
-		}
-	}
-	return err
-	// if errors.Is(err, persistence.ErrInvalidCredentials) {
-	// 	// TODO: send http.StatusUnauthorized
-	// 	return err
-	// } else {
-	// 	// TODO: send http.InternalServerError
-	// 	return err
-	// }
-}
-
-func (a *OldAPI) Logout(c *dove.Context) error {
-	if err := a.Scs.RenewToken(c.Ctx()); err != nil {
-		return err
-	}
-	a.Scs.Remove(c.Ctx(), string(ctxKeyAuthenticatedUserID))
-	return c.Redirect("/login")
 }
 
 func State(a *OldAPI, r *http.Request) *ui.State {
