@@ -42,7 +42,7 @@ func UILayout(s *UIState, nodes ...Node) Node {
 						// navItem(lucide.Bed(), "/sleep", "Sleep ", s.CurrentPath),
 						// navItem(lucide.Dumbbell(), "/fitness", "Fitness", s.CurrentPath),
 						// navItem(lucide.MonitorCog(), "/deep_work", "Deep-Work ", s.CurrentPath),
-						// navItem(lucide.Workflow(), "/integrations", "Integrations", s.CurrentPath),
+						navItem(lucide.Workflow(), "/integrations", "Integrations", s.CurrentPath),
 					),
 				),
 			),

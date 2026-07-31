@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"sync"
@@ -35,6 +36,8 @@ type Config struct {
 	DatabasePath string
 	Username     string
 	Password     string
+	HevyAPIKey   string
+	TogglAPIKey  string
 }
 
 func (c *Config) validate() {
@@ -68,12 +71,16 @@ func loadBase() *Config {
 				return slog.LevelInfo
 			}
 		}(),
+		HevyAPIKey:  getEnv(CONFIG_HEVY_API_KEY, ""),
+		TogglAPIKey: getEnv(CONFIG_TOGGL_API_KEY, ""),
 	}
 }
 
 func getEnv(key, fallback string) string {
 	if val, ok := os.LookupEnv(key); ok {
+		slog.Info(fmt.Sprintf("Config value loaded from environment: %s", key))
 		return val
 	}
+	slog.Info(fmt.Sprintf("Config value loaded from fallbck: %s", key))
 	return fallback
 }
