@@ -19,6 +19,7 @@ require (
 	github.com/magefile/mage v1.17.2
 	github.com/nats-io/nats-server/v2 v2.14.4
 	github.com/nats-io/nats.go v1.51.0
+	github.com/starfederation/datastar-go v1.2.2
 	github.com/stephenafamo/bob v0.49.0
 	github.com/stephenafamo/scan v0.9.0
 	golang.org/x/crypto v0.54.0
@@ -54,6 +55,7 @@ require (
 	github.com/Azure/go-autorest/logger v0.2.1 // indirect
 	github.com/Azure/go-autorest/tracing v0.6.0 // indirect
 	github.com/BurntSushi/toml v1.4.1-0.20240526193622-a339e1f7089c // indirect
+	github.com/CAFxX/httpcompression v0.0.9 // indirect
 	github.com/ClickHouse/clickhouse-go v1.4.3 // indirect
 	github.com/GoogleCloudPlatform/grpc-gcp-go/grpcgcp v1.6.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.31.0 // indirect
@@ -196,7 +198,7 @@ require (
 	github.com/nxadm/tail v1.4.11 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
-	github.com/pierrec/lz4/v4 v4.1.16 // indirect
+	github.com/pierrec/lz4/v4 v4.1.18 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
@@ -214,6 +216,7 @@ require (
 	github.com/stephenafamo/sqlparser v0.0.0-20260122161205-e324475bd1fc // indirect
 	github.com/tdewolff/parse/v2 v2.8.12 // indirect
 	github.com/urfave/cli/v2 v2.23.7 // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/volatiletech/inflect v0.0.1 // indirect
 	github.com/volatiletech/strmangle v0.0.6 // indirect
 	github.com/x448/float16 v0.8.4 // indirect

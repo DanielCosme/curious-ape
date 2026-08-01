@@ -27,6 +27,7 @@ func UI_days(days []core.Day) Node {
 
 	next, prev := ui.GetNextPrevButtons(days[0], "")
 	return Div(
+		ds.Init("@get('/days/stream')"),
 		Class("days-container"),
 		H2(Text(days[0].Date.Time().Month().String())),
 		Div(

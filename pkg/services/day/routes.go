@@ -10,9 +10,10 @@ func SetupRoutes(r chi.Router, db bob.DB, ns *nats.Conn) error {
 	svc := NewService(db, ns)
 	handler := NewHandler(svc)
 
-	r.Get("/", handler.Index)
+	r.Get("/", handler.index)
 	r.Route("/days", func(r chi.Router) {
-		r.Post("/{date}/sync", handler.Sync)
+		r.Get("/stream", handler.streamSSE)
+		r.Post("/{date}/sync", handler.sync)
 	})
 
 	return nil

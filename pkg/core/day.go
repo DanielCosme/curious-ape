@@ -1,5 +1,10 @@
 package core
 
+import (
+	"bytes"
+	"encoding/gob"
+)
+
 type DayRelations int
 
 const (
@@ -56,4 +61,24 @@ func DayRelationsAll() []DayRelations {
 		DayRelationDeepWorkLogs,
 		DayRelationSleepLogs,
 	}
+}
+
+func (d *Day) Endocde() []byte {
+	// NOTE: consider passing the encoder as parameter.
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	if err := enc.Encode(d); err != nil {
+		panic("day: encoding failure: " + err.Error())
+	}
+	return buf.Bytes()
+}
+
+func Decode(data []byte) Day {
+	var d Day
+	buf := bytes.NewBuffer(data)
+	dec := gob.NewDecoder(buf)
+	if err := dec.Decode(&d); err != nil {
+		panic("date: decode feilure: " + err.Error())
+	}
+	return d
 }

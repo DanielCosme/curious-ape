@@ -66,21 +66,21 @@ func loadHabitRelations(db bob.DB, m *models.Day) (err error) {
 
 func BuildDayQuery(f core.DayParams) *sqlite.ViewQuery[*models.Day, models.DaySlice] {
 	q := models.Days.Query()
+
 	if f.ID > 0 {
 		q.Apply(models.SelectWhere.Days.ID.EQ(int64(f.ID)))
 	}
+
 	if !f.Date.Time().IsZero() {
 		q.Apply(models.SelectWhere.Days.Date.EQ(f.Date.Time()))
 	}
+
 	if len(f.Dates) > 0 {
 		q.Apply(models.SelectWhere.Days.Date.In(f.Dates.ToTimeSlice()...))
 	}
+
+	// TODO: Create params that determine which resources get loaded.
 	q.Apply(models.SelectThenLoad.Day.Habits())
-
-	if f.Order == core.DESC {
-		q.Apply(sm.OrderBy(models.Days.Columns.Date).Desc())
-	}
-
 	// q.Apply(models.SelectThenLoad.Day.SleepLogs())
 	// q.Apply(models.SelectThenLoad.Day.FitnessLogs())
 	// q.Apply(
@@ -88,6 +88,11 @@ func BuildDayQuery(f core.DayParams) *sqlite.ViewQuery[*models.Day, models.DaySl
 	// 		sm.OrderBy(models.DeepWorkLogs.Columns.StartTime).Desc(),
 	// 	),
 	// )
+
+	if f.Order == core.DESC {
+		q.Apply(sm.OrderBy(models.Days.Columns.Date).Desc())
+	}
+
 	return q
 }
 
