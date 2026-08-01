@@ -95,7 +95,3 @@ func BuildDayQuery(f core.DayParams) *sqlite.ViewQuery[*models.Day, models.DaySl
 
 	return q
 }
-
-func getDay(date core.Date, exec bob.Executor) (*models.Day, error) {
-	return BuildDayQuery(core.DayParams{Date: date}).One(context.Background(), exec)
-}
