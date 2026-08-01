@@ -25,7 +25,7 @@ func UI_days(days []core.Day) Node {
 		return Div(Text("No days available"))
 	}
 
-	next, prev := ui.GetNextPrevButtons(days[0], "")
+	next, prev := ui.GetNextPrevButtons(days[0].Date, "")
 	return Div(
 		ds.Init("@get('/days/stream')"),
 		Class("days-container"),

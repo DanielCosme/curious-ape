@@ -2,6 +2,11 @@ package worklog
 
 import (
 	"net/http"
+
+	"danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/services/day"
+	"danicos.dev/daniel/curious-ape/pkg/ui"
+	"danicos.dev/daniel/curious-ape/pkg/web"
 )
 
 type Handler struct {
@@ -13,4 +18,15 @@ func NewHandler(s *Service) *Handler {
 }
 
 func (h *Handler) worklogPage(w http.ResponseWriter, r *http.Request) {
+	days, err := day.Find(h.svc.db, core.DayParams{
+		Dates:        web.GetDayParams(r).RangeMonth(),
+		WithRelation: []core.DayRelations{core.DayRelationDeepWorkLogs},
+	})
+	if err != nil {
+		web.ErrInternalServer(err, w)
+		return
+	}
+
+	state := ui.StateFromContextUI(r.Context())
+	web.Render(w, UI_WorkLog(state, days))
 }

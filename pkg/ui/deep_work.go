@@ -11,7 +11,7 @@ import (
 )
 
 func DeepWork(s *State) Node {
-	next, prev := GetNextPrevButtons(s.Days[0], "deep_work")
+	next, prev := GetNextPrevButtons(s.Days[0].Date, "deep_work")
 	return Layout("Deep Work", s, Map(s.Days, func(day core.Day) Node {
 		if len(day.DeepWorkLogs) == 0 {
 			return nil

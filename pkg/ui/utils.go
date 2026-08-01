@@ -11,22 +11,23 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
-func GetNextPrevButtons(day core.Day, route string) (prev, next Node) {
-	p, n := GetNextPrev(day, route)
+func GetNextPrevButtons(date core.Date, route string) (prev, next Node) {
+	p, n := GetNextPrev(date, route)
 	prev = Button(Class(CBtnNav), Text("Previous Month"), ds.On("click", p))
+	// TOOD: If next month is in the future don't show button (return nil), or disable it...
 	next = Button(Class(CBtnNav), Text("Next Month"), ds.On("click", n))
 	return
 }
 
-func GetNextPrev(day core.Day, route string) (prev, next string) {
-	p, n := GetNextAndPreviousMonth(day)
+func GetNextPrev(date core.Date, route string) (prev, next string) {
+	p, n := GetNextAndPreviousMonth(date)
 	prev = fmt.Sprintf("@get('/%s?date=%s')", route, p)
 	next = fmt.Sprintf("@get('/%s?date=%s')", route, n)
 	return
 }
 
-func GetNextAndPreviousMonth(day core.Day) (prev, next string) {
-	t := day.Date.FirstDayOfTheMonth().Time()
+func GetNextAndPreviousMonth(date core.Date) (prev, next string) {
+	t := date.FirstDayOfTheMonth().Time()
 	previousMonth := t.AddDate(0, -1, 0)
 	nextMonth := t.AddDate(0, 1, 0)
 	now := time.Now()

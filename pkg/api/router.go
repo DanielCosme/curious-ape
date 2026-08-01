@@ -14,6 +14,7 @@ import (
 	"danicos.dev/daniel/curious-ape/pkg/services/habit"
 	"danicos.dev/daniel/curious-ape/pkg/services/integration"
 	"danicos.dev/daniel/curious-ape/pkg/services/user"
+	"danicos.dev/daniel/curious-ape/pkg/services/worklog"
 	"danicos.dev/daniel/curious-ape/pkg/ui"
 	"danicos.dev/daniel/curious-ape/web/resources"
 	"github.com/alexedwards/scs/v2"
@@ -40,6 +41,7 @@ func SetupRoutes(ctx context.Context, cfg *config.Config, is *integrations.Integ
 			day.SetupRoutes(r, db, ns)
 			habit.SetupRoutes(r, db, ns)
 			integration.SetupRoutes(r, cfg, is, db, ns)
+			worklog.SetupRoutes(r, db, ns)
 		})
 	})
 

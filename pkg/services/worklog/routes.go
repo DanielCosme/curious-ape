@@ -11,7 +11,7 @@ func SetupRoutes(r chi.Router, db bob.DB, ns *nats.Conn) error {
 	handler := NewHandler(svc)
 
 	r.Route("/worklog", func(r chi.Router) {
-		r.Post("/", handler.worklogPage)
+		r.Get("/", handler.worklogPage)
 	})
 
 	return nil

@@ -38,11 +38,17 @@ func (s *Service) Month(date core.Date, order core.OrderParam) ([]core.Day, erro
 		}
 	}
 
-	return find(s.db, core.DayParams{Dates: daysOfTheMonth, Order: order})
+	return Find(s.db, core.DayParams{
+		Dates:        daysOfTheMonth,
+		Order:        order,
+		WithRelation: []core.DayRelations{core.DayRelationHabits},
+	},
+	)
 }
 
 func (s *Service) GetOrCreate(date core.Date) (d core.Day, err error) {
-	d, err = get(s.db, core.DayParams{Date: date})
+	params := core.DayParams{Date: date, WithRelation: []core.DayRelations{core.DayRelationHabits}}
+	d, err = get(s.db, params)
 	if core.IfErrNNotFound(err) {
 		return
 	}
@@ -58,7 +64,7 @@ func (s *Service) GetOrCreate(date core.Date) (d core.Day, err error) {
 			return d, err
 		}
 
-		return get(s.db, core.DayParams{Date: date})
+		return get(s.db, params)
 	}
 	return
 }

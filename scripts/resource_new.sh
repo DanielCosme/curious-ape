@@ -31,7 +31,7 @@ func SetupRoutes(r chi.Router, db bob.DB, ns *nats.Conn) error {
 	handler := NewHandler(svc)
 
 	r.Route("/$RESOURCE", func(r chi.Router) {
-		r.Post("/", handler.${RESOURCE}Page)
+		r.Get("/", handler.${RESOURCE}Page)
 	})
 
 	return nil

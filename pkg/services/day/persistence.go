@@ -2,6 +2,8 @@ package day
 
 import (
 	"context"
+	"fmt"
+	"slices"
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
@@ -13,6 +15,25 @@ import (
 	"github.com/stephenafamo/bob/dialect/sqlite/sm"
 )
 
+func Find(db bob.DB, p core.DayParams) (days []core.Day, err error) {
+	res, err := BuildDayQuery(p).All(context.Background(), db)
+	if err == nil {
+
+		for _, day := range res { // TODO: optimize this.
+			if slices.Contains(p.WithRelation, core.DayRelationHabits) {
+				if err = loadHabitRelations(db, day); err != nil {
+					return days, persistence.CatchDBErr("days: find", err)
+				}
+			}
+
+			days = append(days, bobto.Day(day))
+		}
+		return
+	} else {
+		return days, persistence.CatchDBErr("days: find", err)
+	}
+}
+
 func new(db bob.DB, date core.Date) (day core.Day, err error) {
 	s := &models.DaySetter{Date: omit.From(date.Time())}
 	res, err := models.Days.Insert(s).One(context.Background(), db)
@@ -22,37 +43,15 @@ func new(db bob.DB, date core.Date) (day core.Day, err error) {
 func get(db bob.DB, p core.DayParams) (day core.Day, err error) {
 	res, err := BuildDayQuery(p).One(context.Background(), db)
 	if err == nil {
-		err = loadHabitRelations(db, res)
+		if slices.Contains(p.WithRelation, core.DayRelationHabits) {
+			err = loadHabitRelations(db, res)
+			if err != nil {
+				return day, persistence.CatchDBErr("days: get", err)
+			}
+		}
 		return bobto.Day(res), err
 	}
 	return day, persistence.CatchDBErr("days: get", err)
-}
-
-func getOrCreate(db bob.DB, params core.DayParams) (day core.Day, err error) {
-	day, err = get(db, params)
-	if core.IfErrNNotFound(err) {
-		return
-	}
-	if day.IsZero() {
-		day, err = new(db, params.Date)
-	}
-	return
-}
-
-func find(db bob.DB, p core.DayParams) (days []core.Day, err error) {
-	res, err := BuildDayQuery(p).All(context.Background(), db)
-	if err == nil {
-		for _, day := range res { // TODO: optimize this.
-			if err = loadHabitRelations(db, day); err == nil {
-				days = append(days, bobto.Day(day))
-			} else {
-				return days, persistence.CatchDBErr("days: find", err)
-			}
-		}
-		return
-	} else {
-		return days, persistence.CatchDBErr("days: find", err)
-	}
 }
 
 func loadHabitRelations(db bob.DB, m *models.Day) (err error) {
@@ -79,15 +78,24 @@ func BuildDayQuery(f core.DayParams) *sqlite.ViewQuery[*models.Day, models.DaySl
 		q.Apply(models.SelectWhere.Days.Date.In(f.Dates.ToTimeSlice()...))
 	}
 
-	// TODO: Create params that determine which resources get loaded.
-	q.Apply(models.SelectThenLoad.Day.Habits())
-	// q.Apply(models.SelectThenLoad.Day.SleepLogs())
-	// q.Apply(models.SelectThenLoad.Day.FitnessLogs())
-	// q.Apply(
-	// 	models.SelectThenLoad.Day.DeepWorkLogs(
-	// 		sm.OrderBy(models.DeepWorkLogs.Columns.StartTime).Desc(),
-	// 	),
-	// )
+	for _, relation := range f.WithRelation {
+		switch relation {
+		case core.DayRelationHabits:
+			q.Apply(models.SelectThenLoad.Day.Habits())
+		case core.DayRelationSleepLogs:
+			q.Apply(models.SelectThenLoad.Day.SleepLogs())
+		case core.DayRelationFitnessLogs:
+			q.Apply(models.SelectThenLoad.Day.FitnessLogs())
+		case core.DayRelationDeepWorkLogs:
+			q.Apply(
+				models.SelectThenLoad.Day.DeepWorkLogs(
+					sm.OrderBy(models.DeepWorkLogs.Columns.StartTime).Desc(),
+				),
+			)
+		default:
+			panic(fmt.Sprintf("unexpected core.DayRelations: %#v", relation))
+		}
+	}
 
 	if f.Order == core.DESC {
 		q.Apply(sm.OrderBy(models.Days.Columns.Date).Desc())

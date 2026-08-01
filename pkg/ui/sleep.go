@@ -10,7 +10,7 @@ import (
 )
 
 func Sleep(s *State) Node {
-	next, prev := GetNextPrevButtons(s.Days[0], "sleep")
+	next, prev := GetNextPrevButtons(s.Days[0].Date, "sleep")
 	return Layout("Sleep", s, Map(s.Days, func(day core.Day) Node {
 		if len(day.SleepLogs) == 0 {
 			return nil

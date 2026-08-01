@@ -12,7 +12,7 @@ import (
 )
 
 func Fitness(s *State) Node {
-	next, prev := GetNextPrevButtons(s.Days[0], "fitness")
+	next, prev := GetNextPrevButtons(s.Days[0].Date, "fitness")
 	return Layout("Fitness", s, Map(s.Days, func(day core.Day) Node {
 		if len(day.FitnessLogs) == 0 {
 			return nil

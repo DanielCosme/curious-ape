@@ -37,10 +37,11 @@ func (d *Day) IsZero() bool {
 }
 
 type DayParams struct {
-	ID    uint
-	Date  Date
-	Dates DateSlice
-	Order OrderParam
+	ID           uint
+	Date         Date
+	Dates        DateSlice
+	Order        OrderParam
+	WithRelation []DayRelations
 }
 
 type DeadlineParams struct {
