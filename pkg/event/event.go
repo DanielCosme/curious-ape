@@ -7,7 +7,9 @@ var (
 	DaySync       = "days.sync"
 	DaySynced     = "days.synced"
 	WorklogSynced = "worklog.synced"
-	HabitUpsert   = ""
+
+	// TODO: remove after refactor is done.
+	HabitUpsert = ""
 )
 
 type Event struct {

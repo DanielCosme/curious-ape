@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/stephenafamo/bob"
@@ -27,8 +28,8 @@ type Handllers struct {
 	User        *user.Handler
 }
 
-func SetupRouter(ctx context.Context, handlers Handllers, cfg *config.Config, r chi.Router, sessionManager *scs.SessionManager, db bob.DB) (err error) {
-	if cfg.Environment == config.Dev {
+func SetupRouter(ctx context.Context, handlers Handllers, r chi.Router, sessionManager *scs.SessionManager, db bob.DB) (err error) {
+	if config.IsDev() {
 		setupReload(r)
 	}
 
@@ -53,6 +54,9 @@ func SetupRouter(ctx context.Context, handlers Handllers, cfg *config.Config, r 
 
 	if err != nil {
 		return fmt.Errorf("error setting up routes: %w", err)
+	}
+	for _, route := range r.Routes() {
+		slog.Debug("Route registered", "pattern", route.Pattern)
 	}
 	return nil
 }

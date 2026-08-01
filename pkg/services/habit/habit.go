@@ -2,6 +2,7 @@ package habit
 
 import (
 	"log/slog"
+	"time"
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/event"
@@ -21,6 +22,7 @@ func NewService(db bob.DB, ns *nats.Conn) *Service {
 	}
 	if ns != nil {
 		ns.Subscribe(event.DayCreated, s.listen)
+		ns.Subscribe(event.WorklogSynced, s.listen)
 	}
 	return s
 }
@@ -66,9 +68,48 @@ func (s *Service) listen(msg *nats.Msg) {
 		}
 		for _, param := range params {
 			if _, err := s.HabitUpsert(param); err != nil {
-				slog.Error("Failed to upsert habit", "err", err)
+				slog.Error("Failed to create habit", "err", err)
 			}
 		}
 		msg.Respond(nil)
+	case event.WorklogSynced:
+		var wls []core.DeepWorkLog
+		core.Decode(msg.Data, &wls)
+		if err := s.eventWorklogSynced(wls); err != nil {
+			slog.Error("Failed to handle event", "err", err, "subject", msg.Subject)
+		}
 	}
+}
+
+func (s *Service) eventWorklogSynced(wls []core.DeepWorkLog) error {
+	var date core.Date
+	if len(wls) > 0 {
+		date = wls[0].Date
+	} else {
+		slog.Info("habit: no work logs to handle")
+		return nil
+	}
+
+	var totalDuration time.Duration
+	for _, wl := range wls {
+		duration := wl.EndTime.Sub(wl.StartTime)
+		totalDuration += duration
+	}
+	habitState := core.HabitStateNotDone
+	if totalDuration > time.Hour*5 {
+		habitState = core.HabitStateDone
+	}
+	habitParams := core.Habit{
+		Date:      date,
+		Type:      core.HabitTypeDeepWork,
+		State:     habitState,
+		Note:      core.DurationToString(totalDuration),
+		Automated: true,
+	}
+	_, err := s.HabitUpsert(habitParams)
+	if err != nil {
+		return err
+	}
+	s.ns.Publish(event.DaySynced, date.Enc())
+	return nil
 }

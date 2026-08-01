@@ -1,8 +1,8 @@
 package toggl
 
 import (
+	"log/slog"
 	"net/http"
-	"os"
 	"time"
 
 	"danicos.dev/daniel/curious-ape/pkg/config"
@@ -32,9 +32,9 @@ func NewApi(workspaceID int, token string) (*API, error) {
 	}
 
 	var tz string
-	// TODO: address this...
-	if os.Getenv("APE_ENVIRONMENT") == string(config.Dev) {
+	if config.IsDev() {
 		tz = config.TZ
+		slog.Info("Toogl API client in DEV mode")
 	} else {
 		profile, err := a.Me.GetProfile()
 		if err != nil {

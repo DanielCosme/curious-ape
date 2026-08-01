@@ -41,6 +41,13 @@ func (c *Config) Validate() {
 	}
 }
 
+func IsDev() bool {
+	if value, _ := os.LookupEnv(ENVIRONMENT); value == string(Dev) {
+		return true
+	}
+	return false
+}
+
 func loadBase() *Config {
 	godotenv.Load()
 

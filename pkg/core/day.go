@@ -73,12 +73,10 @@ func Encode(value any) []byte {
 	return buf.Bytes()
 }
 
-func Decode(data []byte) Day {
-	var d Day
+func Decode(data []byte, v any) {
 	buf := bytes.NewBuffer(data)
 	dec := gob.NewDecoder(buf)
-	if err := dec.Decode(&d); err != nil {
-		panic("date: decode feilure: " + err.Error())
+	if err := dec.Decode(v); err != nil {
+		panic("decode failure: " + err.Error())
 	}
-	return d
 }

@@ -29,7 +29,6 @@ func NewService(db bob.DB, ns *nats.Conn, integration core.WorkLogIntegration) *
 }
 
 func (svc *Service) listen(msg *nats.Msg) {
-	slog.Info("worklog sync got event", "subject", msg.Subject)
 	switch msg.Subject {
 	case event.DaySync:
 		err := svc.sync(core.DateDecode(msg.Data))
@@ -46,14 +45,13 @@ func (svc *Service) sync(date core.Date) error {
 	}
 
 	for _, log := range logs {
-		slog.Info("sleep log", "start", log.StartTime.String(), "origin", log.Origin)
 		_, err := upsert(svc.db, log)
 		if err != nil {
 			return err
 		}
 		duration := log.EndTime.Sub(log.StartTime)
 		t := fmt.Sprintf("%s-%s (%s)", log.StartTime.Format(core.Time), log.EndTime.Format(core.Time), duration)
-		slog.Info("Deep work log added: " + t)
+		slog.Info("Deep work log added: "+t, "origin", log.Origin)
 	}
 	if len(logs) > 0 {
 		svc.nats.Publish(event.WorklogSynced, core.Encode(logs))

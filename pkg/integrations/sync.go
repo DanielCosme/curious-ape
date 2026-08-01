@@ -45,6 +45,7 @@ func New(togglWorkspaceID int, togglToken, hevyAPIKey string, fitbit, google *oa
 			oak.Error("Failed to initialize Toggl API", "error", err.Error())
 		} else {
 			oak.Info("Toggl API client timezone: " + a.ClientTimezone().String())
+
 			i.TogglAPI = a
 			i.list = append(i.list, core.IntegrationToggl)
 		}

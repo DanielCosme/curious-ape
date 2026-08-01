@@ -29,6 +29,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httplog/v3"
 	"github.com/lmittmann/tint"
+	"github.com/nats-io/nats.go"
 	"github.com/stephenafamo/bob"
 	"golang.org/x/sync/errgroup"
 
@@ -104,7 +105,7 @@ func run(ctx context.Context) error {
 		User:        user.NewHandler(userService, sessionManager),
 	}
 
-	if err := api.SetupRouter(errGroupCtx, handlers, cfg, router, sessionManager, bobDB); err != nil {
+	if err := api.SetupRouter(errGroupCtx, handlers, router, sessionManager, bobDB); err != nil {
 		return fmt.Errorf("error setting up routes: %w", err)
 	}
 	if err := userService.SetPassword(cfg.Username, cfg.Password); err != nil {
@@ -125,6 +126,12 @@ func run(ctx context.Context) error {
 			return ctx
 		},
 	}
+
+	go func() {
+		nc.Subscribe(">", func(msg *nats.Msg) {
+			slog.Debug("Event emited", "subject", msg.Subject)
+		})
+	}()
 
 	errGroup.Go(func() error {
 		slog.Info("Server listening", "addr", server.Addr)

@@ -10,6 +10,7 @@ import (
 	*/
 
 	"fmt"
+	"log/slog"
 
 	"github.com/magefile/mage/mg" // mg contains helpful utility functions, like Deps
 	"github.com/magefile/mage/sh"
@@ -38,13 +39,14 @@ func init() {
 	dbLocation = devOutput + ".db"
 
 	Env := map[string]string{
-		config.ENVIRONMENT: "dev",
-		"PROD_OUTPUT":      prodOutput,
-		"DEV_OUTPUT":       devOutput,
-		"SECRETS_PATH":     config.DEPLOYMENT_DIR + "/secrets",
-		"ENC_SECRETS_PATH": config.DEPLOYMENT_DIR + "/enc",
-		"KUBE_SECRETS":     config.KUBERNETES_SECRETS,
-		"KUBE_ENC_SECRETS": config.KUBERNETES_ENC_SECRETS,
+		config.ENVIRONMENT:      "dev",
+		"PROD_OUTPUT":           prodOutput,
+		"DEV_OUTPUT":            devOutput,
+		"SECRETS_PATH":          config.DEPLOYMENT_DIR + "/secrets",
+		"ENC_SECRETS_PATH":      config.DEPLOYMENT_DIR + "/enc",
+		"KUBE_SECRETS":          config.KUBERNETES_SECRETS,
+		"KUBE_ENC_SECRETS":      config.KUBERNETES_ENC_SECRETS,
+		config.CONFIG_LOG_LEVEL: slog.LevelDebug.String(),
 	}
 	r = target.NewRunner(Env, nil)
 }
