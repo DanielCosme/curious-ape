@@ -31,7 +31,7 @@ func UI_WorkLog(s *ui.UIState, days []core.Day) Node {
 		}
 		return Div(
 			Class(ui.CSurface),
-			H3(Text(day.Date.Time().Format(core.HumanDate)+"   "+core.DurationToString(duration))),
+			H3(Text(day.Date.Time.Format(core.HumanDate)+"   "+core.DurationToString(duration))),
 			Group(nodes),
 		)
 	}),

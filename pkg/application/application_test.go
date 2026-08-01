@@ -35,14 +35,14 @@ func TestDeadline(t *testing.T) {
 			input: core.Deadline{
 				Title:     "Wife Birthday",
 				StartDate: now,
-				EndDate:   core.NewDate(now.Time().AddDate(0, 3, 0)),
+				EndDate:   core.NewDate(now.Time.AddDate(0, 3, 0)),
 				Recurring: true,
 			},
 			expected: core.Deadline{
 				RepositoryCommon: core.RepositoryCommon{ID: 1},
 				Title:            "Wife Birthday",
 				StartDate:        now,
-				EndDate:          core.NewDate(now.Time().AddDate(0, 3, 0)),
+				EndDate:          core.NewDate(now.Time.AddDate(0, 3, 0)),
 				Recurring:        true,
 			},
 		},
@@ -86,13 +86,13 @@ func TestDeadline(t *testing.T) {
 				RepositoryCommon: core.RepositoryCommon{ID: 0},
 				Title:            "tt",
 				StartDate:        now,
-				EndDate:          core.NewDate(now.Time().AddDate(0, -3, 0)),
+				EndDate:          core.NewDate(now.Time.AddDate(0, -3, 0)),
 			},
 			expected: core.Deadline{
 				RepositoryCommon: core.RepositoryCommon{ID: 0},
 				Title:            "tt",
 				StartDate:        now,
-				EndDate:          core.NewDate(now.Time().AddDate(0, -3, 0)),
+				EndDate:          core.NewDate(now.Time.AddDate(0, -3, 0)),
 			},
 			err: errors.New("end time cannot be before start time"),
 		},
@@ -113,8 +113,8 @@ func TestDeadline(t *testing.T) {
 			}
 			test.True(t, res.ID == tc.expected.ID)
 			test.True(t, res.Title == tc.expected.Title)
-			test.True(t, res.StartDate.Time().Equal(tc.expected.StartDate.Time()))
-			test.True(t, res.EndDate.Time().Equal(tc.expected.EndDate.Time()))
+			test.True(t, res.StartDate.Time.Equal(tc.expected.StartDate.Time))
+			test.True(t, res.EndDate.Time.Equal(tc.expected.EndDate.Time))
 			test.True(t, res.Recurring == tc.expected.Recurring)
 		})
 	}

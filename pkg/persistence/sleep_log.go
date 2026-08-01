@@ -18,7 +18,7 @@ type SleepLogs struct {
 }
 
 func (sls *SleepLogs) Upsert(params core.SleepLog) (sl core.SleepLog, err error) {
-	day, err := GetDay(params.Date, sls.db)
+	day, err := GetDay(sls.db, params.Date)
 	if err != nil {
 		return sl, CatchDBErr("sleep logs: upsert: get day", err)
 	}

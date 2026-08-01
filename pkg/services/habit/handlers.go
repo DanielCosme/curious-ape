@@ -33,7 +33,7 @@ func (h *Handler) Flip(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	month := habit.Date.Time().Month()
+	month := habit.Date.Time.Month()
 	habitsMonth, err := find(h.svc.db, core.HabitParams{
 		From: habit.Date.FirstDayOfTheMonth(),
 		To:   habit.Date.LastDayOfTheMonth(),
@@ -53,9 +53,9 @@ func (h *Handler) HabitsPage(w http.ResponseWriter, r *http.Request) {
 
 	habitState := &HabitsPageState{}
 	for _, month := range today.MonthsOfYear() {
-		t := time.Date(today.Time().Year(), month+1, 0, 0, 0, 0, 0, time.UTC)
+		t := time.Date(today.Time.Year(), month+1, 0, 0, 0, 0, 0, time.UTC)
 		d := core.NewDate(t)
-		if month == today.Time().Month() {
+		if month == today.Time.Month() {
 			d = today
 		}
 

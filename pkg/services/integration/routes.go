@@ -18,14 +18,6 @@ func SetupRoutes(r chi.Router, cfg *config.Config, is *integrations.Integrations
 	svc := NewService(cfg, is, db, ns)
 	handler := NewHandler(svc)
 
-	// Get integrations endpoints
-	//
-	// Oauth endpoints
-	//
-	// Sync????????????????????????
-	//
-	// I Listen for an event to SYNC, that is for Sure.
-
 	r.Route("/integrations", func(r chi.Router) {
 		r.Get("/", handler.IntegrationsPage)
 		r.Get("/{name}", handler.IntegrationGet)

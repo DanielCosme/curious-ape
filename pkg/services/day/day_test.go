@@ -30,15 +30,15 @@ func TestDay(t *testing.T) {
 		srv := day.NewService(bobDB, nc)
 
 		date1 := core.NewDate(time.Now()).FirstDayOfTheMonth()
-		date2 := core.NewDate(date1.Time().AddDate(0, 0, 1))
+		date2 := core.NewDate(date1.Time.AddDate(0, 0, 1))
 
 		days, err := srv.Month(date2, core.ASC)
 		test.NilErr(t, err)
 		test.True(t, len(days) == 2)
-		test.True(t, days[0].Date.IsEqual(date1.Time()))
-		test.True(t, days[1].Date.IsEqual(date2.Time()))
+		test.True(t, days[0].Date.IsEqual(date1.Time))
+		test.True(t, days[1].Date.IsEqual(date2.Time))
 
-		date3 := core.NewDate(date1.Time().AddDate(0, 0, 27))
+		date3 := core.NewDate(date1.Time.AddDate(0, 0, 27))
 		days, err = srv.Month(date3, core.ASC)
 		test.NilErr(t, err)
 		test.True(t, len(days) == 28)

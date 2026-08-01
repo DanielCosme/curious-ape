@@ -47,12 +47,12 @@ func (a *App) fitnessSync(ctx context.Context, d core.Date) error {
 
 func (a *App) fitnessLogsFromHevy(ctx context.Context, date core.Date) (res []core.FitnessLog, err error) {
 	logger := oak.FromContext(ctx)
-	if !date.Time().Before(core.NewDate(time.Now()).Time()) {
+	if !date.Time.Before(core.NewDate(time.Now()).Time) {
 		d, err := a.Day.GetOrCreate(date)
 		if err == nil {
-			events, err := a.sync.Hevy.WorkoutEvents.Get(d.Date.Time())
+			events, err := a.sync.Hevy.WorkoutEvents.Get(d.Date.Time)
 			if err == nil {
-				logger.Info("Fitness log for: "+d.Date.Time().Format(core.HumanDateWeekDay), "entries", len(events))
+				logger.Info("Fitness log for: "+d.Date.Time.Format(core.HumanDateWeekDay), "entries", len(events))
 				for _, event := range events {
 					if event.Type == "updated" {
 						raw, err := json.Marshal(event.Workout)

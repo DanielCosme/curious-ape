@@ -31,7 +31,7 @@ func (s *Service) HabitUpsert(params core.Habit) (habit core.Habit, err error) {
 		slog.Info("Habit logged",
 			"type", habit.Type,
 			"state", habit.State,
-			"date", habit.Date.Time().Format(core.HumanDateWeekDay),
+			"date", habit.Date.Time.Format(core.HumanDateWeekDay),
 		)
 	}
 	return

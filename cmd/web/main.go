@@ -76,7 +76,7 @@ func run(ctx context.Context) error {
 		middleware.Recoverer,
 	)
 
-	ns, err := embbeded_nats.New(ctx, embbeded_nats.WithLogging())
+	ns, err := embbeded_nats.New(ctx)
 	ns.WaitForServer()
 	exitIfErr(err)
 	nc, err := ns.Client()

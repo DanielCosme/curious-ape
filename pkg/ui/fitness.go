@@ -24,7 +24,7 @@ func Fitness(s *State) Node {
 				return Div(
 					Class(CLogEntry),
 					H3(Text(fl.Title)),
-					Span(Text(fl.Date.Time().Format(core.HumanDate))),
+					Span(Text(fl.Date.Time.Format(core.HumanDate))),
 					Span(Text(fmt.Sprintf("%s-%s", fl.StartTime.Format(core.Time), fl.EndTime.Format(core.Time)))),
 					Span(Text(fmt.Sprintf("  Duration: %s", core.DurationToString(fl.EndTime.Sub(fl.StartTime))))),
 				)

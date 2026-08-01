@@ -37,7 +37,7 @@ func find(db bob.DB, p core.HabitParams) ([]core.Habit, error) {
 }
 
 func upsert(db bob.DB, p core.Habit) (coreHabit core.Habit, err error) {
-	day, err := persistence.GetDay(p.Date, db)
+	day, err := persistence.GetDay(db, p.Date)
 	if err == nil {
 		hCategory, err := buildHabitCategoryQuery(core.HabitCategoryParams{Kind: p.Type}).One(context.Background(), db)
 		if err == nil {
@@ -103,10 +103,10 @@ func buildHabitQuery(f core.HabitParams) *sqlite.ViewQuery[*models.Habit, models
 		q.Apply(models.SelectJoins().Habits.InnerJoin.HabitCategory)
 		q.Apply(models.SelectWhere.HabitCategories.Kind.EQ(string(f.Type)))
 	}
-	if !f.From.Time().IsZero() && !f.To.Time().IsZero() {
+	if !f.From.Time.IsZero() && !f.To.Time.IsZero() {
 		q.Apply(models.SelectJoins().Habits.InnerJoin.Day)
-		q.Apply(models.SelectWhere.Days.Date.GTE(f.From.Time()))
-		q.Apply(models.SelectWhere.Days.Date.LTE(f.To.Time()))
+		q.Apply(models.SelectWhere.Days.Date.GTE(f.From.Time))
+		q.Apply(models.SelectWhere.Days.Date.LTE(f.To.Time))
 		q.Apply(sm.OrderBy(models.Days.Columns.Date).Desc())
 	}
 	return q

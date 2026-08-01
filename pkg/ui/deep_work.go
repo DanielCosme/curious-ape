@@ -29,7 +29,7 @@ func DeepWork(s *State) Node {
 		}
 		return Div(
 			Class(CSurface),
-			H3(Text(day.Date.Time().Format(core.HumanDate)+"   "+core.DurationToString(duration))),
+			H3(Text(day.Date.Time.Format(core.HumanDate)+"   "+core.DurationToString(duration))),
 			Group(nodes),
 		)
 	}),

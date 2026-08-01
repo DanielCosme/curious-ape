@@ -29,7 +29,7 @@ func deadline(d core.Deadline) Node {
 	return Div(
 		Class(CLogEntry+" deadline-item"),
 		H4(Text(d.Title)),
-		P(Text(d.EndDate.Time().Format("02 Jan 2006"))),
+		P(Text(d.EndDate.Time.Format("02 Jan 2006"))),
 		P(Text(fmt.Sprintf("Days left: %d", d.DaysLeft))),
 	)
 }

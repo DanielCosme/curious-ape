@@ -27,8 +27,6 @@ func NewService(cfg *config.Config, sync *integrations.Integrations, db bob.DB, 
 	if sync == nil {
 		panic("sync cannot be nil")
 	}
-	if ns != nil {
-	}
 
 	return s
 }

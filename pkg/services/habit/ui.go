@@ -46,7 +46,7 @@ func HabitsGrid(month Month) Node {
 	gridStyle := fmt.Sprintf("grid-template-columns: 120px repeat(%d, 1fr);", daysCount)
 
 	monthDiv := Div(
-		ID(fmt.Sprintf("%d-%d", month.days[0].Time().Year(), month.m)),
+		ID(fmt.Sprintf("%d-%d", month.days[0].Time.Year(), month.m)),
 		H2(Class("mono"), Text(month.m.String())),
 		Span(Class("month-score"), Text(fmt.Sprintf("%.0f%% %d/%d", percentage, month.score, maxScore))),
 		Div(
@@ -64,7 +64,7 @@ func HabitsGrid(month Month) Node {
 
 func UI_habitHeaders(ds []core.Date) Node {
 	return Map(ds, func(day core.Date) Node {
-		return Div(Class("habit-grid-item grid-header"), Text(day.Time().Format("02")))
+		return Div(Class("habit-grid-item grid-header"), Text(day.Time.Format("02")))
 	})
 }
 

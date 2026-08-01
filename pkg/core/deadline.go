@@ -18,12 +18,12 @@ func (d *Deadline) Validate() error {
 	if d.Title == "" {
 		return errors.New("title is empty")
 	}
-	if d.StartDate.Time().IsZero() {
+	if d.StartDate.Time.IsZero() {
 		return errors.New("start time is empty")
 	}
-	if d.EndDate.Time().IsZero() {
+	if d.EndDate.Time.IsZero() {
 		return errors.New("end time is empty")
-	} else if d.EndDate.Time().Before(d.StartDate.Time()) {
+	} else if d.EndDate.Time.Before(d.StartDate.Time) {
 		return errors.New("end time cannot be before start time")
 	}
 	return nil
@@ -31,6 +31,6 @@ func (d *Deadline) Validate() error {
 
 // DaysLeft calculates days remaining from start until end time.
 func DaysLeft(start, end Date) int {
-	remainingDuration := end.time.Sub(start.time)
+	remainingDuration := end.Time.Sub(start.Time)
 	return int(math.Ceil(remainingDuration.Hours() / 24))
 }

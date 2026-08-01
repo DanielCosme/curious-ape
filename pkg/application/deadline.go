@@ -35,14 +35,14 @@ func (a *App) DeadlineList(ctx context.Context) ([]core.Deadline, error) {
 		if d.DaysLeft < 0 {
 			if d.Recurring {
 				// Add one year
-				d.EndDate = core.NewDate(d.EndDate.Time().AddDate(1, 0, 0))
+				d.EndDate = core.NewDate(d.EndDate.Time.AddDate(1, 0, 0))
 				err := a.db.Deadlines.Update(d)
 				if err != nil {
 					return nil, err
 				}
 				logger.Info("Recurring deadline updated",
 					"title", d.Title,
-					"End Date", d.EndDate.Time().Format(core.HumanDateWeekDay),
+					"End Date", d.EndDate.Time.Format(core.HumanDateWeekDay),
 				)
 				res[idx] = d
 				continue

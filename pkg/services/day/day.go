@@ -20,7 +20,7 @@ func NewService(db bob.DB, ns *nats.Conn) *Service {
 }
 
 func (s *Service) Month(date core.Date, order core.OrderParam) ([]core.Day, error) {
-	if time.Now().Month() != date.Time().Month() {
+	if time.Now().Month() != date.Time.Month() {
 		date = date.LastDayOfTheMonth()
 	}
 

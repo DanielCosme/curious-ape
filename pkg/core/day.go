@@ -33,7 +33,7 @@ type DayHabits struct {
 }
 
 func (d *Day) IsZero() bool {
-	return d.Date.Time().IsZero()
+	return d.Date.Time.IsZero()
 }
 
 type DayParams struct {
@@ -64,12 +64,11 @@ func DayRelationsAll() []DayRelations {
 	}
 }
 
-func (d *Day) Endocde() []byte {
-	// NOTE: consider passing the encoder as parameter.
+func Encode(value any) []byte {
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
-	if err := enc.Encode(d); err != nil {
-		panic("day: encoding failure: " + err.Error())
+	if err := enc.Encode(value); err != nil {
+		panic("encoding failure: " + err.Error())
 	}
 	return buf.Bytes()
 }

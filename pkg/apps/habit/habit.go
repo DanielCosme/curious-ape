@@ -41,7 +41,7 @@ func (a *App) HabitUpsert(params core.Habit) (habit core.Habit, err error) {
 		oak.Info("Habit logged",
 			"type", habit.Type,
 			"state", habit.State,
-			"date", habit.Date.Time().Format(core.HumanDateWeekDay),
+			"date", habit.Date.Time.Format(core.HumanDateWeekDay),
 		)
 	}
 	return

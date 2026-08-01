@@ -21,7 +21,7 @@ func NewDays(executor bob.DB) *Days {
 }
 
 func (d *Days) Create(date core.Date) (day core.Day, err error) {
-	s := &models.DaySetter{Date: omit.From(date.Time())}
+	s := &models.DaySetter{Date: omit.From(date.Time)}
 	res, err := models.Days.Insert(s).One(context.Background(), d.db)
 	return dayToCore(res), err
 }
@@ -109,8 +109,8 @@ func BuildDayQuery(f core.DayParams) *sqlite.ViewQuery[*models.Day, models.DaySl
 	if f.ID > 0 {
 		q.Apply(models.SelectWhere.Days.ID.EQ(int64(f.ID)))
 	}
-	if !f.Date.Time().IsZero() {
-		q.Apply(models.SelectWhere.Days.Date.EQ(f.Date.Time()))
+	if !f.Date.Time.IsZero() {
+		q.Apply(models.SelectWhere.Days.Date.EQ(f.Date.Time))
 	}
 	if len(f.Dates) > 0 {
 		q.Apply(models.SelectWhere.Days.Date.In(f.Dates.ToTimeSlice()...))
@@ -129,6 +129,6 @@ func BuildDayQuery(f core.DayParams) *sqlite.ViewQuery[*models.Day, models.DaySl
 	return q
 }
 
-func GetDay(date core.Date, exec bob.Executor) (*models.Day, error) {
+func GetDay(exec bob.Executor, date core.Date) (*models.Day, error) {
 	return BuildDayQuery(core.DayParams{Date: date}).One(context.Background(), exec)
 }

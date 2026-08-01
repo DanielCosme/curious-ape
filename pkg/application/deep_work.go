@@ -23,12 +23,12 @@ func (a *App) deepWorkSync(ctx context.Context, date core.Date) error {
 	if err != nil {
 		return err
 	}
-	entries, err := a.sync.TogglAPI.TimeEntries.GetDayEntries(date.Time())
+	entries, err := a.sync.TogglAPI.TimeEntries.GetDayEntries(date.Time)
 	if err != nil {
 		return err
 	}
 
-	logger.Info("Deep work logs for: "+d.Date.Time().Format(core.HumanDateWeekDay), "entries", len(entries))
+	logger.Info("Deep work logs for: "+d.Date.Time.Format(core.HumanDateWeekDay), "entries", len(entries))
 	var totalDuration time.Duration
 	for _, entry := range entries {
 		if entry.Stop.Before(date.ToBeginningOfDay()) {

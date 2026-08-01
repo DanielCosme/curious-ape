@@ -29,7 +29,7 @@ func UI_days(days []core.Day) Node {
 	return Div(
 		ds.Init("@get('/days/stream')"),
 		Class("days-container"),
-		H2(Text(days[0].Date.Time().Month().String())),
+		H2(Text(days[0].Date.Time.Month().String())),
 		Div(
 			Class("days-list"),
 			Map(days, func(d core.Day) Node {
@@ -65,7 +65,7 @@ func UI_day(day core.Day) Node {
 
 	return Div(
 		Class("day"),
-		Span(Text(day.Date.Time().Format(core.HumanDate))),
+		Span(Text(day.Date.Time.Format(core.HumanDate))),
 		Span(
 			Class("day-score flex "+scoreClass),
 			goalIcon,

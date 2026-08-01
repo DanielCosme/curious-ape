@@ -35,7 +35,7 @@ func Find(db bob.DB, p core.DayParams) (days []core.Day, err error) {
 }
 
 func new(db bob.DB, date core.Date) (day core.Day, err error) {
-	s := &models.DaySetter{Date: omit.From(date.Time())}
+	s := &models.DaySetter{Date: omit.From(date.Time)}
 	res, err := models.Days.Insert(s).One(context.Background(), db)
 	return bobto.Day(res), err
 }
@@ -70,8 +70,8 @@ func BuildDayQuery(f core.DayParams) *sqlite.ViewQuery[*models.Day, models.DaySl
 		q.Apply(models.SelectWhere.Days.ID.EQ(int64(f.ID)))
 	}
 
-	if !f.Date.Time().IsZero() {
-		q.Apply(models.SelectWhere.Days.Date.EQ(f.Date.Time()))
+	if !f.Date.Time.IsZero() {
+		q.Apply(models.SelectWhere.Days.Date.EQ(f.Date.Time))
 	}
 
 	if len(f.Dates) > 0 {

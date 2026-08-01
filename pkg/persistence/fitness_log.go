@@ -18,7 +18,7 @@ type FitnessLogs struct {
 }
 
 func (fls *FitnessLogs) Upsert(params core.FitnessLog) (fl core.FitnessLog, err error) {
-	day, err := GetDay(params.Date, fls.db)
+	day, err := GetDay(fls.db, params.Date)
 	if err != nil {
 		return fl, CatchDBErr("fitness logs: upsert: get day", err)
 	}

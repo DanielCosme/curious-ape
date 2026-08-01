@@ -22,8 +22,8 @@ func (d *Deadlines) Create(params core.Deadline) (deadlineRes core.Deadline, err
 	}
 	s := &models.DeadlineSetter{
 		Title:     omit.From(params.Title),
-		StartTime: omit.From(params.StartDate.Time()),
-		EndTime:   omit.From(params.EndDate.Time()),
+		StartTime: omit.From(params.StartDate.Time),
+		EndTime:   omit.From(params.EndDate.Time),
 		Recurring: omit.From(params.Recurring),
 	}
 	deadline, err := models.Deadlines.Insert(s).One(context.Background(), d.db)
@@ -55,7 +55,7 @@ func (d *Deadlines) Delete(id uint) error {
 func (d *Deadlines) Update(params core.Deadline) error {
 	s := &models.DeadlineSetter{
 		Title:     omit.From(params.Title),
-		EndTime:   omit.From(params.EndDate.Time()),
+		EndTime:   omit.From(params.EndDate.Time),
 		Recurring: omit.From(params.Recurring),
 	}
 	_, err := models.Deadlines.Update(

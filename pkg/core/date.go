@@ -6,7 +6,7 @@ import (
 )
 
 type Date struct {
-	time time.Time
+	Time time.Time
 }
 
 type DateSlice []Date
@@ -26,31 +26,27 @@ func NewDateToday() Date {
 }
 
 func (d Date) IsEqual(t time.Time) bool {
-	return d.Time().Equal(NewDate(t).Time())
+	return d.Time.Equal(NewDate(t).Time)
 }
 
 func (d Date) String() string {
-	return d.time.Format(ISO8601)
-}
-
-func (d Date) Time() time.Time {
-	return d.time
+	return d.Time.Format(ISO8601)
 }
 
 func (d Date) FirstDayOfTheMonth() Date {
-	return NewDate(time.Date(d.Time().Year(), d.Time().Month(), 1, 0, 0, 0, 0, d.time.Location()))
+	return NewDate(time.Date(d.Time.Year(), d.Time.Month(), 1, 0, 0, 0, 0, d.Time.Location()))
 }
 
 func (d Date) LastDayOfTheMonth() Date {
-	beginning := d.FirstDayOfTheMonth().Time()
+	beginning := d.FirstDayOfTheMonth().Time
 	return NewDate(beginning.AddDate(0, 1, -1))
 }
 
 func (d Date) RangeMonth() DateSlice {
 	var dates []Date
-	beginning := d.FirstDayOfTheMonth().Time()
+	beginning := d.FirstDayOfTheMonth().Time
 
-	for beginning.Before(d.time) {
+	for beginning.Before(d.Time) {
 		dates = append(dates, NewDate(beginning))
 		beginning = beginning.AddDate(0, 0, 1)
 	}
@@ -62,19 +58,19 @@ func (d Date) RangeMonth() DateSlice {
 // MonthsOfYear return all months of the year until the current date.
 func (d Date) MonthsOfYear() []time.Month {
 	months := []time.Month{}
-	for i := d.time.Month(); i > 0; i -= 1 {
+	for i := d.Time.Month(); i > 0; i -= 1 {
 		months = append(months, i)
 	}
 	return months
 }
 
 func (d Date) ToEndOfDay() time.Time {
-	t := d.Time()
+	t := d.Time
 	return time.Date(t.Year(), t.Month(), t.Day(), 23, 59, 59, 0, t.Location())
 }
 
 func (d Date) ToBeginningOfDay() time.Time {
-	t := d.Time()
+	t := d.Time
 	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 }
 
@@ -98,7 +94,7 @@ func DateDecode(in []byte) Date {
 func (ds DateSlice) ToTimeSlice() []time.Time {
 	res := make([]time.Time, len(ds))
 	for idx, d := range ds {
-		res[idx] = d.Time()
+		res[idx] = d.Time
 	}
 	return res
 }

@@ -27,7 +27,7 @@ func GetNextPrev(date core.Date, route string) (prev, next string) {
 }
 
 func GetNextAndPreviousMonth(date core.Date) (prev, next string) {
-	t := date.FirstDayOfTheMonth().Time()
+	t := date.FirstDayOfTheMonth().Time
 	previousMonth := t.AddDate(0, -1, 0)
 	nextMonth := t.AddDate(0, 1, 0)
 	now := time.Now()

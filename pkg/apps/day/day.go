@@ -25,7 +25,7 @@ func New(db bob.DB, event_bus event.Bus) *App {
 }
 
 func (a *App) Month(date core.Date, order core.OrderParam) ([]core.Day, error) {
-	if time.Now().Month() != date.Time().Month() {
+	if time.Now().Month() != date.Time.Month() {
 		date = date.LastDayOfTheMonth()
 	}
 

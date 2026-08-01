@@ -9,6 +9,7 @@ import (
 	"github.com/stephenafamo/bob"
 
 	"danicos.dev/daniel/curious-ape/pkg/config"
+	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/integrations"
 	"danicos.dev/daniel/curious-ape/pkg/services/day"
 	"danicos.dev/daniel/curious-ape/pkg/services/habit"
@@ -25,6 +26,7 @@ func SetupRoutes(ctx context.Context, cfg *config.Config, is *integrations.Integ
 	if cfg.Environment == config.Dev {
 		setupReload(r)
 	}
+	var worklogsIntegration core.WorkLogIntegration = integration.NewService(cfg, is, db, ns)
 
 	r.Handle("/static/*", resources.Handler())
 
@@ -41,7 +43,7 @@ func SetupRoutes(ctx context.Context, cfg *config.Config, is *integrations.Integ
 			day.SetupRoutes(r, db, ns)
 			habit.SetupRoutes(r, db, ns)
 			integration.SetupRoutes(r, cfg, is, db, ns)
-			worklog.SetupRoutes(r, db, ns)
+			worklog.SetupRoutes(r, db, ns, worklogsIntegration)
 		})
 	})
 

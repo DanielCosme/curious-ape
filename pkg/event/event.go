@@ -3,10 +3,11 @@ package event
 import "danicos.dev/daniel/curious-ape/pkg/core"
 
 var (
-	DayCreated  = "days.created"
-	DaySync     = "days.sync"
-	DaySynced   = "days.synced"
-	HabitUpsert = "habits.upsert"
+	DayCreated    = "days.created"
+	DaySync       = "days.sync"
+	DaySynced     = "days.synced"
+	WorklogSynced = "worklog.synced"
+	HabitUpsert   = ""
 )
 
 type Event struct {

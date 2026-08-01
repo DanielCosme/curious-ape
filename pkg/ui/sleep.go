@@ -17,7 +17,7 @@ func Sleep(s *State) Node {
 		}
 		return Div(
 			Class(CSurface),
-			H3(Text(day.Date.Time().Format(core.HumanDate))),
+			H3(Text(day.Date.Time.Format(core.HumanDate))),
 			Map(day.SleepLogs, func(sl core.SleepLog) Node {
 				return Div(
 					Class(CLogEntry),

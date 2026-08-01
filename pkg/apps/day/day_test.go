@@ -32,13 +32,13 @@ func TestDay(t *testing.T) {
 	test.True(t, day1.Habits.Hs[3].State == core.HabitStateNoInfo)
 	test.True(t, day1.Habits.Hs[3].Type == core.HabitTypeEatHealthy)
 
-	date2 := core.NewDate(date1.Time().AddDate(0, 0, 1))
+	date2 := core.NewDate(date1.Time.AddDate(0, 0, 1))
 	days, err := app.Month(date2, core.ASC)
 	test.NilErr(t, err)
 	test.True(t, len(days) == 2)
 	test.True(t, len(days[1].Habits.Hs) == 4)
 
-	date3 := core.NewDate(date1.Time().AddDate(0, 0, 30))
+	date3 := core.NewDate(date1.Time.AddDate(0, 0, 30))
 	days, err = app.Month(date3, core.ASC)
 	test.NilErr(t, err)
 	test.True(t, len(days) == 31)

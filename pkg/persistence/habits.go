@@ -30,7 +30,7 @@ func (h *Habits) Get(p core.HabitParams) (habit core.Habit, err error) {
 }
 
 func (h *Habits) Upsert(p core.Habit) (coreHabit core.Habit, err error) {
-	day, err := GetDay(p.Date, h.db)
+	day, err := GetDay(h.db, p.Date)
 	if err == nil {
 		hCategory, err := buildHabitCategoryQuery(core.HabitCategoryParams{Kind: p.Type}).One(context.Background(), h.db)
 		if err == nil {

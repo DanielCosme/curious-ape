@@ -2,7 +2,6 @@ package persistence
 
 import (
 	"context"
-	"time"
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/gen/bob/dberrors"
@@ -18,7 +17,7 @@ type DeepWorkLogs struct {
 }
 
 func (dw *DeepWorkLogs) Upsert(params core.DeepWorkLog) (log core.DeepWorkLog, err error) {
-	day, err := GetDay(params.Date, dw.db)
+	day, err := GetDay(dw.db, params.Date)
 	if err != nil {
 		return log, CatchDBErr("fitness logs: upsert: get day", err)
 	}
@@ -34,7 +33,7 @@ func (dw *DeepWorkLogs) Upsert(params core.DeepWorkLog) (log core.DeepWorkLog, e
 	bobLog, err := models.DeepWorkLogs.Insert(setter).One(context.Background(), dw.db)
 	if err != nil {
 		if dberrors.DeepWorkLogErrors.ErrUniqueSqliteAutoindexDeepWorkLog1.Is(err) {
-			bobLog, err = dw.Get(DeepWorkLogParams{
+			bobLog, err = dw.Get(core.DeepWorkLogParams{
 				DayID:     day.ID,
 				StartTime: params.StartTime,
 			})
@@ -61,21 +60,15 @@ func deepWorkLogToCore(day *models.Day, bob *models.DeepWorkLog) (log core.DeepW
 	return
 }
 
-func (dw *DeepWorkLogs) Get(p DeepWorkLogParams) (*models.DeepWorkLog, error) {
-	workLog, err := p.BuildQuery().One(context.Background(), dw.db)
+func (dw *DeepWorkLogs) Get(p core.DeepWorkLogParams) (*models.DeepWorkLog, error) {
+	workLog, err := BuildQuery(p).One(context.Background(), dw.db)
 	if err != nil {
 		return nil, CatchDBErr("work logs: get", err)
 	}
 	return workLog, nil
 }
 
-type DeepWorkLogParams struct {
-	ID        int64
-	DayID     int64
-	StartTime time.Time
-}
-
-func (f DeepWorkLogParams) BuildQuery() *sqlite.ViewQuery[*models.DeepWorkLog, models.DeepWorkLogSlice] {
+func BuildQuery(f core.DeepWorkLogParams) *sqlite.ViewQuery[*models.DeepWorkLog, models.DeepWorkLogSlice] {
 	q := models.DeepWorkLogs.Query()
 	if f.ID > 0 {
 		q.Apply(models.SelectWhere.DeepWorkLogs.ID.EQ(f.ID))

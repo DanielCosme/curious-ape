@@ -53,7 +53,7 @@ func (a *App) sleepLogsGetFromFitbit(dates ...core.Date) (res []core.SleepLog, e
 		if err != nil {
 			return res, err
 		}
-		sleepLogs, err := fitbitClient.Sleep.GetByDate(day.Date.Time())
+		sleepLogs, err := fitbitClient.Sleep.GetByDate(day.Date.Time)
 		if err != nil {
 			return res, err
 		}
