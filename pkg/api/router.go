@@ -5,12 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/nats-io/nats.go"
 	"github.com/stephenafamo/bob"
 
 	"danicos.dev/daniel/curious-ape/pkg/config"
-	"danicos.dev/daniel/curious-ape/pkg/core"
-	"danicos.dev/daniel/curious-ape/pkg/integrations"
 	"danicos.dev/daniel/curious-ape/pkg/services/day"
 	"danicos.dev/daniel/curious-ape/pkg/services/habit"
 	"danicos.dev/daniel/curious-ape/pkg/services/integration"
@@ -22,11 +19,18 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func SetupRoutes(ctx context.Context, cfg *config.Config, is *integrations.Integrations, r chi.Router, sessionManager *scs.SessionManager, db bob.DB, ns *nats.Conn) (err error) {
+type Handllers struct {
+	Day         *day.Handler
+	Habit       *habit.Handler
+	Integration *integration.Handler
+	Worklog     *worklog.Handler
+	User        *user.Handler
+}
+
+func SetupRouter(ctx context.Context, handlers Handllers, cfg *config.Config, r chi.Router, sessionManager *scs.SessionManager, db bob.DB) (err error) {
 	if cfg.Environment == config.Dev {
 		setupReload(r)
 	}
-	var worklogsIntegration core.WorkLogIntegration = integration.NewService(cfg, is, db, ns)
 
 	r.Handle("/static/*", resources.Handler())
 
@@ -35,15 +39,15 @@ func SetupRoutes(ctx context.Context, cfg *config.Config, is *integrations.Integ
 		r.Use(user.AuthenticateFromSession(sessionManager, db))
 		r.Use(SetState)
 
-		err = user.SetupRoutes(r, db, sessionManager)
+		err = user.SetupRoutes(r, handlers.User)
 
 		r.Group(func(r chi.Router) {
 			r.Use(user.RequireAuthentication)
 
-			day.SetupRoutes(r, db, ns)
-			habit.SetupRoutes(r, db, ns)
-			integration.SetupRoutes(r, cfg, is, db, ns)
-			worklog.SetupRoutes(r, db, ns, worklogsIntegration)
+			day.SetupRoutes(r, handlers.Day)
+			habit.SetupRoutes(r, handlers.Habit)
+			integration.SetupRoutes(r, handlers.Integration)
+			worklog.SetupRoutes(r, handlers.Worklog)
 		})
 	})
 

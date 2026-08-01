@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"time"
 
-	"danicos.dev/daniel/curious-ape/pkg/config"
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/integrations"
 	"github.com/nats-io/nats.go"
@@ -14,14 +13,14 @@ import (
 
 type Service struct {
 	db   bob.DB
-	ns   *nats.Conn
+	nats *nats.Conn
 	sync *integrations.Integrations
 }
 
-func NewService(cfg *config.Config, sync *integrations.Integrations, db bob.DB, ns *nats.Conn) *Service {
+func NewService(sync *integrations.Integrations, db bob.DB, nc *nats.Conn) *Service {
 	s := &Service{
 		db:   db,
-		ns:   ns,
+		nats: nc,
 		sync: sync,
 	}
 	if sync == nil {

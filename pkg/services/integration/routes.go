@@ -4,20 +4,13 @@ import (
 	"log/slog"
 	"net/http"
 
-	"danicos.dev/daniel/curious-ape/pkg/config"
 	"danicos.dev/daniel/curious-ape/pkg/core"
-	"danicos.dev/daniel/curious-ape/pkg/integrations"
 	"danicos.dev/daniel/curious-ape/pkg/ui"
 	"danicos.dev/daniel/curious-ape/pkg/web"
 	"github.com/go-chi/chi/v5"
-	"github.com/nats-io/nats.go"
-	"github.com/stephenafamo/bob"
 )
 
-func SetupRoutes(r chi.Router, cfg *config.Config, is *integrations.Integrations, db bob.DB, ns *nats.Conn) error {
-	svc := NewService(cfg, is, db, ns)
-	handler := NewHandler(svc)
-
+func SetupRoutes(r chi.Router, handler *Handler) error {
 	r.Route("/integrations", func(r chi.Router) {
 		r.Get("/", handler.IntegrationsPage)
 		r.Get("/{name}", handler.IntegrationGet)

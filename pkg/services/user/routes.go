@@ -3,9 +3,7 @@ package user
 import (
 	"net/http"
 
-	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
-	"github.com/stephenafamo/bob"
 )
 
 type ContextKey string
@@ -16,10 +14,7 @@ const (
 	ctxUser                   ContextKey = "user"
 )
 
-func SetupRoutes(r chi.Router, db bob.DB, session *scs.SessionManager) error {
-	svc := NewService(db)
-	handler := NewHandler(svc, session)
-
+func SetupRoutes(r chi.Router, handler *Handler) error {
 	r.Route("/login", func(r chi.Router) {
 		r.Get("/", handler.LoginPage)
 		r.Post("/", handler.LoginPost)

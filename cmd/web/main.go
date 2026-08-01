@@ -18,7 +18,11 @@ import (
 	"danicos.dev/daniel/curious-ape/pkg/config"
 	"danicos.dev/daniel/curious-ape/pkg/integrations"
 	embbeded_nats "danicos.dev/daniel/curious-ape/pkg/nats"
+	"danicos.dev/daniel/curious-ape/pkg/services/day"
+	"danicos.dev/daniel/curious-ape/pkg/services/habit"
+	"danicos.dev/daniel/curious-ape/pkg/services/integration"
 	"danicos.dev/daniel/curious-ape/pkg/services/user"
+	"danicos.dev/daniel/curious-ape/pkg/services/worklog"
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
@@ -90,17 +94,27 @@ func run(ctx context.Context) error {
 
 	is := integrations.New(cfg.TogglWorkspaceID, cfg.TogglAPIKey, cfg.HevyAPIKey, nil, nil)
 
+	userService := user.NewService(bobDB)
+	integrationService := integration.NewService(is, bobDB, nc)
+	handlers := api.Handllers{
+		Day:         day.NewHandler(day.NewService(bobDB, nc)),
+		Habit:       habit.NewHandler(habit.NewService(bobDB, nc)),
+		Integration: integration.NewHandler(integrationService),
+		Worklog:     worklog.NewHandler(worklog.NewService(bobDB, nc, integrationService)),
+		User:        user.NewHandler(userService, sessionManager),
+	}
+
+	if err := api.SetupRouter(errGroupCtx, handlers, cfg, router, sessionManager, bobDB); err != nil {
+		return fmt.Errorf("error setting up routes: %w", err)
+	}
+	if err := userService.SetPassword(cfg.Username, cfg.Password); err != nil {
+		return fmt.Errorf("error setting up username/password: %w", err)
+	}
+
 	logger.Info("Application initialized",
 		"env", cfg.Environment,
 		"version", version,
 	)
-
-	if err := user.NewService(bobDB).SetPassword(cfg.Username, cfg.Password); err != nil {
-		return fmt.Errorf("error setting up username/password: %w", err)
-	}
-	if err := api.SetupRoutes(errGroupCtx, cfg, is, router, sessionManager, bobDB, nc); err != nil {
-		return fmt.Errorf("error setting up routes: %w", err)
-	}
 
 	addr := fmt.Sprintf(":%s", cfg.Port)
 	server := &http.Server{
