@@ -8,6 +8,7 @@ var (
 	DaySynced        = "days.synced"
 	WorklogSynced    = "worklog.synced"
 	FitnesslogSynced = "fitnesslog.synced"
+	SleepLogSynced   = "sleeplog.synced"
 
 	// TODO: remove after refactor is done.
 	HabitUpsert = ""

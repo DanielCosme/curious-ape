@@ -22,6 +22,7 @@ import (
 	"danicos.dev/daniel/curious-ape/pkg/services/fitnesslog"
 	"danicos.dev/daniel/curious-ape/pkg/services/habit"
 	"danicos.dev/daniel/curious-ape/pkg/services/integration"
+	"danicos.dev/daniel/curious-ape/pkg/services/sleeplog"
 	"danicos.dev/daniel/curious-ape/pkg/services/user"
 	"danicos.dev/daniel/curious-ape/pkg/services/worklog"
 	"github.com/alexedwards/scs/sqlite3store"
@@ -75,14 +76,6 @@ func run(ctx context.Context) error {
 		}
 	}
 
-	router := chi.NewMux()
-	router.Use(
-		httplog.RequestLogger(logger, &httplog.Options{
-			Schema: &httplog.Schema{RequestRemoteIP: "ip"},
-		}),
-		middleware.Recoverer,
-	)
-
 	ns, err := embbeded_nats.New(ctx)
 	ns.WaitForServer()
 	exitIfErr(err)
@@ -117,6 +110,15 @@ func run(ctx context.Context) error {
 		worklog.NewService(bobDB, nc, integrationService),
 		userService,
 		fitnesslog.NewService(bobDB, nc, integrationService),
+		sleeplog.NewService(bobDB, nc, integrationService),
+	)
+
+	router := chi.NewMux()
+	router.Use(
+		httplog.RequestLogger(logger, &httplog.Options{
+			Schema: &httplog.Schema{RequestRemoteIP: "ip"},
+		}),
+		middleware.Recoverer,
 	)
 	if err := api.SetupRouter(errGroupCtx, handlers, router, bobDB); err != nil {
 		return fmt.Errorf("error setting up routes: %w", err)
@@ -140,11 +142,13 @@ func run(ctx context.Context) error {
 		},
 	}
 
-	go func() {
-		nc.Subscribe(">", func(msg *nats.Msg) {
-			slog.Debug("Event emited", "subject", msg.Subject)
-		})
-	}()
+	if config.IsDev() {
+		go func() {
+			nc.Subscribe(">", func(msg *nats.Msg) {
+				slog.Debug("Event emited", "subject", msg.Subject)
+			})
+		}()
+	}
 
 	errGroup.Go(func() error {
 		slog.Info("Server listening", "addr", server.Addr)

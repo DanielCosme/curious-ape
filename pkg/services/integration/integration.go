@@ -70,7 +70,7 @@ func (svc *Service) GetIntegration(provider string) (res core.IntegrationInfo, e
 		// }
 		slog.Info("Google not implemented")
 	case core.IntegrationFitbit:
-		sls, err := svc.GetSleeLogs(today)
+		sls, err := svc.GetSleepLogs(today)
 		if err != nil {
 			authURL = svc.sync.GenerateOauth2URI(core.Integration(provider))
 			if authURL != "" {

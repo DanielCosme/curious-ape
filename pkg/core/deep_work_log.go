@@ -20,4 +20,5 @@ type LogSyncPayload struct {
 	Date        Date
 	WorkLogs    []DeepWorkLog
 	FitnessLogs []FitnessLog
+	SleepLogs   []SleepLog
 }

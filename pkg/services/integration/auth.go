@@ -24,7 +24,7 @@ func (svc *Service) Oauth2Success(provider, code string) error {
 		TokenType:    omit.From(token.Type()),
 		Expiration:   omit.From(token.Expiry),
 	})
-	slog.Info("Authentication successful", "provider", provider, "code", code)
+	slog.Info("Oauth2 authentication successful", "provider", provider)
 	return err
 }
 

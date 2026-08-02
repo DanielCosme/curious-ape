@@ -13,6 +13,7 @@ import (
 	"danicos.dev/daniel/curious-ape/pkg/services/fitnesslog"
 	"danicos.dev/daniel/curious-ape/pkg/services/habit"
 	"danicos.dev/daniel/curious-ape/pkg/services/integration"
+	"danicos.dev/daniel/curious-ape/pkg/services/sleeplog"
 	"danicos.dev/daniel/curious-ape/pkg/services/user"
 	"danicos.dev/daniel/curious-ape/pkg/services/worklog"
 	"danicos.dev/daniel/curious-ape/pkg/ui"
@@ -29,6 +30,7 @@ type Handlers struct {
 	Worklog        *worklog.Handler
 	User           *user.Handler
 	Fitness        *fitnesslog.Handler
+	Sleep          *sleeplog.Handler
 }
 
 func NewHandlers(
@@ -39,6 +41,7 @@ func NewHandlers(
 	Worklog *worklog.Service,
 	User *user.Service,
 	Fitness *fitnesslog.Service,
+	Sleep *sleeplog.Service,
 ) Handlers {
 	return Handlers{
 		sessionManager: SessionManager,
@@ -48,6 +51,7 @@ func NewHandlers(
 		Worklog:        worklog.NewHandler(Worklog),
 		User:           user.NewHandler(User, SessionManager),
 		Fitness:        fitnesslog.NewHandler(Fitness),
+		Sleep:          sleeplog.NewHandler(Sleep),
 	}
 }
 
@@ -61,6 +65,11 @@ func SetupRouter(ctx context.Context, handlers Handlers, r chi.Router, db bob.DB
 	r.Group(func(r chi.Router) {
 		r.Use(handlers.sessionManager.LoadAndSave)
 		r.Use(user.AuthenticateFromSession(handlers.sessionManager, db))
+
+		r.Group(func(r chi.Router) {
+			integration.SetupOauthRoutes(r, handlers.Integration)
+		})
+
 		r.Use(SetState)
 
 		err = user.SetupRoutes(r, handlers.User)
@@ -73,6 +82,7 @@ func SetupRouter(ctx context.Context, handlers Handlers, r chi.Router, db bob.DB
 			integration.SetupRoutes(r, handlers.Integration)
 			worklog.SetupRoutes(r, handlers.Worklog)
 			fitnesslog.SetupRoutes(r, handlers.Fitness)
+			sleeplog.SetupRoutes(r, handlers.Sleep)
 		})
 	})
 
@@ -80,7 +90,7 @@ func SetupRouter(ctx context.Context, handlers Handlers, r chi.Router, db bob.DB
 		return fmt.Errorf("error setting up routes: %w", err)
 	}
 	for _, route := range r.Routes() {
-		slog.Debug("Route registered", "pattern", route.Pattern)
+		slog.Debug(fmt.Sprintf("Service registered: %s", route.Pattern))
 	}
 	return nil
 }

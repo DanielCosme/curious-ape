@@ -9,5 +9,5 @@ type FitnessIntegration interface {
 }
 
 type SleepIntegration interface {
-	GetSleepLogs(Date) ([]FitnessLog, error)
+	GetSleepLogs(Date) ([]SleepLog, error)
 }

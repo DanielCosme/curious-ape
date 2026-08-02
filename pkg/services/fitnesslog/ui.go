@@ -13,6 +13,10 @@ import (
 )
 
 func UI_Fitness(s *ui.UIState, days []core.Day) Node {
+	if len(days) == 0 {
+		return ui.UILayout(s, P(Text("No records")))
+	}
+
 	next, prev := ui.GetNextPrevButtons(days[0].Date, "fitness")
 	return ui.UILayout(s, Map(days, func(day core.Day) Node {
 		if len(day.FitnessLogs) == 0 {

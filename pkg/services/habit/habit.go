@@ -24,6 +24,8 @@ func NewService(db bob.DB, ns *nats.Conn) *Service {
 	if ns != nil {
 		ns.Subscribe(event.DayCreated, s.listen)
 		ns.Subscribe(event.WorklogSynced, s.listen)
+		ns.Subscribe(event.FitnesslogSynced, s.listen)
+		ns.Subscribe(event.SleepLogSynced, s.listen)
 	}
 	return s
 }
@@ -85,6 +87,12 @@ func (s *Service) listen(msg *nats.Msg) {
 		if err := s.eventFitnesslogSynced(wls); err != nil {
 			slog.Error("Failed to handle event", "err", err, "subject", msg.Subject)
 		}
+	case event.SleepLogSynced:
+		var wls core.LogSyncPayload
+		core.Decode(msg.Data, &wls)
+		if err := s.eventSleepLogSynced(wls); err != nil {
+			slog.Error("Failed to handle event", "err", err, "subject", msg.Subject)
+		}
 	}
 }
 
@@ -139,6 +147,32 @@ func (svc *Service) eventFitnesslogSynced(payload core.LogSyncPayload) error {
 	if err != nil {
 		return err
 	}
+	svc.nats.Publish(event.DaySynced, payload.Date.Enc())
+	return nil
+}
+
+func (svc *Service) eventSleepLogSynced(payload core.LogSyncPayload) error {
+	for _, sl := range payload.SleepLogs {
+		if sl.IsMainSleep {
+			habitState := core.HabitStateNotDone
+			wakeUpTime := time.Date(sl.EndTime.Year(), sl.EndTime.Month(), sl.EndTime.Day(), 6, 0, 0, 0, sl.EndTime.Location())
+			if sl.EndTime.Before(wakeUpTime) {
+				habitState = core.HabitStateDone
+			}
+			params := core.Habit{
+				Date:      payload.Date,
+				Type:      core.HabitTypeWakeUp,
+				State:     habitState,
+				Note:      sl.EndTime.Format(core.Time),
+				Automated: true,
+			}
+			_, err := svc.HabitUpsert(params)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	svc.nats.Publish(event.DaySynced, payload.Date.Enc())
 	return nil
 }

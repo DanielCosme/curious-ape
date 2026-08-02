@@ -58,15 +58,17 @@ func (svc *Service) GetDayEntries(date core.Date) ([]core.DeepWorkLog, error) {
 	return res, nil
 }
 
-func (svc *Service) GetSleeLogs(date core.Date) (res []core.SleepLog, err error) {
+func (svc *Service) GetSleepLogs(date core.Date) (res []core.SleepLog, err error) {
 	fitbitClient, err := svc.fitbitClient()
 	if err != nil {
 		return
 	}
+	slog.Info("Fetching sleep logs from fitbit")
 	sleepLogs, err := fitbitClient.Sleep.GetByDate(date.Time)
 	if err != nil {
 		return res, err
 	}
+	slog.Info(fmt.Sprintf("Found %d logs for %s", len(sleepLogs.Sleep), date.Time.Format(core.HumanDateWeekDay)))
 	for _, fsl := range sleepLogs.Sleep {
 		sl, err := sleepLogFromFitbit(date, fsl)
 		if err != nil {

@@ -41,7 +41,7 @@ func UILayout(s *UIState, nodes ...Node) Node {
 						navItem(lucide.House(), "/", "Home ", s.CurrentPath),
 						navItem(lucide.SquareCheckBig(), "/habits", "Habits", s.CurrentPath),
 						// navItem(lucide.Hourglass(), "/deadlines", "Deadlines ", s.CurrentPath),
-						// navItem(lucide.Bed(), "/sleep", "Sleep ", s.CurrentPath),
+						navItem(lucide.Bed(), "/sleep", "Sleep ", s.CurrentPath),
 						navItem(lucide.Dumbbell(), "/fitness", "Fitness", s.CurrentPath),
 						navItem(lucide.MonitorCog(), "/worklog", "Deep-Work ", s.CurrentPath),
 						navItem(lucide.Workflow(), "/integrations", "Integrations", s.CurrentPath),
