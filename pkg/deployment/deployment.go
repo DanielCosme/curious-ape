@@ -76,28 +76,28 @@ func Deployment() apps.Deployment {
 		Path: Secret.LitestreamKey,
 	}})
 	podSpec := core.PodSpec{
-		InitContainers: []core.Container{{
-			Name:  "restore-litestream",
-			Image: config.LITESTREAM_IMAGE,
-			Command: []string{
-				"litestream",
-				"restore",
-				"-if-db-not-exists",
-				"-if-replica-exists",
-				"/db-data/ape.db",
-			},
-			VolumeMounts: []core.VolumeMount{
-				{
-					Name:      dataVolume.Name,
-					MountPath: "/db-data",
-				},
-				{
-					Name:      litestreamVolume.Name,
-					MountPath: "/etc/litestream.yml",
-					SubPath:   Secret.LitestreamKey,
-				},
-			},
-		}},
+		// InitContainers: []core.Container{{
+		// 	Name:  "restore-litestream",
+		// 	Image: config.LITESTREAM_IMAGE,
+		// 	Command: []string{
+		// 		"litestream",
+		// 		"restore",
+		// 		"-if-db-not-exists",
+		// 		"-if-replica-exists",
+		// 		"/db-data/ape.db",
+		// 	},
+		// 	VolumeMounts: []core.VolumeMount{
+		// 		{
+		// 			Name:      dataVolume.Name,
+		// 			MountPath: "/db-data",
+		// 		},
+		// 		{
+		// 			Name:      litestreamVolume.Name,
+		// 			MountPath: "/etc/litestream.yml",
+		// 			SubPath:   Secret.LitestreamKey,
+		// 		},
+		// 	},
+		// }},
 		Containers: []core.Container{
 			{
 				Name:  config.KUBERNETES_NAME,
@@ -116,25 +116,25 @@ func Deployment() apps.Deployment {
 					},
 				},
 			},
-			{
-				Name:  "replicate-litestream",
-				Image: config.LITESTREAM_IMAGE,
-				Command: []string{
-					"litestream",
-					"replicate",
-				},
-				VolumeMounts: []core.VolumeMount{
-					{
-						Name:      dataVolume.Name,
-						MountPath: "/db-data",
-					},
-					{
-						Name:      litestreamVolume.Name,
-						MountPath: "/etc/litestream.yml",
-						SubPath:   Secret.LitestreamKey,
-					},
-				},
-			},
+			// {
+			// 	Name:  "replicate-litestream",
+			// 	Image: config.LITESTREAM_IMAGE,
+			// 	Command: []string{
+			// 		"litestream",
+			// 		"replicate",
+			// 	},
+			// 	VolumeMounts: []core.VolumeMount{
+			// 		{
+			// 			Name:      dataVolume.Name,
+			// 			MountPath: "/db-data",
+			// 		},
+			// 		{
+			// 			Name:      litestreamVolume.Name,
+			// 			MountPath: "/etc/litestream.yml",
+			// 			SubPath:   Secret.LitestreamKey,
+			// 		},
+			// 	},
+			// },
 		},
 		Volumes: []core.Volume{
 			dataVolume,
