@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
-	embbeded_nats "danicos.dev/daniel/curious-ape/pkg/nats"
+	embbeded_nats "danicos.dev/daniel/curious-ape/pkg/mynats"
 	"danicos.dev/daniel/curious-ape/pkg/services/day"
 	"danicos.dev/daniel/curious-ape/pkg/services/habit"
 	"danicos.dev/daniel/curious-ape/pkg/test"

@@ -17,7 +17,7 @@ import (
 	"danicos.dev/daniel/curious-ape/pkg/api"
 	"danicos.dev/daniel/curious-ape/pkg/config"
 	"danicos.dev/daniel/curious-ape/pkg/integrations"
-	embbeded_nats "danicos.dev/daniel/curious-ape/pkg/nats"
+	embbeded_nats "danicos.dev/daniel/curious-ape/pkg/mynats"
 	"danicos.dev/daniel/curious-ape/pkg/services/day"
 	"danicos.dev/daniel/curious-ape/pkg/services/fitnesslog"
 	"danicos.dev/daniel/curious-ape/pkg/services/habit"

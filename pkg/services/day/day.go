@@ -5,7 +5,7 @@ import (
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/event"
-	"danicos.dev/daniel/curious-ape/pkg/utils"
+	"danicos.dev/daniel/curious-ape/pkg/mynats"
 	"github.com/nats-io/nats.go"
 	"github.com/stephenafamo/bob"
 )
@@ -60,7 +60,7 @@ func (s *Service) GetOrCreate(date core.Date) (d core.Day, err error) {
 
 		// NOTE: the first subscriber to respond will un-block this. Might need to address this in the future.
 		_, err := s.nats.Request(event.DayCreated, date.Enc(), time.Second*10)
-		if err != nil && !utils.ErrNatsIsNoResponders(err) {
+		if err != nil && !mynats.ErrNatsIsNoResponders(err) {
 			return d, err
 		}
 
