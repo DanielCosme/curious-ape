@@ -21,14 +21,6 @@ type OldAPI struct {
 	Version string
 }
 
-func NewApi(app *application.App, sessionManager *scs.SessionManager, version string) *OldAPI {
-	return &OldAPI{
-		App:     app,
-		Version: version,
-		Scs:     sessionManager,
-	}
-}
-
 func (a *OldAPI) IsAuthenticated(r *http.Request) bool {
 	isAuthenticated, ok := r.Context().Value(ctxKeyIsAuthenticated).(bool)
 	if !ok {
