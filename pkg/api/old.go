@@ -2,7 +2,6 @@ package api
 
 import (
 	"net/http"
-	"time"
 
 	"danicos.dev/daniel/curious-ape/pkg/config"
 	"danicos.dev/daniel/curious-ape/pkg/core"
@@ -23,15 +22,8 @@ func Routes(a *OldAPI) http.Handler {
 	d.Use(a.MiddlewareAuthenticateFromSession)
 	d.Use(a.MiddlewareSetUIState)
 
-	d.Endpoint("/api/oauth2/fitbit/success").GET(a.FitbitSuccess)
-	d.Endpoint("/api/oauth2/google/success").GET(a.GoogleSuccess)
-
 	d.Use(a.MiddlewareRequireAuthentication)
 
-	d.Endpoint("/day/sync").POST(a.DaySync)
-	d.Endpoint("/sleep").GET(a.Sleep)
-	d.Endpoint("/fitness").GET(a.Fitness)
-	d.Endpoint("/deep_work").GET(a.DeepWork)
 	d.Endpoint("/deadlines").GET(a.DeadlinesList)
 	d.Endpoint("/deadline").
 		GET(a.DeadlinesGetForm).
@@ -75,70 +67,6 @@ func (a *OldAPI) DeadlinesPostForm(c *dove.Context) error {
 		}
 		state.Deadlines.Err = err
 		return c.RenderOK(ui.DeadlineForm(state))
-	}
-	return err
-}
-
-func (a *OldAPI) DeepWork(c *dove.Context) error {
-	days, err := a.App.Day.Month(getDateParam(c), core.DESC)
-	if err == nil {
-		state := State(a, c.Req)
-		state.Days = days
-		return c.RenderOK(ui.DeepWork(state))
-	}
-	return err
-}
-
-func (a *OldAPI) Fitness(c *dove.Context) error {
-	days, err := a.App.Day.Month(getDateParam(c), core.DESC)
-	if err == nil {
-		state := State(a, c.Req)
-		state.Days = days
-		return c.RenderOK(ui.Fitness(state))
-	}
-	return err
-}
-
-func (a *OldAPI) Sleep(c *dove.Context) error {
-	days, err := a.App.Day.Month(getDateParam(c), core.DESC)
-	if err == nil {
-		state := State(a, c.Req)
-		state.Days = days
-		return c.RenderOK(ui.Sleep(state))
-	}
-	return err
-}
-
-func (a *OldAPI) FitbitSuccess(c *dove.Context) error {
-	c.ParseForm()
-	return a.App.Oauth2Success(core.IntegrationFitbit, c.Req.FormValue("code"))
-}
-
-func (a *OldAPI) GoogleSuccess(c *dove.Context) error {
-	c.ParseForm()
-	return a.App.Oauth2Success(core.IntegrationGoogle, c.Req.FormValue("code"))
-}
-
-func getDateParam(c *dove.Context) core.Date {
-	c.ParseForm()
-	if c.Req.Form.Get("date") == "" {
-		return core.NewDate(time.Now())
-	} else {
-		date, err := core.NewDateFromISO8601(c.Req.Form.Get("date"))
-		if err == nil {
-			return date
-		}
-		c.Log.Fatal("cannot parse date", "err", err)
-		panic(err)
-	}
-}
-
-func (a *OldAPI) DaySync(c *dove.Context) error {
-	c.ParseForm()
-	date, _ := core.NewDateFromISO8601(c.Req.Form.Get("date"))
-	_, err := a.App.DaySync(c.Ctx(), date)
-	if err == nil {
-		// return c.RenderOK(day.UI_day(d))
 	}
 	return err
 }
