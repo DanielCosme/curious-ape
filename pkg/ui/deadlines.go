@@ -23,7 +23,7 @@ func Deadlines(s *State) Node {
 }
 
 func deadline(d core.Deadline) Node {
-	if d.EndDate.Time().IsZero() {
+	if d.EndDate.Time.IsZero() {
 		return nil
 	}
 	return Div(

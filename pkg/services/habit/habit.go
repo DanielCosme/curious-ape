@@ -73,7 +73,7 @@ func (s *Service) listen(msg *nats.Msg) {
 		}
 		msg.Respond(nil)
 	case event.WorklogSynced:
-		var wls []core.DeepWorkLog
+		var wls core.LogSyncPayload
 		core.Decode(msg.Data, &wls)
 		if err := s.eventWorklogSynced(wls); err != nil {
 			slog.Error("Failed to handle event", "err", err, "subject", msg.Subject)
@@ -81,35 +81,29 @@ func (s *Service) listen(msg *nats.Msg) {
 	}
 }
 
-func (s *Service) eventWorklogSynced(wls []core.DeepWorkLog) error {
-	var date core.Date
-	if len(wls) > 0 {
-		date = wls[0].Date
-	} else {
-		slog.Info("habit: no work logs to handle")
-		return nil
+func (s *Service) eventWorklogSynced(payload core.LogSyncPayload) error {
+	habitParams := core.Habit{
+		Date:      payload.Date,
+		Type:      core.HabitTypeDeepWork,
+		State:     core.HabitStateNotDone,
+		Automated: true,
 	}
 
 	var totalDuration time.Duration
-	for _, wl := range wls {
+	for _, wl := range payload.WorkLogs {
 		duration := wl.EndTime.Sub(wl.StartTime)
 		totalDuration += duration
 	}
-	habitState := core.HabitStateNotDone
+
 	if totalDuration > time.Hour*5 {
-		habitState = core.HabitStateDone
+		habitParams.State = core.HabitStateDone
 	}
-	habitParams := core.Habit{
-		Date:      date,
-		Type:      core.HabitTypeDeepWork,
-		State:     habitState,
-		Note:      core.DurationToString(totalDuration),
-		Automated: true,
-	}
+	habitParams.Note = core.DurationToString(totalDuration)
+
 	_, err := s.HabitUpsert(habitParams)
 	if err != nil {
 		return err
 	}
-	s.ns.Publish(event.DaySynced, date.Enc())
+	s.ns.Publish(event.DaySynced, payload.Date.Enc())
 	return nil
 }

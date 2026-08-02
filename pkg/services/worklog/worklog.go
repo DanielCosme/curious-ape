@@ -39,6 +39,7 @@ func (svc *Service) listen(msg *nats.Msg) {
 }
 
 func (svc *Service) sync(date core.Date) error {
+	result := core.LogSyncPayload{Date: date}
 	logs, err := svc.integration.GetDayEntries(date)
 	if err != nil {
 		return err
@@ -52,9 +53,9 @@ func (svc *Service) sync(date core.Date) error {
 		duration := log.EndTime.Sub(log.StartTime)
 		t := fmt.Sprintf("%s-%s (%s)", log.StartTime.Format(core.Time), log.EndTime.Format(core.Time), duration)
 		slog.Info("Deep work log added: "+t, "origin", log.Origin)
+		result.WorkLogs = append(result.WorkLogs, log)
 	}
-	if len(logs) > 0 {
-		svc.nats.Publish(event.WorklogSynced, core.Encode(logs))
-	}
+	svc.nats.Publish(event.WorklogSynced, core.Encode(result))
+	svc.nats.Publish(event.DaySynced, date.Enc())
 	return nil
 }

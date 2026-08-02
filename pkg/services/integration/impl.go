@@ -52,3 +52,7 @@ func (svc *Service) GetDayEntries(date core.Date) ([]core.DeepWorkLog, error) {
 
 	return res, nil
 }
+
+func (svc *Service) GetFitnessLogs(date core.Date) ([]core.FitnessLog, error) {
+	return nil, nil
+}

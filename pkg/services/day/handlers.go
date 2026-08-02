@@ -4,13 +4,13 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
-	"time"
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/event"
 	"danicos.dev/daniel/curious-ape/pkg/ui"
 	"danicos.dev/daniel/curious-ape/pkg/web"
 	"github.com/go-chi/chi/v5"
+	"github.com/nats-io/nats.go"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
@@ -35,34 +35,36 @@ func (h *Handler) index(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) streamSSE(w http.ResponseWriter, r *http.Request) {
-	slog.Info("stream endpoint created")
+	slog.Info("Day: SSE stream open")
 	sse := datastar.NewSSE(w, r)
 
-	subs, err := h.svc.nats.SubscribeSync(event.DaySynced)
+	ch := make(chan *nats.Msg)
+	subs, err := h.svc.nats.ChanSubscribe(event.DaySynced, ch)
 	if err != nil {
 		web.ErrInternalServer(err, w)
 		return
 	}
+	defer subs.Unsubscribe()
 
 	for {
-		msg, err := subs.NextMsg(time.Hour * 12)
-		if err != nil {
-			web.ErrInternalServer(err, w)
-			return
-		}
 
-		day, err := h.svc.GetOrCreate(core.DateDecode(msg.Data))
-		if err != nil {
-			web.ErrInternalServer(err, w)
+		select {
+		case <-r.Context().Done():
+			slog.Warn("Day: SSE stream closed")
 			return
-		}
+		case msg := <-ch:
+			day, err := h.svc.GetOrCreate(core.DateDecode(msg.Data))
+			if err != nil {
+				web.ErrInternalServer(err, w)
+				return
+			}
 
-		err = sse.PatchElementGostar(UI_day(day))
-		if err != nil {
-			web.ErrInternalServer(err, w)
-			return
+			err = sse.PatchElementGostar(UI_day(day))
+			if err != nil {
+				web.ErrInternalServer(err, w)
+				return
+			}
 		}
-		continue
 	}
 }
 

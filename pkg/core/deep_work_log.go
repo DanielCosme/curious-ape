@@ -15,3 +15,9 @@ type DeepWorkLogParams struct {
 	DayID     int64
 	StartTime time.Time
 }
+
+type LogSyncPayload struct {
+	Date        Date
+	WorkLogs    []DeepWorkLog
+	FitnessLogs []DeepWorkLog
+}

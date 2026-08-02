@@ -19,6 +19,7 @@ import (
 	"danicos.dev/daniel/curious-ape/pkg/integrations"
 	embbeded_nats "danicos.dev/daniel/curious-ape/pkg/nats"
 	"danicos.dev/daniel/curious-ape/pkg/services/day"
+	"danicos.dev/daniel/curious-ape/pkg/services/fitnesslog"
 	"danicos.dev/daniel/curious-ape/pkg/services/habit"
 	"danicos.dev/daniel/curious-ape/pkg/services/integration"
 	"danicos.dev/daniel/curious-ape/pkg/services/user"
@@ -103,6 +104,7 @@ func run(ctx context.Context) error {
 		Integration: integration.NewHandler(integrationService),
 		Worklog:     worklog.NewHandler(worklog.NewService(bobDB, nc, integrationService)),
 		User:        user.NewHandler(userService, sessionManager),
+		Fitness:     fitnesslog.NewHandler(fitnesslog.NewService(bobDB, nc, integrationService)),
 	}
 
 	if err := api.SetupRouter(errGroupCtx, handlers, router, sessionManager, bobDB); err != nil {

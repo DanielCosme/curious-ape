@@ -10,6 +10,7 @@ import (
 
 	"danicos.dev/daniel/curious-ape/pkg/config"
 	"danicos.dev/daniel/curious-ape/pkg/services/day"
+	"danicos.dev/daniel/curious-ape/pkg/services/fitnesslog"
 	"danicos.dev/daniel/curious-ape/pkg/services/habit"
 	"danicos.dev/daniel/curious-ape/pkg/services/integration"
 	"danicos.dev/daniel/curious-ape/pkg/services/user"
@@ -26,6 +27,7 @@ type Handllers struct {
 	Integration *integration.Handler
 	Worklog     *worklog.Handler
 	User        *user.Handler
+	Fitness     *fitnesslog.Handler
 }
 
 func SetupRouter(ctx context.Context, handlers Handllers, r chi.Router, sessionManager *scs.SessionManager, db bob.DB) (err error) {
@@ -49,6 +51,7 @@ func SetupRouter(ctx context.Context, handlers Handllers, r chi.Router, sessionM
 			habit.SetupRoutes(r, handlers.Habit)
 			integration.SetupRoutes(r, handlers.Integration)
 			worklog.SetupRoutes(r, handlers.Worklog)
+			fitnesslog.SetupRoutes(r, handlers.Fitness)
 		})
 	})
 
