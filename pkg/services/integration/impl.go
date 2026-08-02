@@ -10,6 +10,7 @@ import (
 
 	"danicos.dev/daniel/curious-ape/pkg/config"
 	"danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/integrations/fitbit"
 )
 
 func (svc *Service) GetDayEntries(date core.Date) ([]core.DeepWorkLog, error) {
@@ -55,6 +56,25 @@ func (svc *Service) GetDayEntries(date core.Date) ([]core.DeepWorkLog, error) {
 	}
 
 	return res, nil
+}
+
+func (svc *Service) GetSleeLogs(date core.Date) (res []core.SleepLog, err error) {
+	fitbitClient, err := svc.fitbitClient()
+	if err != nil {
+		return
+	}
+	sleepLogs, err := fitbitClient.Sleep.GetByDate(date.Time)
+	if err != nil {
+		return res, err
+	}
+	for _, fsl := range sleepLogs.Sleep {
+		sl, err := sleepLogFromFitbit(date, fsl)
+		if err != nil {
+			return res, err
+		}
+		res = append(res, sl)
+	}
+	return
 }
 
 func (svc *Service) GetFitnessLogs(date core.Date) (res []core.FitnessLog, err error) {
@@ -109,4 +129,35 @@ func (svc *Service) GetFitnessLogs(date core.Date) (res []core.FitnessLog, err e
 		slog.Warn(fmt.Sprintf("fitness log to sync is not today: %s", date.String()))
 	}
 	return
+}
+
+func sleepLogFromFitbit(date core.Date, s fitbit.Sleep) (sl core.SleepLog, err error) {
+	if !date.IsEqual(fitbit.ParseDate(s.DateOfSleep)) {
+		return sl, errors.New("sleep log from fitbit: dates do not match with current day")
+	}
+	raw, err := json.Marshal(&s)
+	if err != nil {
+		return
+	}
+
+	title := "Nap"
+	if s.IsMainSleep {
+		title = "Main sleep"
+	}
+	sl = core.SleepLog{
+		Date:        date,
+		IsMainSleep: s.IsMainSleep,
+		TimeAsleep:  fitbit.ToDuration(s.MinutesAsleep),
+		TimeInBed:   fitbit.ToDuration(s.TimeInBed),
+		Origin:      core.LogOriginFitbit,
+		Raw:         raw,
+		TimelineLog: core.TimelineLog{
+			Title:     title,
+			StartTime: fitbit.ParseTime(s.StartTime),
+			EndTime:   fitbit.ParseTime(s.EndTime),
+			Type:      core.TimelineTypeSleep,
+			Note:      "Origin: " + core.LogOriginFitbit,
+		},
+	}
+	return sl, nil
 }

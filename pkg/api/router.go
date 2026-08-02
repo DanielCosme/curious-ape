@@ -21,16 +21,37 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-type Handllers struct {
-	Day         *day.Handler
-	Habit       *habit.Handler
-	Integration *integration.Handler
-	Worklog     *worklog.Handler
-	User        *user.Handler
-	Fitness     *fitnesslog.Handler
+type Handlers struct {
+	sessionManager *scs.SessionManager
+	Day            *day.Handler
+	Habit          *habit.Handler
+	Integration    *integration.Handler
+	Worklog        *worklog.Handler
+	User           *user.Handler
+	Fitness        *fitnesslog.Handler
 }
 
-func SetupRouter(ctx context.Context, handlers Handllers, r chi.Router, sessionManager *scs.SessionManager, db bob.DB) (err error) {
+func NewHandlers(
+	SessionManager *scs.SessionManager,
+	Day *day.Service,
+	Habit *habit.Service,
+	Integration *integration.Service,
+	Worklog *worklog.Service,
+	User *user.Service,
+	Fitness *fitnesslog.Service,
+) Handlers {
+	return Handlers{
+		sessionManager: SessionManager,
+		Day:            day.NewHandler(Day),
+		Habit:          habit.NewHandler(Habit),
+		Integration:    integration.NewHandler(Integration),
+		Worklog:        worklog.NewHandler(Worklog),
+		User:           user.NewHandler(User, SessionManager),
+		Fitness:        fitnesslog.NewHandler(Fitness),
+	}
+}
+
+func SetupRouter(ctx context.Context, handlers Handlers, r chi.Router, db bob.DB) (err error) {
 	if config.IsDev() {
 		setupReload(r)
 	}
@@ -38,8 +59,8 @@ func SetupRouter(ctx context.Context, handlers Handllers, r chi.Router, sessionM
 	r.Handle("/static/*", resources.Handler())
 
 	r.Group(func(r chi.Router) {
-		r.Use(sessionManager.LoadAndSave)
-		r.Use(user.AuthenticateFromSession(sessionManager, db))
+		r.Use(handlers.sessionManager.LoadAndSave)
+		r.Use(user.AuthenticateFromSession(handlers.sessionManager, db))
 		r.Use(SetState)
 
 		err = user.SetupRoutes(r, handlers.User)

@@ -32,6 +32,7 @@ import (
 	"github.com/lmittmann/tint"
 	"github.com/nats-io/nats.go"
 	"github.com/stephenafamo/bob"
+	"golang.org/x/oauth2"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -94,20 +95,30 @@ func run(ctx context.Context) error {
 	sessionManager := initSessionManager(cfg, db)
 	errGroup, errGroupCtx := errgroup.WithContext(ctx)
 
-	is := integrations.New(cfg.TogglWorkspaceID, cfg.TogglAPIKey, cfg.HevyAPIKey, nil, nil)
+	fitbitConfig := &oauth2.Config{
+		ClientID:     cfg.Fitbit.ClientID,
+		ClientSecret: cfg.Fitbit.ClientSecret,
+		RedirectURL:  cfg.Fitbit.RedirectURL,
+		Scopes:       cfg.Fitbit.Scopes,
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  cfg.Fitbit.AuthURL,
+			TokenURL: cfg.Fitbit.TokenURL,
+		},
+	}
+	is := integrations.New(cfg.TogglWorkspaceID, cfg.TogglAPIKey, cfg.HevyAPIKey, fitbitConfig, nil)
 
 	userService := user.NewService(bobDB)
 	integrationService := integration.NewService(is, bobDB, nc)
-	handlers := api.Handllers{
-		Day:         day.NewHandler(day.NewService(bobDB, nc)),
-		Habit:       habit.NewHandler(habit.NewService(bobDB, nc)),
-		Integration: integration.NewHandler(integrationService),
-		Worklog:     worklog.NewHandler(worklog.NewService(bobDB, nc, integrationService)),
-		User:        user.NewHandler(userService, sessionManager),
-		Fitness:     fitnesslog.NewHandler(fitnesslog.NewService(bobDB, nc, integrationService)),
-	}
-
-	if err := api.SetupRouter(errGroupCtx, handlers, router, sessionManager, bobDB); err != nil {
+	handlers := api.NewHandlers(
+		sessionManager,
+		day.NewService(bobDB, nc),
+		habit.NewService(bobDB, nc),
+		integrationService,
+		worklog.NewService(bobDB, nc, integrationService),
+		userService,
+		fitnesslog.NewService(bobDB, nc, integrationService),
+	)
+	if err := api.SetupRouter(errGroupCtx, handlers, router, bobDB); err != nil {
 		return fmt.Errorf("error setting up routes: %w", err)
 	}
 	if err := userService.SetPassword(cfg.Username, cfg.Password); err != nil {

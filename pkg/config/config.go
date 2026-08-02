@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -27,6 +28,17 @@ type Config struct {
 	HevyAPIKey       string
 	TogglAPIKey      string
 	TogglWorkspaceID int
+	Fitbit           OathConfig
+}
+
+type OathConfig struct {
+	ClientID     string
+	ClientSecret string
+	RedirectURL  string
+	TokenURL     string
+	AuthURL      string
+	Scopes       []string
+	AuthStyle    int
 }
 
 func (c *Config) Validate() {
@@ -52,7 +64,18 @@ func loadBase() *Config {
 	godotenv.Load()
 
 	return &Config{
-		Port: getEnv(CONFIG_PORT, "4000"),
+		Port:             getEnv(CONFIG_PORT, "4000"),
+		HevyAPIKey:       getEnv(CONFIG_HEVY_API_KEY, ""),
+		TogglAPIKey:      getEnv(CONFIG_TOGGL_API_KEY, ""),
+		TogglWorkspaceID: parseInt(getEnv(CONFIG_TOGGL_WORKSPACE_ID, "")),
+		Fitbit: OathConfig{
+			ClientID:     getEnv(CONFIG_FITBIT_CLIENT_ID, ""),
+			ClientSecret: getEnv(CONFIG_FITBIT_CLIENT_SECRET, ""),
+			RedirectURL:  getEnv(CONFIG_FITBIT_REDIRECT_URL, ""),
+			TokenURL:     getEnv(CONFIG_FITBIT_TOKEN_URL, ""),
+			AuthURL:      getEnv(CONFIG_FITBIT_AUTH_URL, ""),
+			Scopes:       parseArray(getEnv(CONFIG_FITBIT_SCOPES, "")),
+		},
 		LogLevel: func() slog.Level {
 			switch os.Getenv(CONFIG_LOG_LEVEL) {
 			case slog.LevelDebug.String():
@@ -67,16 +90,6 @@ func loadBase() *Config {
 				return slog.LevelInfo
 			}
 		}(),
-		HevyAPIKey:  getEnv(CONFIG_HEVY_API_KEY, ""),
-		TogglAPIKey: getEnv(CONFIG_TOGGL_API_KEY, ""),
-		TogglWorkspaceID: func() int {
-			wokID := getEnv(CONFIG_TOGGL_WORKSPACE_ID, "")
-			id, err := strconv.Atoi(wokID)
-			if err != nil {
-				panic(err)
-			}
-			return id
-		}(),
 	}
 }
 
@@ -86,4 +99,16 @@ func getEnv(key, fallback string) string {
 		return val
 	}
 	return fallback
+}
+
+func parseArray(values string) []string {
+	return strings.Split(values, ",")
+}
+
+func parseInt(value string) int {
+	id, err := strconv.Atoi(value)
+	if err != nil {
+		panic(err)
+	}
+	return id
 }

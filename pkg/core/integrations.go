@@ -7,3 +7,7 @@ type WorkLogIntegration interface {
 type FitnessIntegration interface {
 	GetFitnessLogs(Date) ([]FitnessLog, error)
 }
+
+type SleepIntegration interface {
+	GetSleepLogs(Date) ([]FitnessLog, error)
+}

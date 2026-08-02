@@ -30,15 +30,15 @@ func NewService(sync *integrations.Integrations, db bob.DB, nc *nats.Conn) *Serv
 	return s
 }
 
-func (s *Service) GetIntegration(provider string) (res core.IntegrationInfo, err error) {
+func (svc *Service) GetIntegration(provider string) (res core.IntegrationInfo, err error) {
 	var info []string
-	// var authURL string
-	// today := core.NewDateToday()
+	var authURL string
+	today := core.NewDateToday()
 	status := core.IntegrationStatusNotImplemented
 
 	switch provider {
 	case core.IntegrationHevy:
-		count, err := s.sync.Hevy.Workouts.Count()
+		count, err := svc.sync.Hevy.Workouts.Count()
 		if err != nil {
 			status = core.IntegrationStatusDisconnected
 			info = append(info, err.Error())
@@ -70,28 +70,28 @@ func (s *Service) GetIntegration(provider string) (res core.IntegrationInfo, err
 		// }
 		slog.Info("Google not implemented")
 	case core.IntegrationFitbit:
-		// sls, err := a.sleepLogsGetFromFitbit(today)
-		// if err != nil {
-		// 	authURL = a.sync.GenerateOauth2URI(provider)
-		// 	if authURL != "" {
-		// 		status = core.IntegrationStatusDisconnected
-		// 	}
-		// 	info = append(info, err.Error())
-		// } else {
-		// 	status = core.IntegrationStatusConnected
-		// 	if len(sls) > 0 {
-		// 		info = append(info, fmt.Sprintf("Total time asleep last night: %s", sls[0].TimeAsleep.String()))
-		// 	}
-		// }
-		// res = core.IntegrationInfo{
-		// 	Name:    "Fitbit",
-		// 	Info:    info,
-		// 	AuthURL: authURL,
-		// 	Status:  status,
-		// }
+		sls, err := svc.GetSleeLogs(today)
+		if err != nil {
+			authURL = svc.sync.GenerateOauth2URI(core.Integration(provider))
+			if authURL != "" {
+				status = core.IntegrationStatusDisconnected
+			}
+			info = append(info, err.Error())
+		} else {
+			status = core.IntegrationStatusConnected
+			if len(sls) > 0 {
+				info = append(info, fmt.Sprintf("Total time asleep last night: %s", sls[0].TimeAsleep.String()))
+			}
+		}
+		res = core.IntegrationInfo{
+			Name:    "Fitbit",
+			Info:    info,
+			AuthURL: authURL,
+			Status:  status,
+		}
 		slog.Info("Fitbit not implemented")
 	case core.IntegrationToggl:
-		profile, err := s.sync.TogglAPI.Me.GetProfile()
+		profile, err := svc.sync.TogglAPI.Me.GetProfile()
 		if err != nil {
 			info = append(info, err.Error())
 		} else if profile != nil {
@@ -100,7 +100,7 @@ func (s *Service) GetIntegration(provider string) (res core.IntegrationInfo, err
 			timeZone := fmt.Sprintf("Timezone: %s", profile.Timezone)
 			info = append(info, name, timeZone)
 
-			ws, err := s.sync.TogglAPI.Workspace.Get()
+			ws, err := svc.sync.TogglAPI.Workspace.Get()
 			if err == nil {
 				for _, w := range ws {
 					info = append(info, fmt.Sprintf("Workspace: %s - ID: %d", w.Name, w.ID))
@@ -109,7 +109,7 @@ func (s *Service) GetIntegration(provider string) (res core.IntegrationInfo, err
 				slog.Error(err.Error())
 			}
 
-			summary, err := s.sync.TogglAPI.Reports.GetDaySummary(time.Now())
+			summary, err := svc.sync.TogglAPI.Reports.GetDaySummary(time.Now())
 			if err != nil {
 				slog.Error(err.Error())
 			} else {
