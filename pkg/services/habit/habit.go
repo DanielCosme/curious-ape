@@ -1,6 +1,7 @@
 package habit
 
 import (
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -11,14 +12,14 @@ import (
 )
 
 type Service struct {
-	db bob.DB
-	ns *nats.Conn
+	db   bob.DB
+	nats *nats.Conn
 }
 
 func NewService(db bob.DB, ns *nats.Conn) *Service {
 	s := &Service{
-		db: db,
-		ns: ns,
+		db:   db,
+		nats: ns,
 	}
 	if ns != nil {
 		ns.Subscribe(event.DayCreated, s.listen)
@@ -78,10 +79,16 @@ func (s *Service) listen(msg *nats.Msg) {
 		if err := s.eventWorklogSynced(wls); err != nil {
 			slog.Error("Failed to handle event", "err", err, "subject", msg.Subject)
 		}
+	case event.FitnesslogSynced:
+		var wls core.LogSyncPayload
+		core.Decode(msg.Data, &wls)
+		if err := s.eventFitnesslogSynced(wls); err != nil {
+			slog.Error("Failed to handle event", "err", err, "subject", msg.Subject)
+		}
 	}
 }
 
-func (s *Service) eventWorklogSynced(payload core.LogSyncPayload) error {
+func (svc *Service) eventWorklogSynced(payload core.LogSyncPayload) error {
 	habitParams := core.Habit{
 		Date:      payload.Date,
 		Type:      core.HabitTypeDeepWork,
@@ -98,12 +105,40 @@ func (s *Service) eventWorklogSynced(payload core.LogSyncPayload) error {
 	if totalDuration > time.Hour*5 {
 		habitParams.State = core.HabitStateDone
 	}
-	habitParams.Note = core.DurationToString(totalDuration)
+	if totalDuration > 0 {
+		habitParams.Note = core.DurationToString(totalDuration)
+	}
 
-	_, err := s.HabitUpsert(habitParams)
+	_, err := svc.HabitUpsert(habitParams)
 	if err != nil {
 		return err
 	}
-	s.ns.Publish(event.DaySynced, payload.Date.Enc())
+	svc.nats.Publish(event.DaySynced, payload.Date.Enc())
+	return nil
+}
+
+func (svc *Service) eventFitnesslogSynced(payload core.LogSyncPayload) error {
+	habitParams := core.Habit{
+		Date:      payload.Date,
+		Type:      core.HabitTypeFitness,
+		State:     core.HabitStateNotDone,
+		Automated: true,
+	}
+
+	for idx, fl := range payload.FitnessLogs {
+		if idx == 0 {
+			habitParams.State = core.HabitStateDone
+
+			duration := core.DurationToString(fl.EndTime.Sub(fl.StartTime))
+			habitParams.Note = fmt.Sprintf("%s - %s (%s)", fl.StartTime.Format(core.Time), fl.EndTime.Format(core.Time), duration)
+			break
+		}
+	}
+
+	_, err := svc.HabitUpsert(habitParams)
+	if err != nil {
+		return err
+	}
+	svc.nats.Publish(event.DaySynced, payload.Date.Enc())
 	return nil
 }

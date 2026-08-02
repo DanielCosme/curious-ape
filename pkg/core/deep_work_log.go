@@ -19,5 +19,5 @@ type DeepWorkLogParams struct {
 type LogSyncPayload struct {
 	Date        Date
 	WorkLogs    []DeepWorkLog
-	FitnessLogs []DeepWorkLog
+	FitnessLogs []FitnessLog
 }

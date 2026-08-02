@@ -17,8 +17,9 @@ type Service struct {
 
 func NewService(db bob.DB, nc *nats.Conn, integration core.FitnessIntegration) *Service {
 	s := &Service{
-		db:   db,
-		nats: nc,
+		db:          db,
+		nats:        nc,
+		integration: integration,
 	}
 	if nc != nil {
 		nc.Subscribe(event.DaySync, s.listen)
@@ -37,14 +38,21 @@ func (svc *Service) listen(msg *nats.Msg) {
 }
 
 func (svc *Service) sync(date core.Date) error {
+	result := core.LogSyncPayload{Date: date}
 	logs, err := svc.integration.GetFitnessLogs(date)
 	if err != nil {
 		return err
 	}
 
-	// Upsert
-	if len(logs) > 0 {
+	for _, fl := range logs {
+		_, err := upsert(svc.db, fl)
+		if err != nil {
+			return err
+		}
+		result.FitnessLogs = append(result.FitnessLogs, fl)
 	}
-	svc.nats.Publish(event.WorklogSynced, core.Encode(logs))
+
+	svc.nats.Publish(event.FitnesslogSynced, core.Encode(result))
+	svc.nats.Publish(event.DaySynced, date.Enc())
 	return nil
 }

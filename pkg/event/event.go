@@ -3,10 +3,11 @@ package event
 import "danicos.dev/daniel/curious-ape/pkg/core"
 
 var (
-	DayCreated    = "days.created"
-	DaySync       = "days.sync"
-	DaySynced     = "days.synced"
-	WorklogSynced = "worklog.synced"
+	DayCreated       = "days.created"
+	DaySync          = "days.sync"
+	DaySynced        = "days.synced"
+	WorklogSynced    = "worklog.synced"
+	FitnesslogSynced = "fitnesslog.synced"
 
 	// TODO: remove after refactor is done.
 	HabitUpsert = ""

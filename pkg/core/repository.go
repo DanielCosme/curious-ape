@@ -1,5 +1,9 @@
 package core
 
+import (
+	"time"
+)
+
 type DayRepository interface {
 	Create(Date) (Day, error)
 	Get(DayParams) (Day, error)
@@ -35,4 +39,11 @@ type RepositoryCommon struct {
 }
 type RepositoryID struct {
 	ID int64
+}
+
+type FitnessLogParams struct {
+	ID        int64
+	DayID     int64
+	Origin    LogOrigin
+	StartTime time.Time
 }

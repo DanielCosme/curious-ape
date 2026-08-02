@@ -47,7 +47,6 @@ func (h *Handler) streamSSE(w http.ResponseWriter, r *http.Request) {
 	defer subs.Unsubscribe()
 
 	for {
-
 		select {
 		case <-r.Context().Done():
 			slog.Warn("Day: SSE stream closed")

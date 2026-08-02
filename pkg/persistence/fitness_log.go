@@ -2,7 +2,6 @@ package persistence
 
 import (
 	"context"
-	"time"
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/gen/bob/dberrors"
@@ -35,7 +34,7 @@ func (fls *FitnessLogs) Upsert(params core.FitnessLog) (fl core.FitnessLog, err 
 	bobFitnessLog, err := models.FitnessLogs.Insert(setter).One(context.Background(), fls.db)
 	if err != nil {
 		if dberrors.FitnessLogErrors.ErrUniqueSqliteAutoindexFitnessLog1.Is(err) {
-			bobFitnessLog, err = fls.Get(FitnessLogParams{
+			bobFitnessLog, err = fls.Get(core.FitnessLogParams{
 				DayID:     setter.DayID.GetOrZero(),
 				StartTime: setter.StartTime.GetOrZero(),
 			})
@@ -50,8 +49,8 @@ func (fls *FitnessLogs) Upsert(params core.FitnessLog) (fl core.FitnessLog, err 
 	return fitnessLogToCore(day, bobFitnessLog), err
 }
 
-func (dw *FitnessLogs) Get(p FitnessLogParams) (*models.FitnessLog, error) {
-	fitnessLog, err := p.BuildQuery().One(context.Background(), dw.db)
+func (dw *FitnessLogs) Get(p core.FitnessLogParams) (*models.FitnessLog, error) {
+	fitnessLog, err := BuildFitnessQuery(p).One(context.Background(), dw.db)
 	if err != nil {
 		return nil, CatchDBErr("fitness logs: get", err)
 	}
@@ -70,15 +69,7 @@ func fitnessLogToCore(day *models.Day, bobFl *models.FitnessLog) (fl core.Fitnes
 	fl.Origin = core.LogOrigin(bobFl.Origin)
 	return
 }
-
-type FitnessLogParams struct {
-	ID        int64
-	DayID     int64
-	Origin    core.LogOrigin
-	StartTime time.Time
-}
-
-func (f FitnessLogParams) BuildQuery() *sqlite.ViewQuery[*models.FitnessLog, models.FitnessLogSlice] {
+func BuildFitnessQuery(f core.FitnessLogParams) *sqlite.ViewQuery[*models.FitnessLog, models.FitnessLogSlice] {
 	q := models.FitnessLogs.Query()
 	if f.ID > 0 {
 		q.Apply(models.SelectWhere.FitnessLogs.ID.EQ(f.ID))
