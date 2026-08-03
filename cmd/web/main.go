@@ -155,10 +155,14 @@ func run(ctx context.Context) error {
 	}
 
 	go func() {
-		ticker := time.NewTicker(time.Hour * 4)
+		dur := time.Hour * 4
+		ticker := time.NewTicker(dur)
+		slog.Info("Ticker configured", "rate", dur)
 		for {
 			t := <-ticker.C
-			nc.Publish(event.DaySync, core.NewDate(t).Enc())
+			date := core.NewDate(t)
+			slog.Info("Synchronizing day", "date", date)
+			nc.Publish(event.DaySync, date.Enc())
 		}
 	}()
 
