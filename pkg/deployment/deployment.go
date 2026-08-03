@@ -155,6 +155,7 @@ func Deployment() apps.Deployment {
 			dataVolume,
 			configVolume,
 			litestreamVolume,
+			envVolume,
 		},
 	}
 	return kube.NewDeployment(meta, podSpec)

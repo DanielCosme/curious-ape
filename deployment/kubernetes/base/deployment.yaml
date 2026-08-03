@@ -19,7 +19,7 @@ spec:
       - env:
         - name: APE_ENVIRONMENT
           value: prod
-        image: danicos.dev/daniel/curious-ape:2.0.0
+        image: danicos.dev/daniel/curious-ape:2.0.1
         name: curious-ape
         ports:
         - containerPort: 4000
@@ -48,5 +48,11 @@ spec:
           items:
           - key: litestream.yml
             path: litestream.yml
+          secretName: curious-ape-secret
+      - name: envVol
+        secret:
+          items:
+          - key: env
+            path: env
           secretName: curious-ape-secret
 status: {}
