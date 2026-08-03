@@ -5,7 +5,7 @@ import (
 	"runtime/debug"
 )
 
-const VERSION = "v2.0.1"
+const VERSION = "v2.0.2"
 
 func Version() string {
 	hash := "unknown"
