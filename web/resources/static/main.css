@@ -686,6 +686,10 @@ p.error {
 	opacity: 1;
 	visibility: visible;
 }
+.habit-grid-item:hover .habit-header-tooltip {
+	opacity: 1;
+	visibility: visible;
+}
 
 .habit-category {
 	background: var(--bg-elevated);

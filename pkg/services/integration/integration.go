@@ -89,7 +89,6 @@ func (svc *Service) GetIntegration(provider string) (res core.IntegrationInfo, e
 			AuthURL: authURL,
 			Status:  status,
 		}
-		slog.Info("Fitbit not implemented")
 	case core.IntegrationToggl:
 		profile, err := svc.sync.TogglAPI.Me.GetProfile()
 		if err != nil {

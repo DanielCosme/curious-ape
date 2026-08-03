@@ -1,6 +1,7 @@
 package habit
 
 import (
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -135,8 +136,8 @@ func (svc *Service) eventFitnesslogSynced(payload core.LogSyncPayload) error {
 	for idx, fl := range payload.FitnessLogs {
 		if idx == 0 {
 			habitParams.State = core.HabitStateDone
-
-			habitParams.Note = core.DurationToString(fl.EndTime.Sub(fl.StartTime))
+			duration := core.DurationToString(fl.EndTime.Sub(fl.StartTime))
+			habitParams.Note = fmt.Sprintf("%s - %s (%s)", fl.StartTime.Format(core.Time), fl.EndTime.Format(core.Time), duration)
 			break
 		}
 	}

@@ -63,6 +63,10 @@ func upsert(db bob.DB, p core.Habit) (coreHabit core.Habit, err error) {
 						if habit.Automated == setterAutomated ||
 							!setterAutomated ||
 							habit.State == string(core.HabitStateNoInfo) {
+							if setter.NOTE.GetOrZero() == "" && habit.NOTE.GetOrZero() != "" {
+								// If there is a note already don't clear it on the update.
+								setter.NOTE = omitnull.From(habit.NOTE.GetOrZero())
+							}
 							if err = habit.Update(context.Background(), db, setter); err != nil {
 								return coreHabit, persistence.CatchDBErr("habits: upsert", err)
 							}

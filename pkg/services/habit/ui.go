@@ -105,6 +105,9 @@ func ui_habitCell(h core.Habit, habitType core.HabitType) Node {
 		ID(fmt.Sprintf("habit-%d", h.ID)),
 		ds.On("click", flipAction),
 		Span(Class("habit-cell-icon"), habitTypeIcon(habitType)),
+		If(h.Note != "",
+			Span(Class("habit-header-tooltip"), Text(h.Note)),
+		),
 	)
 }
 
