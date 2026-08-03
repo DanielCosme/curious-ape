@@ -29,7 +29,7 @@ func (s *Service) Month(date core.Date, order core.OrderParam) ([]core.Day, erro
 		return nil, err
 	}
 
-	daysOfTheMonth := date.RangeMonth()
+	daysOfTheMonth := date.RangeMonthUntilNow()
 	if d.IsZero() {
 		for _, date := range daysOfTheMonth {
 			if _, err := s.GetOrCreate(date); err != nil {

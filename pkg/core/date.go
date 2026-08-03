@@ -42,11 +42,25 @@ func (d Date) LastDayOfTheMonth() Date {
 	return NewDate(beginning.AddDate(0, 1, -1))
 }
 
-func (d Date) RangeMonth() DateSlice {
+func (d Date) RangeMonthUntilNow() DateSlice {
 	var dates []Date
 	beginning := d.FirstDayOfTheMonth().Time
 
 	for beginning.Before(d.Time) {
+		dates = append(dates, NewDate(beginning))
+		beginning = beginning.AddDate(0, 0, 1)
+	}
+
+	dates = append(dates, d)
+	return dates
+}
+
+func (d Date) RangeMonthAll() DateSlice {
+	var dates []Date
+	beginning := d.FirstDayOfTheMonth().Time
+	end := d.LastDayOfTheMonth().Time
+
+	for beginning.Before(end) {
 		dates = append(dates, NewDate(beginning))
 		beginning = beginning.AddDate(0, 0, 1)
 	}

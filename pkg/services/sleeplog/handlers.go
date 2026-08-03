@@ -19,7 +19,7 @@ func NewHandler(s *Service) *Handler {
 
 func (h *Handler) sleeplogPage(w http.ResponseWriter, r *http.Request) {
 	days, err := day.Find(h.svc.db, core.DayParams{
-		Dates:        web.GetDayParams(r).RangeMonth(),
+		Dates:        web.GetDayParams(r).RangeMonthAll(),
 		WithRelation: []core.DayRelations{core.DayRelationSleepLogs},
 	})
 	if err != nil {
