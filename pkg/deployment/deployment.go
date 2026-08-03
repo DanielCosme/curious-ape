@@ -14,10 +14,12 @@ var Secret = struct {
 	Name          string
 	ConfigKey     string
 	LitestreamKey string
+	EnvKey        string
 }{
 	Name:          "curious-ape-secret",
 	ConfigKey:     "config.json",
 	LitestreamKey: "litestream.yml",
+	EnvKey:        "env",
 }
 
 var Namespace = kube.Namespace(config.KUBERNETES_NAME)
@@ -75,6 +77,10 @@ func Deployment() apps.Deployment {
 		Key:  Secret.LitestreamKey,
 		Path: Secret.LitestreamKey,
 	}})
+	// envMapping := map[string]string{}
+	// secretMapping := map[string]string{}
+	// env := kube.NewEnvVarWithSecret(envMapping, secretMapping, "")
+	//
 	podSpec := core.PodSpec{
 		// InitContainers: []core.Container{{
 		// 	Name:  "restore-litestream",

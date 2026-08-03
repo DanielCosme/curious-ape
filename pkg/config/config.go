@@ -106,6 +106,10 @@ func parseArray(values string) []string {
 }
 
 func parseInt(value string) int {
+	if value == "" {
+		return 0
+	}
+
 	id, err := strconv.Atoi(value)
 	if err != nil {
 		panic(err)

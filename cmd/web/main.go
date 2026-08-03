@@ -54,17 +54,6 @@ func main() {
 }
 
 func run(ctx context.Context) error {
-	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, os.Kill)
-	defer cancel()
-
-	cfg := config.Load()
-	cfg.Validate() // Will panic if fails validation.
-
-	logger := slog.New(tint.NewHandler(os.Stdout, &tint.Options{
-		Level:      cfg.LogLevel,
-		TimeFormat: time.TimeOnly,
-	}))
-	slog.SetDefault(logger)
 
 	version := config.Version()
 	if len(os.Args) > 1 {
@@ -76,6 +65,18 @@ func run(ctx context.Context) error {
 			slog.Warn("Unkouwn command received", "key", os.Args[1])
 		}
 	}
+
+	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, os.Kill)
+	defer cancel()
+
+	cfg := config.Load()
+	cfg.Validate() // Will panic if fails validation.
+
+	logger := slog.New(tint.NewHandler(os.Stdout, &tint.Options{
+		Level:      cfg.LogLevel,
+		TimeFormat: time.TimeOnly,
+	}))
+	slog.SetDefault(logger)
 
 	ns, err := embbeded_nats.New(ctx)
 	ns.WaitForServer()

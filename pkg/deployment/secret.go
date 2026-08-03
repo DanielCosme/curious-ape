@@ -12,4 +12,5 @@ func init() {
 	meta := kube.NewMetadata(s.Name, Namespace)
 	ApeSecret = kube.SecretFromFile(s.ConfigKey, "./deployment/secrets/config.json", meta)
 	ApeSecret.Data[s.LitestreamKey] = kube.ReadFileBytes("deployment/secrets/litestream.yaml")
+	ApeSecret.Data[s.EnvKey] = kube.ReadFileBytes("deployment/secrets/env-prod")
 }
