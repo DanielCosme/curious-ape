@@ -12,6 +12,7 @@ import (
 )
 
 func UI_Deadlines(s *ui.UIState, deadlineState ui.DeadlineState) Node {
+	s.Title = "Deadlines"
 	return ui.UILayout(s, Div(
 		Class(ui.CSurface),
 		A(

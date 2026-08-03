@@ -13,6 +13,7 @@ import (
 )
 
 func UI_WorkLog(s *ui.UIState, days []core.Day) Node {
+	s.Title = "Deep Work"
 	if len(days) == 0 {
 		return ui.UILayout(s, P(Text("No records")))
 	}

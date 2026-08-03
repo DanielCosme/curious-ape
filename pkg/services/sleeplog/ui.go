@@ -13,6 +13,7 @@ import (
 )
 
 func UI_SleepLogPage(state *ui.UIState, days []core.Day) Node {
+	state.Title = "Sleep"
 	var content []Node
 	if len(days) > 0 {
 		next, prev := ui.GetNextPrevButtons(days[0].Date, "sleep")

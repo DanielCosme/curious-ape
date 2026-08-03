@@ -646,6 +646,45 @@ p.error {
 	font-weight: 600;
 	font-size: 0.9rem;
 	font-family: var(--ff-mono);
+	cursor: default;
+	user-select: none;
+	transition: background-color 120ms ease;
+}
+
+.grid-header:hover {
+	background: var(--accent);
+}
+
+/* Day number headers: show full weekday + day on hover */
+.habit-grid-item.grid-header {
+	position: relative;
+}
+
+.habit-header-tooltip {
+	position: absolute;
+	bottom: calc(100% + 0.35rem);
+	left: 50%;
+	transform: translateX(-50%);
+	white-space: nowrap;
+	padding: 0.35rem 0.6rem;
+	background: var(--bg-elevated);
+	border: 1px solid var(--border-strong);
+	color: var(--fg-base);
+	font-size: 1rem; /* ~30% larger than 0.75rem */
+	font-weight: 500;
+	font-family: var(--ff-mono);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow-elevated);
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	z-index: 20;
+	transition: opacity 80ms ease, visibility 80ms ease;
+}
+
+.habit-grid-item.grid-header:hover .habit-header-tooltip {
+	opacity: 1;
+	visibility: visible;
 }
 
 .habit-category {
@@ -669,6 +708,34 @@ p.error {
 		box-shadow 120ms ease,
 		border-color 120ms ease,
 		filter 120ms ease;
+}
+
+/* Dim type icon watermark — contrast tuned per cell state */
+.habit-cell-icon {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none;
+}
+
+.habit-cell-icon > svg {
+	width: 60%;
+	height: 60%;
+}
+
+/* Colored cells (done / not_done): dark dim icon */
+.habit-done .habit-cell-icon,
+.habit-not_done .habit-cell-icon {
+	color: var(--fg-inverse);
+	opacity: 0.28;
+}
+
+/* Dark empty cells: muted light dim icon */
+.habit-no_info .habit-cell-icon {
+	color: var(--fg-muted);
+	opacity: 0.35;
 }
 
 /* Pop out of the grid on hover */

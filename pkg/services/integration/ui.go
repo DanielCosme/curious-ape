@@ -14,6 +14,7 @@ import (
 )
 
 func UI_Integrations(s *ui.UIState, integrations []core.IntegrationInfo) Node {
+	s.Title = "Integrations"
 	return ui.UILayout(s, Div(
 		Class(ui.CSurface),
 		Map(integrations, func(i core.IntegrationInfo) Node {

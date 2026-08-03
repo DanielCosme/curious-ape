@@ -13,6 +13,7 @@ import (
 )
 
 func UI_Fitness(s *ui.UIState, days []core.Day) Node {
+	s.Title = "Fitness"
 	if len(days) == 0 {
 		return ui.UILayout(s, P(Text("No records")))
 	}

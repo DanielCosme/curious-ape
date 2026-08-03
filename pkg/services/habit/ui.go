@@ -6,6 +6,7 @@ import (
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/ui"
+	lucide "github.com/eduardolat/gomponents-lucide"
 
 	. "maragu.dev/gomponents"
 
@@ -64,20 +65,38 @@ func HabitsGrid(month Month) Node {
 
 func UI_habitHeaders(ds []core.Date) Node {
 	return Map(ds, func(day core.Date) Node {
-		return Div(Class("habit-grid-item grid-header"), Text(day.Time.Format("02")))
+		fullDate := day.Time.Format("Mon 02")
+		return Div(
+			Class("habit-grid-item grid-header"),
+			Text(day.Time.Format("02")),
+			Span(Class("habit-header-tooltip"), Text(fullDate)),
+		)
 	})
 }
 
 func UI_HabitCells(hs []core.Habit, habitType core.HabitType) Node {
+	var habitTypeName string
+	switch habitType {
+	case core.HabitTypeWakeUp:
+		habitTypeName = "Wake up"
+	case core.HabitTypeFitness:
+		habitTypeName = "Fitness"
+	case core.HabitTypeDeepWork:
+		habitTypeName = "Deep Work"
+	case core.HabitTypeEatHealthy:
+		habitTypeName = "Eat Healthy"
+	default:
+		panic(fmt.Sprintf("unexpected core.HabitType: %#v", habitType))
+	}
 	return Group([]Node{
-		Div(Class("habit-category"), Text(string(habitType))),
+		Div(Class("habit-category"), Text(habitTypeName)),
 		Map(hs, func(h core.Habit) Node {
-			return ui_habitCell(h)
+			return ui_habitCell(h, habitType)
 		}),
 	})
 }
 
-func ui_habitCell(h core.Habit) Node {
+func ui_habitCell(h core.Habit, habitType core.HabitType) Node {
 	flipAction := fmt.Sprintf("@put('/habits/%d/flip')", h.ID)
 	class := "habit-grid-item habit-cell habit-" + string(h.State)
 
@@ -85,5 +104,21 @@ func ui_habitCell(h core.Habit) Node {
 		Class(class),
 		ID(fmt.Sprintf("habit-%d", h.ID)),
 		ds.On("click", flipAction),
+		Span(Class("habit-cell-icon"), habitTypeIcon(habitType)),
 	)
+}
+
+func habitTypeIcon(t core.HabitType) Node {
+	switch t {
+	case core.HabitTypeWakeUp:
+		return lucide.Bed()
+	case core.HabitTypeFitness:
+		return lucide.Dumbbell()
+	case core.HabitTypeDeepWork:
+		return lucide.UserCog()
+	case core.HabitTypeEatHealthy:
+		return lucide.Beef()
+	default:
+		return nil
+	}
 }
