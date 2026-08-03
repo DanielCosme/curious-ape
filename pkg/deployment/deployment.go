@@ -69,7 +69,7 @@ func SecretsStack() stack.Stack {
 
 func Deployment() apps.Deployment {
 	dataVolume := kube.NewVolumeFrom(kube.VolumeSourcePVC, "data", PVC.Name)
-	envVolume := kube.NewVolumeFromSecret("envVol", Secret.Name, []core.KeyToPath{{
+	envVolume := kube.NewVolumeFromSecret("env-vol", Secret.Name, []core.KeyToPath{{
 		Key:  Secret.EnvKey,
 		Path: Secret.EnvKey,
 	}})

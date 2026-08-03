@@ -29,7 +29,7 @@ spec:
           name: config
           subPath: config.json
         - mountPath: /app/.env
-          name: envVol
+          name: env-vol
           subPath: env
         - mountPath: /app/db-data
           name: data
@@ -49,7 +49,7 @@ spec:
           - key: litestream.yml
             path: litestream.yml
           secretName: curious-ape-secret
-      - name: envVol
+      - name: env-vol
         secret:
           items:
           - key: env
