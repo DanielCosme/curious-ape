@@ -28,6 +28,9 @@ spec:
         - mountPath: /app/config.json
           name: config
           subPath: config.json
+        - mountPath: /app/.env
+          name: envVol
+          subPath: env
         - mountPath: /app/db-data
           name: data
       volumes:

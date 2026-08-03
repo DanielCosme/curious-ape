@@ -69,6 +69,10 @@ func SecretsStack() stack.Stack {
 
 func Deployment() apps.Deployment {
 	dataVolume := kube.NewVolumeFrom(kube.VolumeSourcePVC, "data", PVC.Name)
+	envVolume := kube.NewVolumeFromSecret("envVol", Secret.Name, []core.KeyToPath{{
+		Key:  Secret.EnvKey,
+		Path: Secret.EnvKey,
+	}})
 	configVolume := kube.NewVolumeFromSecret("config", Secret.Name, []core.KeyToPath{{
 		Key:  Secret.ConfigKey,
 		Path: Secret.ConfigKey,
@@ -115,6 +119,11 @@ func Deployment() apps.Deployment {
 						Name:      configVolume.Name,
 						MountPath: "/app/config.json",
 						SubPath:   Secret.ConfigKey,
+					},
+					{
+						Name:      envVolume.Name,
+						MountPath: "/app/.env",
+						SubPath:   Secret.EnvKey,
 					},
 					{
 						Name:      dataVolume.Name,
