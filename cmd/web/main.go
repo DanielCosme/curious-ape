@@ -16,6 +16,8 @@ import (
 	"danicos.dev/daniel/curious-ape/database/migrations"
 	"danicos.dev/daniel/curious-ape/pkg/api"
 	"danicos.dev/daniel/curious-ape/pkg/config"
+	"danicos.dev/daniel/curious-ape/pkg/core"
+	"danicos.dev/daniel/curious-ape/pkg/event"
 	"danicos.dev/daniel/curious-ape/pkg/integrations"
 	embbeded_nats "danicos.dev/daniel/curious-ape/pkg/mynats"
 	"danicos.dev/daniel/curious-ape/pkg/services/day"
@@ -54,7 +56,6 @@ func main() {
 }
 
 func run(ctx context.Context) error {
-
 	version := config.Version()
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
@@ -152,6 +153,14 @@ func run(ctx context.Context) error {
 			})
 		}()
 	}
+
+	go func() {
+		ticker := time.NewTicker(time.Hour * 4)
+		for {
+			t := <-ticker.C
+			nc.Publish(event.DaySync, core.NewDate(t).Enc())
+		}
+	}()
 
 	errGroup.Go(func() error {
 		slog.Info("Server listening", "addr", server.Addr)
