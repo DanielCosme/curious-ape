@@ -29,10 +29,11 @@ func New(togglWorkspaceID int, togglToken, hevyAPIKey string, fitbit, google *oa
 		google: google,
 	}
 	if i.fitbit != nil {
+		// TODO: Fitbit will be deprecated soon. Need to integrate with the Google Health API.
 		i.list = append(i.list, core.IntegrationFitbit)
 	}
 	if i.google != nil {
-		// NOTE: Google deactivated.
+		// NOTE: Google is deactivated (fitness log now come from Hevy).
 		// i.list = append(i.list, core.IntegrationGoogle)
 	}
 	if hevyAPIKey != "" {

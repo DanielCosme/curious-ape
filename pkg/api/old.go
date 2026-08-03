@@ -24,22 +24,11 @@ func Routes(a *OldAPI) http.Handler {
 
 	d.Use(a.MiddlewareRequireAuthentication)
 
-	d.Endpoint("/deadlines").GET(a.DeadlinesList)
 	d.Endpoint("/deadline").
 		GET(a.DeadlinesGetForm).
 		POST(a.DeadlinesPostForm)
 
 	return d
-}
-
-func (a *OldAPI) DeadlinesList(c *dove.Context) error {
-	res, err := a.App.DeadlineList(c.Ctx())
-	if err == nil {
-		state := State(a, c.Req)
-		state.Deadlines.DS = res
-		return c.RenderOK(ui.Deadlines(state))
-	}
-	return err
 }
 
 func (a *OldAPI) DeadlinesGetForm(c *dove.Context) error {

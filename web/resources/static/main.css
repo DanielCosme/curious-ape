@@ -525,8 +525,9 @@ p.error {
 }
 
 .day {
+	/* date | score | habits (grow, right-aligned) | sync */
 	display: grid;
-	grid-template-columns: 0.3fr 0.3fr repeat(4, 1fr) 0.3fr;
+	grid-template-columns: auto auto 1fr auto;
 	align-items: center;
 	background: var(--bg-elevated);
 	border: 1px solid var(--border);
@@ -553,13 +554,6 @@ p.error {
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.day > .habit-spot {
-	display: flex;
-	align-items: center;
-	padding: 0.25rem 0.4rem;
-	border-radius: 2px;
-}
-
 .day > button {
 	justify-self: end;
 }
@@ -570,6 +564,7 @@ p.error {
 	display: flex;
 	align-items: center;
 	gap: 0.4rem;
+	margin-left: 1rem;
 }
 
 /* Score color states (earthy natural progression - higher contrast on cards) */
@@ -589,11 +584,20 @@ p.error {
 	color: #8c5fa3;
 } /* regal purple */
 
+.day-habits {
+	display: flex;
+	align-items: center;
+	justify-self: end;
+	gap: 0.25rem;
+	margin-right: 1rem;
+}
+
 .habit-spot {
 	display: flex;
 	align-items: center;
+	justify-content: center;
 	cursor: pointer;
-	padding: 0.15rem 0.35rem;
+	padding: 0.25rem;
 	border-radius: 2px;
 	transition:
 		background 80ms ease,
@@ -601,7 +605,6 @@ p.error {
 }
 
 .habit-spot > svg {
-	margin-right: 0.5rem;
 	width: 1.5rem;
 	height: 1.5rem;
 	flex-shrink: 0;

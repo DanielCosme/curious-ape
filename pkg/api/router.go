@@ -10,6 +10,7 @@ import (
 
 	"danicos.dev/daniel/curious-ape/pkg/config"
 	"danicos.dev/daniel/curious-ape/pkg/services/day"
+	"danicos.dev/daniel/curious-ape/pkg/services/deadline"
 	"danicos.dev/daniel/curious-ape/pkg/services/fitnesslog"
 	"danicos.dev/daniel/curious-ape/pkg/services/habit"
 	"danicos.dev/daniel/curious-ape/pkg/services/integration"
@@ -31,6 +32,7 @@ type Handlers struct {
 	User           *user.Handler
 	Fitness        *fitnesslog.Handler
 	Sleep          *sleeplog.Handler
+	Deadline       *deadline.Handler
 }
 
 func NewHandlers(
@@ -42,6 +44,7 @@ func NewHandlers(
 	User *user.Service,
 	Fitness *fitnesslog.Service,
 	Sleep *sleeplog.Service,
+	Deadline *deadline.Service,
 ) Handlers {
 	return Handlers{
 		sessionManager: SessionManager,
@@ -52,6 +55,7 @@ func NewHandlers(
 		User:           user.NewHandler(User, SessionManager),
 		Fitness:        fitnesslog.NewHandler(Fitness),
 		Sleep:          sleeplog.NewHandler(Sleep),
+		Deadline:       deadline.NewHandler(Deadline),
 	}
 }
 
@@ -83,6 +87,7 @@ func SetupRouter(ctx context.Context, handlers Handlers, r chi.Router, db bob.DB
 			worklog.SetupRoutes(r, handlers.Worklog)
 			fitnesslog.SetupRoutes(r, handlers.Fitness)
 			sleeplog.SetupRoutes(r, handlers.Sleep)
+			deadline.SetupRoutes(r, handlers.Deadline)
 		})
 	})
 

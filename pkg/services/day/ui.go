@@ -2,8 +2,6 @@ package day
 
 import (
 	"fmt"
-	"net/url"
-	"strconv"
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/ui"
@@ -71,20 +69,19 @@ func UI_day(day core.Day) Node {
 			goalIcon,
 			Text(fmt.Sprintf("%d", day.Habits.Score)),
 		),
-		habitSpot(lucide.Bed(), day.Habits.Sleep),
-		habitSpot(lucide.Dumbbell(), day.Habits.Fitness),
-		habitSpot(lucide.UserCog(), day.Habits.DeepWork),
-		habitSpot(lucide.Beef(), day.Habits.Eat),
+		Div(
+			Class("day-habits"),
+			habitSpot(lucide.Bed(), day.Habits.Sleep),
+			habitSpot(lucide.Dumbbell(), day.Habits.Fitness),
+			habitSpot(lucide.UserCog(), day.Habits.DeepWork),
+			habitSpot(lucide.Beef(), day.Habits.Eat),
+		),
 		Button(Class(ui.CBtn+" btn-sync"), Text("sync"), ds.On("click", sync)),
 		ID(fmt.Sprintf("day-%d", day.ID)),
 	)
 }
 
 func habitSpot(icon Node, habit core.Habit) Node {
-	q := url.Values{}
-	q.Add("id", strconv.Itoa(int(habit.ID)))
-	flipAction := fmt.Sprintf("@put('/habit/flip?%s')", q.Encode())
-
 	var className string
 	switch habit.State {
 	case core.HabitStateDone:
@@ -103,7 +100,5 @@ func habitSpot(icon Node, habit core.Habit) Node {
 	return Span(
 		Class(classes),
 		icon,
-		If(habit.Note != "", Text(" "+habit.Note)),
-		ds.On("click", flipAction),
 	)
 }

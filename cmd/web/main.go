@@ -19,6 +19,7 @@ import (
 	"danicos.dev/daniel/curious-ape/pkg/integrations"
 	embbeded_nats "danicos.dev/daniel/curious-ape/pkg/mynats"
 	"danicos.dev/daniel/curious-ape/pkg/services/day"
+	"danicos.dev/daniel/curious-ape/pkg/services/deadline"
 	"danicos.dev/daniel/curious-ape/pkg/services/fitnesslog"
 	"danicos.dev/daniel/curious-ape/pkg/services/habit"
 	"danicos.dev/daniel/curious-ape/pkg/services/integration"
@@ -111,6 +112,7 @@ func run(ctx context.Context) error {
 		userService,
 		fitnesslog.NewService(bobDB, nc, integrationService),
 		sleeplog.NewService(bobDB, nc, integrationService),
+		deadline.NewService(bobDB, nc),
 	)
 
 	router := chi.NewMux()
