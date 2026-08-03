@@ -23,7 +23,7 @@ func (h *Handler) LoginPage(w http.ResponseWriter, r *http.Request) {
 		web.Redirect(w, "/")
 		return
 	}
-	state := ui.StateFromContextUI(r.Context())
+	state := ui.StateFromContext(r.Context())
 	web.Render(w, UI_Login(state))
 }
 

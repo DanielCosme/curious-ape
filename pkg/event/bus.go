@@ -1,8 +1,6 @@
 package event
 
-import (
-	"danicos.dev/daniel/curious-ape/pkg/oak"
-)
+import "log/slog"
 
 type Listener func(data any) error
 
@@ -26,12 +24,12 @@ func (b BusImpl) Publish(topic string, data any) error {
 		for _, run := range listeners {
 			err := run(data)
 			if err != nil {
-				oak.Error("error executing event", "err", err.Error(), "topic", topic)
+				slog.Error("error executing event", "err", err.Error(), "topic", topic)
 				return err
 			}
 		}
 	} else {
-		oak.Error("topic not found", "name", topic)
+		slog.Error("topic not found", "name", topic)
 	}
 	return nil
 }

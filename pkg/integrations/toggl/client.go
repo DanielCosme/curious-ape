@@ -5,9 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log/slog"
 	"net/http"
-
-	"danicos.dev/daniel/curious-ape/pkg/oak"
 )
 
 const BaseURL = "https://api.track.toggl.com"
@@ -63,6 +62,6 @@ func (c *Client) Call(method, path string, reqBody, resPayload any) error {
 }
 
 func (c *Client) catchTogglErr(body []byte) error {
-	oak.Error(string(body))
+	slog.Error(string(body))
 	return errors.New("toggl api error")
 }

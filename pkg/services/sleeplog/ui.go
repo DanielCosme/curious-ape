@@ -12,7 +12,7 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
-func UI_SleepLogPage(state *ui.UIState, days []core.Day) Node {
+func UI_SleepLogPage(state *ui.State, days []core.Day) Node {
 	state.Title = "Sleep"
 	var content []Node
 	if len(days) > 0 {
@@ -47,6 +47,6 @@ func UI_SleepLogPage(state *ui.UIState, days []core.Day) Node {
 		}
 	}
 
-	return ui.UILayout(state, content...)
+	return ui.Layout(state, content...)
 
 }

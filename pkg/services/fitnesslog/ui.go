@@ -12,14 +12,14 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
-func UI_Fitness(s *ui.UIState, days []core.Day) Node {
+func UI_Fitness(s *ui.State, days []core.Day) Node {
 	s.Title = "Fitness"
 	if len(days) == 0 {
-		return ui.UILayout(s, P(Text("No records")))
+		return ui.Layout(s, P(Text("No records")))
 	}
 
 	next, prev := ui.GetNextPrevButtons(days[0].Date, "fitness")
-	return ui.UILayout(s, Map(days, func(day core.Day) Node {
+	return ui.Layout(s, Map(days, func(day core.Day) Node {
 		if len(day.FitnessLogs) == 0 {
 			return nil
 		}

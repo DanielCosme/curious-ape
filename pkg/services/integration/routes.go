@@ -56,7 +56,7 @@ func (h *Handler) OauthSuccess(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) IntegrationsPage(w http.ResponseWriter, r *http.Request) {
-	state := ui.StateFromContextUI(r.Context())
+	state := ui.StateFromContext(r.Context())
 	var list []core.IntegrationInfo
 	for _, integration := range h.svc.sync.IntegrationsList() {
 		list = append(list, core.IntegrationInfo{

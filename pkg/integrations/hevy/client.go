@@ -5,9 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log/slog"
 	"net/http"
-
-	"danicos.dev/daniel/curious-ape/pkg/oak"
 )
 
 const BaseURL = "https://api.hevyapp.com"
@@ -49,6 +48,6 @@ func (c *Client) Call(method, path string, reqBody, resPayload any) error {
 }
 
 func (c *Client) catchHevyErr(body []byte) error {
-	oak.Error(string(body))
+	slog.Error(string(body))
 	return errors.New("Hevy api error")
 }

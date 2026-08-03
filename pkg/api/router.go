@@ -102,12 +102,12 @@ func SetupRouter(ctx context.Context, handlers Handlers, r chi.Router, db bob.DB
 
 func SetState(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		state := ui.UIState{
+		state := ui.State{
 			IsAuthenticated: user.IsAuthenticated(r),
 			Version:         config.Version(),
 			CurrentPath:     r.URL.Path,
 		}
-		ctx := ui.StateWithContextUI(r.Context(), &state)
+		ctx := ui.StateWithContext(r.Context(), &state)
 		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r)
 	})

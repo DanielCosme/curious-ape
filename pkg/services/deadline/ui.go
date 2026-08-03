@@ -11,9 +11,9 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
-func UI_Deadlines(s *ui.UIState, deadlineState ui.DeadlineState) Node {
+func UI_Deadlines(s *ui.State, deadlineState ui.DeadlineState) Node {
 	s.Title = "Deadlines"
-	return ui.UILayout(s, Div(
+	return ui.Layout(s, Div(
 		Class(ui.CSurface),
 		A(
 			Href("/deadlines/new"),
@@ -37,14 +37,14 @@ func deadline(d core.Deadline) Node {
 	)
 }
 
-func DeadlineForm(s *ui.UIState, deadlineState ui.DeadlineState) Node {
+func DeadlineForm(s *ui.State, deadlineState ui.DeadlineState) Node {
 	post := "@post('/deadlines/new', {contentType: 'form'})"
 
 	var err string
 	if deadlineState.Err != nil {
 		err = deadlineState.Err.Error()
 	}
-	return ui.UILayout(s, Div(
+	return ui.Layout(s, Div(
 		Class(ui.CSurface),
 		If(deadlineState.Err != nil,
 			P(Class(ui.CError), Text("ERROR: "+err)),

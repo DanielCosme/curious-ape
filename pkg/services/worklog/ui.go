@@ -12,14 +12,14 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
-func UI_WorkLog(s *ui.UIState, days []core.Day) Node {
+func UI_WorkLog(s *ui.State, days []core.Day) Node {
 	s.Title = "Deep Work"
 	if len(days) == 0 {
-		return ui.UILayout(s, P(Text("No records")))
+		return ui.Layout(s, P(Text("No records")))
 	}
 
 	next, prev := ui.GetNextPrevButtons(days[0].Date, "worklog")
-	return ui.UILayout(s, Map(days, func(day core.Day) Node {
+	return ui.Layout(s, Map(days, func(day core.Day) Node {
 		if len(day.DeepWorkLogs) == 0 {
 			return nil
 		}

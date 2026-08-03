@@ -8,7 +8,6 @@ import (
 	"danicos.dev/daniel/curious-ape/pkg/gen/bob/dberrors"
 	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
 	"danicos.dev/daniel/curious-ape/pkg/persistence"
-	"danicos.dev/daniel/curious-ape/pkg/persistence/bobto"
 	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
 	"github.com/stephenafamo/bob"
@@ -21,7 +20,7 @@ func get(db bob.DB, p core.HabitParams) (habit core.Habit, err error) {
 	if err != nil {
 		return habit, persistence.CatchDBErr("habits: get", err)
 	}
-	return bobto.Habit(res), nil
+	return persistence.HabitToCore(res), nil
 }
 
 func find(db bob.DB, p core.HabitParams) ([]core.Habit, error) {
@@ -31,7 +30,7 @@ func find(db bob.DB, p core.HabitParams) ([]core.Habit, error) {
 	}
 	habits := make([]core.Habit, 0, len(res))
 	for _, h := range res {
-		habits = append(habits, bobto.Habit(h))
+		habits = append(habits, persistence.HabitToCore(h))
 	}
 	return habits, nil
 }
@@ -80,7 +79,7 @@ func upsert(db bob.DB, p core.Habit) (coreHabit core.Habit, err error) {
 				ctx := context.Background()
 				if err = habit.LoadDay(ctx, db); err == nil {
 					if err = habit.LoadHabitCategory(ctx, db); err == nil {
-						return bobto.Habit(habit), nil
+						return persistence.HabitToCore(habit), nil
 					}
 					return coreHabit, persistence.CatchDBErr("habits: create: load habit category", err)
 				}

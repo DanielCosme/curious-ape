@@ -30,14 +30,14 @@ type Month struct {
 
 type DayHabit struct{}
 
-func HabitsPage(s *ui.UIState, habitState *HabitsPageState) Node {
+func HabitsPage(s *ui.State, habitState *HabitsPageState) Node {
 	s.Title = "Habits"
 
 	finalNodes := []Node{}
 	for _, month := range habitState.Months {
 		finalNodes = append(finalNodes, HabitsGrid(month))
 	}
-	return ui.UILayout(s, Group(finalNodes))
+	return ui.Layout(s, Group(finalNodes))
 }
 
 func HabitsGrid(month Month) Node {

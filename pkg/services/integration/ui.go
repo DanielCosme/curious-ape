@@ -13,9 +13,9 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
-func UI_Integrations(s *ui.UIState, integrations []core.IntegrationInfo) Node {
+func UI_Integrations(s *ui.State, integrations []core.IntegrationInfo) Node {
 	s.Title = "Integrations"
-	return ui.UILayout(s, Div(
+	return ui.Layout(s, Div(
 		Class(ui.CSurface),
 		Map(integrations, func(i core.IntegrationInfo) Node {
 			return ui_integration(i)

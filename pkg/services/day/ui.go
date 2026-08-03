@@ -13,9 +13,9 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
-func UI_Index(s *ui.UIState, days []core.Day) Node {
+func UI_Index(s *ui.State, days []core.Day) Node {
 	s.Title = "Days"
-	return ui.UILayout(s, UI_days(days))
+	return ui.Layout(s, UI_days(days))
 }
 
 func UI_days(days []core.Day) Node {

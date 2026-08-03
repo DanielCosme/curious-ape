@@ -8,7 +8,6 @@ import (
 
 	"danicos.dev/daniel/curious-ape/pkg/integrations/hevy"
 	"danicos.dev/daniel/curious-ape/pkg/integrations/toggl"
-	"danicos.dev/daniel/curious-ape/pkg/oak"
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
 
@@ -43,15 +42,15 @@ func New(togglWorkspaceID int, togglToken, hevyAPIKey string, fitbit, google *oa
 	if togglToken != "" && togglWorkspaceID > 0 {
 		a, err := toggl.NewApi(togglWorkspaceID, togglToken)
 		if err != nil {
-			oak.Error("Failed to initialize Toggl API", "error", err.Error())
+			slog.Error("Failed to initialize Toggl API", "error", err.Error())
 		} else {
-			oak.Info("Toggl API client timezone: " + a.ClientTimezone().String())
+			slog.Info("Toggl API client timezone: " + a.ClientTimezone().String())
 
 			i.TogglAPI = a
 			i.list = append(i.list, core.IntegrationToggl)
 		}
 	} else {
-		oak.Warning("Toggl integration not configured")
+		slog.Warn("Toggl integration not configured")
 	}
 	return i
 }

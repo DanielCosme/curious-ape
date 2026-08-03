@@ -24,18 +24,18 @@ func (h *Handler) deadlinePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	deadlinesState := ui.DeadlineState{DS: ds}
-	state := ui.StateFromContextUI(r.Context())
+	state := ui.StateFromContext(r.Context())
 	web.Render(w, UI_Deadlines(state, deadlinesState))
 }
 
 func (h *Handler) newDeadlinePage(w http.ResponseWriter, r *http.Request) {
-	state := ui.StateFromContextUI(r.Context())
+	state := ui.StateFromContext(r.Context())
 	web.Render(w, DeadlineForm(state, ui.DeadlineState{}))
 }
 
 func (h *Handler) newDeadlinePost(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	state := ui.StateFromContextUI(r.Context())
+	state := ui.StateFromContext(r.Context())
 
 	var recurring bool
 	if r.PostForm.Get("recurrent") == "on" {

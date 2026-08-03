@@ -7,7 +7,7 @@ import (
 	. "maragu.dev/gomponents/html"
 )
 
-func UI_Login(s *ui.UIState) Node {
+func UI_Login(s *ui.State) Node {
 	form := Form(
 		Class("login-form"),
 		FieldSet(
@@ -28,5 +28,5 @@ func UI_Login(s *ui.UIState) Node {
 		),
 	)
 	s.Title = "Login"
-	return ui.UILayout(s, form)
+	return ui.Layout(s, form)
 }

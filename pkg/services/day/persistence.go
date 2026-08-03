@@ -8,7 +8,6 @@ import (
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
 	"danicos.dev/daniel/curious-ape/pkg/persistence"
-	"danicos.dev/daniel/curious-ape/pkg/persistence/bobto"
 	"github.com/aarondl/opt/omit"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/sqlite"
@@ -26,7 +25,7 @@ func Find(db bob.DB, p core.DayParams) (days []core.Day, err error) {
 				}
 			}
 
-			days = append(days, bobto.Day(day))
+			days = append(days, persistence.DayToCore(day))
 		}
 		return
 	} else {
@@ -37,7 +36,7 @@ func Find(db bob.DB, p core.DayParams) (days []core.Day, err error) {
 func new(db bob.DB, date core.Date) (day core.Day, err error) {
 	s := &models.DaySetter{Date: omit.From(date.Time)}
 	res, err := models.Days.Insert(s).One(context.Background(), db)
-	return bobto.Day(res), err
+	return persistence.DayToCore(res), err
 }
 
 func get(db bob.DB, p core.DayParams) (day core.Day, err error) {
@@ -49,7 +48,7 @@ func get(db bob.DB, p core.DayParams) (day core.Day, err error) {
 				return day, persistence.CatchDBErr("days: get", err)
 			}
 		}
-		return bobto.Day(res), err
+		return persistence.DayToCore(res), err
 	}
 	return day, persistence.CatchDBErr("days: get", err)
 }

@@ -30,7 +30,7 @@ func (h *Handler) index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s := ui.StateFromContextUI(r.Context())
+	s := ui.StateFromContext(r.Context())
 	web.Render(w, UI_Index(s, days))
 }
 

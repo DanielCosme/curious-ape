@@ -27,6 +27,6 @@ func (h *Handler) sleeplogPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	state := ui.StateFromContextUI(r.Context())
+	state := ui.StateFromContext(r.Context())
 	web.Render(w, UI_SleepLogPage(state, days))
 }

@@ -48,7 +48,7 @@ func (h *Handler) Flip(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HabitsPage(w http.ResponseWriter, r *http.Request) {
-	state := ui.StateFromContextUI(r.Context())
+	state := ui.StateFromContext(r.Context())
 	today := core.NewDate(time.Now())
 
 	habitState := &HabitsPageState{}
