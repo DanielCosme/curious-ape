@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"context"
+	"log/slog"
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
 	"danicos.dev/daniel/curious-ape/pkg/gen/bob/models"
@@ -10,7 +11,12 @@ import (
 )
 
 func GetDay(exec bob.Executor, date core.Date) (*models.Day, error) {
-	return BuildDayQuery(core.DayParams{Date: date}).One(context.Background(), exec)
+	day, err := BuildDayQuery(core.DayParams{Date: date}).One(context.Background(), exec)
+	if err != nil {
+		slog.Error("Get day: failed", "err", err)
+		return nil, err
+	}
+	return day, nil
 }
 
 func BuildDayQuery(f core.DayParams) *sqlite.ViewQuery[*models.Day, models.DaySlice] {

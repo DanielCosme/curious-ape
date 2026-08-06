@@ -105,9 +105,10 @@ func run(ctx context.Context) error {
 
 	userService := user.NewService(bobDB)
 	integrationService := integration.NewService(is, bobDB, nc)
+	dayService := day.NewService(bobDB, nc)
 	handlers := api.NewHandlers(
 		sessionManager,
-		day.NewService(bobDB, nc),
+		dayService,
 		habit.NewService(bobDB, nc),
 		integrationService,
 		worklog.NewService(bobDB, nc, integrationService),
@@ -159,8 +160,8 @@ func run(ctx context.Context) error {
 		ticker := time.NewTicker(dur)
 		slog.Info("Ticker configured", "rate", dur)
 		for {
-			t := <-ticker.C
-			date := core.NewDate(t)
+			date := core.NewDate(<-ticker.C)
+			dayService.GetOrCreate(date)
 			slog.Info("Synchronizing day", "date", date)
 			nc.Publish(event.DaySync, date.Enc())
 		}

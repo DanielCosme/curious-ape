@@ -1,6 +1,7 @@
 package day
 
 import (
+	"log/slog"
 	"time"
 
 	"danicos.dev/daniel/curious-ape/pkg/core"
@@ -57,6 +58,7 @@ func (s *Service) GetOrCreate(date core.Date) (d core.Day, err error) {
 		if err != nil {
 			return
 		}
+		slog.Info("Day created", "date", date.String())
 
 		// NOTE: the first subscriber to respond will un-block this. Might need to address this in the future.
 		_, err := s.nats.Request(event.DayCreated, date.Enc(), time.Second*10)
