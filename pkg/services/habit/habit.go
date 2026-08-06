@@ -52,11 +52,17 @@ func (s *Service) Flip(id int) (habit core.Habit, err error) {
 		state = core.HabitStateDone
 	}
 	habit.State = state
-	return upsert(s.db, core.Habit{
+	h, err := upsert(s.db, core.Habit{
 		Date:  habit.Date,
 		Type:  habit.Type,
 		State: habit.State,
 	})
+	if err != nil {
+		return habit, err
+	}
+
+	s.nats.Publish(event.DaySynced, habit.Date.Enc())
+	return h, nil
 }
 
 func (s *Service) listen(msg *nats.Msg) {
